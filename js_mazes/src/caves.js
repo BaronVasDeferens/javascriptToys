@@ -1,5 +1,5 @@
-    const mazeRowsCols = 5;
-	const roomSize = 160;
+    const mazeRowsCols = 10;
+	const roomSize = 25;
 
 	var mazeArray = new Array(mazeRowsCols);
 	var allRooms = new Array();
@@ -35,10 +35,6 @@
         createMaze();
 
 	}();
-
-    function printRoom(room) {
-        return "(" + room.row + "," + room.col + ")";
-    }
 
     function getRandomRoom() {
         var index = Math.floor(Math.random() * 1000 % (mazeRowsCols * mazeRowsCols));
@@ -95,41 +91,31 @@
         return array;
     }
 
-    // Examines diagonals to prevent four square opening
-    function ableToOpen(room) {
+    //
+    function areDiagonalsOpen(room) {
 
-        var up = getRoom(room.row - 1, room.col);
-        var down = getRoom(room.row + 1, room.col);
-        var left = getRoom(room.row, room.col -1);
-        var right = getRoom(room.row, room.col + 1);
-
-        // Upper left
         var diag = getRoom(room.row-1, room.col-1);
 
         if (diag !== undefined) {
-            // both up and left are defined if upperLeft is!
-            if (diag.open && up.open && left.open) { return false; }
+            if (diag.open) { return true; }
         }
 
-        // Upper right
         diag = getRoom(room.row-1, room.col+1);
             if (diag !== undefined) {
-                if (diag.open && up.open && right.open) { return false; }
+                if (diag.open) { return true; }
         }
 
-        // lower left
         diag = getRoom(room.row+1, room.col-1);
         if (diag !== undefined) {
-            if (diag.open && down.open && left.open) { return false; }
+            if (diag.open) { return true; }
         }
 
-        // lower right
         diag = getRoom(room.row+1, room.col+1);
             if (diag !== undefined) {
-                if (diag.open && down.open && right.open) { return false; }
+                if (diag.open) { return true; }
         }
 
-        return true;
+        return false;
     }
 
     function createMaze() {
@@ -147,54 +133,52 @@
             reachable.push(r);
         });
 
+        drawMaze();
+        debugger;
+
         while (reachable.length != allRooms.length) {
 
             frontier = shuffleArray(frontier);
 
             var newRoom = frontier.pop();
-            console.log("considering " + printRoom(newRoom));
 
             // Disqualify any room whose neighbors are all already reachable
+
+//            if (getAdjacentRooms(newRoom.row, newRoom.col).length == 0)
+//                continue;
+
             if (getAdjacentRooms(newRoom.row, newRoom.col).every(function (r) {
-                 if (reachable.includes(r)) {
+                if (reachable.includes(r)) {
                     return true;
                 }
 
-            })) {
-                  console.log("\tall neighbors reachable...");
-                  if(!reachable.includes(newRoom)) {
-                        reachable.push(newRoom);
-                   }
-                    continue;
-                }
+            })) { continue; }
 
-            // Disqualify any room whose diagonal is already open
-            if (ableToOpen(newRoom)) {
-                console.log("\topening " + printRoom(newRoom) + "...");
-                newRoom.open = true;
-            }
-            else {
-                console.log("\tclosing " + printRoom(newRoom) + "...");
-            }
-
-
-            getAdjacentRooms(newRoom.row, newRoom.col).forEach( function (r) {
-
-                if (!inMaze.includes(newRoom)) {
-
-                    if (!frontier.includes(r)) {
-                        frontier.push(r);
-                    }
-
-                    if(!reachable.includes(r)) {
-                        reachable.push(r);
-                    }
-                }
-            });
 
             if (! inMaze.includes(newRoom)) {
+
+                // Disqualify any room whose diagonal is already open
+//                if (areDiagonalsOpen(newRoom)) {
+//                    console.log("skipping " + newRoom.row + "," + newRoom.col);
+//                    continue;
+//                }
+
+                newRoom.open = true;
                 inMaze.push(newRoom);
+
+                getAdjacentRooms(newRoom.row, newRoom.col).forEach( function (r) {
+                    if (!frontier.includes(r)) {
+                        frontier.push(r);
+
+                        if(!reachable.includes(r)) {
+                            reachable.push(r);
+                        }
+                    }
+                });
+
             }
+
+//            console.log("frontier size = " + frontier.length);
         }
 
         drawMaze();

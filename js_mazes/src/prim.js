@@ -2,10 +2,10 @@
 	const canvasSize = 400
 	const roomSize = canvasSize / mazeRowsCols;
 
-
 	var mazeArray = new Array(mazeRowsCols);
 	var allRooms = new Array();
     var inMaze = new Array();
+    var edges = new Array();
 
 	// Setup (IFFE function)
 	// Insert a drawable canvas element into the page
@@ -15,6 +15,7 @@
         var mazeArea = document.getElementById('mazeArea');
         mazeArea.innerHTML = "<canvas id=\"myCanvas\" width=\"400\" height=\"400\"></canvas>"
 
+        console.log("Creating rooms...");
 		for (var i = 0; i < mazeRowsCols; i++) {
 
 			mazeArray[i] = new Array(mazeRowsCols);
@@ -36,8 +37,43 @@
 			}
 		}
 
-        createMaze();
-        drawMaze();
+        console.log("Creating edges...");
+
+        // Create list of edges
+        // Look at right and down
+        for (var i = 0; i < mazeRowsCols; i++) {
+
+            for (var j = 0; j < mazeRowsCols; j++) {
+
+                var currentRoom = mazeArray[i][j];
+
+                var down = getRoom(currentRoom.row + 1, currentRoom.col);
+                if (down !== undefined) {
+                console.log("!")
+                        edges.push({
+                            v1: currentRoom,
+                            v2: down,
+                            display : function() { return this.v1.display() + " <-> " + this.v2.display(); }
+                        });
+                }
+
+                var right = getRoom(currentRoom.row, currentRoom.col + 1);
+                if (right !== undefined) {
+                                console.log("?")
+                        edges.push({
+                            v1: currentRoom,
+                            v2: right,
+                            display : function() { return this.v1.display() + " <-> " + this.v2.display(); }
+                        });
+                }
+            }
+        }
+
+        edges.forEach( function (e) {
+            console.log(e.display());
+        });
+
+        //window.setInterval(createMaze, 500);
 
 	}();
 
@@ -108,6 +144,8 @@
         console.log("START " + startRoom.display());
         startRoom.open = true;
         inMaze.push(startRoom);
+
+        drawMaze();
     }
 
 	function drawMaze() {

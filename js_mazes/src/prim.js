@@ -1,16 +1,20 @@
-    const mazeRowsCols = 19;
-	const canvasSize = 400
-	const roomSize = 10;
+    const mazeRowsCols = 20;
+    const roomSize = 10;
 
-    var canvasDef = "<canvas id=\"myCanvas\" width=\"%SIZE%\" height=\"%SIZE%\"></canvas>";
-    canvasDef = canvasDef.replace("%SIZE%", canvasSize);
-    canvasDef = canvasDef.replace("%SIZE%", canvasSize);
+	const canvasWidth = 1100
+	const canvasHeight = 700;
+
+
+    var canvasDef = "<canvas id=\"myCanvas\" width=\"%WIDTH%\" height=\"%HEIGHT%\"></canvas>";
+    canvasDef = canvasDef.replace("%WIDTH%", canvasWidth);
+    canvasDef = canvasDef.replace("%HEIGHT%", canvasHeight);
 
 	var mazeArray = new Array(mazeRowsCols);
 	var allRooms = new Array();
     var inMaze = new Array();
     var edges = new Array();
     var connections = new Array();
+    var frontier = new Array();     // set of edges where x in inMaze and y is not in inMaze
 
 	// Setup (IFFE function)
 	// Insert a drawable canvas element into the page
@@ -30,12 +34,13 @@
 				var room = {
 					row: i,
                   	col: j,
-                  	open: false,
-                  	reachable : false,
+                  	edges : Array(),
                   	display : function() {
                   	    return "(" + this.row + "," + this.col + ")";
                   	}
                   };
+
+                room.edges = new Array();
 
 				allRooms.push(room);
 				mazeArray[i][j] = room;
@@ -54,56 +59,67 @@
 
                 var up = getRoom(currentRoom.row - 1, currentRoom.col);
                 if (up !== undefined) {
-                        edges.push({
+
+                        var e = {
                             v1: currentRoom,
                             v2: up,
                             display : function() { return this.v1.display() + " <-> " + this.v2.display(); }
-                        });
+                        };
+
+                        edges.push(e);
+                        currentRoom.edges.push(e);
                 }
 
                 var down = getRoom(currentRoom.row + 1, currentRoom.col);
                 if (down !== undefined) {
-                        edges.push({
+                        var e = {
                             v1: currentRoom,
                             v2: down,
                             display : function() { return this.v1.display() + " <-> " + this.v2.display(); }
-                        });
+                        };
+
+                        edges.push(e);
+                        currentRoom.edges.push(e);
                 }
 
                 var right = getRoom(currentRoom.row, currentRoom.col + 1);
                 if (right !== undefined) {
-                        edges.push({
+                        var e = {
                             v1: currentRoom,
                             v2: right,
                             display : function() { return this.v1.display() + " <-> " + this.v2.display(); }
-                        });
+                        };
+
+                        edges.push(e);
+                        currentRoom.edges.push(e);
                 }
 
                  var left = getRoom(currentRoom.row, currentRoom.col - 1);
                 if (left !== undefined) {
-                    edges.push({
+                    var e = {
                         v1: currentRoom,
                         v2: left,
                         display : function() { return this.v1.display() + " <-> " + this.v2.display(); }
-                    });
+                    };
+
+                    edges.push(e);
+                    currentRoom.edges.push(e);
                 }
 
             }
 
-
         }
 
-//        edges.forEach( function (e) {
-//            console.log(e.display());
-//        });
 
         // Select initial vertex (room)
         var startRoom = getRandomRoom();
-        console.log("starting room : " + startRoom.display());
         inMaze.push(startRoom);
-        edges = shuffleArray(edges);
 
-        window.setInterval(createMaze, 10);
+        startRoom.edges.forEach(function (r) {
+            frontier.push(r);
+        });
+
+       window.setInterval(createMaze, 1);
 
 	}();
 
@@ -111,40 +127,97 @@
         return "(" + room.row + "," + room.col + ")";
     }
 
+
+
+    function createMaze() {
+
+        if (frontier.length <= 0) {
+            console.log("DONE");
+        }
+
+        frontier = shuffleArray(frontier);
+        var edge = frontier.pop();
+
+        if (!inMaze.includes(edge.v2)) {
+            inMaze.push(edge.v2);
+            connections.push(edge);
+            edge.v2.edges.forEach( function (e) {
+                if (!inMaze.includes(e.v2)) {
+                    frontier.push(e);
+                }
+            })
+
+            drawBigMaze();
+        }
+    }
+
+
+	function drawBigMaze() {
+
+	    var canvas = document.getElementById("myCanvas");
+        var context = canvas.getContext("2d");
+
+        context.fillStyle = "#000000"; // black
+        context.fillRect(0,0,canvasWidth,canvasHeight);
+
+        context.fillStyle ="#FFFFFF"; // white
+
+        inMaze.forEach(function (room) {
+                context.fillRect(
+                    room.col * 2 * roomSize,
+                    room.row * 2 * roomSize,
+                    roomSize,
+                    roomSize);
+        });
+
+        context.fillStyle = "#FFFFFF";
+
+        connections.forEach(function (vtx) {
+            var v1, v2, ox, oy;
+
+            // v1 to the left
+            if (vtx.v1.col < vtx.v2.col) {
+                v1 = vtx.v1;
+                v2 = vtx.v2;
+
+                ox = v1.col * 2 * roomSize + roomSize;
+                oy = v1.row * 2 * roomSize;
+
+            }
+            // v1 on top
+            else if (vtx.v1.row < vtx.v2.row) {
+              v1 = vtx.v1;
+              v2 = vtx.v2;
+              ox = v1.col * 2 * roomSize;
+              oy = v1.row * 2 * roomSize + roomSize;
+            }
+
+            else if (vtx.v1.col == vtx.v2.col) {
+                    v1 = vtx.v2;
+                    v2 = vtx.v1;
+                    ox = v1.col * 2 * roomSize ;
+                    oy = v1.row * 2 * roomSize + roomSize;
+            }
+            else {
+                v1 = vtx.v2;
+                v2 = vtx.v1;
+                ox = v1.col * 2 * roomSize +roomSize;
+                oy = v1.row * 2 * roomSize ;
+            }
+
+            context.fillRect(ox, oy, roomSize, roomSize);
+
+        });
+
+
+	}
+
     function getRoom(row, col) {
         try {
             return mazeArray[row][col];
         } catch (e) {
             return undefined;
         }
-    }
-
-    function getAdjacentRooms(row, col) {
-
-        var room = getRoom(row, col);
-        var adjacentRooms = new Array();
-
-        var up = getRoom(row, col-1);
-        if (up !== undefined) {
-            adjacentRooms.push(up);
-        }
-
-        var down = getRoom(row, col+1);
-        if (down !== undefined) {
-            adjacentRooms.push(down);
-        }
-
-        var left = getRoom(row-1, col);
-        if (left !== undefined) {
-            adjacentRooms.push(left);
-        }
-
-        var right = getRoom(row+1, col);
-        if (right !== undefined) {
-            adjacentRooms.push(right);
-        }
-
-        return adjacentRooms;
     }
 
     function shuffleArray(array) {
@@ -165,115 +238,3 @@
         var index = Math.floor(Math.random() * 1000 % (mazeRowsCols * mazeRowsCols));
         return allRooms[index]
     }
-
-    function createMaze() {
-
-        var currentVertex = edges.pop();
-
-        if (checkVertex(currentVertex.v1, currentVertex.v2) || checkVertex(currentVertex.v2, currentVertex.v1))
-        {
-            console.log("added " + currentVertex.display());
-            connections.push(currentVertex);
-            inMaze.push(currentVertex.v2);
-        }
-        else {
-            edges.push(currentVertex);
-        }
-
-        edges = shuffleArray(edges);
-        drawBigMaze();
-    }
-
-    // Prim: find an edge {x,y} such that:
-    // x is in theMaze
-    // y is not in theMaze
-    function checkVertex(v1, v2) {
-
-        if (!inMaze.includes(v1)) {
-            return false;
-        }
-
-        if (inMaze.includes(v2)) {
-            return false;
-        }
-
-        return true;
-
-    }
-
-	function drawMaze() {
-
-		var canvas = document.getElementById("myCanvas");
-		var context = canvas.getContext("2d");
-
-        context.fillStyle = "#000000"; // black
-        context.fillRect(0,0,canvasSize,canvasSize);
-
-        context.fillStyle ="#FFFFFF"; // white
-
-		inMaze.forEach(function (room) {
-                context.fillRect(
-                    room.col * roomSize,
-                    room.row * roomSize,
-                    roomSize,
-                    roomSize);
-		});
-
-	}
-
-
-	function drawBigMaze() {
-
-	    var canvas = document.getElementById("myCanvas");
-        var context = canvas.getContext("2d");
-
-        context.fillStyle = "#000000"; // black
-        context.fillRect(0,0,canvasSize,canvasSize);
-
-        context.fillStyle ="#FFFFFF"; // white
-
-        inMaze.forEach(function (room) {
-                context.fillRect(
-                    room.col * 2 * roomSize ,
-                    room.row * 2 * roomSize,
-                    roomSize,
-                    roomSize);
-        });
-
-        context.fillStyle = "#FFFFFF"; // red
-
-        connections.forEach(function (vtx) {
-            var v1, v2, ox, oy;
-
-            // v1 to the left
-            if (vtx.v1.col > vtx.v2.col) {
-                v1 = vtx.v1;
-                v2 = vtx.v2;
-
-                ox = v1.col * 2 * roomSize + roomSize;
-                oy = v1.row * 2 * roomSize;
-
-            }
-            // v1 on top
-            else if (vtx.v1.row > vtx.v2.row) {
-              v1 = vtx.v1;
-              v2 = vtx.v2;
-
-              ox = v1.col * 2 * roomSize;
-              oy = v1.row * 2 * roomSize + roomSize;
-
-            }
-            else {
-                v1 = vtx.v2;
-                v2 = vtx.v1;
-
-                ox = v1.col * 2 * roomSize + roomSize;
-                oy = v1.row * 2 * roomSize;
-            }
-
-            context.fillRect(ox, oy, roomSize, roomSize);
-
-        });
-
-
-	}

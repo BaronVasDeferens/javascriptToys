@@ -1,20 +1,27 @@
-    const mazeRowsCols = 20;
+    const mazeRows = 5;
+    const mazeCols = 30;
     const roomSize = 10;
 
 	const canvasWidth = 1100
 	const canvasHeight = 700;
 
+    const millisecondDelay = 1;
 
     var canvasDef = "<canvas id=\"myCanvas\" width=\"%WIDTH%\" height=\"%HEIGHT%\"></canvas>";
     canvasDef = canvasDef.replace("%WIDTH%", canvasWidth);
     canvasDef = canvasDef.replace("%HEIGHT%", canvasHeight);
 
-	var mazeArray = new Array(mazeRowsCols);
+	var mazeArray = new Array(mazeRows);
 	var allRooms = new Array();
     var inMaze = new Array();
     var edges = new Array();
     var connections = new Array();
     var frontier = new Array();     // set of edges where x in inMaze and y is not in inMaze
+
+    var finalMaze = new Array(mazeRows * 2 - 1);
+    for (var i = 0; i < mazeCols; i++) {
+        finalMaze[i] = new Array(mazeCols * 2 - 1);
+    }
 
 	// Setup (IFFE function)
 	// Insert a drawable canvas element into the page
@@ -25,11 +32,11 @@
         mazeArea.innerHTML = canvasDef
 
         console.log("Creating rooms...");
-		for (var i = 0; i < mazeRowsCols; i++) {
+		for (var i = 0; i < mazeRows; i++) {
 
-			mazeArray[i] = new Array(mazeRowsCols);
+			mazeArray[i] = new Array(mazeCols);
 
-			for (var j = 0; j < mazeRowsCols; j++) {
+			for (var j = 0; j < mazeCols; j++) {
 
 				var room = {
 					row: i,
@@ -51,9 +58,9 @@
 
         // Create list of edges
 
-        for (var i = 0; i < mazeRowsCols; i++) {
+        for (var i = 0; i < mazeRows; i++) {
 
-            for (var j = 0; j < mazeRowsCols; j++) {
+            for (var j = 0; j < mazeCols; j++) {
 
                 var currentRoom = mazeArray[i][j];
 
@@ -119,7 +126,17 @@
             frontier.push(r);
         });
 
-       window.setInterval(createMaze, 1);
+       var interval = window.setInterval(
+            function () {
+                if (frontier.length > 0) {
+                    createMaze()
+                }
+                else {
+                    clearInterval(interval)
+                    console.log("ALL DONE!")
+                }
+            }
+       , millisecondDelay);
 
 	}();
 
@@ -148,6 +165,10 @@
             })
 
             drawBigMaze();
+        }
+
+        else {
+//            console.log("."); // 361 extra edges :(
         }
     }
 
@@ -235,6 +256,6 @@
     }
 
     function getRandomRoom() {
-        var index = Math.floor(Math.random() * 1000 % (mazeRowsCols * mazeRowsCols));
+        var index = Math.floor(Math.random() * 1000 % (mazeRows * mazeCols));
         return allRooms[index]
     }

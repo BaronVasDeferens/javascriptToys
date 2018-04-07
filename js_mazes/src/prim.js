@@ -1,4 +1,4 @@
-    const mazeRows = 5;
+    const mazeRows = 30;
     const mazeCols = 30;
     const roomSize = 10;
 

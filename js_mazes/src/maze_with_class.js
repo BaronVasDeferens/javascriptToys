@@ -1,6 +1,6 @@
     // CONSTANTS
-    const mazeRows = 15;
-    const mazeCols = 15;
+    const mazeRows = 10;
+    const mazeCols = 10;
     const roomSize = 20;
 
 	const canvasWidth = 1100
@@ -8,7 +8,7 @@
 
     const millisecondDelay = 0;
     
-    const showFrontier = true;
+    const showFrontier = false;
     const frontierColor = "#888888"
 
     class Room {
@@ -114,7 +114,7 @@
                         edge.setVertexes(up, down);
                         edges.push(edge);
                     }
-                } else if (j % 2 != 0) {
+                } if (j % 2 != 0) {
                     var left = getCell(edge.row, edge.col - 1);
                     var right = getCell(edge.row, edge.col + 1);
                     if (left instanceof Room && right instanceof Room) {
@@ -136,6 +136,8 @@
             frontier.push(edge);
         });
 
+        frontier = shuffleArray(frontier);
+
         drawFinalMaze();
 
         var interval = window.setInterval(
@@ -150,8 +152,6 @@
                 }
             }
         , millisecondDelay);
-
-
 
     }();
 
@@ -224,34 +224,48 @@
                 console.log("DONE");
             }
 
-            frontier = shuffleArray(frontier);
-            var edge = frontier.pop();
-
+            var index = Math.floor(Math.random() * 100 % edges.length);
+            var edge = frontier[index];
             var room;
 
-            if (! edge.v1.isInMaze) {
-                room = edge.v1;
-                room.setInMaze();
-                inMaze.push(edge);
-                inMaze.push(room);
-                getAdjacentEdges(room.row, room.col).forEach( function (e) {
-                    if (! e.inFrontier) {
-                        e.setInFrontier();
-                        frontier.push(e);
+            if (edge !== undefined) {
+
+                 if (! edge.v1.isInMaze) {
+                        room = edge.v1;
+                        room.setInMaze();
+                        inMaze.push(edge);
+                        inMaze.push(room);
+                        getAdjacentEdges(room.row, room.col).forEach( function (e) {
+                            if (! e.inFrontier) {
+                                e.setInFrontier();
+                                frontier.push(e);
+                            }
+                        });
+                    } else if (! edge.v2.isInMaze) {
+                        room = edge.v2;
+                        room.setInMaze();
+                        inMaze.push(edge);
+                        inMaze.push(room);
+                        getAdjacentEdges(room.row, room.col).forEach( function (e) {
+                            if (! e.inFrontier) {
+                                e.setInFrontier();
+                                frontier.push(e);
+                            }
+                        });
                     }
-                });
-            } else if (! edge.v2.isInMaze) {
-                room = edge.v2;
-                room.setInMaze();
-                inMaze.push(edge);
-                inMaze.push(room);
-                getAdjacentEdges(room.row, room.col).forEach( function (e) {
-                    if (! e.inFrontier) {
-                        e.setInFrontier();
-                        frontier.push(e);
-                    }
-                });
+
             }
+
+            var newFrontier = new Array();
+            frontier.forEach (function (e) {
+                if (e !== edge) {
+                    newFrontier.push(e);
+                }
+            });
+
+            frontier = newFrontier;
+
+//            console.log(frontier.length);
         }
 
     function drawFinalMaze() {
@@ -277,7 +291,6 @@
 
         context.fillStyle ="#FFFFFF"; // white
         inMaze.forEach(function (cell) {
-
             context.fillRect(
                 cell.col * roomSize,
                 cell.row * roomSize,

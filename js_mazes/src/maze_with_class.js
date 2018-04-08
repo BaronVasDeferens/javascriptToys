@@ -1,14 +1,14 @@
     // CONSTANTS
-    const mazeRows = 10;
-    const mazeCols = 10;
-    const roomSize = 20;
+    const mazeRows = 20;
+    const mazeCols = 20;
+    const roomSize = 15;
 
-	const canvasWidth = 1100
+	const canvasWidth = 800
 	const canvasHeight = 800;
 
     const millisecondDelay = 0;
     
-    const showFrontier = false;
+    const showFrontier = true;
     const frontierColor = "#888888"
 
     class Room {
@@ -39,6 +39,9 @@
         setVertexes(v1, v2) {
             this.v1 = v1;
             this.v2 = v2;
+            if (v1 === v2) {
+                console.log("somethings wrong with " + display())
+            }
         }
 
         setInFrontier() {
@@ -65,7 +68,7 @@
 
 
 
-    var newSetup = function() {
+    var setup = function() {
 
         insertHtmlElements();
 
@@ -138,22 +141,38 @@
 
         frontier = shuffleArray(frontier);
 
-        drawFinalMaze();
 
-        var interval = window.setInterval(
-            function () {
-                if (frontier.length > 0) {
-                    createMaze();
-                    drawFinalMaze();
-                }
-                else {
-                    clearInterval(interval)
-                    console.log("ALL DONE!");
-                }
-            }
-        , millisecondDelay);
+        drawAllSteps();
+//        drawOnce();
 
     }();
+
+    function drawOnce() {
+            while (frontier.length > 0) {
+                createMaze();
+            }
+            console.log("ALL DONE!");
+            drawFinalMaze();
+    }
+
+    function drawAllSteps() {
+
+        var interval = window.setInterval(
+                    function () {
+                        if (frontier.length > 0) {
+                            createMaze();
+                            drawFinalMaze();
+                        }
+                        else {
+                            clearInterval(interval)
+                            console.log("ALL DONE!");
+                        }
+                    }
+                , millisecondDelay);
+
+    }
+
+
 
     function insertHtmlElements() {
         console.log("Inserting HTML...");
@@ -224,8 +243,8 @@
                 console.log("DONE");
             }
 
-            var index = Math.floor(Math.random() * 100 % edges.length);
-            var edge = frontier[index];
+            var edge = shuffleArray(frontier).pop()
+
             var room;
 
             if (edge !== undefined) {
@@ -241,7 +260,9 @@
                                 frontier.push(e);
                             }
                         });
-                    } else if (! edge.v2.isInMaze) {
+                    }
+
+                    else if (! edge.v2.isInMaze) {
                         room = edge.v2;
                         room.setInMaze();
                         inMaze.push(edge);
@@ -254,18 +275,10 @@
                         });
                     }
 
+            } else {
+                console.log("edge was undefined!")
             }
 
-            var newFrontier = new Array();
-            frontier.forEach (function (e) {
-                if (e !== edge) {
-                    newFrontier.push(e);
-                }
-            });
-
-            frontier = newFrontier;
-
-//            console.log(frontier.length);
         }
 
     function drawFinalMaze() {
@@ -291,12 +304,11 @@
 
         context.fillStyle ="#FFFFFF"; // white
         inMaze.forEach(function (cell) {
+
             context.fillRect(
                 cell.col * roomSize,
                 cell.row * roomSize,
                 roomSize,
                 roomSize);
         });
-
-
     }

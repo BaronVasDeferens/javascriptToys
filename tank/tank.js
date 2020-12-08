@@ -6,53 +6,48 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const tank = new TankEntity(50,50,50)
+const tank = new TankEntity(250,250);
+const inputSet = new Set();
 
-window.addEventListener('keypress', event => {
-    console.log(event);
+window.onkeydown = function(event) {
+    inputSet.add(event.key);
+    processInput();
+}
 
-    switch(event.key){
-        case 'w':
-            tank.updatePosition(0,-10);
-            break;
-        case 's':
-            tank.updatePosition(0,10);   
-            break; 
-        case 'a':
-            tank.updatePosition(-10,0);
-            break;
-        case 'd':
-            tank.updatePosition(10,0);
-            break;  
-    } 
-    drawScene();
-});
+window.onkeyup = function(event) {
+    inputSet.delete(event.key);
+    processInput();
+}
 
-window.addEventListener('mousedown', event => {
-    console.log(event);
-
-    if (event.y < tank.y) {
-        tank.updatePosition(0,-10);
+function processInput() {
+    if (inputSet.has("a") && inputSet.has("d")) {
+        tank.moveForward();
+    } else if (inputSet.has("a")) {
+        tank.updateOrientationByDelta(-5);
+    } else if (inputSet.has("d")) {
+        tank.updateOrientationByDelta(5);
     }
-    if (event.y > tank.y) {
-        tank.updatePosition(0,10);   
-    }   
-    if (event.x < tank.x) {
-        tank.updatePosition(-10,0);
-    }
-    if (event.x > tank.x) {
-        tank.updatePosition(10,0); 
-    } 
-    drawScene();
-});
-
+}
 
 var setup = function() {
     drawScene();
 }();
 
+
 function drawScene() {
     context.fillStyle = "#FF0000";
-    context.fillRect(0,0,canvas.width,canvas.height);
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawGrid(context);
     tank.draw(context);
+    requestAnimationFrame(drawScene);
+}
+
+function drawGrid(context) {
+    context.strokeStyle = "#000000";
+    for(var i = 0; i < 50; i++) {
+        for (var j = 0; j < 50; j++) {
+            context.strokeRect(i * 50, j * 50, 50, 50);
+        }
+    }
 }

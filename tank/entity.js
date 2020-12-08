@@ -1,8 +1,22 @@
 export class TankEntity {
-    constructor(x,y,size) {
+
+    image = new Image();
+
+    position = 0;
+    movementUnits = 5;
+
+    constructor(x,y) {
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.image.src="images/tank_1.png"; 
+    }
+
+    moveForward() {
+        // This business with ( - 90) has to do with where Javascript thinks "zero" is on the unit circle;
+        // According to JS, zero starts at 3 o'clock; 90 is at 6 o'clock, etc
+        let deltaX = Math.floor(Math.cos((this.position - 90) * Math.PI / 180) * this.movementUnits);
+        let deltaY = Math.floor(Math.sin((this.position - 90) * Math.PI / 180) * this.movementUnits);
+        this.updatePosition(deltaX, deltaY);
     }
 
     updatePosition(dx, dy){
@@ -10,8 +24,30 @@ export class TankEntity {
         this.y += dy;
     }
 
+    updateOrientationByDelta(delta) {
+        this.position += delta;
+        this.position = Math.abs((360 + this.position) % 360);
+    }
+
     draw(context) {
-        context.fillStyle = "#0000FF";
-        context.fillRect(this.x,this.y,this.size, this.size);
+        context.save();
+        context.translate(this.x, this.y );
+        context.rotate(this.position * Math.PI / 180);
+        context.drawImage(this.image, -(this.image.width / 2), -(this.image.height / 2));
+        context.restore();
+
+        this.drawOrientationEllipse(context);
+    }
+
+    drawOrientationEllipse(context) {
+        context.strokeStyle = "#0000FF"
+        context.beginPath();
+        let lineLength = 100;
+        context.ellipse(this.x, this.y, lineLength, lineLength, 2 * Math.PI, 2 * Math.PI, false);
+        context.moveTo(this.x, this.y);
+        context.lineTo(
+            this.x + Math.cos((this.position - 90) * Math.PI / 180) * lineLength,
+            this.y + Math.sin((this.position - 90) * Math.PI / 180) * lineLength); 
+        context.stroke();
     }
 }

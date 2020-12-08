@@ -1,5 +1,11 @@
 import { TankEntity } from './entity.js';
 
+/**
+ * TANK
+ * To run locally, console: "http-server ."
+ * If that doesn't work, you'll need: "npm install http-server -g"
+ */
+
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 

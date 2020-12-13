@@ -1,6 +1,7 @@
 export class TankEntity {
 
-    image = new Image();
+    tankImage = new Image();
+    turretImage = new Image();
 
     position = 0;
     turretPosition = 0;
@@ -9,7 +10,8 @@ export class TankEntity {
     constructor(x,y) {
         this.x = x;
         this.y = y;
-        this.image.src="images/tank_1.png"; 
+        this.tankImage.src="images/my_tank.png"; 
+        this.turretImage.src = "images/my_turret.png";
     }
 
     moveForward() {
@@ -28,6 +30,7 @@ export class TankEntity {
     updateOrientationByDelta(delta) {
         this.position += delta;
         this.position = Math.abs((360 + this.position) % 360);
+        this.rotateTurretByDelta(delta);
     }
 
     rotateTurretByDelta(delta) {
@@ -39,7 +42,7 @@ export class TankEntity {
         context.save();
         context.translate(this.x, this.y );
         context.rotate(this.position * Math.PI / 180);
-        context.drawImage(this.image, -(this.image.width / 2), - (this.image.height / 2));
+        context.drawImage(this.tankImage, -(this.tankImage.width / 2), - (this.tankImage.height / 2));
         context.restore();
 
         //this.drawOrientationEllipse(context);
@@ -58,7 +61,7 @@ export class TankEntity {
         context.stroke();
     }
 
-    drawTurret(context) {
+    drawLineTurret(context) {
         context.strokeStyle = "#0000FF"
         context.beginPath();
         let lineLength = 100;
@@ -67,5 +70,13 @@ export class TankEntity {
             this.x + Math.cos((this.turretPosition - 90) * Math.PI / 180) * lineLength,
             this.y + Math.sin((this.turretPosition - 90) * Math.PI / 180) * lineLength); 
         context.stroke();
+    }
+
+    drawTurret(context) {
+        context.save();
+        context.translate(this.x, this.y );
+        context.rotate(this.turretPosition * Math.PI / 180);
+        context.drawImage(this.turretImage, - (this.turretImage.width / 2), - (this.turretImage.height / 2));
+        context.restore();
     }
 }

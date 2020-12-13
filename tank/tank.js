@@ -48,7 +48,7 @@ var setup = function() {
 
 function drawScene() {
     processInput();
-    context.fillStyle = "#FF0000";
+    context.fillStyle = "#29293d";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGrid(context);
@@ -57,7 +57,7 @@ function drawScene() {
 }
 
 function drawGrid(context) {
-    context.strokeStyle = "#000000";
+    context.strokeStyle = "#7575a3";
     for(var i = 0; i < 50; i++) {
         for (var j = 0; j < 50; j++) {
             context.strokeRect(i * 50, j * 50, 50, 50);

@@ -17,21 +17,27 @@ const inputSet = new Set();
 
 window.onkeydown = function(event) {
     inputSet.add(event.key);
-    processInput();
 }
 
 window.onkeyup = function(event) {
     inputSet.delete(event.key);
-    processInput();
 }
 
 function processInput() {
+    // Movement controls: engage treads
     if (inputSet.has("a") && inputSet.has("d")) {
         tank.moveForward();
     } else if (inputSet.has("a")) {
-        tank.updateOrientationByDelta(-5);
+        tank.updateOrientationByDelta(-1);
     } else if (inputSet.has("d")) {
-        tank.updateOrientationByDelta(5);
+        tank.updateOrientationByDelta(1);
+    }
+
+    // Turret controls
+    if(inputSet.has("j")) {
+        tank.rotateTurretByDelta(-2); 
+    } else if (inputSet.has("l")) {
+       tank.rotateTurretByDelta(2);     
     }
 }
 
@@ -41,6 +47,7 @@ var setup = function() {
 
 
 function drawScene() {
+    processInput();
     context.fillStyle = "#FF0000";
     context.fillRect(0, 0, canvas.width, canvas.height);
 

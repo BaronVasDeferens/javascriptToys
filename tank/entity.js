@@ -16,6 +16,10 @@ export class TankEntity {
         this.turretImage.src = "images/my_turret.png";
     }
 
+    reverse() {
+        this.movementUnits *= -1;
+    }
+
     moveForward() {
         // This business with (this.bodyOrientDegrees - 90) has to do with where Javascript thinks "zero" is on the unit circle;
         // According to JS, zero starts at 3 o'clock; 90 is at 6 o'clock, etc
@@ -82,6 +86,11 @@ export class TankEntity {
 }
 
 export class Projectile {
+
+    x = 0;
+    y = 0;
+    angle = 0;
+    speed = 0;
 
     radius = 5;
 

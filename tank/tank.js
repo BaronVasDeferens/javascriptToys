@@ -18,9 +18,14 @@ const projectiles = [];
 const inputSet = new Set();
 
 window.onkeydown = function(event) {
-    inputSet.add(event.key);
+    // Single events first
+    
     if(event.key == " ") {
         fire();
+    } else if (event.key == "s") {
+        tank.reverse();
+    } else {
+        inputSet.add(event.key);
     }
 }
 
@@ -51,7 +56,7 @@ var setup = function() {
 }();
 
 function fire() {
-    console.log("pew!");
+    // TODO: check for ammo capacity
     projectiles.push(
         new Projectile(tank.projectileParams())
         );
@@ -69,9 +74,15 @@ function drawScene() {
 
     tank.draw(context);
 
-    projectiles.forEach(proectile => {
-        proectile.updatePosition();
-        proectile.drawProjectile(context);
+    projectiles.forEach(projectile => {
+        projectile.updatePosition();
+        if (projectile.x > canvas.width || projectile.x < 0 
+            || projectile.y > canvas.height || projectile.y < 0) {
+            projectiles.shift();
+        } else {
+            projectile.drawProjectile(context);
+        }
+        
     });
 
     requestAnimationFrame(drawScene);

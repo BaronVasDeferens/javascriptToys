@@ -1,4 +1,5 @@
 import { TankEntity } from './entity.js';
+import { Projectile } from './entity.js';
 
 /**
  * TANK
@@ -13,10 +14,14 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 const tank = new TankEntity(250,250);
+const projectiles = [];
 const inputSet = new Set();
 
 window.onkeydown = function(event) {
     inputSet.add(event.key);
+    if(event.key == " ") {
+        fire();
+    }
 }
 
 window.onkeyup = function(event) {
@@ -35,9 +40,9 @@ function processInput() {
 
     // Turret controls
     if(inputSet.has("j")) {
-        tank.rotateTurretByDelta(-2); 
+        tank.rotateTurretByDelta(-1); 
     } else if (inputSet.has("l")) {
-       tank.rotateTurretByDelta(2);     
+       tank.rotateTurretByDelta(1);     
     }
 }
 
@@ -45,14 +50,30 @@ var setup = function() {
     drawScene();
 }();
 
+function fire() {
+    console.log("pew!");
+    projectiles.push(
+        new Projectile(tank.projectileParams())
+        );
+}
 
 function drawScene() {
     processInput();
+
+    // Draw background
     context.fillStyle = "#29293d";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGrid(context);
+
+
     tank.draw(context);
+
+    projectiles.forEach(proectile => {
+        proectile.updatePosition();
+        proectile.drawProjectile(context);
+    });
+
     requestAnimationFrame(drawScene);
 }
 

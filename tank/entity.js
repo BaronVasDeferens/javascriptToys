@@ -53,6 +53,13 @@ export class TankEntity {
         };
     }
 
+    tracerRoundParams() {
+        return {
+            x: this.x,
+            y: this.y
+        }
+    }
+
     draw(context) {
         context.save();
         context.translate(this.x, this.y );
@@ -114,4 +121,31 @@ export class Projectile {
         context.ellipse(this.x, this.y, this.radius, this.radius, 2 * Math.PI, 2 * Math.PI, false);
         context.fill();
     }
+}
+
+export class TracerRound {
+
+    radius = 2;
+
+    originX = 0;
+    originY = 0;
+    terminalX = 0;
+    terminalY = 0;
+    colors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
+
+    constructor(params) {
+        this.originX = params.x;
+        this.originY = params.y;
+        // this.terminalX = params.terminalX;
+        // this.terminalY = params.terminalY;
+    }
+
+    drawTracerRound(context) {
+        context.fillStyle = this.colors[Math.floor(Math.random() * this.colors.length)];
+        let tempRadius = this.radius + ((Math.random() * 7) + 1);
+        context.beginPath();
+        context.ellipse(this.originX, this.originY, tempRadius, tempRadius, 2 * Math.PI, 2 * Math.PI, false);
+        context.fill();
+    }
+
 }

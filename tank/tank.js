@@ -1,10 +1,12 @@
 import { TankEntity } from './entity.js';
 import { Projectile } from './entity.js';
+import { TracerRound } from './entity.js';
 
 /**
  * TANK
  * To run locally, console: "http-server ."
  * If that doesn't work, you'll need: "npm install http-server -g"
+ * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
 const canvas = document.querySelector('canvas');
@@ -15,13 +17,14 @@ canvas.height = innerHeight;
 
 const tank = new TankEntity(250,250);
 const projectiles = [];
+const tracers = [];
 const inputSet = new Set();
 
 window.onkeydown = function(event) {
     // Single events first
     
     if(event.key == " ") {
-        fire();
+        fireMain();
     } else if (event.key == "s") {
         tank.reverse();
     } else {
@@ -48,18 +51,29 @@ function processInput() {
         tank.rotateTurretByDelta(-1); 
     } else if (inputSet.has("l")) {
        tank.rotateTurretByDelta(1);     
-    }
+    } 
+
+    if (inputSet.has("k")) {
+        fireSecondary();    
+    } 
 }
 
 var setup = function() {
     drawScene();
 }();
 
-function fire() {
+function fireMain() {
     // TODO: check for ammo capacity
     projectiles.push(
         new Projectile(tank.projectileParams())
         );
+}
+
+function fireSecondary() {
+    // TODO: check for ammo capacity
+    tracers.push(
+        new TracerRound(tank.tracerRoundParams())
+    );
 }
 
 function drawScene() {
@@ -71,7 +85,6 @@ function drawScene() {
 
     drawGrid(context);
 
-
     tank.draw(context);
 
     projectiles.forEach(projectile => {
@@ -81,8 +94,12 @@ function drawScene() {
             projectiles.shift();
         } else {
             projectile.drawProjectile(context);
-        }
-        
+        }  
+    });
+
+    tracers.forEach(tracer => {
+        tracer.drawTracerRound(context);
+        tracers.shift();
     });
 
     requestAnimationFrame(drawScene);

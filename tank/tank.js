@@ -1,6 +1,7 @@
 import { TankEntity } from './entity.js';
 import { Projectile } from './entity.js';
 import { TracerRound } from './entity.js';
+import { Robot } from './entity.js';
 
 /**
  * TANK
@@ -15,15 +16,22 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const tank = new TankEntity(250,250);
+const tank = new TankEntity(250, 250);
+
+const robots = [];
+
+
 const projectiles = [];
 const tracers = [];
+
+
+
 const inputSet = new Set();
 
-window.onkeydown = function(event) {
+window.onkeydown = function (event) {
     // Single events first
-    
-    if(event.key == " ") {
+
+    if (event.key == " ") {
         fireMain();
     } else if (event.key == "s") {
         tank.reverse();
@@ -32,7 +40,7 @@ window.onkeydown = function(event) {
     }
 }
 
-window.onkeyup = function(event) {
+window.onkeyup = function (event) {
     inputSet.delete(event.key);
 }
 
@@ -47,18 +55,19 @@ function processInput() {
     }
 
     // Turret controls
-    if(inputSet.has("j")) {
-        tank.rotateTurretByDelta(-1); 
+    if (inputSet.has("j")) {
+        tank.rotateTurretByDelta(-0.25);
     } else if (inputSet.has("l")) {
-       tank.rotateTurretByDelta(1);     
-    } 
+        tank.rotateTurretByDelta(0.25);
+    }
 
     if (inputSet.has("k")) {
-        fireSecondary();    
-    } 
+        fireSecondary();
+    }
 }
 
-var setup = function() {
+var setup = function () {
+    robots.push(new Robot(500, 500, 0));
     drawScene();
 }();
 
@@ -66,7 +75,7 @@ function fireMain() {
     // TODO: check for ammo capacity
     projectiles.push(
         new Projectile(tank.projectileParams())
-        );
+    );
 }
 
 function fireSecondary() {
@@ -87,15 +96,29 @@ function drawScene() {
 
     tank.draw(context);
 
+    robots.forEach(robot => {
+        robot.draw(context);
+    });
+
     projectiles.forEach(projectile => {
         projectile.updatePosition();
-        if (projectile.x > canvas.width || projectile.x < 0 
+        if (projectile.x > canvas.width || projectile.x < 0
             || projectile.y > canvas.height || projectile.y < 0) {
             projectiles.shift();
         } else {
             projectile.drawProjectile(context);
-        }  
+        }
     });
+
+    // Determine any hits
+    if (robots.length > 0 && tracers.length > 0) {
+        let params = tank.tracerRoundParams();
+        robots.forEach(robot => {
+            if (robot.detectTracerHit(params) == true) {
+                console.log("HIT!!!!!!!!! " + robot);
+            }
+        });
+    }
 
     tracers.forEach(tracer => {
         tracer.drawTracerRound(context);
@@ -107,7 +130,7 @@ function drawScene() {
 
 function drawGrid(context) {
     context.strokeStyle = "#7575a3";
-    for(var i = 0; i < 50; i++) {
+    for (var i = 0; i < 50; i++) {
         for (var j = 0; j < 50; j++) {
             context.strokeRect(i * 50, j * 50, 50, 50);
         }

@@ -4,15 +4,15 @@ export class TankEntity {
     turretImage = new Image();
 
     bodyOrientDegrees = 0;
-    turretOrientDegrees = 0;
-    
+    turretOrientDegrees = 135;
+
     movementUnits = 1;
     projectileSpeed = 20;
 
-    constructor(x,y) {
+    constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.tankImage.src="images/my_tank.png"; 
+        this.tankImage.src = "images/my_tank_2.png";
         this.turretImage.src = "images/my_turret.png";
     }
 
@@ -28,7 +28,7 @@ export class TankEntity {
         this.updatePosition(deltaX, deltaY);
     }
 
-    updatePosition(dx, dy){
+    updatePosition(dx, dy) {
         this.x += dx;
         this.y += dy;
     }
@@ -63,7 +63,7 @@ export class TankEntity {
 
     draw(context) {
         context.save();
-        context.translate(this.x, this.y );
+        context.translate(this.x, this.y);
         context.rotate(this.bodyOrientDegrees * Math.PI / 180);
         context.drawImage(this.tankImage, -(this.tankImage.width / 2), - (this.tankImage.height / 2));
         context.restore();
@@ -74,7 +74,7 @@ export class TankEntity {
 
     drawTurret(context) {
         context.save();
-        context.translate(this.x, this.y );
+        context.translate(this.x, this.y);
         context.rotate(this.turretOrientDegrees * Math.PI / 180);
         context.drawImage(this.turretImage, - (this.turretImage.width / 2), - (this.turretImage.height / 2));
         context.restore();
@@ -89,7 +89,7 @@ export class TankEntity {
         context.moveTo(this.x, this.y);
         context.lineTo(
             this.x + Math.cos((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength,
-            this.y + Math.sin((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength); 
+            this.y + Math.sin((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength);
         context.stroke();
     }
 }
@@ -145,7 +145,7 @@ export class TracerRound {
     }
 
     drawTracerRound(context) {
-        
+
         let tempRadius = this.radius + ((Math.random() * 7) + 1);
         let color = this.colors[Math.floor(Math.random() * this.colors.length)];
         let degrees = this.turretOrientDegrees + (Math.random() * 0.75) - (Math.random() * 0.75);
@@ -154,18 +154,58 @@ export class TracerRound {
         if (Math.random() * 100 > 90) {
             context.strokeStyle = color;
             context.beginPath();
-            
+
             context.moveTo(this.originX, this.originY);
             context.lineTo(
                 this.originX + Math.cos((degrees - 90) * Math.PI / 180) * lineLength,
-                this.originY + Math.sin((degrees - 90) * Math.PI / 180) * lineLength); 
+                this.originY + Math.sin((degrees - 90) * Math.PI / 180) * lineLength);
             context.stroke();
         }
 
         context.beginPath();
-        context.fillStyle = color;    
+        context.fillStyle = color;
         context.ellipse(this.originX, this.originY, tempRadius, tempRadius, 2 * Math.PI, 2 * Math.PI, false);
         context.fill();
+    }
+
+}
+
+export class Robot {
+
+    x = 0;
+    y = 0;
+    orientation = 0;
+    size = 25;
+
+    constructor(x, y, orientation) {
+        this.x = x;
+        this.y = y;
+        this.orientation = orientation;
+    }
+
+    draw(context) {
+        context.fillStyle = "#000000"
+        context.fillRect(this.x - (this.size / 2), this.y - (this.size / 2), this.size, this.size);
+    }
+
+    detectTracerHit(params) {
+
+
+        console.log("Ry - Ty = " + (this.y - params.y));
+        console.log("Rx - Tx = " + (this.x - params.x));
+        console.log("ratio: " + (this.y - params.y) / (this.x - params.x));
+
+        console.log("tan(" + ((params.turretOrientDegrees- 90) + "): " + Math.tan( (params.turretOrientDegrees - 90) * Math.PI / 180)));
+        console.log("diff: " + 
+            
+            Math.abs( Math.tan( (params.turretOrientDegrees - 90) * Math.PI * 180 ) - ( (this.y - params.y) / (this.x - params.x) ) )
+        );
+        if (
+            Math.abs( Math.tan( (params.turretOrientDegrees - 90) * Math.PI * 180 ) - ( (this.y - params.y) / (this.x - params.x) ) )  < 0.009)  {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

@@ -4,7 +4,7 @@ export class TankEntity {
     turretImage = new Image();
 
     bodyOrientDegrees = 0;
-    turretOrientDegrees = 135;
+    turretOrientDegrees = 0;
 
     movementUnits = 1;
     projectileSpeed = 20;
@@ -102,6 +102,7 @@ export class Projectile {
     speed = 0;
 
     radius = 5;
+    isLive = true;
 
     constructor(params) {
         this.x = params.x;
@@ -188,16 +189,29 @@ export class Robot {
         context.fillRect(this.x - (this.size / 2), this.y - (this.size / 2), this.size, this.size);
     }
 
+    detectProjectileHit(x,y) {
+
+        if (Math.abs(x - this.x) <= 10 && Math.abs(y - this.y) < 10) {
+            console.log(Math.abs(x - this.x));
+            console.log(Math.abs(y - this.y));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     detectTracerHit(params) {
 
         let tanResult = Math.tan( (params.turretOrientDegrees - 90) * Math.PI / 180 );
         let distanceRatio = (this.y - params.y) / (this.x - params.x);
 
-        console.log("angle: " + (params.turretOrientDegrees - 90));
-        console.log("tan result: " + tanResult);
-        console.log("dist ratio: " + distanceRatio);
+        let bothSignedSame = (distanceRatio > 0 && tanResult > 0) || (distanceRatio < 0 && tanResult < 0);
 
-        if (Math.abs(distanceRatio - tanResult) < 0.1) {
+        if (bothSignedSame && Math.abs(distanceRatio - tanResult) < 0.1) {
+            // console.log("HIT!!")
+            // console.log("turret angle: " + (params.turretOrientDegrees - 90));
+            // console.log("tan result: " + tanResult);
+            // console.log("dist ratio: " + distanceRatio);
             return true;
         } else {
             return false;

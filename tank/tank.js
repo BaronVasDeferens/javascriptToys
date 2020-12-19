@@ -16,7 +16,9 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const tank = new TankEntity(250, 250);
+const tank = new TankEntity(500, 500);
+const tankRotateSpeed = 0.25;
+const turretRotateSpeed = 0.5;
 
 const robots = [];
 
@@ -35,6 +37,8 @@ window.onkeydown = function (event) {
         fireMain();
     } else if (event.key == "s") {
         tank.reverse();
+    } else if (event.key == "p") {
+        robots.push(new Robot(Math.random() * 1500, Math.random() * 1500, 0));
     } else {
         inputSet.add(event.key);
     }
@@ -49,16 +53,16 @@ function processInput() {
     if (inputSet.has("a") && inputSet.has("d")) {
         tank.moveForward();
     } else if (inputSet.has("a")) {
-        tank.updateOrientationByDelta(-1);
+        tank.updateOrientationByDelta(-tankRotateSpeed);
     } else if (inputSet.has("d")) {
-        tank.updateOrientationByDelta(1);
+        tank.updateOrientationByDelta(tankRotateSpeed);
     }
 
     // Turret controls
     if (inputSet.has("j")) {
-        tank.rotateTurretByDelta(-0.25);
+        tank.rotateTurretByDelta(-turretRotateSpeed);
     } else if (inputSet.has("l")) {
-        tank.rotateTurretByDelta(0.25);
+        tank.rotateTurretByDelta(turretRotateSpeed);
     }
 
     if (inputSet.has("k")) {
@@ -67,7 +71,11 @@ function processInput() {
 }
 
 var setup = function () {
-    robots.push(new Robot(500, 500, 0));
+    robots.push(new Robot(100, 100, 0));
+    robots.push(new Robot(1000, 1000, 0));
+    robots.push(new Robot(100, 1000, 0));
+    robots.push(new Robot(1000, 100, 0));
+
     drawScene();
 }();
 
@@ -85,6 +93,10 @@ function fireSecondary() {
     );
 }
 
+function updateGameState() {
+
+}
+
 function drawScene() {
     processInput();
 
@@ -100,25 +112,63 @@ function drawScene() {
         robot.draw(context);
     });
 
+    let deadProjectiles = [];
+
+    // Update projectiles, tagging any that are no longer "live"
     projectiles.forEach(projectile => {
-        projectile.updatePosition();
-        if (projectile.x > canvas.width || projectile.x < 0
-            || projectile.y > canvas.height || projectile.y < 0) {
-            projectiles.shift();
-        } else {
+        if (projectile.isLive) {
+            projectile.updatePosition();
             projectile.drawProjectile(context);
+            if (projectile.x > canvas.width || projectile.x < 0
+                || projectile.y > canvas.height || projectile.y < 0) {
+                    deadProjectiles.push(projectile);
+            }
+        } else {
+            deadProjectiles.push(projectile);
         }
     });
 
+    // Cull dead projectiles
+    deadProjectiles.forEach(projectile => {
+        let idx = projectiles.indexOf(projectile);
+        if (idx > -1) {
+            projectiles.splice(idx, 1);
+        }
+    });
+
+
     // Determine any hits
-    if (robots.length > 0 && tracers.length > 0) {
-        let params = tank.tracerRoundParams();
-        robots.forEach(robot => {
+
+    let params = tank.tracerRoundParams();
+    robots.forEach(robot => {
+        
+        if (tracers.length > 0){
             if (robot.detectTracerHit(params) == true) {
-                console.log("HIT!!!!!!!!! " + robot);
+                // TODO: apply damage to robot
+                console.log("tracer hit robot: " + robot);
+            }
+        }
+
+        let deadRobots = [];
+        if (projectiles.length > 0) {
+        projectiles.forEach(projectile => {
+            if (projectile.isLive && robot.detectProjectileHit(projectile.x, projectile.y)) {
+                // TODO: remove robot
+                console.log("proj hit robot: " + robot);
+                deadRobots.push(robot);
+                projectile.isLive = false;
             }
         });
     }
+
+        deadRobots.forEach(robot => {
+            let idx = robots.indexOf(robot);
+            if (idx > -1) {
+                robots.splice(idx, 1);
+            }
+        });
+    });
+
 
     tracers.forEach(tracer => {
         tracer.drawTracerRound(context);

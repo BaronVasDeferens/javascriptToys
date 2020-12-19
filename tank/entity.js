@@ -190,18 +190,14 @@ export class Robot {
 
     detectTracerHit(params) {
 
+        let tanResult = Math.tan( (params.turretOrientDegrees - 90) * Math.PI / 180 );
+        let distanceRatio = (this.y - params.y) / (this.x - params.x);
 
-        console.log("Ry - Ty = " + (this.y - params.y));
-        console.log("Rx - Tx = " + (this.x - params.x));
-        console.log("ratio: " + (this.y - params.y) / (this.x - params.x));
+        console.log("angle: " + (params.turretOrientDegrees - 90));
+        console.log("tan result: " + tanResult);
+        console.log("dist ratio: " + distanceRatio);
 
-        console.log("tan(" + ((params.turretOrientDegrees- 90) + "): " + Math.tan( (params.turretOrientDegrees - 90) * Math.PI / 180)));
-        console.log("diff: " + 
-            
-            Math.abs( Math.tan( (params.turretOrientDegrees - 90) * Math.PI * 180 ) - ( (this.y - params.y) / (this.x - params.x) ) )
-        );
-        if (
-            Math.abs( Math.tan( (params.turretOrientDegrees - 90) * Math.PI * 180 ) - ( (this.y - params.y) / (this.x - params.x) ) )  < 0.009)  {
+        if (Math.abs(distanceRatio - tanResult) < 0.1) {
             return true;
         } else {
             return false;

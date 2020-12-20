@@ -1,7 +1,8 @@
-import { TankEntity } from './entity.js';
-import { Projectile } from './entity.js';
-import { TracerRound } from './entity.js';
-import { Robot } from './entity.js';
+import { Tank } from './entities.js';
+import { Robot } from './entities.js';
+import { Projectile } from './projectiles.js';
+import { TracerRound } from './projectiles.js';
+
 
 /**
  * TANK
@@ -16,19 +17,18 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const tank = new TankEntity(500, 500);
-const tankRotateSpeed = 0.25;
-const turretRotateSpeed = 0.5;
+const tank = new Tank(500, 500, 2);
+const tankRotateSpeed = 1.25;      // 0.25 is good
+const turretRotateSpeed = 0.4;      // 0.4 is good
 
 const robots = [];
-
 
 const projectiles = [];
 const tracers = [];
 
-
-
 const inputSet = new Set();
+
+let pause = false;
 
 window.onkeydown = function (event) {
     // Single events first
@@ -37,8 +37,10 @@ window.onkeydown = function (event) {
         fireMain();
     } else if (event.key == "s") {
         tank.reverse();
-    } else if (event.key == "p") {
-        robots.push(new Robot(Math.random() * 1500, Math.random() * 1500, 0));
+    } else if (event.key == "r") {
+        // spawn robos
+        robots.unshift(new Robot(Math.random() * 1500, Math.random() * 1500, 0));
+        console.log("new bot: " + robots[0].x + "," + robots[0].y);
     } else {
         inputSet.add(event.key);
     }
@@ -81,9 +83,11 @@ var setup = function () {
 
 function fireMain() {
     // TODO: check for ammo capacity
-    projectiles.push(
-        new Projectile(tank.projectileParams())
-    );
+    if (projectiles.length == 0) {
+        projectiles.push(
+            new Projectile(tank.projectileParams())
+        );
+    }
 }
 
 function fireSecondary() {
@@ -108,7 +112,9 @@ function drawScene() {
 
     tank.draw(context);
 
+    let tankParams = tank.projectileParams();
     robots.forEach(robot => {
+        robot.updatePosition(tankParams);
         robot.draw(context);
     });
 
@@ -121,7 +127,7 @@ function drawScene() {
             projectile.drawProjectile(context);
             if (projectile.x > canvas.width || projectile.x < 0
                 || projectile.y > canvas.height || projectile.y < 0) {
-                    deadProjectiles.push(projectile);
+                deadProjectiles.push(projectile);
             }
         } else {
             deadProjectiles.push(projectile);
@@ -140,8 +146,8 @@ function drawScene() {
     // Determine any hits
     let params = tank.tracerRoundParams();
     robots.forEach(robot => {
-        
-        if (tracers.length > 0){
+
+        if (tracers.length > 0) {
             if (robot.detectTracerHit(params) == true) {
                 // TODO: apply damage to robot
                 console.log("tracer hit robot: " + robot);
@@ -150,15 +156,15 @@ function drawScene() {
 
         let deadRobots = [];
         if (projectiles.length > 0) {
-        projectiles.forEach(projectile => {
-            if (projectile.isLive && robot.detectProjectileHit(projectile.x, projectile.y)) {
-                // TODO: remove robot
-                console.log("proj hit robot: " + robot);
-                deadRobots.push(robot);
-                projectile.isLive = false;
-            }
-        });
-    }
+            projectiles.forEach(projectile => {
+                if (projectile.isLive && robot.detectProjectileHit(projectile.x, projectile.y)) {
+                    // TODO: remove robot
+                    console.log("proj hit robot: " + robot);
+                    deadRobots.push(robot);
+                    projectile.isLive = false;
+                }
+            });
+        }
         // Cull the dead robots
         deadRobots.forEach(robot => {
             let idx = robots.indexOf(robot);

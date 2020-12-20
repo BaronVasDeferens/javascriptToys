@@ -1,4 +1,4 @@
-export class TankEntity {
+export class Tank {
 
     tankImage = new Image();
     turretImage = new Image();
@@ -6,12 +6,13 @@ export class TankEntity {
     bodyOrientDegrees = 0;
     turretOrientDegrees = 0;
 
-    movementUnits = 0.5;
-    projectileSpeed = 20;
+    movementUnits = 1; // 0.5;
+    projectileSpeed = 10;
 
-    constructor(x, y) {
+    constructor(x, y, movementUnits) {
         this.x = x;
         this.y = y;
+        this.movementUnits = movementUnits;
         this.tankImage.src = "images/my_tank_2.png";
         this.turretImage.src = "images/my_turret.png";
     }
@@ -94,90 +95,18 @@ export class TankEntity {
     }
 }
 
-export class Projectile {
 
-    x = 0;
-    y = 0;
-    angle = 0;
-    speed = 0;
-
-    radius = 5;
-    isLive = true;
-
-    constructor(params) {
-        this.x = params.x;
-        this.y = params.y;
-        this.angle = params.angle;
-        this.speed = params.speed;
-    }
-
-    updatePosition() {
-        let deltaX = Math.cos((this.angle - 90) * Math.PI / 180) * this.speed;
-        let deltaY = Math.sin((this.angle - 90) * Math.PI / 180) * this.speed;
-        this.x += deltaX;
-        this.y += deltaY;
-    }
-
-    drawProjectile(context) {
-        context.fillStyle = "#FF0000"
-        context.beginPath();
-        context.ellipse(this.x, this.y, this.radius, this.radius, 2 * Math.PI, 2 * Math.PI, false);
-        context.fill();
-    }
-}
-
-export class TracerRound {
-
-    radius = 2;
-
-    originX = 0;
-    originY = 0;
-    turretOrientDegrees = 0;
-    terminalX = 0;
-    terminalY = 0;
-    colors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
-
-    constructor(params) {
-        this.originX = params.x;
-        this.originY = params.y;
-        this.turretOrientDegrees = params.turretOrientDegrees;
-        // this.terminalX = params.terminalX;
-        // this.terminalY = params.terminalY;
-    }
-
-    drawTracerRound(context) {
-
-        let tempRadius = this.radius + ((Math.random() * 7) + 1);
-        let color = this.colors[Math.floor(Math.random() * this.colors.length)];
-        let degrees = this.turretOrientDegrees + (Math.random() * 0.75) - (Math.random() * 0.75);
-        let lineLength = 1000;
-
-        if (Math.random() * 100 > 90) {
-            context.strokeStyle = color;
-            context.beginPath();
-
-            context.moveTo(this.originX, this.originY);
-            context.lineTo(
-                this.originX + Math.cos((degrees - 90) * Math.PI / 180) * lineLength,
-                this.originY + Math.sin((degrees - 90) * Math.PI / 180) * lineLength);
-            context.stroke();
-        }
-
-        context.beginPath();
-        context.fillStyle = color;
-        context.ellipse(this.originX, this.originY, tempRadius, tempRadius, 2 * Math.PI, 2 * Math.PI, false);
-        context.fill();
-    }
-
-}
 
 export class Robot {
+
     robotImage = new Image();
     x = 0;
     y = 0;
     centerX = 0;
     centerY = 0;
     orientation = 0;
+
+    movementIncrement = 0.25;
 
     constructor(x, y, orientation) {
         this.x = x;
@@ -189,10 +118,49 @@ export class Robot {
         this.robotImage.src = "./images/robot_1.png";
     }
 
+    updatePosition(target) {
+
+        if (this.x > target.x) {
+            this.x -= this.movementIncrement;
+        } else if (this.x < target.x) {
+            this.x += this.movementIncrement;
+        }
+
+        if (this.y > target.y) {
+            this.y -= this.movementIncrement;
+        } else if (this.y < target.y) {
+            this.y += this.movementIncrement;
+        }
+
+        this.centerX = this.x - (this.robotImage.width / 2);
+        this.centerY = this.y - (this.robotImage.height / 2);
+
+
+        let xDiff = (target.x - this.x);
+        let yDiff = (target.y - this.y);
+        let rotationAdjust = 270;
+        if (xDiff < 0) {
+            rotationAdjust = 270;
+        } else {
+            rotationAdjust = 90;
+        }
+
+        this.orientation = rotationAdjust + (Math.atan(yDiff / xDiff) * 180 / Math.PI);
+        // console.log(this.orientation);
+    }
+
     draw(context) {
-        // context.fillStyle = "#000000"
-        // context.fillRect(this.x - (this.size / 2), this.y - (this.size / 2), this.size, this.size);
-        context.drawImage(this.robotImage, this.x - (this.robotImage.width / 2), this.y - (this.robotImage.height / 2));
+
+
+        context.save();
+        context.translate(this.x, this.y);
+        context.rotate(this.orientation * Math.PI / 180);
+        context.drawImage(this.robotImage, -(this.robotImage.width / 2), -(this.robotImage.height / 2));
+        context.restore();
+
+
+
+        // context.drawImage(this.robotImage, this.centerX, this.centerY);
         // this.drawOrientationEllipse(context);
     }
 
@@ -200,20 +168,19 @@ export class Robot {
     drawOrientationEllipse(context) {
         context.strokeStyle = "#0000FF"
         context.beginPath();
+        context.ellipse(this.x, this.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
         let lineLength = 25;
-        context.ellipse(this.centerX, this.centerY, lineLength, lineLength, 2 * Math.PI, 2 * Math.PI, false);
-        context.moveTo(this.centerX, this.centerY);
+        context.ellipse(this.x, this.y, lineLength, lineLength, 2 * Math.PI, 2 * Math.PI, false);
+        context.moveTo(this.x, this.y);
         context.lineTo(
-            this.x + Math.cos((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength,
-            this.y + Math.sin((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength);
+            this.x + Math.cos((this.orientation - 90) * Math.PI / 180) * lineLength,
+            this.y + Math.sin((this.orientation - 90) * Math.PI / 180) * lineLength);
         context.stroke();
     }
 
-    detectProjectileHit(x,y) {
-
-        if (Math.abs(x - this.centerX) <= 15 && Math.abs(y - this.centerY) < 15) {
-            // console.log(Math.abs(x - this.centerX));
-            // console.log(Math.abs(y - this.centerY));
+    detectProjectileHit(x, y) {
+        let radius = 15;
+        if (Math.abs(x - this.x) <= radius && Math.abs(y - this.y) <= radius) {
             return true;
         } else {
             return false;
@@ -222,16 +189,12 @@ export class Robot {
 
     detectTracerHit(params) {
 
-        let tanResult = Math.tan( (params.turretOrientDegrees - 90) * Math.PI / 180 );
+        let tanResult = Math.tan((params.turretOrientDegrees - 90) * Math.PI / 180);
         let distanceRatio = (this.y - params.y) / (this.x - params.x);
 
         let bothSignedSame = (distanceRatio > 0 && tanResult > 0) || (distanceRatio < 0 && tanResult < 0);
 
         if (bothSignedSame && Math.abs(distanceRatio - tanResult) < 0.1) {
-            // console.log("HIT!!")
-            // console.log("turret angle: " + (params.turretOrientDegrees - 90));
-            // console.log("tan result: " + tanResult);
-            // console.log("dist ratio: " + distanceRatio);
             return true;
         } else {
             return false;

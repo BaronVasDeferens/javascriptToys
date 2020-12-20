@@ -138,7 +138,6 @@ function drawScene() {
 
 
     // Determine any hits
-
     let params = tank.tracerRoundParams();
     robots.forEach(robot => {
         
@@ -160,7 +159,7 @@ function drawScene() {
             }
         });
     }
-
+        // Cull the dead robots
         deadRobots.forEach(robot => {
             let idx = robots.indexOf(robot);
             if (idx > -1) {

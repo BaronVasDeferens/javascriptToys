@@ -6,7 +6,7 @@ export class TankEntity {
     bodyOrientDegrees = 0;
     turretOrientDegrees = 0;
 
-    movementUnits = 1;
+    movementUnits = 0.5;
     projectileSpeed = 20;
 
     constructor(x, y) {
@@ -172,28 +172,48 @@ export class TracerRound {
 }
 
 export class Robot {
-
+    robotImage = new Image();
     x = 0;
     y = 0;
+    centerX = 0;
+    centerY = 0;
     orientation = 0;
-    size = 25;
 
     constructor(x, y, orientation) {
         this.x = x;
         this.y = y;
+        this.centerX = this.x - (this.robotImage.width / 2);
+        this.centerY = this.y - (this.robotImage.height / 2);
         this.orientation = orientation;
+
+        this.robotImage.src = "./images/robot_1.png";
     }
 
     draw(context) {
-        context.fillStyle = "#000000"
-        context.fillRect(this.x - (this.size / 2), this.y - (this.size / 2), this.size, this.size);
+        // context.fillStyle = "#000000"
+        // context.fillRect(this.x - (this.size / 2), this.y - (this.size / 2), this.size, this.size);
+        context.drawImage(this.robotImage, this.x - (this.robotImage.width / 2), this.y - (this.robotImage.height / 2));
+        // this.drawOrientationEllipse(context);
+    }
+
+    // For debuggin'
+    drawOrientationEllipse(context) {
+        context.strokeStyle = "#0000FF"
+        context.beginPath();
+        let lineLength = 25;
+        context.ellipse(this.centerX, this.centerY, lineLength, lineLength, 2 * Math.PI, 2 * Math.PI, false);
+        context.moveTo(this.centerX, this.centerY);
+        context.lineTo(
+            this.x + Math.cos((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength,
+            this.y + Math.sin((this.bodyOrientDegrees - 90) * Math.PI / 180) * lineLength);
+        context.stroke();
     }
 
     detectProjectileHit(x,y) {
 
-        if (Math.abs(x - this.x) <= 10 && Math.abs(y - this.y) < 10) {
-            console.log(Math.abs(x - this.x));
-            console.log(Math.abs(y - this.y));
+        if (Math.abs(x - this.centerX) <= 15 && Math.abs(y - this.centerY) < 15) {
+            // console.log(Math.abs(x - this.centerX));
+            // console.log(Math.abs(y - this.centerY));
             return true;
         } else {
             return false;

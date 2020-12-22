@@ -102,23 +102,25 @@ export class Robot {
     robotImage = new Image();
     x = 0;
     y = 0;
-    centerX = 0;
-    centerY = 0;
+
     orientation = 0;
 
-    movementIncrement = 0.25;
+    movementIncrement = 0.25;  // 0.25 is good
 
     constructor(x, y, orientation) {
         this.x = x;
         this.y = y;
-        this.centerX = this.x - (this.robotImage.width / 2);
-        this.centerY = this.y - (this.robotImage.height / 2);
         this.orientation = orientation;
 
         this.robotImage.src = "./images/robot_1.png";
     }
 
     updatePosition(target) {
+
+        if (this.frameDamage > 0) {
+            this.frameDamage -= this.healingRate;
+            return;
+        }
 
         if (this.x > target.x) {
             this.x -= this.movementIncrement;
@@ -132,10 +134,7 @@ export class Robot {
             this.y += this.movementIncrement;
         }
 
-        this.centerX = this.x - (this.robotImage.width / 2);
-        this.centerY = this.y - (this.robotImage.height / 2);
-
-
+        // Face the robot toward the tank; adjust rotation based on position relative to the tank
         let xDiff = (target.x - this.x);
         let yDiff = (target.y - this.y);
         let rotationAdjust = 270;
@@ -146,21 +145,14 @@ export class Robot {
         }
 
         this.orientation = rotationAdjust + (Math.atan(yDiff / xDiff) * 180 / Math.PI);
-        // console.log(this.orientation);
     }
 
     draw(context) {
-
-
         context.save();
         context.translate(this.x, this.y);
         context.rotate(this.orientation * Math.PI / 180);
         context.drawImage(this.robotImage, -(this.robotImage.width / 2), -(this.robotImage.height / 2));
         context.restore();
-
-
-
-        // context.drawImage(this.robotImage, this.centerX, this.centerY);
         // this.drawOrientationEllipse(context);
     }
 
@@ -168,7 +160,6 @@ export class Robot {
     drawOrientationEllipse(context) {
         context.strokeStyle = "#0000FF"
         context.beginPath();
-        context.ellipse(this.x, this.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
         let lineLength = 25;
         context.ellipse(this.x, this.y, lineLength, lineLength, 2 * Math.PI, 2 * Math.PI, false);
         context.moveTo(this.x, this.y);

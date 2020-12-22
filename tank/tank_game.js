@@ -26,9 +26,11 @@ const robots = [];
 const projectiles = [];
 const tracers = [];
 
+const explosionColors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
+
 const inputSet = new Set();
 
-let pause = false;
+
 
 window.onkeydown = function (event) {
     // Single events first
@@ -168,9 +170,14 @@ function drawScene() {
         // Cull the dead robots
         deadRobots.forEach(robot => {
             let idx = robots.indexOf(robot);
+            
+            drawExplosion(context, robot.x, robot.y);
+
+            // Remove robot
             if (idx > -1) {
                 robots.splice(idx, 1);
             }
+
         });
     });
 
@@ -181,6 +188,13 @@ function drawScene() {
     });
 
     requestAnimationFrame(drawScene);
+}
+
+function drawExplosion(context,x,y) {
+    context.fillStyle = explosionColors[Math.floor(Math.random() * explosionColors.length)];
+    let radius = (Math.random() * 30) + 40;
+    context.ellipse(x, y, radius, radius, Math.PI * 2, Math.PI * 2, false);
+    context.fill();
 }
 
 function drawGrid(context) {

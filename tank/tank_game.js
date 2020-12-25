@@ -26,6 +26,8 @@ const robots = [];
 const projectiles = [];
 const tracers = [];
 
+const explosionSound = new Audio("sounds/explosion_1.wav");
+
 const explosionColors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
 
 const inputSet = new Set();
@@ -69,6 +71,7 @@ function processInput() {
         tank.rotateTurretByDelta(turretRotateSpeed);
     }
 
+    // Fire machine guns
     if (inputSet.has("k")) {
         fireSecondary();
     }
@@ -86,6 +89,7 @@ var setup = function () {
 function fireMain() {
     // TODO: check for ammo capacity
     if (projectiles.length == 0) {
+        tank.playMainGunSound();
         projectiles.push(
             new Projectile(tank.projectileParams())
         );
@@ -97,6 +101,7 @@ function fireSecondary() {
     tracers.push(
         new TracerRound(tank.tracerRoundParams())
     );
+    tank.playMachineGunSound();
 }
 
 function updateGameState() {
@@ -172,6 +177,10 @@ function drawScene() {
             let idx = robots.indexOf(robot);
             
             drawExplosion(context, robot.x, robot.y);
+            explosionSound.playbackRate = 1.20 - (Math.random() * 0.5);
+            explosionSound.pause();
+            explosionSound.currentTime = 0;
+            explosionSound.play();
 
             // Remove robot
             if (idx > -1) {

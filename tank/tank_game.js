@@ -26,8 +26,10 @@ const robots = [];
 const projectiles = [];
 const tracers = [];
 
-const explosionSound = new Audio("sounds/explosion_1.wav");
+const deadRobots = [];
+const deadProjectiles = [];
 
+const explosionSound = new Audio("sounds/explosion_1.wav");
 const explosionColors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
 
 const inputSet = new Set();
@@ -55,6 +57,7 @@ window.onkeyup = function (event) {
 }
 
 function processInput() {
+
     // Movement controls: engage treads
     if (inputSet.has("a") && inputSet.has("d")) {
         tank.moveForward();
@@ -83,7 +86,7 @@ var setup = function () {
     robots.push(new Robot(100, 1000, 0));
     robots.push(new Robot(1000, 100, 0));
 
-    drawScene();
+    beginGame();
 }();
 
 function fireMain() {
@@ -104,42 +107,36 @@ function fireSecondary() {
     tank.playMachineGunSound();
 }
 
-function updateGameState() {
 
+function beginGame() {
+
+    updateGameState();
+    drawScene();
+    requestAnimationFrame(beginGame);
 }
 
-function drawScene() {
-    processInput();
 
-    // Draw background
-    context.fillStyle = "#29293d";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+function updateGameState() {
 
-    drawGrid(context);
+    // Clear prior "dead" stuff, robots, projectules, tracers
+    tracers.length = 0;
 
-    tank.draw(context);
+    // Cull the dead robots
+    deadRobots.forEach(robot => {
+        let idx = robots.indexOf(robot);
 
-    let tankParams = tank.projectileParams();
-    robots.forEach(robot => {
-        robot.updatePosition(tankParams);
-        robot.draw(context);
-    });
+        explosionSound.playbackRate = 1.20 - (Math.random() * 0.5);
+        explosionSound.pause();
+        explosionSound.currentTime = 0;
+        explosionSound.play();
 
-    let deadProjectiles = [];
-
-    // Update projectiles, tagging any that are no longer "live"
-    projectiles.forEach(projectile => {
-        if (projectile.isLive) {
-            projectile.updatePosition();
-            projectile.drawProjectile(context);
-            if (projectile.x > canvas.width || projectile.x < 0
-                || projectile.y > canvas.height || projectile.y < 0) {
-                deadProjectiles.push(projectile);
-            }
-        } else {
-            deadProjectiles.push(projectile);
+        // Remove robot
+        if (idx > -1) {
+            robots.splice(idx, 1);
         }
     });
+
+    deadRobots.length = 0;;
 
     // Cull dead projectiles
     deadProjectiles.forEach(projectile => {
@@ -149,57 +146,80 @@ function drawScene() {
         }
     });
 
+    deadProjectiles.length = 0;
 
-    // Determine any hits
-    let params = tank.tracerRoundParams();
+    // Update tank and robot positions
+    processInput();
+
+    let tankParams = tank.projectileParams();
+
     robots.forEach(robot => {
-
-        if (tracers.length > 0) {
-            if (robot.detectTracerHit(params) == true) {
-                // TODO: apply damage to robot
-                console.log("tracer hit robot: " + robot);
-            }
-        }
-
-        let deadRobots = [];
-        if (projectiles.length > 0) {
-            projectiles.forEach(projectile => {
-                if (projectile.isLive && robot.detectProjectileHit(projectile.x, projectile.y)) {
-                    // TODO: remove robot
-                    console.log("proj hit robot: " + robot);
-                    deadRobots.push(robot);
-                    projectile.isLive = false;
-                }
-            });
-        }
-        // Cull the dead robots
-        deadRobots.forEach(robot => {
-            let idx = robots.indexOf(robot);
-            
-            drawExplosion(context, robot.x, robot.y);
-            explosionSound.playbackRate = 1.20 - (Math.random() * 0.5);
-            explosionSound.pause();
-            explosionSound.currentTime = 0;
-            explosionSound.play();
-
-            // Remove robot
-            if (idx > -1) {
-                robots.splice(idx, 1);
-            }
-
-        });
+        robot.updatePosition(tankParams);
     });
 
+    // Update projectiles, tagging any that are no longer "live"
+    let params = tank.tracerRoundParams();
+    projectiles.forEach(projectile => {
+        if (projectile.isLive) {
+            projectile.updatePosition();
+            if (projectile.x > canvas.width || projectile.x < 0
+                || projectile.y > canvas.height || projectile.y < 0) {
+                deadProjectiles.push(projectile);
+            }
+        } else {
+            deadProjectiles.push(projectile);
+        }
+    });
+
+
+    // Determine projectile hits
+    robots.forEach(robot => {
+        // 
+        // if (tracers.length > 0) {
+        //     if (robot.detectTracerHit(params) == true) {
+        //         // TODO: apply damage to robot
+        //     }
+        // }
+
+        projectiles.forEach(projectile => {
+            if (projectile.isLive && robot.detectProjectileHit(projectile.x, projectile.y)) {
+                deadRobots.push(robot);
+                projectile.isLive = false;
+            }
+        });
+    });
+}
+
+function drawScene() {
+
+    // Draw background
+    context.fillStyle = "#29293d";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawGrid(context);
+
+    tank.draw(context);
+
+    robots.forEach(robot => {
+        robot.draw(context);
+    });
+
+    deadRobots.forEach(robot => {
+        drawExplosion(context, robot.x, robot.y);
+    });
+
+    projectiles.forEach(projectile => {
+        projectile.drawProjectile(context);
+    });
 
     tracers.forEach(tracer => {
         tracer.drawTracerRound(context);
-        tracers.shift();
     });
 
-    requestAnimationFrame(drawScene);
+    // requestAnimationFrame(drawScene);
 }
 
-function drawExplosion(context,x,y) {
+function drawExplosion(context, x, y) {
     context.fillStyle = explosionColors[Math.floor(Math.random() * explosionColors.length)];
     let radius = (Math.random() * 30) + 40;
     context.ellipse(x, y, radius, radius, Math.PI * 2, Math.PI * 2, false);

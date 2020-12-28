@@ -4,7 +4,7 @@ export class Tank {
     turretImage = new Image();
     mainGunSound = new Audio("sounds/tank_gun_1.wav");
     machineGunSound = new Audio("sounds/machine_gun_1.wav");
-   
+    turretSound = new Audio("sounds/turret_1.wav");
 
     bodyOrientDegrees = 0;
     turretOrientDegrees = 0;
@@ -18,15 +18,6 @@ export class Tank {
         this.movementUnits = movementUnits;
         this.tankImage.src = "images/my_tank_2.png";
         this.turretImage.src = "images/my_turret.png";
-
-
-        // this.machineGunSound.addEventListener('timeupdate', function(){
-        //     var buffer = .14
-        //     if(this.currentTime > this.duration - buffer){
-        //         this.currentTime = 0
-        //         this.play()
-        //     }
-        // });
     }
 
     reverse() {
@@ -49,12 +40,15 @@ export class Tank {
     updateOrientationByDelta(delta) {
         this.bodyOrientDegrees += delta;
         this.bodyOrientDegrees = Math.abs((360 + this.bodyOrientDegrees) % 360);
-        this.rotateTurretByDelta(delta);
+        this.rotateTurretByDelta(delta, false);
     }
 
-    rotateTurretByDelta(delta) {
+    rotateTurretByDelta(delta, playSound) {
         this.turretOrientDegrees += delta;
         this.turretOrientDegrees = Math.abs((360 + this.turretOrientDegrees) % 360);
+        // if (playSound != false) {
+        //     this.playTurretSound();
+        // }
     }
 
     playMainGunSound() {
@@ -69,6 +63,18 @@ export class Tank {
             this.machineGunSound.currentTime = 0;
         }
         this.machineGunSound.play();
+    }
+
+    playTurretSound() {
+
+        // if (this.turretSound.currentTime > 0.5) {
+        //     this.turretSound.currentTime = 0;
+        // }
+        // this.turretSound.play();
+    }
+
+    stopTurretSound() {
+        this.turretSound.pause();
     }
 
 

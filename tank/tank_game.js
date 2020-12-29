@@ -1,5 +1,6 @@
 import { Tank } from './entities.js';
 import { Robot } from './entities.js';
+import { HelplessHumanoid } from './entities.js';
 import { Projectile } from './projectiles.js';
 import { TracerRound } from './projectiles.js';
 
@@ -17,17 +18,19 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const tank = new Tank(500, 500, 2);
-const tankRotateSpeed = 1.25;      // 0.25 is good
+const tank = new Tank(500, 500, .5);
+const tankRotateSpeed = 0.25;      // 0.25 is good
 const turretRotateSpeed = 0.4;      // 0.4 is good
 
 const robots = [];
+const humans = [];
 
 const projectiles = [];
 const tracers = [];
 
 const deadRobots = [];
 const deadProjectiles = [];
+const deadHumans = [];
 
 const explosionSound = new Audio("sounds/explosion_1.wav");
 const explosionColors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
@@ -36,10 +39,57 @@ const inputSet = new Set();
 
 
 
-window.onkeydown = function (event) {
-    // Single events first
 
-    if (event.key == " ") {
+
+
+var setup = function () {
+
+
+    humans.push(new HelplessHumanoid(randomRange(0, canvas.width), 600));
+    humans.push(new HelplessHumanoid(randomRange(0, canvas.width), 600));
+    humans.push(new HelplessHumanoid(randomRange(0, canvas.width), 600));
+
+    for (var i = 0; i < 7; i++) {
+       createRandomRobot();
+    }
+
+    beginGame();
+}();
+
+function randomRange(min, max) {
+    return Math.floor(Math.random() * max) + min;
+}
+
+function createRandomRobot() {
+    
+    let robotX = randomRange(0, canvas.width);
+
+    let robotY = 0; 
+    if (randomRange(0,2) == 1) {
+        robotY = canvas.height;
+    } 
+
+    let robot = new Robot(robotX, robotY, 0);
+
+    if (randomRange(0,2) == 1) {
+        robot.setTarget(tank);
+    } else {
+        robot.setTarget(humans[randomRange(0, humans.length)]);
+    }
+
+
+    robots.push(robot);
+}
+
+function beginGame() {
+    updateGameState();
+    drawScene();
+    requestAnimationFrame(beginGame);
+}
+
+
+window.onkeydown = function (event) {
+    if (event.key == " ") { // Space bar : main gun
         fireMain();
     } else if (event.key == "s") {
         tank.reverse();
@@ -57,7 +107,6 @@ window.onkeyup = function (event) {
 }
 
 function processInput() {
-
     // Movement controls: engage treads
     if (inputSet.has("a") && inputSet.has("d")) {
         tank.moveForward();
@@ -80,15 +129,6 @@ function processInput() {
     }
 }
 
-var setup = function () {
-    robots.push(new Robot(100, 100, 0));
-    robots.push(new Robot(1000, 1000, 0));
-    robots.push(new Robot(100, 1000, 0));
-    robots.push(new Robot(1000, 100, 0));
-
-    beginGame();
-}();
-
 function fireMain() {
     // TODO: check for ammo capacity
     if (projectiles.length == 0) {
@@ -108,15 +148,16 @@ function fireSecondary() {
 }
 
 
-function beginGame() {
 
-    updateGameState();
-    drawScene();
-    requestAnimationFrame(beginGame);
-}
 
 
 function updateGameState() {
+
+    if (robots.length < 5) {
+        for (var r = 0; r < 5 - robots.length; r++) {
+            createRandomRobot();
+        }
+    }
 
     // Clear prior "dead" stuff, robots, projectules, tracers
     tracers.length = 0;
@@ -138,7 +179,7 @@ function updateGameState() {
 
     deadRobots.length = 0;;
 
-    // Cull dead projectiles
+    // Remove any dead projectiles from the projectiles array
     deadProjectiles.forEach(projectile => {
         let idx = projectiles.indexOf(projectile);
         if (idx > -1) {
@@ -148,13 +189,20 @@ function updateGameState() {
 
     deadProjectiles.length = 0;
 
+    // Cull the dead humans
+    deadHumans.forEach(human => {
+        let idx = humans.indexOf(human);
+        if (idx > -1) {
+            humans.splice(idx, 1);
+        }
+    });
+
     // Update tank and robot positions
     processInput();
 
     let tankParams = tank.projectileParams();
-
     robots.forEach(robot => {
-        robot.updatePosition(tankParams);
+        robot.updatePosition();
     });
 
     // Update projectiles, tagging any that are no longer "live"
@@ -173,21 +221,39 @@ function updateGameState() {
 
 
     // Determine projectile hits
-    robots.forEach(robot => {
-        // 
-        // if (tracers.length > 0) {
-        //     if (robot.detectTracerHit(params) == true) {
-        //         // TODO: apply damage to robot
-        //     }
-        // }
 
-        projectiles.forEach(projectile => {
+    projectiles.forEach(projectile => {
+
+        robots.forEach(robot => {
             if (projectile.isLive && robot.detectProjectileHit(projectile.x, projectile.y)) {
                 deadRobots.push(robot);
                 projectile.isLive = false;
             }
         });
+
+        humans.forEach(human => {
+            if (projectile.isLive && human.detectProjectileHit(projectile.x, projectile.y)) {
+                deadHumans.push(human);
+                projectile.isLive = false;
+            }
+        });
+
     });
+
+    humans.forEach(human => {
+        if (human.checkForTankCollision(tankParams.x, tankParams.y) == true) {
+            console.log("crushed human!")
+            deadHumans.push(human);
+        }
+
+        robots.forEach(robot => {
+            if (human.checkForRobotCollision(robot.x, robot.y) == true) {
+                console.log("robot killed human");
+                deadHumans.push(human);
+            }
+        });
+    });
+
 }
 
 function drawScene() {
@@ -202,6 +268,10 @@ function drawScene() {
 
     robots.forEach(robot => {
         robot.draw(context);
+    });
+
+    humans.forEach(humanoid => {
+        humanoid.draw(context);
     });
 
     deadRobots.forEach(robot => {

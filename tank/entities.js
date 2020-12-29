@@ -1,4 +1,15 @@
+
+class Entity {
+
+    randomRange(min, max) {
+        return Math.floor(Math.random() * max) + min;
+    }
+}
+
 export class Tank {
+
+    x = 0;
+    y = 0;
 
     tankImage = new Image();
     turretImage = new Image();
@@ -130,7 +141,7 @@ export class Tank {
 
 
 
-export class Robot {
+export class Robot extends Entity {
 
     robotImage = new Image();
     x = 0;
@@ -140,7 +151,10 @@ export class Robot {
 
     movementIncrement = 0.25;  // 0.25 is good
 
+    target = null;
+
     constructor(x, y, orientation) {
+        super();
         this.x = x;
         this.y = y;
         this.orientation = orientation;
@@ -148,13 +162,16 @@ export class Robot {
         this.robotImage.src = "./images/robot_1.png";
     }
 
+    setTarget(target) {
+        this.target = target;
+    }
+
     updatePosition(target) {
 
-        if (this.frameDamage > 0) {
-            this.frameDamage -= this.healingRate;
-            return;
+        if (target === undefined) {
+            target= this.target;
         }
-
+        
         if (this.x > target.x) {
             this.x -= this.movementIncrement;
         } else if (this.x < target.x) {
@@ -224,5 +241,59 @@ export class Robot {
             return false;
         }
     }
+}
 
+
+
+export class HelplessHumanoid {
+
+    alive = true;
+    x = 0;
+    y = 0;
+
+    // const deathScream = new Audio("sounds/death_1.wav");
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    draw(context) {
+        if (this.alive == true) {
+            context.beginPath();
+            context.fillStyle = "#FFFF00";
+            context.rect(this.x, this.y, 25, 25);
+            context.fill();
+        }
+    }
+
+    detectProjectileHit(x, y) {
+        let radius = 15;
+        if (Math.abs(x - this.x) <= radius && Math.abs(y - this.y) <= radius) {
+            this.alive = false;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    checkForTankCollision(x,y) {
+        let radius = 30;
+        if (Math.abs(x - this.x) <= radius && Math.abs(y - this.y) <= radius) {
+            this.alive = false;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    checkForRobotCollision(x,y) {
+        let radius = 5;
+        if (Math.abs(x - this.x) <= radius && Math.abs(y - this.y) <= radius) {
+            this.alive = false;
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

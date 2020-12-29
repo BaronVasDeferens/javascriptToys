@@ -23,8 +23,8 @@ export class Projectile {
     }
 
     drawProjectile(context) {
-        context.fillStyle = "#FF0000"
         context.beginPath();
+        context.fillStyle = "#FF0000";
         context.ellipse(this.x, this.y, this.radius, this.radius, 2 * Math.PI, 2 * Math.PI, false);
         context.fill();
     }
@@ -57,9 +57,8 @@ export class TracerRound {
         let lineLength = 1000;
 
         if (Math.random() * 100 > 90) {
-            context.strokeStyle = color;
             context.beginPath();
-
+            context.strokeStyle = color;
             context.moveTo(this.originX, this.originY);
             context.lineTo(
                 this.originX + Math.cos((degrees - 90) * Math.PI / 180) * lineLength,

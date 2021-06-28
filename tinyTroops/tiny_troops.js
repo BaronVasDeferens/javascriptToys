@@ -22,21 +22,25 @@ canvas.height = innerHeight;
 var States = Object.freeze({IDLE: "IDLE", UNIT_SELECTED: "UNIT_SELECTED"});
 var currentState = States.IDLE;
 
-var selectedUnitPrimary = null;
+var selectedEntityPrimary = null;
+var mousePointerHoverDot = null;
+var mousePointerHoverLine = null;
+
 const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
 const entitiesTransient = [];   // These are cleared after ever render
 
+
+
+
 var setup = function () {
-    // Include any initiatlization code here
+    
     console.log(">>> Starting...");
     entitiesResident.push(new Soldier(50,50));
-    entitiesResident.push(new Soldier(150,50));
-    entitiesResident.push(new Soldier(250,50));
-    entitiesResident.push(new Soldier(350,50));
-    entitiesResident.push(new Soldier(450,50));
-
-
+    entitiesResident.push(new Soldier(50,150));
+    entitiesResident.push(new Soldier(50,250));
+    entitiesResident.push(new Soldier(50,350));
+    entitiesResident.push(new Soldier(50,450));
 
     beginGame();
 }();
@@ -62,6 +66,8 @@ window.onmousedown = function(event) {
                 case 2:
                     currentState = States.IDLE
                     entitiesTemporary.length = 0;
+                    mousePointerHoverDot = null;
+                    mousePointerHoverLine = null;
                     break;
                 default:
                     break;
@@ -79,7 +85,9 @@ window.onmousedown = function(event) {
                 case 2:
                     currentState = States.IDLE
                     entitiesTemporary.length = 0;
-                    selectedUnitPrimary = null;
+                    selectedEntityPrimary = null;
+                    mousePointerHoverDot = null;
+                    mousePointerHoverLine = null;
                     break;
                 default:
                     break;
@@ -101,23 +109,39 @@ window.onmousemove = function(event) {
         case States.IDLE:
             break;
         case States.UNIT_SELECTED:
-            console.log("!! == " + event);
-            let centeredCoords = selectedUnitPrimary.getCenteredCoords();
-            entitiesTransient.push(new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 5, "#FF0000"));
+
+            if (selectedEntityPrimary != null) {
+                // draw a line from the primary selected unit
+                let centeredCoords = selectedEntityPrimary.getCenteredCoords();
+                mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 5, "#FF0000");
+                mousePointerHoverDot = new Dot(event.x, event.y, 50, "#00000");
+            }
+
             break;
     }
 
 };
 
+
+window.onmouseover = function (event) {
+    // when leaving the game window
+};
+
+
 function activateAtMouse(event) {
 
     entitiesResident.forEach (resident => {
-        // LOk for a unit under this click
+        // Look for a unit under this click:
         let centeredOnClick = resident.isClicked(event);
+        // A unit is found!
         if (centeredOnClick) {
             var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
             entitiesTemporary.push(dot);
-            selectedUnitPrimary = resident;
+            selectedEntityPrimary = resident;
+
+            // draw a circle around the destination
+            //mousePointerHoverDot = new Dot(event.x, event.y, 50, "#00000");
+
             currentState = States.UNIT_SELECTED;
         }
     });
@@ -139,6 +163,16 @@ function updateGameState() {
 
     processPlayerInput();
 
+    if (mousePointerHoverLine != null) {
+        entitiesTransient.push(mousePointerHoverLine);
+    }
+    
+    if (mousePointerHoverDot != null) {
+        entitiesTransient.push(mousePointerHoverDot);
+    }
+
+
+
 }
 
 function processPlayerInput() {
@@ -147,9 +181,9 @@ function processPlayerInput() {
 
 function drawGrid(context, size) {
     context.strokeStyle = "#a8a8a8";
-    context.lineWidth = 1;
-    for (var i = 0; i < size; i++) {
-        for (var j = 0; j < size; j++) {
+    context.lineWidth = 0.15;
+    for (var i = 0; i < (canvas.width / size); i++) {
+        for (var j = 0; j < (canvas.height / size); j++) {
             context.strokeRect(i * size, j * size, size, size);
         }
     }
@@ -160,7 +194,7 @@ function drawScene() {
     context.fillStyle = "#b8bab9";
     context.lineWidth =
     context.fillRect(0, 0, canvas.width, canvas.height);
-    drawGrid(context, 50);
+    drawGrid(context, 25);
 
     entitiesResident.forEach( entity => {
         entity.render(context);

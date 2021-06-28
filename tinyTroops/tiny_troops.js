@@ -6,7 +6,7 @@
  */
 
 import { Dot, Line } from './entity.js';
-import { Soldier } from './entity.js';
+import { Soldier, Blob } from './entity.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -36,12 +36,21 @@ const entitiesTransient = [];   // These are cleared after ever render
 
 var setup = function () {
     console.log(">>> Starting...");
+
+
     entitiesResident.push(new Soldier(50,50));
     entitiesResident.push(new Soldier(50,150));
     entitiesResident.push(new Soldier(50,250));
     entitiesResident.push(new Soldier(50,350));
     entitiesResident.push(new Soldier(50,450));
 
+    entitiesResident.push(new Blob(450,50));
+    entitiesResident.push(new Blob(450,150));
+    entitiesResident.push(new Blob(450,250));
+    entitiesResident.push(new Blob(450,350));
+    entitiesResident.push(new Blob(450,450));
+
+    
     beginGame();
 }();
 
@@ -118,7 +127,7 @@ window.onmousemove = function(event) {
 
 
 window.onmouseover = function (event) {
-    // when leaving the game window
+    // when leaving the game window: handly later?
 };
 
 

@@ -126,3 +126,59 @@ export class Soldier extends Entity {
     }
 
 }
+
+
+export class Blob extends Entity {
+
+    x = 0;
+    y = 0;
+    image = new Image();
+
+    constructor(x,y) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.image.src = "resources/blob_1.png";
+    }
+
+    /**
+     * Returns the coordinates of this entity if the click was within this image's bounds;
+     * 
+     * @param {*} event 
+     */
+    isClicked(event) {
+
+
+        return null;
+        // if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2) ) {
+        //     if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + ( this.image.height /2)) {
+        //         return { x: this.x, y: this.y };
+        //     } else {
+        //         return null;
+        //     }
+        // } else {
+        //     return null;
+        // }
+    }
+
+    getCenteredCoords() {
+        return {
+            x: this.x, // + (this.image.width / 2),
+            y: this.y // + (this.image.height / 2)
+        }
+    }
+
+    updatePositionByDelta(dx, dy) {
+        this.x += dx;
+        this.y += dy;
+    }
+
+    // Draws CENTERED on x,y
+    render(context) {
+        context.save();
+        context.translate(this.x, this.y);
+        context.drawImage(this.image, -(this.image.width / 2), - (this.image.height / 2));
+        context.restore();
+    }
+
+}

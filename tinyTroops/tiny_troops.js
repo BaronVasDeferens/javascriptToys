@@ -22,9 +22,10 @@ canvas.height = innerHeight;
 var States = Object.freeze({IDLE: "IDLE", UNIT_SELECTED: "UNIT_SELECTED"});
 var currentState = States.IDLE;
 
-var selectedEntityPrimary = null;
-var mousePointerHoverDot = null;
-var mousePointerHoverLine = null;
+var selectedEntityPrimary = null;       // the currently "selected" entity
+                                        // Transient objects are discarded after each render; the following data tracks the last known position of the mouse
+var mousePointerHoverDot = null;        // a dot which denotes the selected entity
+var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
 const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
@@ -34,7 +35,6 @@ const entitiesTransient = [];   // These are cleared after ever render
 
 
 var setup = function () {
-    
     console.log(">>> Starting...");
     entitiesResident.push(new Soldier(50,50));
     entitiesResident.push(new Soldier(50,150));
@@ -60,14 +60,11 @@ window.onmousedown = function(event) {
             switch (event.button) {
                 // left click
                 case 0: 
-                    activateAtMouse(event);
+                    selectEntityAtMouse(event);
                     break;
                 // Right click
                 case 2:
-                    currentState = States.IDLE
-                    entitiesTemporary.length = 0;
-                    mousePointerHoverDot = null;
-                    mousePointerHoverLine = null;
+                    setStateIdle();
                     break;
                 default:
                     break;
@@ -79,15 +76,12 @@ window.onmousedown = function(event) {
                 // left click
                 case 0: 
                     // Preform an action
-
+                    // TODO: check eligibillity
+                    moveEntity(selectedEntityPrimary, event);
                     break;
                 // Right click
                 case 2:
-                    currentState = States.IDLE
-                    entitiesTemporary.length = 0;
-                    selectedEntityPrimary = null;
-                    mousePointerHoverDot = null;
-                    mousePointerHoverLine = null;
+                    setStateIdle();
                     break;
                 default:
                     break;
@@ -113,8 +107,8 @@ window.onmousemove = function(event) {
             if (selectedEntityPrimary != null) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
-                mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 5, "#FF0000");
-                mousePointerHoverDot = new Dot(event.x, event.y, 50, "#00000");
+                mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#000000");
+                mousePointerHoverDot = new Dot(event.x, event.y, 50, "#000000");
             }
 
             break;
@@ -128,28 +122,35 @@ window.onmouseover = function (event) {
 };
 
 
-function activateAtMouse(event) {
+function selectEntityAtMouse(event) {
 
     entitiesResident.forEach (resident => {
         // Look for a unit under this click:
         let centeredOnClick = resident.isClicked(event);
-        // A unit is found!
+        // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state 
         if (centeredOnClick) {
             var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
             entitiesTemporary.push(dot);
             selectedEntityPrimary = resident;
-
-            // draw a circle around the destination
-            //mousePointerHoverDot = new Dot(event.x, event.y, 50, "#00000");
-
             currentState = States.UNIT_SELECTED;
         }
     });
-
-
-
 }
 
+
+function moveEntity(entity, event) {
+    entity.x = event.x;
+    entity.y = event.y;
+    setStateIdle();
+}
+
+function setStateIdle() {
+    currentState = States.IDLE
+    entitiesTemporary.length = 0;
+    selectedEntityPrimary = null;
+    mousePointerHoverDot = null;
+    mousePointerHoverLine = null;
+}
 
 function beginGame() {
     updateGameState();
@@ -163,6 +164,7 @@ function updateGameState() {
 
     processPlayerInput();
 
+    // Add transients for the last known mouse positions
     if (mousePointerHoverLine != null) {
         entitiesTransient.push(mousePointerHoverLine);
     }

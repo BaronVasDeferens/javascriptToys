@@ -147,18 +147,15 @@ export class Blob extends Entity {
      * @param {*} event 
      */
     isClicked(event) {
-
-
-        return null;
-        // if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2) ) {
-        //     if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + ( this.image.height /2)) {
-        //         return { x: this.x, y: this.y };
-        //     } else {
-        //         return null;
-        //     }
-        // } else {
-        //     return null;
-        // }
+        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2) ) {
+            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + ( this.image.height /2)) {
+                return { x: this.x, y: this.y };
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     getCenteredCoords() {

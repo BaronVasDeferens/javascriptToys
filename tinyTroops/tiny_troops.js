@@ -23,6 +23,7 @@ var States = Object.freeze({IDLE: "IDLE", UNIT_SELECTED: "UNIT_SELECTED"});
 var currentState = States.IDLE;
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
+var selectedEntitySecondary = null;
                                         // Transient objects are discarded after each render; the following data tracks the last known position of the mouse
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
@@ -117,7 +118,17 @@ window.onmousemove = function(event) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
                 mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#000000");
-                mousePointerHoverDot = new Dot(event.x, event.y, 50, "#000000");
+                
+
+                // sub-entity under click?
+                let subEnt = secondaryEntityUnderMouse(event);
+                selectedEntitySecondary = subEnt;
+                
+                if (selectedEntitySecondary == null) {
+                    mousePointerHoverDot = new Dot(event.x, event.y, 50, "#000000");
+                } else {
+                    mousePointerHoverDot = new Dot(event.x, event.y, 50, "#FF0000");
+                }
             }
 
             break;
@@ -144,6 +155,23 @@ function selectEntityAtMouse(event) {
             currentState = States.UNIT_SELECTED;
         }
     });
+}
+
+function secondaryEntityUnderMouse(event) {
+
+    let target = null;
+
+    entitiesResident.forEach( entity => {
+        if (entity instanceof Blob) {
+            let entityCoords = entity.isClicked(event)
+            if (entityCoords != null) {
+                target = entity;
+            }
+        }
+    });
+
+    return target;
+
 }
 
 

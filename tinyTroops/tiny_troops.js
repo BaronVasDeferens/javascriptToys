@@ -70,7 +70,7 @@ window.onmousedown = function(event) {
             switch (event.button) {
                 // left click
                 case 0: 
-                    selectEntityAtMouse(event);
+                    selectPlayerEntityAtMouse(event);
                     break;
                 // Right click
                 case 2:
@@ -86,7 +86,7 @@ window.onmousedown = function(event) {
                 // left click
                 case 0: 
                     // Preform an action
-                    // TODO: check eligibillity
+                    // TODO: check eligibility
                     moveEntity(selectedEntityPrimary, event);
                     break;
                 // Right click
@@ -142,18 +142,20 @@ window.onmouseover = function (event) {
 };
 
 
-function selectEntityAtMouse(event) {
+function selectPlayerEntityAtMouse(event) {
 
     entitiesResident.forEach (resident => {
-        // Look for a unit under this click:
-        let centeredOnClick = resident.isClicked(event);
-        // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state 
-        if (centeredOnClick) {
-            var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
-            entitiesTemporary.push(dot);
-            selectedEntityPrimary = resident;
-            currentState = States.UNIT_SELECTED;
-        }
+
+            // Look for a unit under this click:
+            let centeredOnClick = resident.isClicked(event);
+            // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state
+            if (centeredOnClick && resident instanceof Soldier) {
+                var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
+                entitiesTemporary.push(dot);
+                selectedEntityPrimary = resident;
+                currentState = States.UNIT_SELECTED;
+            }
+
     });
 }
 

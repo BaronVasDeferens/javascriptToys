@@ -71,13 +71,8 @@ window.onmousedown = function (event) {
 
             switch (event.button) {
                 // left click
-<<<<<<< HEAD
-                case 0:
-                    selectEntityAtMouse(event);
-=======
                 case 0: 
                     selectPlayerEntityAtMouse(event);
->>>>>>> 31c1e1bd4b75d8b60d0c0610568e009cbbd2bbbb
                     break;
                 // Right click
                 case 2:
@@ -150,18 +145,6 @@ window.onmouseover = function (event) {
 
 function selectPlayerEntityAtMouse(event) {
 
-<<<<<<< HEAD
-    entitiesResident.forEach(resident => {
-        // Look for a unit under this click:
-        let centeredOnClick = resident.isClicked(event);
-        // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state 
-        if (centeredOnClick) {
-            var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
-            entitiesTemporary.push(dot);
-            selectedEntityPrimary = resident;
-            currentState = States.UNIT_SELECTED;
-        }
-=======
     entitiesResident.forEach (resident => {
 
             // Look for a unit under this click:
@@ -174,7 +157,6 @@ function selectPlayerEntityAtMouse(event) {
                 currentState = States.UNIT_SELECTED;
             }
 
->>>>>>> 31c1e1bd4b75d8b60d0c0610568e009cbbd2bbbb
     });
 }
 

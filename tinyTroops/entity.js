@@ -15,7 +15,7 @@ export class Dot extends Entity {
 
     lineWidth = 10;
 
-    constructor(x,y,size, color) {
+    constructor(x, y, size, color) {
         super();
         this.centerX = x;
         this.centerY = y;
@@ -52,10 +52,24 @@ export class Line extends Entity {
         super();
         this.startX = x1;
         this.startY = y1;
-        this.endX =x2;
-        this.endY =y2;
+        this.endX = x2;
+        this.endY = y2;
         this.color = color;
         this.lineWidth = lineWidth;
+    }
+
+    getLength() {
+        let rawLength = Math.sqrt(
+            Math.pow(Math.abs(this.startX - this.endX), 2) + Math.pow(Math.abs(this.startY - this.endY), 2));
+
+        let length = Math.ceil(rawLength / 100);
+
+        // Minimum length of 1
+        if (length < 1) {
+            length++
+        }
+
+        return length;
     }
 
     render(context) {
@@ -74,13 +88,38 @@ export class Line extends Entity {
 }
 
 
+export class TextLabel extends Entity {
+
+    startX = 0;
+    startY = 0;
+    text = "";
+    color = "#FF0000";
+
+    lineWidth = 10;
+
+    constructor(x, y, text, color) {
+        super();
+        this.startX = x;
+        this.startY = y;
+        this.text = text;
+        this.color = color;
+    }
+
+    render(context) {
+        context.strokeStyle = this.color;
+        context.font = "24px sans-serif";
+        context.strokeText(this.text, this.startX, this.startY);
+    }
+}
+
+
 export class Soldier extends Entity {
 
     x = 0;
     y = 0;
     image = new Image();
 
-    constructor(x,y) {
+    constructor(x, y) {
         super();
         this.x = x;
         this.y = y;
@@ -94,8 +133,8 @@ export class Soldier extends Entity {
      */
     isClicked(event) {
 
-        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2) ) {
-            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + ( this.image.height /2)) {
+        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2)) {
+            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + (this.image.height / 2)) {
                 return { x: this.x, y: this.y };
             } else {
                 return null;
@@ -134,7 +173,7 @@ export class Blob extends Entity {
     y = 0;
     image = new Image();
 
-    constructor(x,y) {
+    constructor(x, y) {
         super();
         this.x = x;
         this.y = y;
@@ -147,8 +186,8 @@ export class Blob extends Entity {
      * @param {*} event 
      */
     isClicked(event) {
-        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2) ) {
-            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + ( this.image.height /2)) {
+        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2)) {
+            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + (this.image.height / 2)) {
                 return { x: this.x, y: this.y };
             } else {
                 return null;

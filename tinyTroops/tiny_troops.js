@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Dot, Line } from './entity.js';
+import { Dot, Line, TextLabel } from './entity.js';
 import { Soldier, Blob } from './entity.js';
 
 const canvas = document.querySelector('canvas');
@@ -19,14 +19,16 @@ canvas.height = innerHeight;
  * GAME STATES
  * 
  */
-var States = Object.freeze({IDLE: "IDLE", UNIT_SELECTED: "UNIT_SELECTED"});
+var States = Object.freeze({ IDLE: "IDLE", UNIT_SELECTED: "UNIT_SELECTED" });
 var currentState = States.IDLE;
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
 var selectedEntitySecondary = null;
-                                        // Transient objects are discarded after each render; the following data tracks the last known position of the mouse
+// Transient objects are discarded after each render; the following data tracks the last known position of the mouse
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
+
+var mousePointerHoverLineDistance = 0;
 
 const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
@@ -39,19 +41,19 @@ var setup = function () {
     console.log(">>> Starting...");
 
 
-    entitiesResident.push(new Soldier(50,50));
-    entitiesResident.push(new Soldier(50,150));
-    entitiesResident.push(new Soldier(50,250));
-    entitiesResident.push(new Soldier(50,350));
-    entitiesResident.push(new Soldier(50,450));
+    entitiesResident.push(new Soldier(50, 50));
+    entitiesResident.push(new Soldier(50, 150));
+    entitiesResident.push(new Soldier(50, 250));
+    entitiesResident.push(new Soldier(50, 350));
+    entitiesResident.push(new Soldier(50, 450));
 
-    entitiesResident.push(new Blob(450,50));
-    entitiesResident.push(new Blob(450,150));
-    entitiesResident.push(new Blob(450,250));
-    entitiesResident.push(new Blob(450,350));
-    entitiesResident.push(new Blob(450,450));
+    entitiesResident.push(new Blob(450, 50));
+    entitiesResident.push(new Blob(450, 150));
+    entitiesResident.push(new Blob(450, 250));
+    entitiesResident.push(new Blob(450, 350));
+    entitiesResident.push(new Blob(450, 450));
 
-    
+
     beginGame();
 }();
 
@@ -62,14 +64,14 @@ document.addEventListener('contextmenu', event => event.preventDefault());
 
 
 // Process mouse clicks
-window.onmousedown = function(event) {
+window.onmousedown = function (event) {
 
     switch (currentState) {
         case States.IDLE:
 
             switch (event.button) {
                 // left click
-                case 0: 
+                case 0:
                     selectEntityAtMouse(event);
                     break;
                 // Right click
@@ -84,7 +86,7 @@ window.onmousedown = function(event) {
 
             switch (event.button) {
                 // left click
-                case 0: 
+                case 0:
                     // Preform an action
                     // TODO: check eligibillity
                     moveEntity(selectedEntityPrimary, event);
@@ -107,7 +109,7 @@ window.onmousedown = function(event) {
 }
 
 // Process mouse movement
-window.onmousemove = function(event) {
+window.onmousemove = function (event) {
 
     switch (currentState) {
         case States.IDLE:
@@ -118,12 +120,11 @@ window.onmousemove = function(event) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
                 mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#000000");
-                
 
-                // sub-entity under click?
+                // sub-entity under mouse?
                 let subEnt = secondaryEntityUnderMouse(event);
                 selectedEntitySecondary = subEnt;
-                
+
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Dot(event.x, event.y, 50, "#000000");
                 } else {
@@ -144,7 +145,7 @@ window.onmouseover = function (event) {
 
 function selectEntityAtMouse(event) {
 
-    entitiesResident.forEach (resident => {
+    entitiesResident.forEach(resident => {
         // Look for a unit under this click:
         let centeredOnClick = resident.isClicked(event);
         // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state 
@@ -161,7 +162,7 @@ function secondaryEntityUnderMouse(event) {
 
     let target = null;
 
-    entitiesResident.forEach( entity => {
+    entitiesResident.forEach(entity => {
         if (entity instanceof Blob) {
             let entityCoords = entity.isClicked(event)
             if (entityCoords != null) {
@@ -204,8 +205,13 @@ function updateGameState() {
     // Add transients for the last known mouse positions
     if (mousePointerHoverLine != null) {
         entitiesTransient.push(mousePointerHoverLine);
+        var mousePointerHoverLineDistance = mousePointerHoverLine.getLength();
+        entitiesTransient.push(new TextLabel(
+            mousePointerHoverLine.endX,
+            mousePointerHoverLine.endY + 75,
+            mousePointerHoverLineDistance, "#FF0000"));
     }
-    
+
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);
     }
@@ -232,18 +238,18 @@ function drawScene() {
     // Draw background
     context.fillStyle = "#b8bab9";
     context.lineWidth =
-    context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context, 25);
 
-    entitiesResident.forEach( entity => {
+    entitiesResident.forEach(entity => {
         entity.render(context);
     });
 
-    entitiesTemporary.forEach( entity => { 
+    entitiesTemporary.forEach(entity => {
         entity.render(context);
     });
 
-    entitiesTransient.forEach( entity => { 
+    entitiesTransient.forEach(entity => {
         entity.render(context);
     });
 

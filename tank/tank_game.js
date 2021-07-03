@@ -33,7 +33,7 @@ const deadProjectiles = [];
 const deadHumans = [];
 
 const explosionSound = new Audio("sounds/explosion_1.wav");
-const explosionColors = ["#FF0000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
+const explosionColors = ["#000000", "#FC6203", "#FCA503", "#FC6F03", "#FC3503"];
 
 const inputSet = new Set();
 

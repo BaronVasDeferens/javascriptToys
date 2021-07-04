@@ -6,7 +6,7 @@ class Entity {
 }
 
 
-export class Dot extends Entity {
+export class Dot {
 
     centerX = 0;
     centerY = 0;
@@ -16,7 +16,6 @@ export class Dot extends Entity {
     lineWidth = 10;
 
     constructor(x, y, size, color) {
-        super();
         this.centerX = x;
         this.centerY = y;
         this.size = size;
@@ -39,7 +38,7 @@ export class Dot extends Entity {
     }
 }
 
-export class Line extends Entity {
+export class Line {
 
     startX = 0;
     startY = 0;
@@ -49,7 +48,6 @@ export class Line extends Entity {
     lineWidth = 1;
 
     constructor(x1, y1, x2, y2, lineWidth, color) {
-        super();
         this.startX = x1;
         this.startY = y1;
         this.endX = x2;
@@ -88,7 +86,7 @@ export class Line extends Entity {
 }
 
 
-export class TextLabel extends Entity {
+export class TextLabel {
 
     startX = 0;
     startY = 0;
@@ -98,7 +96,6 @@ export class TextLabel extends Entity {
     lineWidth = 10;
 
     constructor(x, y, text, color) {
-        super();
         this.startX = x;
         this.startY = y;
         this.text = text;

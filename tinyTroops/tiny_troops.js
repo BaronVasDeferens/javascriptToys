@@ -105,7 +105,6 @@ window.onmousedown = function (event) {
     }
 
     console.log("State is now " + currentState);
-
 }
 
 // Process mouse movement

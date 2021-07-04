@@ -19,7 +19,12 @@ canvas.height = innerHeight;
  * GAME STATES
  * 
  */
-var States = Object.freeze({ IDLE: "IDLE", UNIT_SELECTED: "UNIT_SELECTED" });
+var States = Object.freeze({
+    IDLE: "IDLE",
+    UNIT_SELECTED: "UNIT_SELECTED",
+    ENEMY_TURN: "ENEMY_TURN"
+});
+
 var currentState = States.IDLE;
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
@@ -71,12 +76,12 @@ window.onmousedown = function (event) {
 
             switch (event.button) {
                 // left click
-                case 0: 
+                case 0:
                     selectPlayerEntityAtMouse(event);
                     break;
                 // Right click
                 case 2:
-                    setStateIdle();
+                    setState(States.IDLE);
                     break;
                 default:
                     break;
@@ -90,10 +95,11 @@ window.onmousedown = function (event) {
                     // Preform an action
                     // TODO: check eligibility
                     moveEntity(selectedEntityPrimary, event);
+                    setState(States.IDLE);
                     break;
                 // Right click
                 case 2:
-                    setStateIdle();
+                    setState(States.IDLE);
                     break;
                 default:
                     break;
@@ -144,17 +150,17 @@ window.onmouseover = function (event) {
 
 function selectPlayerEntityAtMouse(event) {
 
-    entitiesResident.forEach (resident => {
+    entitiesResident.forEach(resident => {
 
-            // Look for a unit under this click:
-            let centeredOnClick = resident.isClicked(event);
-            // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state
-            if (centeredOnClick && resident instanceof Soldier) {
-                var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
-                entitiesTemporary.push(dot);
-                selectedEntityPrimary = resident;
-                currentState = States.UNIT_SELECTED;
-            }
+        // Look for a unit under this click:
+        let centeredOnClick = resident.isClicked(event);
+        // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state
+        if (centeredOnClick && resident instanceof Soldier) {
+            var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
+            entitiesTemporary.push(dot);
+            selectedEntityPrimary = resident;
+            currentState = States.UNIT_SELECTED;
+        }
 
     });
 }
@@ -180,15 +186,20 @@ function secondaryEntityUnderMouse(event) {
 function moveEntity(entity, event) {
     entity.x = event.x;
     entity.y = event.y;
-    setStateIdle();
 }
 
-function setStateIdle() {
-    currentState = States.IDLE
-    entitiesTemporary.length = 0;
-    selectedEntityPrimary = null;
-    mousePointerHoverDot = null;
-    mousePointerHoverLine = null;
+function setState(state) {
+
+    switch (state) {
+        case States.IDLE:
+            currentState = States.IDLE
+            entitiesTemporary.length = 0;
+            selectedEntityPrimary = null;
+            mousePointerHoverDot = null;
+            mousePointerHoverLine = null;
+            break;
+    }
+
 }
 
 function beginGame() {

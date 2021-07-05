@@ -214,8 +214,33 @@ function startEnemyTurn() {
 
     let activeBlob = blobs[Math.floor(Math.random() * blobs.length)];
 
-    // Moster does something here!
-    
+    // Does the monster have a target?
+    if (activeBlob.target == null) {
+        activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
+    }
+
+    // Move toward target
+    let deltaX = activeBlob.x - activeBlob.target.x;
+    let deltaY = activeBlob.y - activeBlob.target.y;
+    let distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+
+    console.log("distance: " + distance);
+    console.log({deltaX, deltaY});
+
+    if (distance <= 100) {
+        // Target in in striking distance!
+        console.log("Blob in range of target-- STRIKE!!")
+        activeBlob.updatePositionByDelta(-deltaX, -deltaY);
+        // kill target
+    } else {
+        // move as far as possible toward target
+        let x = (100 * deltaX) / distance;
+        let y = (100 * deltaY) / distance;
+        console.log({x,y});
+        activeBlob.updatePositionByDelta(-x,-y);
+
+    }
+
 
 }
 

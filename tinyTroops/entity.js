@@ -58,7 +58,7 @@ export class Line {
 
     getLength() {
         let rawLength = Math.sqrt(
-            Math.pow(Math.abs(this.startX - this.endX), 2) + Math.pow(Math.abs(this.startY - this.endY), 2));
+            Math.pow(this.startX - this.endX, 2) + Math.pow(this.startY - this.endY, 2));
 
         let length = Math.ceil(rawLength / 100);
 
@@ -170,6 +170,8 @@ export class Blob extends Entity {
     y = 0;
     image = new Image();
 
+    target = null;
+
     constructor(x, y) {
         super();
         this.x = x;
@@ -204,6 +206,11 @@ export class Blob extends Entity {
     updatePositionByDelta(dx, dy) {
         this.x += dx;
         this.y += dy;
+    }
+
+
+    setTarget(target) {
+        this.target = target;
     }
 
     // Draws CENTERED on x,y

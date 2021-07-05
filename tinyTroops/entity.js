@@ -1,8 +1,15 @@
 class Entity {
 
-    // randomRange(min, max) {
-    //     return Math.floor(Math.random() * max) + min;
-    // }
+    id = "";
+    x = 0;
+    y = 0;
+
+    constructor(id, x, y) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+    }
+
 }
 
 
@@ -112,14 +119,10 @@ export class TextLabel {
 
 export class Soldier extends Entity {
 
-    x = 0;
-    y = 0;
     image = new Image();
 
-    constructor(x, y) {
-        super();
-        this.x = x;
-        this.y = y;
+    constructor(id, x, y) {
+        super(id,x,y);
         this.image.src = "resources/guy_1.png";
     }
 
@@ -166,16 +169,11 @@ export class Soldier extends Entity {
 
 export class Blob extends Entity {
 
-    x = 0;
-    y = 0;
     image = new Image();
-
     target = null;
 
-    constructor(x, y) {
-        super();
-        this.x = x;
-        this.y = y;
+    constructor(id, x, y) {
+        super(id, x, y);
         this.image.src = "resources/blob_1.png";
     }
 
@@ -211,6 +209,7 @@ export class Blob extends Entity {
 
     setTarget(target) {
         this.target = target;
+        console.log("blob " + this.id + " now targets soldier " + this.target.id);
     }
 
     // Draws CENTERED on x,y

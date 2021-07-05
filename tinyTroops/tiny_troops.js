@@ -45,19 +45,17 @@ const entitiesTransient = [];   // These are cleared after ever render
 var setup = function () {
     console.log(">>> Starting...");
 
+    entitiesResident.push(new Soldier("alpha", 50, 50));
+    entitiesResident.push(new Soldier("bravo", 50, 150));
+    entitiesResident.push(new Soldier("charlie", 50, 250));
+    entitiesResident.push(new Soldier("delta", 50, 350));
+    entitiesResident.push(new Soldier("echo", 50, 450));
 
-    entitiesResident.push(new Soldier(50, 50));
-    entitiesResident.push(new Soldier(50, 150));
-    entitiesResident.push(new Soldier(50, 250));
-    entitiesResident.push(new Soldier(50, 350));
-    entitiesResident.push(new Soldier(50, 450));
-
-    entitiesResident.push(new Blob(450, 50));
-    entitiesResident.push(new Blob(450, 150));
-    entitiesResident.push(new Blob(450, 250));
-    entitiesResident.push(new Blob(450, 350));
-    entitiesResident.push(new Blob(450, 450));
-
+    entitiesResident.push(new Blob("one", 450, 50));
+    entitiesResident.push(new Blob("two", 450, 150));
+    entitiesResident.push(new Blob("three", 450, 250));
+    entitiesResident.push(new Blob("four", 450, 350));
+    entitiesResident.push(new Blob("five", 450, 450));
 
     beginGame();
 }();
@@ -147,7 +145,6 @@ window.onmouseover = function (event) {
     // when leaving the game window: handly later?
 };
 
-
 function selectPlayerEntityAtMouse(event) {
 
     entitiesResident.forEach(resident => {
@@ -182,7 +179,6 @@ function secondaryEntityUnderMouse(event) {
 
 }
 
-
 function moveEntity(entity, event) {
     entity.x = event.x;
     entity.y = event.y;
@@ -191,7 +187,11 @@ function moveEntity(entity, event) {
 
 
 
-/** START ENEMY TURN */
+/** 
+ * 
+ * START ENEMY TURN 
+ * 
+*/
 function startEnemyTurn() {
 
     setState(States.ENEMY_TURN);
@@ -224,8 +224,8 @@ function startEnemyTurn() {
     let deltaY = activeBlob.y - activeBlob.target.y;
     let distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-    console.log("distance: " + distance);
-    console.log({deltaX, deltaY});
+    // console.log("distance: " + distance);
+    // console.log({deltaX, deltaY});
 
     if (distance <= 100) {
         // Target in in striking distance!
@@ -236,8 +236,8 @@ function startEnemyTurn() {
         // move as far as possible toward target
         let x = (100 * deltaX) / distance;
         let y = (100 * deltaY) / distance;
-        console.log({x,y});
-        activeBlob.updatePositionByDelta(-x,-y);
+        // console.log({x,y});
+        activeBlob.updatePositionByDelta(-x, -y);
 
     }
 
@@ -272,13 +272,15 @@ function setState(state) {
     console.log("State is now " + currentState);
 }
 
+
+
+
+
 function beginGame() {
     updateGameState();
     drawScene();
     requestAnimationFrame(beginGame);
 }
-
-
 
 function updateGameState() {
 

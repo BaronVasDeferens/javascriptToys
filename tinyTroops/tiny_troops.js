@@ -95,6 +95,7 @@ window.onmousedown = function (event) {
                     // Preform an action
                     // TODO: check eligibility
                     moveEntity(selectedEntityPrimary, event);
+                    startEnemyTurn();
                     setState(States.IDLE);
                     break;
                 // Right click
@@ -110,7 +111,6 @@ window.onmousedown = function (event) {
             break;
     }
 
-    console.log("State is now " + currentState);
 }
 
 // Process mouse movement
@@ -188,9 +188,50 @@ function moveEntity(entity, event) {
     entity.y = event.y;
 }
 
+
+
+
+/** START ENEMY TURN */
+function startEnemyTurn() {
+
+    setState(States.ENEMY_TURN);
+
+    let blobs = entitiesResident.filter(ent => {
+        if (ent instanceof Blob) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    let soldiers = entitiesResident.filter(ent => {
+        if (ent instanceof Soldier) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    let activeBlob = blobs[Math.floor(Math.random() * blobs.length)];
+
+    // Moster does something here!
+    
+
+}
+
+function sleep(sleepDuration) {
+    var now = new Date().getTime();
+    while (new Date().getTime() < now + sleepDuration) { /* do nothing */ }
+}
+
+
 function setState(state) {
 
     switch (state) {
+
+        case States.ENEMY_TURN:
+            break;
+
         case States.IDLE:
             currentState = States.IDLE
             entitiesTemporary.length = 0;
@@ -198,8 +239,12 @@ function setState(state) {
             mousePointerHoverDot = null;
             mousePointerHoverLine = null;
             break;
+        default:
+            break;
     }
 
+    currentState = state;
+    console.log("State is now " + currentState);
 }
 
 function beginGame() {

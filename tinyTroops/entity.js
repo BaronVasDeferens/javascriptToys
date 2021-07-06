@@ -4,6 +4,8 @@ class Entity {
     x = 0;
     y = 0;
 
+    alive = true;
+
     constructor(id, x, y) {
         this.id = id;
         this.x = x;

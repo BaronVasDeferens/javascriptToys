@@ -39,6 +39,8 @@ const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
 const entitiesTransient = [];   // These are cleared after ever render
 
+let actionPointsMax = 5;
+var actionPointAvailable = 0;
 
 
 
@@ -91,8 +93,13 @@ window.onmousedown = function (event) {
                 // left click
                 case 0:
                     // Preform an action
-                    // TODO: check eligibility
-                    moveEntity(selectedEntityPrimary, event);
+
+                    if (selectedEntitySecondary == null) {
+                        moveEntity(selectedEntityPrimary, event);
+                    } else {
+                        attackEntity(selectedEntityPrimary, selectedEntitySecondary);
+                    }
+
                     startEnemyTurn();
                     setState(States.IDLE);
                     break;
@@ -184,8 +191,12 @@ function moveEntity(entity, event) {
     entity.y = event.y;
 }
 
+function attackEntity(aggressor, target) {
+    console.log(aggressor.id + " attacks " + target.id);
 
-
+    // If something non-deterministic happens here, you have done something very bad
+    target.alive = false;
+}
 
 /** 
  * 
@@ -198,7 +209,7 @@ function startEnemyTurn() {
 
     let blobs = entitiesResident.filter(ent => {
         if (ent instanceof Blob) {
-            return true;
+            return ent.alive;
         } else {
             return false;
         }
@@ -206,7 +217,7 @@ function startEnemyTurn() {
 
     let soldiers = entitiesResident.filter(ent => {
         if (ent instanceof Soldier) {
-            return true;
+            return ent.alive;
         } else {
             return false;
         }
@@ -215,7 +226,7 @@ function startEnemyTurn() {
     let activeBlob = blobs[Math.floor(Math.random() * blobs.length)];
 
     // Does the monster have a target?
-    if (activeBlob.target == null) {
+    if (activeBlob.target == null || activeBlob.target.alive == false) {
         activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
     }
 

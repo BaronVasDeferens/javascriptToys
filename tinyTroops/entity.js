@@ -94,7 +94,6 @@ export class Line {
 
 }
 
-
 export class TextLabel {
 
     startX = 0;

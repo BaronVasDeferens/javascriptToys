@@ -117,7 +117,6 @@ export class TextLabel {
     }
 }
 
-
 export class Soldier extends Entity {
 
     image = new Image();
@@ -164,9 +163,7 @@ export class Soldier extends Entity {
         context.drawImage(this.image, -(this.image.width / 2), - (this.image.height / 2));
         context.restore();
     }
-
 }
-
 
 export class Blob extends Entity {
 
@@ -180,8 +177,6 @@ export class Blob extends Entity {
 
     /**
      * Returns the coordinates of this entity if the click was within this image's bounds;
-     * 
-     * @param {*} event 
      */
     isClicked(event) {
         if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2)) {

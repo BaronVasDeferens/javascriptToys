@@ -112,6 +112,8 @@ export class TextLabel {
 
     render(context) {
         context.strokeStyle = this.color;
+        context.fillStyle = "#000000";
+        context.lineWidth = 2.0;
         context.font = "24px sans-serif";
         context.strokeText(this.text, this.startX, this.startY);
     }

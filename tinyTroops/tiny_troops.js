@@ -33,31 +33,34 @@ var selectedEntitySecondary = null;
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
-var mousePointerHoverLineDistance = 0;
+
 
 const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
 const entitiesTransient = [];   // These are cleared after ever render
 
-let actionPointsMax = 5;
-var actionPointAvailable = 0;
+let actionPointsMax = 7;
+var actionPointsAvailable = actionPointsMax;
+var actionPointsCostPotential = 0;
+var actionPointCostAdjustment = 0;
+var actionPointCostTotal = 0;
 
 
 
 var setup = function () {
     console.log(">>> Starting...");
 
-    entitiesResident.push(new Soldier("alpha", 50, 50));
-    entitiesResident.push(new Soldier("bravo", 50, 150));
-    entitiesResident.push(new Soldier("charlie", 50, 250));
-    entitiesResident.push(new Soldier("delta", 50, 350));
-    entitiesResident.push(new Soldier("echo", 50, 450));
+    entitiesResident.push(new Soldier("soldier_alpha", 50, 50));
+    entitiesResident.push(new Soldier("soldier_bravo", 50, 150));
+    entitiesResident.push(new Soldier("soldier_charlie", 50, 250));
+    entitiesResident.push(new Soldier("soldier_delta", 50, 350));
+    entitiesResident.push(new Soldier("soldier_echo", 50, 450));
 
-    entitiesResident.push(new Blob("one", 450, 50));
-    entitiesResident.push(new Blob("two", 450, 150));
-    entitiesResident.push(new Blob("three", 450, 250));
-    entitiesResident.push(new Blob("four", 450, 350));
-    entitiesResident.push(new Blob("five", 450, 450));
+    entitiesResident.push(new Blob("blob_one", 450, 50));
+    entitiesResident.push(new Blob("blob_two", 450, 150));
+    entitiesResident.push(new Blob("blob_three", 450, 250));
+    entitiesResident.push(new Blob("blob_four", 450, 350));
+    entitiesResident.push(new Blob("blob_five", 450, 450));
 
     beginGame();
 }();
@@ -66,7 +69,6 @@ var setup = function () {
 
 //Prevent the right click from summoning the context menu
 document.addEventListener('contextmenu', event => event.preventDefault());
-
 
 // Process mouse clicks
 window.onmousedown = function (event) {
@@ -95,13 +97,21 @@ window.onmousedown = function (event) {
                     // Preform an action
 
                     if (selectedEntitySecondary == null) {
-                        moveEntity(selectedEntityPrimary, event);
+
+                        if (actionPointsAvailable - actionPointCostTotal >= 0) {
+                            moveEntity(selectedEntityPrimary, event);
+                            actionPointsAvailable -= actionPointCostTotal;
+                        }
+                        setState(States.IDLE);
                     } else {
-                        attackEntity(selectedEntityPrimary, selectedEntitySecondary);
+
+                        if (actionPointsAvailable - actionPointCostTotal >= 0) {
+                            attackEntity(selectedEntityPrimary, selectedEntitySecondary);
+                            actionPointsAvailable -= actionPointCostTotal;
+                        }
+                        setState(States.IDLE);
                     }
 
-                    startEnemyTurn();
-                    setState(States.IDLE);
                     break;
                 // Right click
                 case 2:
@@ -114,6 +124,15 @@ window.onmousedown = function (event) {
             break;
         default:
             break;
+    }
+
+    // Check for remaining action points...
+
+    // No more avaialbe actions? Enemy turn...
+    if (actionPointsAvailable == 0) {
+        startEnemyTurn();
+        actionPointsAvailable = actionPointsMax;
+        setState(States.IDLE);
     }
 
 }
@@ -147,6 +166,21 @@ window.onmousemove = function (event) {
 
 };
 
+// Process mousewheel events
+window.onmousewheel = function (event) {
+
+    if (actionPointsCostPotential > 0 && selectedEntitySecondary != null) {
+        // Mouse wheel rolls top-to-bottom
+        if (event.deltaY == 100 && actionPointCostAdjustment > 0) {
+            actionPointCostAdjustment--;
+        } else if (event.deltaY == -100 && (actionPointCostAdjustment + actionPointsCostPotential < actionPointsAvailable)) {
+            // mouse wheel rolls bottom-to-top
+            actionPointCostAdjustment++;
+        }
+    }
+
+    console.log(actionPointCostAdjustment);
+};
 
 window.onmouseover = function (event) {
     // when leaving the game window: handly later?
@@ -295,17 +329,23 @@ function beginGame() {
 
 function updateGameState() {
 
-    processPlayerInput();
-
     // Add transients for the last known mouse positions
     if (mousePointerHoverLine != null) {
         entitiesTransient.push(mousePointerHoverLine);
         var mousePointerHoverLineDistance = mousePointerHoverLine.getLength();
+        actionPointsCostPotential = mousePointerHoverLineDistance;
+        actionPointCostTotal = actionPointsCostPotential + actionPointCostAdjustment;
         entitiesTransient.push(new TextLabel(
             mousePointerHoverLine.endX,
             mousePointerHoverLine.endY + 75,
-            mousePointerHoverLineDistance, "#FF0000"));
+            actionPointCostTotal,
+            "#FF0000"));
     }
+
+    // The distance will represent the point cost of moving or shooting
+    entitiesTransient.push(new TextLabel(
+        10, 600, "AP: " + actionPointsAvailable, "#000000"
+    ));
 
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);
@@ -315,9 +355,7 @@ function updateGameState() {
 
 }
 
-function processPlayerInput() {
 
-}
 
 function drawGrid(context, size) {
     context.strokeStyle = "#a8a8a8";
@@ -332,9 +370,12 @@ function drawGrid(context, size) {
 function drawScene() {
     // Draw background
     context.fillStyle = "#b8bab9";
-    context.lineWidth =
-        context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context, 25);
+
+
+    // context.lineWidth = 1;
+    // context.fillStyle = "#000000";
 
     entitiesResident.forEach(entity => {
         entity.render(context);

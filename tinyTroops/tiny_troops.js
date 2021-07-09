@@ -43,7 +43,8 @@ let actionPointsMax = 7;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
-var actionPointCostTotal = 0;
+
+function actionPointCostTotal() { return actionPointsCostPotential + actionPointCostAdjustment; };
 
 
 
@@ -98,16 +99,16 @@ window.onmousedown = function (event) {
 
                     if (selectedEntitySecondary == null) {
 
-                        if (actionPointsAvailable - actionPointCostTotal >= 0) {
+                        if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             moveEntity(selectedEntityPrimary, event);
-                            actionPointsAvailable -= actionPointCostTotal;
+                            actionPointsAvailable -= actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     } else {
 
-                        if (actionPointsAvailable - actionPointCostTotal >= 0) {
+                        if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             attackEntity(selectedEntityPrimary, selectedEntitySecondary);
-                            actionPointsAvailable -= actionPointCostTotal;
+                            actionPointsAvailable -= actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     }
@@ -166,7 +167,7 @@ window.onmousemove = function (event) {
 
 };
 
-// Process mousewheel events
+// Process mousewheel events: increase point spend on up, decrease on down (when targetting)
 window.onmousewheel = function (event) {
 
     if (actionPointsCostPotential > 0 && selectedEntitySecondary != null) {
@@ -178,8 +179,6 @@ window.onmousewheel = function (event) {
             actionPointCostAdjustment++;
         }
     }
-
-    console.log(actionPointCostAdjustment);
 };
 
 window.onmouseover = function (event) {
@@ -334,11 +333,10 @@ function updateGameState() {
         entitiesTransient.push(mousePointerHoverLine);
         var mousePointerHoverLineDistance = mousePointerHoverLine.getLength();
         actionPointsCostPotential = mousePointerHoverLineDistance;
-        actionPointCostTotal = actionPointsCostPotential + actionPointCostAdjustment;
         entitiesTransient.push(new TextLabel(
             mousePointerHoverLine.endX,
             mousePointerHoverLine.endY + 75,
-            actionPointCostTotal,
+            actionPointCostTotal(),
             "#FF0000"));
     }
 

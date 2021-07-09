@@ -169,20 +169,22 @@ export class Soldier extends Entity {
 
 export class Blob extends Entity {
 
-    image = new Image();
+    imageAlive = new Image();
+    imageDead = new Image();
     target = null;
 
     constructor(id, x, y) {
         super(id, x, y);
-        this.image.src = "resources/blob_1.png";
+        this.imageAlive.src = "resources/blob_1.png";
+        this.imageDead.src = "resources/blob_dead_1.png";
     }
 
     /**
      * Returns the coordinates of this entity if the click was within this image's bounds;
      */
     isClicked(event) {
-        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2)) {
-            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + (this.image.height / 2)) {
+        if (event.x >= this.x - (this.imageAlive.width / 2) && event.x <= this.x + (this.imageAlive.width / 2)) {
+            if (event.y >= this.y - (this.imageAlive.height / 2) && event.y <= this.y + (this.imageAlive.height / 2)) {
                 return { x: this.x, y: this.y };
             } else {
                 return null;
@@ -214,7 +216,14 @@ export class Blob extends Entity {
     render(context) {
         context.save();
         context.translate(this.x, this.y);
-        context.drawImage(this.image, -(this.image.width / 2), - (this.image.height / 2));
+        var image;
+        if (this.alive) {
+            image = this.imageAlive;
+        } else {
+            image = this.imageDead;
+        }
+        context.drawImage(image, -(this.imageAlive.width / 2), - (this.imageAlive.height / 2));
+
         context.restore();
     }
 

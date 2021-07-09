@@ -46,22 +46,38 @@ var actionPointCostAdjustment = 0;
 
 function actionPointCostTotal() { return actionPointsCostPotential + actionPointCostAdjustment; };
 
-
+function randomValueInRange(min, max) {
+    return Math.random() * max + min;
+};
 
 var setup = function () {
     console.log(">>> Starting...");
 
-    entitiesResident.push(new Soldier("soldier_alpha", 50, 50));
-    entitiesResident.push(new Soldier("soldier_bravo", 50, 150));
-    entitiesResident.push(new Soldier("soldier_charlie", 50, 250));
-    entitiesResident.push(new Soldier("soldier_delta", 50, 350));
-    entitiesResident.push(new Soldier("soldier_echo", 50, 450));
 
-    entitiesResident.push(new Blob("blob_one", 450, 50));
-    entitiesResident.push(new Blob("blob_two", 450, 150));
-    entitiesResident.push(new Blob("blob_three", 450, 250));
-    entitiesResident.push(new Blob("blob_four", 450, 350));
-    entitiesResident.push(new Blob("blob_five", 450, 450));
+
+    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(50, 50)));
+    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(150, 50)));
+    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(250, 50)));
+    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(350, 50)));
+    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(450, 50)));
+
+    entitiesResident.push(new Blob("blob_one", randomValueInRange(450, 150), randomValueInRange(50, 50)));
+    entitiesResident.push(new Blob("blob_two", randomValueInRange(450, 150), randomValueInRange(150, 50)));
+    entitiesResident.push(new Blob("blob_three",randomValueInRange(450, 150), randomValueInRange(250, 50)));
+    entitiesResident.push(new Blob("blob_four", randomValueInRange(450, 150), randomValueInRange(350, 50)));
+    entitiesResident.push(new Blob("blob_five", randomValueInRange(450, 150), randomValueInRange(450, 50)));
+
+    // entitiesResident.push(new Soldier("soldier_alpha", 50, 50));
+    // entitiesResident.push(new Soldier("soldier_bravo", 50, 150));
+    // entitiesResident.push(new Soldier("soldier_charlie", 50, 250));
+    // entitiesResident.push(new Soldier("soldier_delta", 50, 350));
+    // entitiesResident.push(new Soldier("soldier_echo", 50, 450));
+
+    // entitiesResident.push(new Blob("blob_one", 450, 50));
+    // entitiesResident.push(new Blob("blob_two", 450, 150));
+    // entitiesResident.push(new Blob("blob_three", 450, 250));
+    // entitiesResident.push(new Blob("blob_four", 450, 350));
+    // entitiesResident.push(new Blob("blob_five", 450, 450));
 
     beginGame();
 }();
@@ -256,8 +272,8 @@ function startEnemyTurn() {
         }
     });
 
-    let activeBlob = blobs[Math.floor(Math.random() * blobs.length)];
 
+    blobs.forEach(activeBlob => {
     // Does the monster have a target?
     if (activeBlob.target == null || activeBlob.target.alive == false) {
         activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
@@ -282,10 +298,9 @@ function startEnemyTurn() {
         let y = (100 * deltaY) / distance;
         // console.log({x,y});
         activeBlob.updatePositionByDelta(-x, -y);
-
     }
-
-
+    });
+    
 }
 
 function sleep(sleepDuration) {

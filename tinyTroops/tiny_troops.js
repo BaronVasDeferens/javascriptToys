@@ -44,7 +44,9 @@ var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
 
-function actionPointCostTotal() { return actionPointsCostPotential + actionPointCostAdjustment; };
+function actionPointCostTotal() {
+    return actionPointsCostPotential + actionPointCostAdjustment;
+};
 
 function randomValueInRange(min, max) {
     return Math.random() * max + min;
@@ -56,28 +58,18 @@ var setup = function () {
 
 
     entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(50, 50)));
-    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(150, 50)));
-    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(250, 50)));
-    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(350, 50)));
-    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(450, 50)));
+    // entitiesResident.push(new Soldier("soldier_bravo", randomValueInRange(50, 150), randomValueInRange(150, 50)));
+    // entitiesResident.push(new Soldier("soldier_charlie", randomValueInRange(50, 150), randomValueInRange(250, 50)));
+    // entitiesResident.push(new Soldier("soldier_delta", randomValueInRange(50, 150), randomValueInRange(350, 50)));
+    // entitiesResident.push(new Soldier("soldier_echo", randomValueInRange(50, 150), randomValueInRange(450, 50)));
 
     entitiesResident.push(new Blob("blob_one", randomValueInRange(450, 150), randomValueInRange(50, 50)));
     entitiesResident.push(new Blob("blob_two", randomValueInRange(450, 150), randomValueInRange(150, 50)));
-    entitiesResident.push(new Blob("blob_three",randomValueInRange(450, 150), randomValueInRange(250, 50)));
+    entitiesResident.push(new Blob("blob_three", randomValueInRange(450, 150), randomValueInRange(250, 50)));
     entitiesResident.push(new Blob("blob_four", randomValueInRange(450, 150), randomValueInRange(350, 50)));
     entitiesResident.push(new Blob("blob_five", randomValueInRange(450, 150), randomValueInRange(450, 50)));
 
-    // entitiesResident.push(new Soldier("soldier_alpha", 50, 50));
-    // entitiesResident.push(new Soldier("soldier_bravo", 50, 150));
-    // entitiesResident.push(new Soldier("soldier_charlie", 50, 250));
-    // entitiesResident.push(new Soldier("soldier_delta", 50, 350));
-    // entitiesResident.push(new Soldier("soldier_echo", 50, 450));
 
-    // entitiesResident.push(new Blob("blob_one", 450, 50));
-    // entitiesResident.push(new Blob("blob_two", 450, 150));
-    // entitiesResident.push(new Blob("blob_three", 450, 250));
-    // entitiesResident.push(new Blob("blob_four", 450, 350));
-    // entitiesResident.push(new Blob("blob_five", 450, 450));
 
     beginGame();
 }();
@@ -240,11 +232,65 @@ function moveEntity(entity, event) {
     entity.y = event.y;
 }
 
+function computeAttackStats() {
+
+    let hit = "AUTO";
+    let min = 0;
+    let max = 3;
+
+
+    switch (actionPointsCostPotential) {
+        case 1:
+            hit = 100;
+            break;
+        case 2:
+            hit = 85;
+            break;
+        case 3:
+            hit = 60;
+            break;
+        case 4:
+            hit = 40;
+            break;
+        case 5:
+            hit = 20;
+            break;
+        case 6:
+            hit = 10;
+            break;
+        case 7:
+        default:
+            hit = 0;
+            break;
+    }
+
+    hit = hit + (actionPointCostAdjustment * 10);
+    min = min + actionPointCostAdjustment;
+    max = max + actionPointCostAdjustment;
+
+    return {
+        hitChance: hit,
+        minDamage: min,
+        maxDamage: max
+    };
+
+}
+
 function attackEntity(aggressor, target) {
     console.log(aggressor.id + " attacks " + target.id);
+    
+    let attackStats = computeAttackStats();
 
-    // If something non-deterministic happens here, you have done something very bad
-    target.alive = false;
+    if (Math.floor(Math.random() * 100) <= attackStats.hitChance ) {
+        console.log("attack success!");
+        target.alive = false;
+    } else {
+        console.log("attack fail");
+    }
+
+    // do some rolling here
+    
+    
 }
 
 /** 
@@ -274,33 +320,33 @@ function startEnemyTurn() {
 
 
     blobs.forEach(activeBlob => {
-    // Does the monster have a target?
-    if (activeBlob.target == null || activeBlob.target.alive == false) {
-        activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
-    }
+        // Does the monster have a target?
+        if (activeBlob.target == null || activeBlob.target.alive == false) {
+            activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
+        }
 
-    // Move toward target
-    let deltaX = activeBlob.x - activeBlob.target.x;
-    let deltaY = activeBlob.y - activeBlob.target.y;
-    let distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+        // Move toward target
+        let deltaX = activeBlob.x - activeBlob.target.x;
+        let deltaY = activeBlob.y - activeBlob.target.y;
+        let distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-    // console.log("distance: " + distance);
-    // console.log({deltaX, deltaY});
+        // console.log("distance: " + distance);
+        // console.log({deltaX, deltaY});
 
-    if (distance <= 100) {
-        // Target in in striking distance!
-        console.log("Blob in range of target-- STRIKE!!")
-        activeBlob.updatePositionByDelta(-deltaX, -deltaY);
-        // kill target
-    } else {
-        // move as far as possible toward target
-        let x = (100 * deltaX) / distance;
-        let y = (100 * deltaY) / distance;
-        // console.log({x,y});
-        activeBlob.updatePositionByDelta(-x, -y);
-    }
+        if (distance <= 100) {
+            // Target in in striking distance!
+            console.log("Blob in range of target-- STRIKE!!")
+            activeBlob.updatePositionByDelta(-deltaX, -deltaY);
+            // kill target
+        } else {
+            // move as far as possible toward target
+            let x = (100 * deltaX) / distance;
+            let y = (100 * deltaY) / distance;
+            // console.log({x,y});
+            activeBlob.updatePositionByDelta(-x, -y);
+        }
     });
-    
+
 }
 
 function sleep(sleepDuration) {
@@ -322,6 +368,8 @@ function setState(state) {
             selectedEntityPrimary = null;
             mousePointerHoverDot = null;
             mousePointerHoverLine = null;
+
+            actionPointCostAdjustment = 0;
             break;
         default:
             break;
@@ -353,6 +401,27 @@ function updateGameState() {
             mousePointerHoverLine.endY + 75,
             actionPointCostTotal(),
             "#FF0000"));
+
+        // Display hit chnace and damage potential stats
+        if (selectedEntitySecondary != null) {
+
+            let attackStats = computeAttackStats();
+
+            entitiesTransient.push(
+                new TextLabel(
+                    mousePointerHoverLine.endX - 25,
+                    mousePointerHoverLine.endY + 100,
+                    "HIT: " + attackStats.hitChance,
+                    "#FF0000"));
+
+            entitiesTransient.push(
+                new TextLabel(
+                    mousePointerHoverLine.endX - 25,
+                    mousePointerHoverLine.endY + 125,
+                    "DMG: " + attackStats.minDamage + "-" + attackStats.maxDamage,
+                    "#FF0000"));
+        }
+
     }
 
     // The distance will represent the point cost of moving or shooting

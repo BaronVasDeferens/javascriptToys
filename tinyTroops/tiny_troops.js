@@ -6,7 +6,7 @@
  */
 
 import { Dot, Line, TextLabel } from './entity.js';
-import { Soldier, Blob } from './entity.js';
+import { Soldier, Blob, Helpless } from './entity.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -68,6 +68,8 @@ var setup = function () {
     entitiesResident.push(new Blob("blob_three", randomValueInRange(450, 150), randomValueInRange(250, 50)));
     entitiesResident.push(new Blob("blob_four", randomValueInRange(450, 150), randomValueInRange(350, 50)));
     entitiesResident.push(new Blob("blob_five", randomValueInRange(450, 150), randomValueInRange(450, 50)));
+
+    entitiesResident.push(new Helpless("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(250, 250)));
 
 
 
@@ -278,10 +280,10 @@ function computeAttackStats() {
 
 function attackEntity(aggressor, target) {
     console.log(aggressor.id + " attacks " + target.id);
-    
+
     let attackStats = computeAttackStats();
 
-    if (Math.floor(Math.random() * 100) <= attackStats.hitChance ) {
+    if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
         console.log("attack success!");
         target.alive = false;
     } else {
@@ -289,8 +291,8 @@ function attackEntity(aggressor, target) {
     }
 
     // do some rolling here
-    
-    
+
+
 }
 
 /** 

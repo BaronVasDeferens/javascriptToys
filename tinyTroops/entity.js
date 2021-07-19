@@ -167,6 +167,27 @@ export class Soldier extends Entity {
     }
 }
 
+export class Helpless extends Entity {
+
+    image = new Image();
+
+    constructor(id, x, y) {
+        super(id,x,y);
+        this.image.src = "resources/helpless_1.png";
+    }
+
+    isClicked(event) {
+        return null;
+    }
+
+    render(context) {
+        context.save();
+        context.translate(this.x, this.y);
+        context.drawImage(this.image, -(this.image.width / 2), - (this.image.height / 2));
+        context.restore();
+    }
+}
+
 export class Blob extends Entity {
 
     imageAlive = new Image();

@@ -6,7 +6,7 @@
  */
 
 import { Dot, Line, TextLabel } from './entity.js';
-import { Square, Soldier, Blob, Helpless } from './entity.js';
+import { GridSquare, Soldier, Blob, Helpless } from './entity.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -33,9 +33,9 @@ var selectedEntitySecondary = null;
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
-const gridSize = 30;
-const gridSquares = [];
-const squareSize = 75;
+const gridSize = 10;
+const gridSquares = new Array(0);
+const gridSquareSize = 75;
 
 const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
@@ -58,9 +58,9 @@ var setup = function () {
     console.log(">>> Starting...");
 
     for (var i = 0; i < gridSize; i++) {
-        gridSquares[i] = new Array(gridSize);
+        gridSquares[i] = new Array(0);
         for (var j = 0; j < gridSize; j++) {
-            gridSquares[i].push(new Square(i, j, squareSize));
+            gridSquares[i].push(new GridSquare(i, j, gridSquareSize));
         }
     }
 
@@ -163,6 +163,19 @@ window.onmousemove = function (event) {
             break;
         case States.UNIT_SELECTED:
 
+
+
+
+            // WIP WIP WIP DERP
+            let selected = findGridSquareAtMouse(event);
+            if (selected != null) {
+                entitiesTemporary.push(new GridSquare(selected.x, selected.y, selected.size, "#FF0000"));
+            }
+
+
+
+
+            
             if (selectedEntityPrimary != null) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
@@ -201,6 +214,27 @@ window.onmousewheel = function (event) {
 window.onmouseover = function (event) {
     // when leaving the game window: handly later?
 };
+
+
+function findGridSquareAtMouse(event) {
+
+    // Think of it like this...
+    // The layout of the first array Array(elements) is horizontal (like normal)
+    // Then the sub-arrays start in the home element but extend downward like columns.
+    // So, counter-intuitively...
+    // columns: x
+    // rows : y
+
+    let column = Math.floor(event.x / gridSquareSize);
+    let row = Math.floor(event.y / gridSquareSize);
+
+    if (row > gridSize || column > gridSize) {
+        return;
+    }
+
+    let target = gridSquares[column].find(sq => sq.y === row);
+    return target;
+}
 
 function selectPlayerEntityAtMouse(event) {
 
@@ -302,11 +336,6 @@ function attackEntity(aggressor, target) {
 
 }
 
-/** 
- * 
- * START ENEMY TURN 
- * 
-*/
 function startEnemyTurn() {
 
     setState(States.ENEMY_TURN);
@@ -363,7 +392,6 @@ function sleep(sleepDuration) {
     while (new Date().getTime() < now + sleepDuration) { /* do nothing */ }
 }
 
-
 function setState(state) {
 
     switch (state) {
@@ -387,10 +415,6 @@ function setState(state) {
     currentState = state;
     console.log("State is now " + currentState);
 }
-
-
-
-
 
 function beginGame() {
     updateGameState();
@@ -441,22 +465,9 @@ function updateGameState() {
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);
     }
-
-
-
 }
 
-
-
-function drawGrid(context, size) {
-    // context.strokeStyle = "#a8a8a8";
-    // context.lineWidth = 0.15;
-    // for (var i = 0; i < (canvas.width / size); i++) {
-    //     for (var j = 0; j < (canvas.height / size); j++) {
-    //         context.strokeRect(i * size, j * size, size, size);
-    //     }
-    // }
-
+function drawGrid(context) {
     for (var i = 0; i < gridSize; i++) {
         for (var j = 0; j < gridSize; j++) {
             gridSquares[i].forEach(square => {
@@ -470,11 +481,7 @@ function drawScene() {
     // Draw background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    drawGrid(context, 25);
-
-
-    // context.lineWidth = 1;
-    // context.fillStyle = "#000000";
+    drawGrid(context);
 
     entitiesResident.forEach(entity => {
         entity.render(context);
@@ -488,6 +495,6 @@ function drawScene() {
         entity.render(context);
     });
 
+    // Clear the transients
     entitiesTransient.length = 0;
-
 }

@@ -14,15 +14,20 @@ class Entity {
 
 }
 
-export class Square {
+export class GridSquare {
 
+    x = 0;
+    y = 0;
     size = 50;
     color = "#a8a8a8";
 
-    constructor(x, y, size) {
+    constructor(x, y, size, color) {
         this.x = x;
         this.y = y;
         this.size = size;
+        if (color != undefined) {
+            this.color = color;
+        }
     }
 
     setColor(color) {
@@ -41,10 +46,28 @@ export class Square {
         }
     }
 
+    getCenter() {
+        let xCenter = (this.x * this.size) + (this.size / 2);
+        let yCenter = (this.y * this.size) + (this.size / 2);
+        return {x: xCenter, y: yCenter };
+    }
+
+    getOnScreenPos() {
+        return {
+            x: this.x * this.size,
+            y: this.y * this.size,
+            size: this.size
+        };
+    }
+
     render(context) {
         context.strokeStyle = this.color;
         context.lineWidth = 1.0;
         context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+        context.beginPath();
+        let center = this.getCenter();
+        context.ellipse(center.x, center.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
+        context.stroke();
     }
 }
 
@@ -65,11 +88,9 @@ export class Dot {
     }
 
     render(context) {
-
         context.strokeStyle = this.color;
         context.lineWidth = this.lineWidth;
         context.beginPath();
-
         context.ellipse(this.centerX, this.centerY, this.size, this.size, 2 * Math.PI, 2 * Math.PI, false);
         context.stroke();
     }

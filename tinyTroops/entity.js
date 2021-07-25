@@ -14,6 +14,39 @@ class Entity {
 
 }
 
+export class Square {
+
+    size = 50;
+    color = "#a8a8a8";
+
+    constructor(x, y, size) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+    }
+
+    setColor(color) {
+        this.color = color;
+    }
+
+    containsPoint(x,y) {
+        if (x > this.x && x < this.x + this.size) {
+            if (y > this.y && y < this.y + this.size) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    render(context) {
+        context.strokeStyle = this.color;
+        context.lineWidth = 1.0;
+        context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+    }
+}
 
 export class Dot {
 
@@ -38,12 +71,7 @@ export class Dot {
         context.beginPath();
 
         context.ellipse(this.centerX, this.centerY, this.size, this.size, 2 * Math.PI, 2 * Math.PI, false);
-        // context.moveTo(this.x, this.y);
-        // context.lineTo(
-        //     this.x + Math.cos((this.orientation - 90) * Math.PI / 180) * lineLength,
-        //     this.y + Math.sin((this.orientation - 90) * Math.PI / 180) * lineLength);
         context.stroke();
-
     }
 }
 
@@ -124,7 +152,7 @@ export class Soldier extends Entity {
     image = new Image();
 
     constructor(id, x, y) {
-        super(id,x,y);
+        super(id, x, y);
         this.image.src = "resources/guy_1.png";
     }
 
@@ -172,7 +200,7 @@ export class Helpless extends Entity {
     image = new Image();
 
     constructor(id, x, y) {
-        super(id,x,y);
+        super(id, x, y);
         this.image.src = "resources/helpless_1.png";
     }
 

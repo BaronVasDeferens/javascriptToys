@@ -6,7 +6,7 @@
  */
 
 import { Dot, Line, TextLabel } from './entity.js';
-import { Soldier, Blob, Helpless } from './entity.js';
+import { Square, Soldier, Blob, Helpless } from './entity.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -33,7 +33,9 @@ var selectedEntitySecondary = null;
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
-
+const gridSize = 30;
+const gridSquares = [];
+const squareSize = 75;
 
 const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
 const entitiesTemporary = [];   // Temporary entities
@@ -55,7 +57,12 @@ function randomValueInRange(min, max) {
 var setup = function () {
     console.log(">>> Starting...");
 
-
+    for (var i = 0; i < gridSize; i++) {
+        gridSquares[i] = new Array(gridSize);
+        for (var j = 0; j < gridSize; j++) {
+            gridSquares[i].push(new Square(i, j, squareSize));
+        }
+    }
 
     entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(50, 50)));
     // entitiesResident.push(new Soldier("soldier_bravo", randomValueInRange(50, 150), randomValueInRange(150, 50)));
@@ -442,11 +449,19 @@ function updateGameState() {
 
 
 function drawGrid(context, size) {
-    context.strokeStyle = "#a8a8a8";
-    context.lineWidth = 0.15;
-    for (var i = 0; i < (canvas.width / size); i++) {
-        for (var j = 0; j < (canvas.height / size); j++) {
-            context.strokeRect(i * size, j * size, size, size);
+    // context.strokeStyle = "#a8a8a8";
+    // context.lineWidth = 0.15;
+    // for (var i = 0; i < (canvas.width / size); i++) {
+    //     for (var j = 0; j < (canvas.height / size); j++) {
+    //         context.strokeRect(i * size, j * size, size, size);
+    //     }
+    // }
+
+    for (var i = 0; i < gridSize; i++) {
+        for (var j = 0; j < gridSize; j++) {
+            gridSquares[i].forEach(square => {
+                square.render(context);
+            });
         }
     }
 }

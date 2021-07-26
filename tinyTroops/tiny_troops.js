@@ -17,7 +17,6 @@ canvas.height = innerHeight;
 
 /**
  * GAME STATES
- * 
  */
 var States = Object.freeze({
     IDLE: "IDLE",
@@ -29,7 +28,7 @@ var currentState = States.IDLE;
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
 var selectedEntitySecondary = null;
-// Transient objects are discarded after each render; the following data tracks the last known position of the mouse
+
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
@@ -37,9 +36,9 @@ const gridSize = 10;
 const gridSquares = new Array(0);
 const gridSquareSize = 75;
 
-const entitiesResident = [];    // All "permanent" entities (playhers, enemies)
-const entitiesTemporary = [];   // Temporary entities
-const entitiesTransient = [];   // These are cleared after ever render
+const entitiesResident = [];    // All "permanent" entities (players, enemies)
+const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
+const entitiesTransient = [];   // These are cleared after every render
 
 let actionPointsMax = 7;
 var actionPointsAvailable = actionPointsMax;
@@ -78,14 +77,12 @@ var setup = function () {
 
     entitiesResident.push(new Helpless("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(250, 250)));
 
-
-
     beginGame();
 }();
 
 
 
-//Prevent the right click from summoning the context menu
+// Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
 document.addEventListener('contextmenu', event => event.preventDefault());
 
 // Process mouse clicks
@@ -110,10 +107,9 @@ window.onmousedown = function (event) {
         case States.UNIT_SELECTED:
 
             switch (event.button) {
-                // left click
+                // Left click
                 case 0:
                     // Preform an action
-
                     if (selectedEntitySecondary == null) {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
@@ -131,7 +127,7 @@ window.onmousedown = function (event) {
                     }
 
                     break;
-                // Right click
+                // Right click: dismiss
                 case 2:
                     setState(States.IDLE);
                     break;
@@ -144,15 +140,12 @@ window.onmousedown = function (event) {
             break;
     }
 
-    // Check for remaining action points...
-
-    // No more avaialbe actions? Enemy turn...
+    // Check for remaining action points. When there are no more, it's the enemy's turn...
     if (actionPointsAvailable == 0) {
         startEnemyTurn();
         actionPointsAvailable = actionPointsMax;
         setState(States.IDLE);
     }
-
 }
 
 // Process mouse movement
@@ -197,30 +190,30 @@ window.onmousemove = function (event) {
 
 };
 
-// Process mousewheel events: increase point spend on up, decrease on down (when targetting)
+// Process mousewheel events: increase actionPointAdjustment on up, decrease on down (when targetting)
 window.onmousewheel = function (event) {
 
     if (actionPointsCostPotential > 0 && selectedEntitySecondary != null) {
-        // Mouse wheel rolls top-to-bottom
+        // Mouse wheel rolls top-to-bottom (down)
         if (event.deltaY == 100 && actionPointCostAdjustment > 0) {
             actionPointCostAdjustment--;
         } else if (event.deltaY == -100 && (actionPointCostAdjustment + actionPointsCostPotential < actionPointsAvailable)) {
-            // mouse wheel rolls bottom-to-top
+            // mouse wheel rolls bottom-to-top (up)
             actionPointCostAdjustment++;
         }
     }
 };
 
 window.onmouseover = function (event) {
-    // when leaving the game window: handly later?
+    // when leaving the game window. Maybe handy later?
 };
 
 
 function findGridSquareAtMouse(event) {
 
     // Think of it like this...
-    // The layout of the first array Array(elements) is horizontal (like normal)
-    // Then the sub-arrays start in the home element but extend downward like columns.
+    // The layout of the first Array is horizontal (like normal)
+    // Then the sub-arrays start in the home element but extend downward, like columns.
     // So, counter-intuitively...
     // columns: x
     // rows : y
@@ -249,7 +242,6 @@ function selectPlayerEntityAtMouse(event) {
             selectedEntityPrimary = resident;
             currentState = States.UNIT_SELECTED;
         }
-
     });
 }
 
@@ -267,7 +259,6 @@ function secondaryEntityUnderMouse(event) {
     });
 
     return target;
-
 }
 
 function moveEntity(entity, event) {
@@ -331,7 +322,7 @@ function attackEntity(aggressor, target) {
         console.log("attack fail");
     }
 
-    // do some rolling here
+    // do some rolling here for wounds, effects, etc
 
 
 }
@@ -368,9 +359,6 @@ function startEnemyTurn() {
         let deltaY = activeBlob.y - activeBlob.target.y;
         let distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-        // console.log("distance: " + distance);
-        // console.log({deltaX, deltaY});
-
         if (distance <= 100) {
             // Target in in striking distance!
             console.log("Blob in range of target-- STRIKE!!")
@@ -380,7 +368,6 @@ function startEnemyTurn() {
             // move as far as possible toward target
             let x = (100 * deltaX) / distance;
             let y = (100 * deltaY) / distance;
-            // console.log({x,y});
             activeBlob.updatePositionByDelta(-x, -y);
         }
     });
@@ -435,7 +422,7 @@ function updateGameState() {
             actionPointCostTotal(),
             "#FF0000"));
 
-        // Display hit chnace and damage potential stats
+        // Display hit chance and damage potential stats
         if (selectedEntitySecondary != null) {
 
             let attackStats = computeAttackStats();
@@ -457,7 +444,7 @@ function updateGameState() {
 
     }
 
-    // The distance will represent the point cost of moving or shooting
+    // Display available AP
     entitiesTransient.push(new TextLabel(
         10, 600, "AP: " + actionPointsAvailable, "#000000"
     ));
@@ -467,6 +454,9 @@ function updateGameState() {
     }
 }
 
+// Display the underlying grid.
+// BIG GRIDS make the game SLOW! 
+// TODO: Render once and re-use
 function drawGrid(context) {
     for (var i = 0; i < gridSize; i++) {
         for (var j = 0; j < gridSize; j++) {
@@ -483,6 +473,8 @@ function drawScene() {
     context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context);
 
+    // Draw entities
+    // TODO: consider adding layer ordering
     entitiesResident.forEach(entity => {
         entity.render(context);
     });

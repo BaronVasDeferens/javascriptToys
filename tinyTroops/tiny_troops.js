@@ -35,6 +35,8 @@ var mousePointerHoverLine = null;       // a line stretching from the sleected u
 const gridSize = 10;
 const gridSquares = new Array(0);
 const gridSquareSize = 75;
+var selectedGridSquares = [];
+
 
 const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
@@ -156,19 +158,23 @@ window.onmousemove = function (event) {
             break;
         case States.UNIT_SELECTED:
 
-
-
-
-            // WIP WIP WIP DERP
+            // Comput the selection path (selectedGridSquares)
             let selected = findGridSquareAtMouse(event);
             if (selected != null) {
-                entitiesTemporary.push(new GridSquare(selected.x, selected.y, selected.size, "#FF0000"));
+
+                // Determine if the gridSquare under the mouse is already in the set BUT is NOT the last item
+                let index = selectedGridSquares.indexOf(selected);
+                if (index == -1) {
+                    console.log(selected.getOnScreenPos());
+                    selectedGridSquares.push(selected);
+                } else {
+                    // Otherwise, truncate the selection queue back to the current mouse position
+                    if (index != selectedGridSquares.length - 1) {
+                        selectedGridSquares = selectedGridSquares.slice(0, index);
+                    }
+                }
             }
 
-
-
-
-            
             if (selectedEntityPrimary != null) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
@@ -394,6 +400,9 @@ function setState(state) {
             mousePointerHoverLine = null;
 
             actionPointCostAdjustment = 0;
+
+            selectedGridSquares.length = 0;
+
             break;
         default:
             break;
@@ -441,8 +450,12 @@ function updateGameState() {
                     "DMG: " + attackStats.minDamage + "-" + attackStats.maxDamage,
                     "#FF0000"));
         }
-
     }
+
+    // Highlight the selected path (selectedGridSquares)
+    selectedGridSquares.forEach( square => {
+        entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
+    });
 
     // Display available AP
     entitiesTransient.push(new TextLabel(

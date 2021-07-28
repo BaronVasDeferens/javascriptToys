@@ -165,7 +165,6 @@ window.onmousemove = function (event) {
                 // Determine if the gridSquare under the mouse is already in the set BUT is NOT the last item
                 let index = selectedGridSquares.indexOf(selected);
                 if (index == -1) {
-                    console.log(selected.getOnScreenPos());
                     selectedGridSquares.push(selected);
                 } else {
                     // Otherwise, truncate the selection queue back to the current mouse position

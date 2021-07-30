@@ -65,7 +65,11 @@ var setup = function () {
         }
     }
 
-    entitiesResident.push(new Soldier("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(50, 50)));
+    let randomGridSquare = gridSquares[Math.floor(Math.random() * gridSize)][Math.floor(Math.random() * gridSize)]
+    let gridCenter = randomGridSquare.getCenter();
+
+
+    entitiesResident.push(new Soldier("soldier_alpha", gridCenter.x, gridCenter.y));
     // entitiesResident.push(new Soldier("soldier_bravo", randomValueInRange(50, 150), randomValueInRange(150, 50)));
     // entitiesResident.push(new Soldier("soldier_charlie", randomValueInRange(50, 150), randomValueInRange(250, 50)));
     // entitiesResident.push(new Soldier("soldier_delta", randomValueInRange(50, 150), randomValueInRange(350, 50)));
@@ -267,8 +271,12 @@ function secondaryEntityUnderMouse(event) {
 }
 
 function moveEntity(entity, event) {
-    entity.x = event.x;
-    entity.y = event.y;
+
+    let targetSquare = findGridSquareAtMouse(event);
+    let center = targetSquare.getCenter();
+
+    entity.x = center.x;
+    entity.y = center.y;
 }
 
 function computeAttackStats() {

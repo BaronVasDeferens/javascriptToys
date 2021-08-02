@@ -6,10 +6,21 @@ class Entity {
 
     alive = true;
 
+    gridSquare = null;
+
     constructor(id, x, y) {
         this.id = id;
         this.x = x;
         this.y = y;
+    }
+
+    setGridSquare(gridSquare) {
+        if (this.gridSquare != null) {
+            this.gridSquare.isOccupied = false;
+        }
+
+        this.gridSquare = gridSquare;
+        this.gridSquare.isOccupied = true;
     }
 
 }
@@ -20,6 +31,8 @@ export class GridSquare {
     y = 0;
     size = 50;
     color = "#a8a8a8";
+
+    isOccupied = false;
 
     constructor(x, y, size, color) {
         this.x = x;

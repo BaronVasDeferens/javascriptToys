@@ -34,6 +34,7 @@ var mousePointerHoverLine = null;       // a line stretching from the sleected u
 
 const gridSize = 10;
 const gridSquares = new Array(0);
+var allSquares = [];
 const gridSquareSize = 75;
 var selectedGridSquares = [];
 
@@ -75,13 +76,27 @@ var setup = function () {
     // entitiesResident.push(new Soldier("soldier_delta", randomValueInRange(50, 150), randomValueInRange(350, 50)));
     // entitiesResident.push(new Soldier("soldier_echo", randomValueInRange(50, 150), randomValueInRange(450, 50)));
 
-    entitiesResident.push(new Blob("blob_one", randomValueInRange(450, 150), randomValueInRange(50, 50)));
-    entitiesResident.push(new Blob("blob_two", randomValueInRange(450, 150), randomValueInRange(150, 50)));
-    entitiesResident.push(new Blob("blob_three", randomValueInRange(450, 150), randomValueInRange(250, 50)));
-    entitiesResident.push(new Blob("blob_four", randomValueInRange(450, 150), randomValueInRange(350, 50)));
-    entitiesResident.push(new Blob("blob_five", randomValueInRange(450, 150), randomValueInRange(450, 50)));
 
-    entitiesResident.push(new Helpless("soldier_alpha", randomValueInRange(50, 150), randomValueInRange(250, 250)));
+    allSquares = gridSquares.flat(arr => {
+        arr.flat();
+    }).flat();
+
+    for (var n = 0; n < 5; n++) {
+        shuffleArray(allSquares);
+        let home = allSquares.filter(sq => sq.isOccupied == false )[0];
+        console.log(home);
+        let center = home.getCenter();
+        let ent = new Blob("blob_one", center.x, center.y);
+        ent.setGridSquare(home);
+        entitiesResident.push(ent);
+    }
+
+
+    // entitiesResident.push(new Blob("blob_one", randomValueInRange(450, 150), randomValueInRange(50, 50)));
+    // entitiesResident.push(new Blob("blob_two", randomValueInRange(450, 150), randomValueInRange(150, 50)));
+    // entitiesResident.push(new Blob("blob_three", randomValueInRange(450, 150), randomValueInRange(250, 50)));
+    // entitiesResident.push(new Blob("blob_four", randomValueInRange(450, 150), randomValueInRange(350, 50)));
+    // entitiesResident.push(new Blob("blob_five", randomValueInRange(450, 150), randomValueInRange(450, 50)));
 
     beginGame();
 }();
@@ -217,6 +232,12 @@ window.onmouseover = function (event) {
     // when leaving the game window. Maybe handy later?
 };
 
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
 
 function findGridSquareAtMouse(event) {
 
@@ -460,7 +481,7 @@ function updateGameState() {
     }
 
     // Highlight the selected path (selectedGridSquares)
-    selectedGridSquares.forEach( square => {
+    selectedGridSquares.forEach(square => {
         entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
     });
 

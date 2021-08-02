@@ -66,37 +66,31 @@ var setup = function () {
         }
     }
 
-    let randomGridSquare = gridSquares[Math.floor(Math.random() * gridSize)][Math.floor(Math.random() * gridSize)]
-    let gridCenter = randomGridSquare.getCenter();
-
-
-    entitiesResident.push(new Soldier("soldier_alpha", gridCenter.x, gridCenter.y));
-    // entitiesResident.push(new Soldier("soldier_bravo", randomValueInRange(50, 150), randomValueInRange(150, 50)));
-    // entitiesResident.push(new Soldier("soldier_charlie", randomValueInRange(50, 150), randomValueInRange(250, 50)));
-    // entitiesResident.push(new Soldier("soldier_delta", randomValueInRange(50, 150), randomValueInRange(350, 50)));
-    // entitiesResident.push(new Soldier("soldier_echo", randomValueInRange(50, 150), randomValueInRange(450, 50)));
-
-
     allSquares = gridSquares.flat(arr => {
         arr.flat();
     }).flat();
 
+    // CReate some soldiers
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false )[0];
+        let home = allSquares.filter(sq => sq.isOccupied == false ).pop();
+        console.log(home);
+        let center = home.getCenter();
+        let ent = new Soldier("soldier_" + n, center.x, center.y);
+        ent.setGridSquare(home);
+        entitiesResident.push(ent);
+    }
+
+    // Craete some blobs
+    for (var n = 0; n < 5; n++) {
+        shuffleArray(allSquares);
+        let home = allSquares.filter(sq => sq.isOccupied == false ).pop();
         console.log(home);
         let center = home.getCenter();
         let ent = new Blob("blob_one", center.x, center.y);
         ent.setGridSquare(home);
         entitiesResident.push(ent);
     }
-
-
-    // entitiesResident.push(new Blob("blob_one", randomValueInRange(450, 150), randomValueInRange(50, 50)));
-    // entitiesResident.push(new Blob("blob_two", randomValueInRange(450, 150), randomValueInRange(150, 50)));
-    // entitiesResident.push(new Blob("blob_three", randomValueInRange(450, 150), randomValueInRange(250, 50)));
-    // entitiesResident.push(new Blob("blob_four", randomValueInRange(450, 150), randomValueInRange(350, 50)));
-    // entitiesResident.push(new Blob("blob_five", randomValueInRange(450, 150), randomValueInRange(450, 50)));
 
     beginGame();
 }();
@@ -294,8 +288,9 @@ function secondaryEntityUnderMouse(event) {
 function moveEntity(entity, event) {
 
     let targetSquare = findGridSquareAtMouse(event);
-    let center = targetSquare.getCenter();
+    entity.setGridSquare(targetSquare);
 
+    let center = targetSquare.getCenter();
     entity.x = center.x;
     entity.y = center.y;
 }

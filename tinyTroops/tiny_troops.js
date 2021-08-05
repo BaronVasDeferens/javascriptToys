@@ -73,7 +73,7 @@ var setup = function () {
     // CReate some soldiers
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false ).pop();
+        let home = allSquares.filter(sq => sq.isOccupied == false).pop();
         console.log(home);
         let center = home.getCenter();
         let ent = new Soldier("soldier_" + n, center.x, center.y);
@@ -84,7 +84,7 @@ var setup = function () {
     // Craete some blobs
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false ).pop();
+        let home = allSquares.filter(sq => sq.isOccupied == false).pop();
         console.log(home);
         let center = home.getCenter();
         let ent = new Blob("blob_one", center.x, center.y);
@@ -190,7 +190,7 @@ window.onmousemove = function (event) {
             if (selectedEntityPrimary != null) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
-                mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#000000");
+                // mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#000000");
 
                 // sub-entity under mouse?
                 let subEnt = secondaryEntityUnderMouse(event);
@@ -476,8 +476,16 @@ function updateGameState() {
     }
 
     // Highlight the selected path (selectedGridSquares)
-    selectedGridSquares.forEach(square => {
-        entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
+    selectedGridSquares.forEach( (square, index) => {
+        // entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
+
+        let next = selectedGridSquares[index - 1];
+
+        if (next != null) {
+            let c1 = square.getCenter();
+            let c2 = next.getCenter();
+            entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#FF0000"));
+        }
     });
 
     // Display available AP

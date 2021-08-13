@@ -178,7 +178,15 @@ window.onmousemove = function (event) {
                 // Determine if the gridSquare under the mouse is already in the set BUT is NOT the last item
                 let index = selectedGridSquares.indexOf(selected);
                 if (index == -1) {
-                    selectedGridSquares.push(selected);
+
+                    // Are there enough AP to move here?
+                    if (selectedGridSquares.length <= actionPointsAvailable) {
+                        
+                        // TODO: check if selected space is occupied
+                        
+                        selectedGridSquares.push(selected);
+                    }
+
                 } else {
                     // Otherwise, truncate the selection queue back to the current mouse position
                     if (index != selectedGridSquares.length - 1) {
@@ -293,6 +301,8 @@ function moveEntity(entity, event) {
     let center = targetSquare.getCenter();
     entity.x = center.x;
     entity.y = center.y;
+
+    actionPointsAvailable -= selectedGridSquares.length - 1;
 }
 
 function computeAttackStats() {
@@ -476,7 +486,7 @@ function updateGameState() {
     }
 
     // Highlight the selected path (selectedGridSquares)
-    selectedGridSquares.forEach( (square, index) => {
+    selectedGridSquares.forEach((square, index) => {
         // entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
 
         let next = selectedGridSquares[index - 1];
@@ -487,6 +497,11 @@ function updateGameState() {
             entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#FF0000"));
         }
     });
+
+    // Adjust the remaining AP
+    // if (selectedGridSquares.length >= 1) {
+    //     actionPointsAvailable -= selectedGridSquares.length - 1;
+    // }
 
     // Display available AP
     entitiesTransient.push(new TextLabel(

@@ -32,7 +32,7 @@ var selectedEntitySecondary = null;
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
-const gridSize = 10;
+const gridSize = 7;
 const gridSquares = new Array(0);
 var allSquares = [];
 const gridSquareSize = 75;
@@ -171,14 +171,27 @@ window.onmousemove = function (event) {
             break;
         case States.UNIT_SELECTED:
 
-            // Comput the selection path (selectedGridSquares)
+            // Compute the selection path (selectedGridSquares)
             let selected = findGridSquareAtMouse(event);
             if (selected != null) {
+
+
 
                 // Determine if the gridSquare under the mouse is already in the set BUT is NOT the last item
                 let index = selectedGridSquares.indexOf(selected);
                 if (index == -1) {
-                    selectedGridSquares.push(selected);
+
+                    // Determine if the new square is adjacent to the most recent as a condition for adding to the list
+                    // let adj = selectedGridSquares[selectedGridSquares.length - 1];
+                    // if (Math.abs(selected.x - adj.x) + Math.abs(selected.y - adj.y) <= 1) {
+
+                    // }
+
+                    // Finally, check if there are sufficient AP remaining
+                    if (selectedGridSquares.length <= actionPointsAvailable) {
+                        selectedGridSquares.push(selected);
+                    }
+
                 } else {
                     // Otherwise, truncate the selection queue back to the current mouse position
                     if (index != selectedGridSquares.length - 1) {
@@ -290,6 +303,10 @@ function moveEntity(entity, event) {
     let targetSquare = findGridSquareAtMouse(event);
     entity.setGridSquare(targetSquare);
 
+    if (entity instanceof Soldier) {
+        actionPointsAvailable -= selectedGridSquares.length - 1;
+    }
+
     let center = targetSquare.getCenter();
     entity.x = center.x;
     entity.y = center.y;
@@ -352,8 +369,6 @@ function attackEntity(aggressor, target) {
     }
 
     // do some rolling here for wounds, effects, etc
-
-
 }
 
 function startEnemyTurn() {
@@ -473,10 +488,12 @@ function updateGameState() {
                     "DMG: " + attackStats.minDamage + "-" + attackStats.maxDamage,
                     "#FF0000"));
         }
+
+
     }
 
     // Highlight the selected path (selectedGridSquares)
-    selectedGridSquares.forEach( (square, index) => {
+    selectedGridSquares.forEach((square, index) => {
         // entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
 
         let next = selectedGridSquares[index - 1];
@@ -488,9 +505,16 @@ function updateGameState() {
         }
     });
 
+    let apAvail = 0;
+    if (selectedGridSquares.length >= 1) {
+        apAvail = actionPointsAvailable - (selectedGridSquares.length - 1);
+    } else {
+        apAvail = actionPointsAvailable;
+    }
+
     // Display available AP
     entitiesTransient.push(new TextLabel(
-        10, 600, "AP: " + actionPointsAvailable, "#000000"
+        10, 600, "AP: " + apAvail, "#000000"
     ));
 
     if (mousePointerHoverDot != null) {

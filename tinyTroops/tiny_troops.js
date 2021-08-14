@@ -129,14 +129,14 @@ window.onmousedown = function (event) {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             moveEntity(selectedEntityPrimary, event);
-                            actionPointsAvailable -= actionPointCostTotal();
+                            //actionPointsAvailable -= actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     } else {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             attackEntity(selectedEntityPrimary, selectedEntitySecondary);
-                            actionPointsAvailable -= actionPointCostTotal();
+                            //actionPointsAvailable -= actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     }
@@ -302,18 +302,16 @@ function secondaryEntityUnderMouse(event) {
 
 function moveEntity(entity, event) {
 
-    let targetSquare = findGridSquareAtMouse(event);
+    let targetSquare = selectedGridSquares.pop()  // findGridSquareAtMouse(event);
     entity.setGridSquare(targetSquare);
 
     if (entity instanceof Soldier) {
-        actionPointsAvailable -= selectedGridSquares.length - 1;
+        actionPointsAvailable -= selectedGridSquares.length;
     }
 
     let center = targetSquare.getCenter();
     entity.x = center.x;
     entity.y = center.y;
-
-    actionPointsAvailable -= selectedGridSquares.length - 1;
 }
 
 function computeAttackStats() {

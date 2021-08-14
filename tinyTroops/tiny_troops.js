@@ -181,6 +181,7 @@ window.onmousemove = function (event) {
                 let index = selectedGridSquares.indexOf(selected);
                 if (index == -1) {
 
+
                     // Determine if the new square is adjacent to the most recent as a condition for adding to the list
                     // let adj = selectedGridSquares[selectedGridSquares.length - 1];
                     // if (Math.abs(selected.x - adj.x) + Math.abs(selected.y - adj.y) <= 1) {
@@ -189,6 +190,7 @@ window.onmousemove = function (event) {
 
                     // Finally, check if there are sufficient AP remaining
                     if (selectedGridSquares.length <= actionPointsAvailable) {
+
                         selectedGridSquares.push(selected);
                     }
 
@@ -310,6 +312,8 @@ function moveEntity(entity, event) {
     let center = targetSquare.getCenter();
     entity.x = center.x;
     entity.y = center.y;
+
+    actionPointsAvailable -= selectedGridSquares.length - 1;
 }
 
 function computeAttackStats() {
@@ -505,12 +509,14 @@ function updateGameState() {
         }
     });
 
+
     let apAvail = 0;
     if (selectedGridSquares.length >= 1) {
         apAvail = actionPointsAvailable - (selectedGridSquares.length - 1);
     } else {
         apAvail = actionPointsAvailable;
     }
+
 
     // Display available AP
     entitiesTransient.push(new TextLabel(

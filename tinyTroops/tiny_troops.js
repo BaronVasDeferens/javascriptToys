@@ -32,7 +32,7 @@ var selectedEntitySecondary = null;
 var mousePointerHoverDot = null;        // a dot which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
 
-const gridSize = 7;
+const gridSize = 9;
 const gridSquares = new Array(0);
 var allSquares = [];
 const gridSquareSize = 75;
@@ -70,10 +70,17 @@ var setup = function () {
         arr.flat();
     }).flat();
 
-    // CReate some soldiers
+    // Obstruct a few squares
+    gridSquares[2][2].isObstructed = true;
+    gridSquares[6][2].isObstructed = true;
+    gridSquares[2][6].isObstructed = true;
+    gridSquares[6][6].isObstructed = true;
+
+
+    // Create some soldiers
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false).pop();
+        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         console.log(home);
         let center = home.getCenter();
         let ent = new Soldier("soldier_" + n, center.x, center.y);
@@ -84,7 +91,7 @@ var setup = function () {
     // Craete some blobs
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false).pop();
+        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         console.log(home);
         let center = home.getCenter();
         let ent = new Blob("blob_one", center.x, center.y);
@@ -177,22 +184,24 @@ window.onmousemove = function (event) {
 
 
 
-                // Determine if the gridSquare under the mouse is already in the set BUT is NOT the last item
+                //Is the gridSquare under the mouse is already in the set
                 let index = selectedGridSquares.indexOf(selected);
                 if (index == -1) {
 
 
-                    // Determine if the new square is adjacent to the most recent as a condition for adding to the list
-                    // let adj = selectedGridSquares[selectedGridSquares.length - 1];
-                    // if (Math.abs(selected.x - adj.x) + Math.abs(selected.y - adj.y) <= 1) {
+                    // Determine if the new square is adjacent to the most recent (unless the movement queueu is empty)
+                    let adj = selectedGridSquares[selectedGridSquares.length - 1];
+                    let isAdjacentToPrior = selectedGridSquares.length == 0 || (Math.abs(selected.x - adj.x) + Math.abs(selected.y - adj.y) <= 1);
 
-                    // }
 
-                    // Finally, check if there are sufficient AP remaining
-                    if (selectedGridSquares.length <= actionPointsAvailable) {
-
-                        selectedGridSquares.push(selected);
+                    if (selected.isObstructed == false && isAdjacentToPrior) {
+                        // Finally, check if there are sufficient AP remaining
+                        if (selectedGridSquares.length <= actionPointsAvailable) {
+                            selectedGridSquares.push(selected);
+                        }
                     }
+
+
 
                 } else {
                     // Otherwise, truncate the selection queue back to the current mouse position

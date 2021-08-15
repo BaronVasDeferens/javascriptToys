@@ -33,6 +33,7 @@ export class GridSquare {
     color = "#a8a8a8";
 
     isOccupied = false;
+    isObstructed = false;
 
     constructor(x, y, size, color) {
         this.x = x;
@@ -74,13 +75,19 @@ export class GridSquare {
     }
 
     render(context) {
-        context.strokeStyle = this.color;
-        context.lineWidth = 1.0;
-        context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
-        context.beginPath();
-        let center = this.getCenter();
-        context.ellipse(center.x, center.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
-        context.stroke();
+
+        if (this.isObstructed) {
+            context.fillStyle = "#000000";
+            context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
+        } else {
+            context.strokeStyle = this.color;
+            context.lineWidth = 1.0;
+            context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            context.beginPath();
+            let center = this.getCenter();
+            context.ellipse(center.x, center.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
+            context.stroke();
+        }
     }
 }
 

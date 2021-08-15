@@ -516,10 +516,19 @@ function updateGameState() {
     }
 
 
-    // Display available AP
-    entitiesTransient.push(new TextLabel(
-        10, 600, "AP: " + apAvail, "#000000"
-    ));
+    // Display available AP:
+    // If there's a movement being plotted...
+    if (selectedGridSquares.length > 0) {
+        entitiesTransient.push(new TextLabel(
+            10, 600, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
+        ));
+    } else {
+        //...otherwise, display the remaining AP
+        entitiesTransient.push(new TextLabel(
+            10, 600, "AP: " + apAvail, "#000000"
+        ));
+    }
+
 
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);

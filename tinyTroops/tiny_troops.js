@@ -6,7 +6,7 @@
  */
 
 import { Dot, Line, TextLabel } from './entity.js';
-import { GridSquare, Soldier, Blob, Helpless } from './entity.js';
+import { GridSquare, Soldier, Blob, EntityAnimationFrame } from './entity.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -21,7 +21,8 @@ canvas.height = innerHeight;
 var States = Object.freeze({
     IDLE: "IDLE",
     UNIT_SELECTED: "UNIT_SELECTED",
-    ENEMY_TURN: "ENEMY_TURN"
+    ENEMY_TURN: "ENEMY_TURN",
+    ANIMATION: "ANIMATION"
 });
 
 var currentState = States.IDLE;
@@ -47,6 +48,10 @@ let actionPointsMax = 7;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
+
+const animationFrames = new Array();
+
+
 
 function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
@@ -158,13 +163,6 @@ window.onmousedown = function (event) {
             break;
         default:
             break;
-    }
-
-    // Check for remaining action points. When there are no more, it's the enemy's turn...
-    if (actionPointsAvailable == 0) {
-        startEnemyTurn();
-        actionPointsAvailable = actionPointsMax;
-        setState(States.IDLE);
     }
 }
 
@@ -322,6 +320,15 @@ function moveEntity(entity, event) {
     let center = targetSquare.getCenter();
     entity.x = center.x;
     entity.y = center.y;
+
+
+    // Add movement frames
+    selectedGridSquares.forEach((sqr, index) => {
+        center = sqr.getCenter();
+        animationFrames.push(new EntityAnimationFrame(center.x, center.y, entity));
+    });
+
+    setState(States.ANIMATION);
 }
 
 function computeAttackStats() {
@@ -454,6 +461,10 @@ function setState(state) {
             selectedGridSquares.length = 0;
 
             break;
+
+        case States.ANIMATION:
+
+            break;
         default:
             break;
     }
@@ -501,7 +512,6 @@ function updateGameState() {
                     "#FF0000"));
         }
 
-
     }
 
     // Highlight the selected path (selectedGridSquares)
@@ -543,6 +553,20 @@ function updateGameState() {
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);
     }
+
+
+
+    // Check for remaining action points. When there are no more, it's the enemy's turn...
+    let notBusy = (currentState != States.ANIMATION && currentState != States.ENEMY_TURN);
+    if (actionPointsAvailable == 0 && notBusy) {
+        startEnemyTurn();
+        actionPointsAvailable = actionPointsMax;
+        setState(States.IDLE);
+    }
+
+    
+
+
 }
 
 // Display the underlying grid.
@@ -558,26 +582,38 @@ function drawGrid(context) {
     }
 }
 
+
 function drawScene() {
     // Draw background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context);
 
-    // Draw entities
-    // TODO: consider adding layer ordering
-    entitiesResident.forEach(entity => {
-        entity.render(context);
-    });
+    if (currentState == States.IDLE || currentState == States.UNIT_SELECTED) {
+        // Draw entities
+        // TODO: consider adding layer ordering
+        entitiesResident.forEach(entity => {
+            entity.render(context);
+        });
 
-    entitiesTemporary.forEach(entity => {
-        entity.render(context);
-    });
+        entitiesTemporary.forEach(entity => {
+            entity.render(context);
+        });
 
-    entitiesTransient.forEach(entity => {
-        entity.render(context);
-    });
+        entitiesTransient.forEach(entity => {
+            entity.render(context);
+        });
 
-    // Clear the transients
-    entitiesTransient.length = 0;
+        // Clear the transients
+        entitiesTransient.length = 0;
+    }
+
+    if (animationFrames.length > 0) {
+
+        let renderMe = animationFrames.shift();
+        renderMe.render(context);
+        sleep(200);
+    }
+
+
 }

@@ -5,7 +5,6 @@ class Entity {
     y = 0;
 
     alive = true;
-
     gridSquare = null;
 
     constructor(id, x, y) {
@@ -48,7 +47,7 @@ export class GridSquare {
         this.color = color;
     }
 
-    containsPoint(x,y) {
+    containsPoint(x, y) {
         if (x > this.x && x < this.x + this.size) {
             if (y > this.y && y < this.y + this.size) {
                 return true;
@@ -63,7 +62,7 @@ export class GridSquare {
     getCenter() {
         let xCenter = (this.x * this.size) + (this.size / 2);
         let yCenter = (this.y * this.size) + (this.size / 2);
-        return {x: xCenter, y: yCenter };
+        return { x: xCenter, y: yCenter };
     }
 
     getOnScreenPos() {
@@ -317,4 +316,25 @@ export class Blob extends Entity {
         context.restore();
     }
 
+}
+
+export class EntityAnimationFrame {
+
+    x = 0;
+    y = 0;
+    entity = null;
+
+    constructor(x, y, entity) {
+        this.x = x;
+        this.y = y;
+        this.entity = entity;
+    }
+
+    render(context) {
+        // context.drawImage(this.image, this.x, this.y);
+        context.save();
+        context.translate(this.x, this.y);
+        context.drawImage(this.entity.image, -(this.entity.image.width / 2), - (this.entity.image.height / 2));
+        context.restore();
+    }
 }

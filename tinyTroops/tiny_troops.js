@@ -136,14 +136,12 @@ window.onmousedown = function (event) {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             moveEntity(selectedEntityPrimary, event);
-                            //actionPointsAvailable -= actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     } else {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             attackEntity(selectedEntityPrimary, selectedEntitySecondary);
-                            //actionPointsAvailable -= actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     }
@@ -182,31 +180,28 @@ window.onmousemove = function (event) {
             let selected = findGridSquareAtMouse(event);
             if (selected != null) {
 
-
-
                 //Is the gridSquare under the mouse is already in the set
-                let index = selectedGridSquares.indexOf(selected);
-                if (index == -1) {
+                let indexOfSelected = selectedGridSquares.indexOf(selected);
+                if (indexOfSelected == -1) {
 
-
-                    // Determine if the new square is adjacent to the most recent (unless the movement queueu is empty)
+                    // Determine if the new square is adjacent to the most recent in the queue (unless the queue is empty)
                     let adj = selectedGridSquares[selectedGridSquares.length - 1];
                     let isAdjacentToPrior = selectedGridSquares.length == 0 || (Math.abs(selected.x - adj.x) + Math.abs(selected.y - adj.y) <= 1);
 
-
-                    if (selected.isObstructed == false && isAdjacentToPrior) {
+                    if (selected.isObstructed == false && isAdjacentToPrior && selected.isOccupied == false) {
                         // Finally, check if there are sufficient AP remaining
                         if (selectedGridSquares.length <= actionPointsAvailable) {
                             selectedGridSquares.push(selected);
                         }
                     }
-
-
-
                 } else {
-                    // Otherwise, truncate the selection queue back to the current mouse position
-                    if (index != selectedGridSquares.length - 1) {
-                        selectedGridSquares = selectedGridSquares.slice(0, index);
+
+                    // Do not remove the gridSquare of the selected unit form the movement queue
+                    if (indexOfSelected == 0) {
+                        selectedGridSquares = selectedGridSquares.slice(0, 1);
+                    } else if (indexOfSelected != selectedGridSquares.length - 1) {
+                        // Otherwise, truncate the selection queue back to the current mouse position
+                        selectedGridSquares = selectedGridSquares.slice(0, indexOfSelected);
                     }
                 }
             }
@@ -288,6 +283,12 @@ function selectPlayerEntityAtMouse(event) {
             var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
             entitiesTemporary.push(dot);
             selectedEntityPrimary = resident;
+
+            // Add the selected unit's gridsquare to selectedGridSquares...MEANING when a unit is selected, the movement queue is NEVER empty
+            // This is convenient for calculating which squares are eligible to highlight during moevement
+            selectedGridSquares.push(findGridSquareAtMouse(event));
+
+            // Update game state
             currentState = States.UNIT_SELECTED;
         }
     });

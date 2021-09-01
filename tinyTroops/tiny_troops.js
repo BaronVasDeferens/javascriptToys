@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Dot, Line, TextLabel } from './entity.js';
+import { Dot, Line, MovementAnimationDriver, TextLabel } from './entity.js';
 import { GridSquare, Soldier, Blob, EntityAnimationFrame } from './entity.js';
 
 const canvas = document.querySelector('canvas');
@@ -308,22 +308,18 @@ function secondaryEntityUnderMouse(event) {
 
 function moveEntity(entity, event) {
 
-    let targetSquare = selectedGridSquares.pop()  // findGridSquareAtMouse(event);
-    entity.setGridSquare(targetSquare);
+    let targetSquare = selectedGridSquares[selectedGridSquares.length - 1];
 
     if (entity instanceof Soldier) {
-        actionPointsAvailable -= selectedGridSquares.length;
+        actionPointsAvailable -= (selectedGridSquares.length - 1);
     }
 
-    let center = targetSquare.getCenter();
-    entity.x = center.x;
-    entity.y = center.y;
-
-
-    // Add movement frames
+    // Add movement drivers
     selectedGridSquares.forEach((sqr, index) => {
-        center = sqr.getCenter();
-        animationFrames.push(new EntityAnimationFrame(center.x, center.y, entity));
+        if (index + 1 < selectedGridSquares.length) {
+            entity.movementDrivers.push( new MovementAnimationDriver(sqr, selectedGridSquares[index + 1]));
+        }
+
     });
 
     setState(States.ANIMATION);

@@ -186,7 +186,9 @@ export class TextLabel {
         context.strokeText(this.text, this.startX, this.startY);
     }
 }
-
+/**
+ * SOLDIER
+ */
 export class Soldier extends Entity {
 
     image = new Image();
@@ -198,18 +200,16 @@ export class Soldier extends Entity {
     currentTick = 0;
     maxTicks = 60;
 
+    movementDrivers = new Array();
+
     constructor(id, x, y) {
         super(id, x, y);
         this.image.src = "resources/guys_strip.png";
     }
 
-    /**
-     * Returns the coordinates of this entity if the click was within this image's bounds;
-     * 
-     * @param {*} event 
-     */
-    isClicked(event) {
 
+    // Returns the coordinates of this entity if the click was within this image's bounds;
+    isClicked(event) {
         if (event.x >= this.x - (this.imageWidth / 2) && event.x <= this.x + (this.imageWidth / 2)) {
             if (event.y >= this.y - (this.imageHeight / 2) && event.y <= this.y + (this.imageHeight / 2)) {
                 return { x: this.x, y: this.y };
@@ -234,6 +234,15 @@ export class Soldier extends Entity {
     }
 
     update() {
+
+        if (this.movementDrivers.length > 0) {
+            let driver = this.movementDrivers[0];
+            driver.update(this);
+            if (driver.isDone()) {
+                this.movementDrivers.shift();
+            }
+        }
+
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
             this.currentFrameIndex++;
@@ -247,7 +256,7 @@ export class Soldier extends Entity {
     render(context) {
         context.save();
         context.translate(this.x, this.y);
-        context.drawImage(this.image, 50 * this.currentFrameIndex, 0, 50, 50,  -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
+        context.drawImage(this.image, 50 * this.currentFrameIndex, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
         context.restore();
     }
 }
@@ -350,12 +359,58 @@ export class Blob extends Entity {
         } else {
             image = this.imageDead;
         }
-        context.drawImage(image, 50 * this.currentFrameIndex, 0, 50, 50,  -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
+        context.drawImage(image, 50 * this.currentFrameIndex, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
 
         context.restore();
     }
 
 }
+
+
+export class MovementAnimationDriver {
+
+    deltaX = 0;
+    deltaY = 0;
+
+    currentTick = 0;
+    maxTicks = 2;
+
+    currentStep = 0;
+    maxSteps = 20;
+
+    destination = null;
+
+    constructor(origin, destination) {
+
+        console.log(origin, destination);
+
+        this.destination = destination;
+
+        let destinationPos = destination.getOnScreenPos();
+        let originScreenPos = origin.getOnScreenPos();
+
+        this.deltaX = (destinationPos.x - originScreenPos.x) / this.maxSteps;
+        this.deltaY = (destinationPos.y - originScreenPos.y) / this.maxSteps;
+
+        console.log(this);
+    }
+
+    update(entity) {
+
+        this.currentTick++;
+        if (this.currentTick >= this.maxTicks) {
+            this.currentTick = 0;
+            this.currentStep++;
+            entity.updatePositionByDelta(this.deltaX, this.deltaY);
+        }
+    }
+
+    isDone = function () {
+        return this.currentStep >= this.maxSteps;
+    }
+
+}
+
 
 export class EntityAnimationFrame {
 
@@ -388,7 +443,7 @@ export class EntityAnimationFrame {
 }
 
 export class EntityTransitionAnimation {
-    
+
     deltaX = 0;
     deltaY = 0;
 

@@ -190,7 +190,8 @@ export class TextLabel {
 export class Soldier extends Entity {
 
     image = new Image();
-
+    imageWidth = 50;
+    imageHeight = 50;
 
     currentFrameIndex = 0;
     maxFrameIndex = 3;
@@ -199,7 +200,7 @@ export class Soldier extends Entity {
 
     constructor(id, x, y) {
         super(id, x, y);
-        this.image.src = "resources/guy_1.png";
+        this.image.src = "resources/guys_strip.png";
     }
 
     /**
@@ -209,8 +210,8 @@ export class Soldier extends Entity {
      */
     isClicked(event) {
 
-        if (event.x >= this.x - (this.image.width / 2) && event.x <= this.x + (this.image.width / 2)) {
-            if (event.y >= this.y - (this.image.height / 2) && event.y <= this.y + (this.image.height / 2)) {
+        if (event.x >= this.x - (this.imageWidth / 2) && event.x <= this.x + (this.imageWidth / 2)) {
+            if (event.y >= this.y - (this.imageHeight / 2) && event.y <= this.y + (this.imageHeight / 2)) {
                 return { x: this.x, y: this.y };
             } else {
                 return null;
@@ -246,7 +247,7 @@ export class Soldier extends Entity {
     render(context) {
         context.save();
         context.translate(this.x, this.y);
-        context.drawImage(this.image, -(this.image.width / 2), - (this.image.height / 2));
+        context.drawImage(this.image, 50 * this.currentFrameIndex, 0, 50, 50,  -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
         context.restore();
     }
 }
@@ -284,7 +285,7 @@ export class Blob extends Entity {
     currentFrameIndex = 0;
     maxFrameIndex = 3;
     currentTick = 0;
-    maxTicks = 60;
+    maxTicks = 45;
 
     constructor(id, x, y) {
         super(id, x, y);
@@ -323,10 +324,14 @@ export class Blob extends Entity {
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
             this.currentTick = 0;
-            this.currentFrameIndex++;
-            if (this.currentFrameIndex > this.maxFrameIndex) {
-                this.currentFrameIndex = 0;
-            }
+
+            // Random frame
+            this.currentFrameIndex = Math.floor(Math.random() * (this.maxFrameIndex + 1));
+
+            // this.currentFrameIndex++;
+            // if (this.currentFrameIndex > this.maxFrameIndex) {
+            //     this.currentFrameIndex = 0;
+            // }
         }
     }
 

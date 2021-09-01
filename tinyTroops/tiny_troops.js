@@ -528,14 +528,12 @@ function updateGameState() {
         }
     });
 
-
     let apAvail = 0;
     if (selectedGridSquares.length >= 1) {
         apAvail = actionPointsAvailable - (selectedGridSquares.length - 1);
     } else {
         apAvail = actionPointsAvailable;
     }
-
 
     // Display available AP:
     // If there's a movement being plotted...
@@ -550,12 +548,9 @@ function updateGameState() {
         ));
     }
 
-
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);
     }
-
-
 
     // Check for remaining action points. When there are no more, it's the enemy's turn...
     let notBusy = (currentState != States.ANIMATION && currentState != States.ENEMY_TURN);
@@ -566,9 +561,7 @@ function updateGameState() {
     }
 
     entitiesResident.forEach(entity => {
-
         entity.update();
-
     });
 
 
@@ -617,11 +610,8 @@ function drawScene() {
     }
 
     if (animationFrames.length > 0) {
-
         let renderMe = animationFrames.shift();
         renderMe.render(context);
         // sleep(200);
     }
-
-
 }

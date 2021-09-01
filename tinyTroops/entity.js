@@ -191,6 +191,12 @@ export class Soldier extends Entity {
 
     image = new Image();
 
+
+    currentFrameIndex = 0;
+    maxFrameIndex = 3;
+    currentTick = 0;
+    maxTicks = 60;
+
     constructor(id, x, y) {
         super(id, x, y);
         this.image.src = "resources/guy_1.png";
@@ -224,6 +230,16 @@ export class Soldier extends Entity {
     updatePositionByDelta(dx, dy) {
         this.x += dx;
         this.y += dy;
+    }
+
+    update() {
+        this.currentTick++;
+        if (this.currentTick >= this.maxTicks) {
+            this.currentFrameIndex++;
+            if (this.currentFrameIndex > this.maxFrameIndex) {
+                this.currentFrameIndex = 0;
+            }
+        }
     }
 
     // Draws CENTERED on x,y
@@ -262,9 +278,17 @@ export class Blob extends Entity {
     imageDead = new Image();
     target = null;
 
+    imageWidth = 50;
+    imageHeight = 50;
+
+    currentFrameIndex = 0;
+    maxFrameIndex = 3;
+    currentTick = 0;
+    maxTicks = 60;
+
     constructor(id, x, y) {
         super(id, x, y);
-        this.imageAlive.src = "resources/blob_1.png";
+        this.imageAlive.src = "resources/blob_strip.png";
         this.imageDead.src = "resources/blob_dead_1.png";
     }
 
@@ -272,8 +296,8 @@ export class Blob extends Entity {
      * Returns the coordinates of this entity if the click was within this image's bounds;
      */
     isClicked(event) {
-        if (event.x >= this.x - (this.imageAlive.width / 2) && event.x <= this.x + (this.imageAlive.width / 2)) {
-            if (event.y >= this.y - (this.imageAlive.height / 2) && event.y <= this.y + (this.imageAlive.height / 2)) {
+        if (event.x >= this.x - (this.imageWidth / 2) && event.x <= this.x + (this.imageWidth / 2)) {
+            if (event.y >= this.y - (this.imageHeight / 2) && event.y <= this.y + (this.imageHeight / 2)) {
                 return { x: this.x, y: this.y };
             } else {
                 return null;
@@ -295,6 +319,16 @@ export class Blob extends Entity {
         this.y += dy;
     }
 
+    update() {
+        this.currentTick++;
+        if (this.currentTick >= this.maxTicks) {
+            this.currentTick = 0;
+            this.currentFrameIndex++;
+            if (this.currentFrameIndex > this.maxFrameIndex) {
+                this.currentFrameIndex = 0;
+            }
+        }
+    }
 
     setTarget(target) {
         this.target = target;
@@ -311,7 +345,7 @@ export class Blob extends Entity {
         } else {
             image = this.imageDead;
         }
-        context.drawImage(image, -(this.imageAlive.width / 2), - (this.imageAlive.height / 2));
+        context.drawImage(image, 50 * this.currentFrameIndex, 0, 50, 50,  -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
 
         context.restore();
     }

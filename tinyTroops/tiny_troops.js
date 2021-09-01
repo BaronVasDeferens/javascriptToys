@@ -565,7 +565,11 @@ function updateGameState() {
         setState(States.IDLE);
     }
 
-    
+    entitiesResident.forEach(entity => {
+
+        entity.update();
+
+    });
 
 
 }
@@ -591,6 +595,9 @@ function drawScene() {
     drawGrid(context);
 
     if (currentState == States.IDLE || currentState == States.UNIT_SELECTED) {
+
+        context.imageSmoothingEnabled = false;
+
         // Draw entities
         // TODO: consider adding layer ordering
         entitiesResident.forEach(entity => {

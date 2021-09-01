@@ -86,7 +86,6 @@ var setup = function () {
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
-        console.log(home);
         let center = home.getCenter();
         let ent = new Soldier("soldier_" + n, center.x, center.y);
         ent.setGridSquare(home);
@@ -97,7 +96,6 @@ var setup = function () {
     for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
-        console.log(home);
         let center = home.getCenter();
         let ent = new Blob("blob_one", center.x, center.y);
         ent.setGridSquare(home);
@@ -477,6 +475,9 @@ function beginGame() {
     updateGameState();
     drawScene();
     requestAnimationFrame(beginGame);
+    if (animationFrames.length > 0) {
+        sleep(500);
+    }
 }
 
 function updateGameState() {
@@ -612,7 +613,7 @@ function drawScene() {
 
         let renderMe = animationFrames.shift();
         renderMe.render(context);
-        sleep(200);
+        // sleep(200);
     }
 
 

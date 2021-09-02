@@ -5,8 +5,8 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Dot, Line, MovementAnimationDriver, TextLabel } from './entity.js';
-import { GridSquare, Soldier, Blob, EntityAnimationFrame } from './entity.js';
+import { Blob, Dot, GridSquare, Line, MovementAnimationDriver, Soldier, TextLabel } from './entity.js';
+
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -44,7 +44,7 @@ const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
 const entitiesTransient = [];   // These are cleared after every render
 
-let actionPointsMax = 7;
+let actionPointsMax = 50;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -308,19 +308,19 @@ function secondaryEntityUnderMouse(event) {
 
 function moveEntity(entity, event) {
 
-    let targetSquare = selectedGridSquares[selectedGridSquares.length - 1];
+    let destinationSquare = selectedGridSquares[selectedGridSquares.length - 1]; // last item in the list
+    entity.setGridSquare(destinationSquare);
 
     if (entity instanceof Soldier) {
         actionPointsAvailable -= (selectedGridSquares.length - 1);
+
+        // Add movement drivers
+        selectedGridSquares.forEach((sqr, index) => {
+            if (index + 1 < selectedGridSquares.length) {
+                entity.movementDrivers.push(new MovementAnimationDriver(sqr, selectedGridSquares[index + 1]));
+            }
+        });
     }
-
-    // Add movement drivers
-    selectedGridSquares.forEach((sqr, index) => {
-        if (index + 1 < selectedGridSquares.length) {
-            entity.movementDrivers.push( new MovementAnimationDriver(sqr, selectedGridSquares[index + 1]));
-        }
-
-    });
 
     setState(States.ANIMATION);
 }

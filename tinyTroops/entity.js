@@ -382,8 +382,6 @@ export class MovementAnimationDriver {
 
     constructor(origin, destination) {
 
-        console.log(origin, destination);
-
         this.destination = destination;
 
         let destinationPos = destination.getOnScreenPos();
@@ -391,8 +389,6 @@ export class MovementAnimationDriver {
 
         this.deltaX = (destinationPos.x - originScreenPos.x) / this.maxSteps;
         this.deltaY = (destinationPos.y - originScreenPos.y) / this.maxSteps;
-
-        console.log(this);
     }
 
     update(entity) {
@@ -408,90 +404,5 @@ export class MovementAnimationDriver {
     isDone = function () {
         return this.currentStep >= this.maxSteps;
     }
-
-}
-
-
-export class EntityAnimationFrame {
-
-    x = 0;
-    y = 0;
-    entity = null;
-
-    constructor(x, y, entity) {
-        this.x = x;
-        this.y = y;
-        this.entity = entity;
-    }
-
-    render(context) {
-        // context.drawImage(this.image, this.x, this.y);
-
-        // Test text render
-        // context.strokeStyle = "#FF0000";
-        // context.fillStyle = "#FF0000";
-        // context.lineWidth = 2.0;
-        // context.font = "24px sans-serif";
-        // context.strokeText({x: this.x, y: this.y}, 100,100);
-
-        // Entity render
-        context.save();
-        context.translate(this.x, this.y);
-        context.drawImage(this.entity.image, -(this.entity.image.width / 2), - (this.entity.image.height / 2));
-        context.restore();
-    }
-}
-
-export class EntityTransitionAnimation {
-
-    deltaX = 0;
-    deltaY = 0;
-
-
-    /**
-     * Every call to update() increases the current tick. 
-     */
-    ticksPerUpdate = 60;
-    currentTick = 0;
-
-    /**
-     * After all ticks complete, move the image by this amount
-     */
-    movePerUpdate = 5;
-
-    /**
-     * Contains the image frames
-     */
-    frameSequence = [];
-    currentFrameIndex = 0;
-
-    image = new Image();
-
-    constructor(startX, startY, endX, endY, frameSequence) {
-        this.deltaX = (startX - endX);
-        this.deltaY = (startY - endY);
-
-        this.frameSequence = frameSequence;
-
-        this.image.src = this.frameSequence[this.currentFrameIndex];
-    }
-
-    update() {
-        this.currentTick++;
-        if (this.currentTick >= this.ticksPerUpdate) {
-
-            // Reset
-            this.currentTick = 0;
-
-            // TODO: advance to the next frame
-            // this.currentFrameIndex++;
-            // this.image.src = this.frameSequence[this.currentFrameIndex];
-        }
-    }
-
-    render(context) {
-        context.drawImage(this.image)
-    }
-
 
 }

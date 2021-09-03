@@ -14,6 +14,7 @@ class Entity {
     }
 
     setGridSquare(gridSquare) {
+        
         if (this.gridSquare != null) {
             this.gridSquare.isOccupied = false;
         }

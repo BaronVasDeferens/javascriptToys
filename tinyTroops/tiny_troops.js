@@ -83,7 +83,7 @@ var setup = function () {
 
 
     // Create some soldiers
-    for (var n = 0; n < 3; n++) {
+    for (var n = 0; n < 1; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -410,6 +410,8 @@ function startEnemyTurn() {
         if (activeBlob.target == null || activeBlob.target.alive == false) {
             activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
         }
+
+        console.log("target: ", activeBlob.target.gridSquare);
 
         // Move toward target
         let deltaX = activeBlob.x - activeBlob.target.x;

@@ -296,6 +296,8 @@ export class Blob extends Entity {
     currentTick = 0;
     maxTicks = 45;
 
+    movementDrivers = new Array();
+
     constructor(id, x, y) {
         super(id, x, y);
         this.imageAlive.src = "resources/blob_strip.png";
@@ -330,6 +332,16 @@ export class Blob extends Entity {
     }
 
     update() {
+
+        if (this.movementDrivers.length > 0) {
+            let driver = this.movementDrivers[0];
+            driver.update(this);
+            if (driver.isDone()) {
+                this.movementDrivers.shift();
+            }
+        }
+
+
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
             this.currentTick = 0;

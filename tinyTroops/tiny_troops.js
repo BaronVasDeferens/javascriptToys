@@ -44,7 +44,7 @@ const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
 const entitiesTransient = [];   // These are cleared after every render
 
-let actionPointsMax = 50;
+let actionPointsMax = 7;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -83,7 +83,7 @@ var setup = function () {
 
 
     // Create some soldiers
-    for (var n = 0; n < 5; n++) {
+    for (var n = 0; n < 3; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -312,14 +312,14 @@ function moveEntity(entity, event) {
     entity.setGridSquare(destinationSquare);
 
     if (entity instanceof Soldier) {
-        actionPointsAvailable -= (selectedGridSquares.length - 1);
-
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
                 entity.movementDrivers.push(new MovementAnimationDriver(sqr, selectedGridSquares[index + 1]));
             }
         });
+
+        actionPointsAvailable -= (selectedGridSquares.length - 1);
     }
 
     setState(States.ANIMATION);
@@ -413,20 +413,30 @@ function startEnemyTurn() {
 
         // Move toward target
         let deltaX = activeBlob.x - activeBlob.target.x;
-        let deltaY = activeBlob.y - activeBlob.target.y;
-        let distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
-        if (distance <= 100) {
-            // Target in in striking distance!
-            console.log("Blob in range of target-- STRIKE!!")
-            activeBlob.updatePositionByDelta(-deltaX, -deltaY);
-            // kill target
-        } else {
-            // move as far as possible toward target
-            let x = (100 * deltaX) / distance;
-            let y = (100 * deltaY) / distance;
-            activeBlob.updatePositionByDelta(-x, -y);
+        deltaX = deltaX / Math.abs(deltaX);
+        if (isNaN(deltaX)) {
+            deltaX = 0;
         }
+
+        let deltaY = activeBlob.y - activeBlob.target.y;
+        deltaY = deltaY / Math.abs(deltaY);
+        if (isNaN(deltaY)) {
+            deltaY = 0;
+        }
+
+        console.log("x,y" , deltaX, deltaY);
+
+        let origin = activeBlob.gridSquare;
+        let destination =  gridSquares[activeBlob.gridSquare.x - deltaX][activeBlob.gridSquare.y - deltaY];
+        if (destination != null && !destination.isOccupied && !destination.isObstructed) {
+            
+            console.log(origin, destination);
+            activeBlob.setGridSquare(destination);
+            activeBlob.movementDrivers.push(new MovementAnimationDriver(origin, destination));
+        }
+
+        // TODO: actual pathing
+    
     });
 
 }
@@ -471,9 +481,6 @@ function beginGame() {
     updateGameState();
     drawScene();
     requestAnimationFrame(beginGame);
-    if (animationFrames.length > 0) {
-        sleep(500);
-    }
 }
 
 function updateGameState() {

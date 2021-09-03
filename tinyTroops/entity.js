@@ -236,13 +236,13 @@ export class Soldier extends Entity {
 
     update() {
 
-        if (this.movementDrivers.length > 0) {
-            let driver = this.movementDrivers[0];
-            driver.update(this);
-            if (driver.isDone()) {
-                this.movementDrivers.shift();
-            }
-        }
+        // if (this.movementDrivers.length > 0) {
+        //     let driver = this.movementDrivers[0];
+        //     driver.update(this);
+        //     if (driver.isDone()) {
+        //         this.movementDrivers.shift();
+        //     }
+        // }
 
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
@@ -334,13 +334,13 @@ export class Blob extends Entity {
 
     update() {
 
-        if (this.movementDrivers.length > 0) {
-            let driver = this.movementDrivers[0];
-            driver.update(this);
-            if (driver.isDone()) {
-                this.movementDrivers.shift();
-            }
-        }
+        // if (this.movementDrivers.length > 0) {
+        //     let driver = this.movementDrivers[0];
+        //     driver.update(this);
+        //     if (driver.isDone()) {
+        //         this.movementDrivers.shift();
+        //     }
+        // }
 
 
         this.currentTick++;
@@ -349,11 +349,6 @@ export class Blob extends Entity {
 
             // Random frame
             this.currentFrameIndex = Math.floor(Math.random() * (this.maxFrameIndex + 1));
-
-            // this.currentFrameIndex++;
-            // if (this.currentFrameIndex > this.maxFrameIndex) {
-            //     this.currentFrameIndex = 0;
-            // }
         }
     }
 
@@ -391,10 +386,11 @@ export class MovementAnimationDriver {
     currentStep = 0;
     maxSteps = 20;
 
+    entity = null;
     destination = null;
 
-    constructor(origin, destination) {
-
+    constructor(entity, origin, destination) {
+        this.entity = entity;
         this.destination = destination;
 
         let destinationPos = destination.getOnScreenPos();
@@ -404,17 +400,16 @@ export class MovementAnimationDriver {
         this.deltaY = (destinationPos.y - originScreenPos.y) / this.maxSteps;
     }
 
-    update(entity) {
-
+    update() {
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
             this.currentTick = 0;
             this.currentStep++;
-            entity.updatePositionByDelta(this.deltaX, this.deltaY);
+            this.entity.updatePositionByDelta(this.deltaX, this.deltaY);
         }
     }
 
-    isDone = function () {
+    isDone() {
         return this.currentStep >= this.maxSteps;
     }
 

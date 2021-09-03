@@ -44,12 +44,12 @@ const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
 const entitiesTransient = [];   // These are cleared after every render
 
-let actionPointsMax = 7;
+const actionPointsMax = 7;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
 
-const animationFrames = new Array();
+var movementAnimationDrivers = new Array();
 
 
 
@@ -83,7 +83,7 @@ var setup = function () {
 
 
     // Create some soldiers
-    for (var n = 0; n < 1; n++) {
+    for (var n = 0; n < 3; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -93,7 +93,7 @@ var setup = function () {
     }
 
     // Craete some blobs
-    for (var n = 0; n < 5; n++) {
+    for (var n = 0; n < 7; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -315,7 +315,7 @@ function moveEntity(entity, event) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
-                entity.movementDrivers.push(new MovementAnimationDriver(sqr, selectedGridSquares[index + 1]));
+                movementAnimationDrivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1]));
             }
         });
 
@@ -434,7 +434,7 @@ function startEnemyTurn() {
             
             console.log(origin, destination);
             activeBlob.setGridSquare(destination);
-            activeBlob.movementDrivers.push(new MovementAnimationDriver(origin, destination));
+            movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, destination));
         }
 
         // TODO: actual pathing
@@ -570,6 +570,13 @@ function updateGameState() {
     });
 
 
+    if (movementAnimationDrivers.length > 0) {
+        let driver = movementAnimationDrivers[0];
+        driver.update();
+        if (driver.isDone()) {
+            movementAnimationDrivers = movementAnimationDrivers.splice(1, movementAnimationDrivers.length - 1);
+        }
+    }
 }
 
 // Display the underlying grid.
@@ -612,11 +619,5 @@ function drawScene() {
 
         // Clear the transients
         entitiesTransient.length = 0;
-    }
-
-    if (animationFrames.length > 0) {
-        let renderMe = animationFrames.shift();
-        renderMe.render(context);
-        // sleep(200);
     }
 }

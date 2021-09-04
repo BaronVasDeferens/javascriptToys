@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Dot, GridSquare, Line, MovementAnimationDriver, Soldier, TextLabel } from './entity.js';
+import { Blob, Dot, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -19,13 +19,16 @@ canvas.height = innerHeight;
  * GAME STATES
  */
 var States = Object.freeze({
+    INTRO: "INTRO",
     IDLE: "IDLE",
     UNIT_SELECTED: "UNIT_SELECTED",
     ENEMY_TURN: "ENEMY_TURN",
     ANIMATION: "ANIMATION"
 });
 
-var currentState = States.IDLE;
+var currentState = States.INTRO;
+const introAudio = new Audio("resources/intro.wav");
+
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
 var selectedEntitySecondary = null;
@@ -64,6 +67,13 @@ function randomValueInRange(min, max) {
 var setup = function () {
     console.log(">>> Starting...");
 
+    // Set intro mode, animation, music
+    setState(States.INTRO);
+    let introAnim = new IntroAnimation(90, 90);
+    entitiesTemporary.push(introAnim);
+
+
+    // Setup grid squares
     for (var i = 0; i < gridSize; i++) {
         gridSquares[i] = new Array(0);
         for (var j = 0; j < gridSize; j++) {
@@ -92,7 +102,7 @@ var setup = function () {
         entitiesResident.push(ent);
     }
 
-    // Craete some blobs
+    // Create some blobs
     for (var n = 0; n < 7; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
@@ -114,6 +124,10 @@ document.addEventListener('contextmenu', event => event.preventDefault());
 window.onmousedown = function (event) {
 
     switch (currentState) {
+        case States.INTRO:
+            setState(States.IDLE);
+            break;
+
         case States.IDLE:
 
             switch (event.button) {
@@ -168,10 +182,13 @@ window.onmousedown = function (event) {
 window.onmousemove = function (event) {
 
     switch (currentState) {
+        case States.INTRO:
+            introAudio.play();
+            break;
         case States.IDLE:
+            introAudio.pause();
             break;
         case States.UNIT_SELECTED:
-
             // Compute the selection path (selectedGridSquares)
             let selected = findGridSquareAtMouse(event);
             if (selected != null) {
@@ -426,19 +443,15 @@ function startEnemyTurn() {
             deltaY = 0;
         }
 
-        console.log("x,y" , deltaX, deltaY);
-
         let origin = activeBlob.gridSquare;
-        let destination =  gridSquares[activeBlob.gridSquare.x - deltaX][activeBlob.gridSquare.y - deltaY];
+        let destination = gridSquares[activeBlob.gridSquare.x - deltaX][activeBlob.gridSquare.y - deltaY];
         if (destination != null && !destination.isOccupied && !destination.isObstructed) {
-            
-            console.log(origin, destination);
             activeBlob.setGridSquare(destination);
             movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, destination));
         }
 
         // TODO: actual pathing
-    
+
     });
 
 }
@@ -599,7 +612,9 @@ function drawScene() {
     context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context);
 
-    if (currentState == States.IDLE || currentState == States.UNIT_SELECTED) {
+    if (currentState == States.INTRO
+        || currentState == States.IDLE
+        || currentState == States.UNIT_SELECTED) {
 
         context.imageSmoothingEnabled = false;
 

@@ -14,7 +14,7 @@ class Entity {
     }
 
     setGridSquare(gridSquare) {
-        
+
         if (this.gridSquare != null) {
             this.gridSquare.isOccupied = false;
         }
@@ -234,6 +234,13 @@ export class Soldier extends Entity {
         this.y += dy;
     }
 
+    incrementFrame() {
+        this.currentFrameIndex++;
+        if (this.currentFrameIndex > this.maxFrameIndex) {
+            this.currentFrameIndex = 0;
+        }
+    }
+
     update() {
 
         // if (this.movementDrivers.length > 0) {
@@ -244,13 +251,13 @@ export class Soldier extends Entity {
         //     }
         // }
 
-        this.currentTick++;
-        if (this.currentTick >= this.maxTicks) {
-            this.currentFrameIndex++;
-            if (this.currentFrameIndex > this.maxFrameIndex) {
-                this.currentFrameIndex = 0;
-            }
-        }
+        // this.currentTick++;
+        // if (this.currentTick >= this.maxTicks) {
+        //     this.currentFrameIndex++;
+        //     if (this.currentFrameIndex > this.maxFrameIndex) {
+        //         this.currentFrameIndex = 0;
+        //     }
+        // }
     }
 
     // Draws CENTERED on x,y
@@ -352,6 +359,13 @@ export class Blob extends Entity {
         }
     }
 
+    incrementFrame() {
+        this.currentFrameIndex++;
+        if (this.currentFrameIndex > this.maxFrameIndex) {
+            this.currentFrameIndex = 0;
+        }
+    }
+
     setTarget(target) {
         this.target = target;
         console.log("blob " + this.id + " now targets soldier " + this.target.id);
@@ -405,6 +419,7 @@ export class MovementAnimationDriver {
         if (this.currentTick >= this.maxTicks) {
             this.currentTick = 0;
             this.currentStep++;
+            this.entity.incrementFrame();
             this.entity.updatePositionByDelta(this.deltaX, this.deltaY);
         }
     }
@@ -412,5 +427,54 @@ export class MovementAnimationDriver {
     isDone() {
         return this.currentStep >= this.maxSteps;
     }
+
+}
+
+
+export class IntroAnimation {
+
+    introImage = new Image();
+
+    canvasWidth = 0;
+    canvasHeight = 0;
+    x = 0;
+    y = 0;
+
+    constructor(x, y) {
+        // this.canvasWidth = canvasWidth;
+        // this.canvasHeight = canvasHeight;
+        this.x = x;
+        this.y = y;
+        this.introImage.src = "resources/logo.png";
+    }
+
+    render(context) {
+
+        // let startX = (this.canvasWidth / 2) - (this.introImage.width / 2);
+        // let startY = (this.canvasHeight / 2) - (this.introImage.height / 2);
+
+        context.drawImage(this.introImage, this.x, this.y);
+
+
+
+
+        context.fillStyle = "#000000";
+
+        for (var i = 0; i < 100; i++) {
+            let startX = this.randomRange(this.x, this.introImage.width - 50);
+            let startY = this.randomRange(this.y, this.introImage.height - 50);
+            let sizeX = Math.random() * 50;
+            let sizeY = Math.random() * 50;
+            context.fillRect(startX, startY, sizeX, sizeY);
+        }
+
+    }
+
+    randomRange(min, max) {
+        return Math.floor(Math.random() * max) + min;
+    }
+
+
+
 
 }

@@ -111,9 +111,11 @@ export class Dot {
     render(context) {
         context.strokeStyle = this.color;
         context.lineWidth = this.lineWidth;
+        context.globalAlpha = 0.5;
         context.beginPath();
         context.ellipse(this.centerX, this.centerY, this.size, this.size, 2 * Math.PI, 2 * Math.PI, false);
         context.stroke();
+        context.globalAlpha = 1.0;
     }
 }
 
@@ -152,13 +154,14 @@ export class Line {
     render(context) {
         context.strokeStyle = this.color;
         context.lineWidth = this.lineWidth;
-
+        context.globalAlpha = 0.5;
         context.save();
         context.beginPath();
         context.moveTo(this.startX, this.startY);
         context.lineTo(this.endX, this.endY);
         context.stroke();
         context.restore();
+        context.globalAlpha = 1.0;
     }
 
 

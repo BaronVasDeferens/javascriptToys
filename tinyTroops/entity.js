@@ -375,13 +375,12 @@ export class Blob extends Entity {
     render(context) {
         context.save();
         context.translate(this.x, this.y);
-        var image;
+
         if (this.alive) {
-            image = this.imageAlive;
+            context.drawImage(this.imageAlive, 50 * this.currentFrameIndex, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
         } else {
-            image = this.imageDead;
+            context.drawImage(this.imageDead, -(this.imageDead.width / 2), - (this.imageDead.height / 2));
         }
-        context.drawImage(image, 50 * this.currentFrameIndex, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
 
         context.restore();
     }

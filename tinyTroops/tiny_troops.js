@@ -29,32 +29,37 @@ var States = Object.freeze({
 var currentState = States.INTRO;
 const introAudio = new Audio("resources/intro.wav");
 
-
-var selectedEntityPrimary = null;       // the currently "selected" entity
-var selectedEntitySecondary = null;
-
-var mousePointerHoverDot = null;        // a dot which denotes the selected entity
-var mousePointerHoverLine = null;       // a line stretching from the sleected unit to the mouse pointer
-
+// Map data
 const gridSize = 9;
 const gridSquares = new Array(0);
 var allSquares = [];
 const gridSquareSize = 75;
 var selectedGridSquares = [];
 
+var selectedEntityPrimary = null;       // the currently "selected" entity
+var selectedEntitySecondary = null;     // if selectedPrimary != null, this is the entity (if any) under the mouse
+
+var mousePointerHoverDot = null;        // a ring which denotes the selected entity
+var mousePointerHoverLine = null;       // a line stretching from the selected unit to the mouse pointer
+
+
 
 const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
-const entitiesTransient = [];   // These are cleared after every render
+const entitiesTransient = [];   // Cleared after every render
 
+
+/**
+ * Movement Animation Drivers
+ * An ordered queue of classes which incrementally adjust entity positions on screen
+ */
+var movementAnimationDrivers = new Array();
+
+// Action point tracking
 const actionPointsMax = 7;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
-
-var movementAnimationDrivers = new Array();
-
-
 
 function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
@@ -63,6 +68,12 @@ function actionPointCostTotal() {
 function randomValueInRange(min, max) {
     return Math.random() * max + min;
 };
+
+
+
+/**
+ * SETUP
+ */
 
 var setup = function () {
     console.log(">>> Starting...");
@@ -183,7 +194,7 @@ window.onmousemove = function (event) {
 
     switch (currentState) {
         case States.INTRO:
-            introAudio.play();
+            //introAudio.play();
             break;
         case States.IDLE:
             introAudio.pause();
@@ -222,7 +233,6 @@ window.onmousemove = function (event) {
             if (selectedEntityPrimary != null) {
                 // draw a line from the primary selected unit
                 let centeredCoords = selectedEntityPrimary.getCenteredCoords();
-                // mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#000000");
 
                 // sub-entity under mouse?
                 let subEnt = secondaryEntityUnderMouse(event);
@@ -230,8 +240,11 @@ window.onmousemove = function (event) {
 
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Dot(event.x, event.y, 50, "#000000");
+                    mousePointerHoverLine = null;
                 } else {
                     mousePointerHoverDot = new Dot(event.x, event.y, 50, "#FF0000");
+                    // TODO: make mousePointerHoverLine origin at circumference of hoverdot
+                    mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#FF0000");
                 }
             }
 
@@ -533,19 +546,25 @@ function updateGameState() {
 
     }
 
-    // Highlight the selected path (selectedGridSquares)
-    selectedGridSquares.forEach((square, index) => {
-        // entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
+    // Only highlight the movement path if there is no secondary entity selected
+    if (selectedEntitySecondary == null) {
+        // Highlight the selected path (selectedGridSquares)
+        selectedGridSquares.forEach((square, index) => {
+            // entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
 
-        let next = selectedGridSquares[index - 1];
+            let next = selectedGridSquares[index - 1];
 
-        if (next != null) {
-            let c1 = square.getCenter();
-            let c2 = next.getCenter();
-            entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#FF0000"));
-        }
-    });
+            if (next != null) {
+                let c1 = square.getCenter();
+                let c2 = next.getCenter();
+                entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#FF0000"));
+            }
+        });
 
+    }
+
+
+    // Recalculate available action points
     let apAvail = 0;
     if (selectedGridSquares.length >= 1) {
         apAvail = actionPointsAvailable - (selectedGridSquares.length - 1);
@@ -593,7 +612,7 @@ function updateGameState() {
 }
 
 // Display the underlying grid.
-// BIG GRIDS make the game SLOW! 
+// BIG GRIDS with intricate internal geometry make the game SLOW! 
 // TODO: Render once and re-use
 function drawGrid(context) {
     for (var i = 0; i < gridSize; i++) {

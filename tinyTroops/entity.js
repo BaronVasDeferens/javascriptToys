@@ -83,6 +83,7 @@ export class GridSquare {
             context.strokeStyle = this.color;
             context.lineWidth = 1.0;
             context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            // Circle in the center
             // context.beginPath();
             // let center = this.getCenter();
             // context.ellipse(center.x, center.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
@@ -224,8 +225,8 @@ export class Soldier extends Entity {
 
     getCenteredCoords() {
         return {
-            x: this.x, // + (this.image.width / 2),
-            y: this.y // + (this.image.height / 2)
+            x: this.x,
+            y: this.y 
         }
     }
 
@@ -242,22 +243,7 @@ export class Soldier extends Entity {
     }
 
     update() {
-
-        // if (this.movementDrivers.length > 0) {
-        //     let driver = this.movementDrivers[0];
-        //     driver.update(this);
-        //     if (driver.isDone()) {
-        //         this.movementDrivers.shift();
-        //     }
-        // }
-
-        // this.currentTick++;
-        // if (this.currentTick >= this.maxTicks) {
-        //     this.currentFrameIndex++;
-        //     if (this.currentFrameIndex > this.maxFrameIndex) {
-        //         this.currentFrameIndex = 0;
-        //     }
-        // }
+        // Idle "wiggle" animation would go here
     }
 
     // Draws CENTERED on x,y
@@ -329,8 +315,8 @@ export class Blob extends Entity {
 
     getCenteredCoords() {
         return {
-            x: this.x, // + (this.image.width / 2),
-            y: this.y // + (this.image.height / 2)
+            x: this.x, 
+            y: this.y
         }
     }
 
@@ -340,16 +326,6 @@ export class Blob extends Entity {
     }
 
     update() {
-
-        // if (this.movementDrivers.length > 0) {
-        //     let driver = this.movementDrivers[0];
-        //     driver.update(this);
-        //     if (driver.isDone()) {
-        //         this.movementDrivers.shift();
-        //     }
-        // }
-
-
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
             this.currentTick = 0;

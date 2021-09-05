@@ -429,7 +429,11 @@ export class MovementAnimationDriver {
 
 }
 
-
+/**
+ * Intro animation
+ * Designed as a Temporary Entity (disposed when INTRO state changes)
+ * Shows the logo with a crazed "static" effect
+ */
 export class IntroAnimation {
 
     introImage = new Image();
@@ -440,8 +444,6 @@ export class IntroAnimation {
     y = 0;
 
     constructor(x, y) {
-        // this.canvasWidth = canvasWidth;
-        // this.canvasHeight = canvasHeight;
         this.x = x;
         this.y = y;
         this.introImage.src = "resources/logo.png";
@@ -449,16 +451,9 @@ export class IntroAnimation {
 
     render(context) {
 
-        // let startX = (this.canvasWidth / 2) - (this.introImage.width / 2);
-        // let startY = (this.canvasHeight / 2) - (this.introImage.height / 2);
-
         context.drawImage(this.introImage, this.x, this.y);
 
-
-
-
         context.fillStyle = "#000000";
-
         for (var i = 0; i < 100; i++) {
             let startX = this.randomRange(this.x, this.introImage.width - 50);
             let startY = this.randomRange(this.y, this.introImage.height - 50);
@@ -466,14 +461,9 @@ export class IntroAnimation {
             let sizeY = Math.random() * 50;
             context.fillRect(startX, startY, sizeX, sizeY);
         }
-
     }
 
     randomRange(min, max) {
         return Math.floor(Math.random() * max) + min;
     }
-
-
-
-
 }

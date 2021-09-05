@@ -80,7 +80,7 @@ var setup = function () {
 
     // Set intro mode, animation, music
     setState(States.INTRO);
-    let introAnim = new IntroAnimation(90, 90);
+    let introAnim = new IntroAnimation(90, 180);
     entitiesTemporary.push(introAnim);
 
 

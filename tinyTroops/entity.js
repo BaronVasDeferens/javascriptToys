@@ -92,7 +92,7 @@ export class GridSquare {
     }
 }
 
-export class Dot {
+export class Ring {
 
     centerX = 0;
     centerY = 0;

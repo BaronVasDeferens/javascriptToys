@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Dot, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -239,10 +239,10 @@ window.onmousemove = function (event) {
                 selectedEntitySecondary = subEnt;
 
                 if (selectedEntitySecondary == null) {
-                    mousePointerHoverDot = new Dot(event.x, event.y, 50, "#000000");
+                    mousePointerHoverDot = new Ring(event.x, event.y, 50, "#000000");
                     mousePointerHoverLine = null;
                 } else {
-                    mousePointerHoverDot = new Dot(event.x, event.y, 50, "#FF0000");
+                    mousePointerHoverDot = new Ring(event.x, event.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
                     mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#FF0000");
                 }
@@ -306,7 +306,7 @@ function selectPlayerEntityAtMouse(event) {
         let centeredOnClick = resident.isClicked(event);
         // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state
         if (centeredOnClick && resident instanceof Soldier) {
-            var dot = new Dot(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
+            var dot = new Ring(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
             entitiesTemporary.push(dot);
             selectedEntityPrimary = resident;
 

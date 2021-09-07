@@ -92,6 +92,29 @@ export class GridSquare {
     }
 }
 
+export class Dot {
+
+    x = 0;
+    y = 0;
+    color = "#000000";
+
+    constructor(gridSquare, color) {
+        let centers = gridSquare.getCenter();
+        this.x = centers.x;
+        this.y = centers.y;
+        this.color = color;
+    }
+
+    render(context) {
+        context.strokeStyle = this.color;
+        context.lineWidth = 1.0;
+        context.beginPath();
+        context.ellipse(this.x, this.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
+        context.stroke();
+    }
+
+}
+
 export class Ring {
 
     centerX = 0;

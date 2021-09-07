@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -558,9 +558,18 @@ function updateGameState() {
                 let c1 = square.getCenter();
                 let c2 = next.getCenter();
                 entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#FF0000"));
+                entitiesTransient.push(new Dot(square, "#000000"));
             }
         });
 
+    }
+
+
+    if (selectedEntityPrimary != null && selectedEntitySecondary != null) {
+        let LOSdots = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
+        LOSdots.forEach(dot => {
+            entitiesTransient.push(dot);
+        });
     }
 
 
@@ -610,6 +619,51 @@ function updateGameState() {
         }
     }
 }
+
+
+
+
+
+function calculateLineOfSight(origin, target) {
+
+    let dots = new Array();
+
+    let rX = target.x - origin.x;
+    let dX = Math.floor(rX / Math.abs(rX));
+    if (isNaN(dX)) {
+        dX = 0;
+    }
+
+    let rY = target.y - origin.y;
+    let dY = Math.floor(rY / Math.abs(rY));
+    if (isNaN(dY)) {
+        dY = 0;
+    }
+
+    console.log("rx, ry, dx, dy", rX, rY, dX, dY);
+
+    let currentGridSquare = origin;
+    for (let z = 0; z < Math.abs(rX) + Math.abs(rY); z++) {
+
+
+        if (Math.abs(rX) > Math.abs(rY)) {
+            currentGridSquare = gridSquares[currentGridSquare.x + dX][currentGridSquare.y];
+            dots.push(new Dot(currentGridSquare, "#FF0000"));
+            currentGridSquare = gridSquares[currentGridSquare.x][currentGridSquare.y + dY];
+            dots.push(new Dot(currentGridSquare, "#FF0000"));
+        }
+
+
+    }
+
+    return dots;
+
+}
+
+
+
+
+
 
 // Display the underlying grid.
 // BIG GRIDS with intricate internal geometry make the game SLOW! 

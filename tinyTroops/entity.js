@@ -97,20 +97,33 @@ export class Dot {
     x = 0;
     y = 0;
     color = "#000000";
+    isFilled = false;
 
-    constructor(gridSquare, color) {
+    constructor(gridSquare, color, isFilled) {
         let centers = gridSquare.getCenter();
         this.x = centers.x;
         this.y = centers.y;
         this.color = color;
+        if (isFilled != null) {
+            this.isFilled = isFilled;
+        } else {
+            this.isFilled = false;
+        }
     }
 
     render(context) {
+
+        context.fillStyle = this.color;
         context.strokeStyle = this.color;
+
         context.lineWidth = 1.0;
         context.beginPath();
         context.ellipse(this.x, this.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
         context.stroke();
+
+        if (this.isFilled) {
+            context.fill();
+        }
     }
 
 }
@@ -252,7 +265,7 @@ export class Soldier extends Entity {
     getCenteredCoords() {
         return {
             x: this.x,
-            y: this.y 
+            y: this.y
         }
     }
 
@@ -341,7 +354,7 @@ export class Blob extends Entity {
 
     getCenteredCoords() {
         return {
-            x: this.x, 
+            x: this.x,
             y: this.y
         }
     }

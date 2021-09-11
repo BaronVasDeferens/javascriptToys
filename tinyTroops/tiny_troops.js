@@ -104,7 +104,7 @@ var setup = function () {
 
 
     // Create some soldiers
-    for (var n = 0; n < 3; n++) {
+    for (var n = 0; n < 5; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -237,14 +237,16 @@ window.onmousemove = function (event) {
                 // sub-entity under mouse?
                 let subEnt = secondaryEntityUnderMouse(event);
                 selectedEntitySecondary = subEnt;
+                
 
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Ring(event.x, event.y, 50, "#000000");
                     mousePointerHoverLine = null;
                 } else {
-                    mousePointerHoverDot = new Ring(event.x, event.y, 50, "#FF0000");
+                    let centerTarget = selectedEntitySecondary.gridSquare.getCenter();
+                    mousePointerHoverDot = new Ring(centerTarget.x, centerTarget.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
-                    mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, event.x, event.y, 2, "#FF0000");
+                    mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, centerTarget.x, centerTarget.y, 2, "#FF0000");
                 }
             }
 
@@ -557,8 +559,8 @@ function updateGameState() {
             if (next != null) {
                 let c1 = square.getCenter();
                 let c2 = next.getCenter();
-                entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#FF0000"));
-                entitiesTransient.push(new Dot(square, "#000000"));
+                entitiesTransient.push(new Line(c1.x, c1.y, c2.x, c2.y, 5.0, "#000000"));
+                entitiesTransient.push(new Dot(square, "#000000", true));
             }
         });
 
@@ -628,33 +630,58 @@ function calculateLineOfSight(origin, target) {
 
     let dots = new Array();
 
-    let rX = target.x - origin.x;
-    let dX = Math.floor(rX / Math.abs(rX));
+    let rX = target.x - origin.x;           // horizontal difference: run
+    let dX = Math.floor(rX / Math.abs(rX)); // direction; right (positive) or left (negative)?
     if (isNaN(dX)) {
         dX = 0;
     }
 
-    let rY = target.y - origin.y;
-    let dY = Math.floor(rY / Math.abs(rY));
+    let rY = target.y - origin.y;           // vertical difference: rise
+    let dY = Math.floor(rY / Math.abs(rY)); // direction: down (positive) or up (negative)
     if (isNaN(dY)) {
         dY = 0;
     }
 
-    console.log("rx, ry, dx, dy", rX, rY, dX, dY);
+    // abs(rX) + abs(dY) - 1 
+    // is the number of squares our LOS passes through and that must be checked;
+    let distanceInSquares = (Math.abs(rX) + Math.abs(rY)) - 1;
+
+    console.log("rx, ry, dx, dy, squares", rX, rY, dX, dY, distanceInSquares);
 
     let currentGridSquare = origin;
-    for (let z = 0; z < Math.abs(rX) + Math.abs(rY); z++) {
+
+    // This works perfectly for straight horizontals
+    // for (let z = 0; z < Math.abs(rX) + Math.abs(rY); z++) {
 
 
-        if (Math.abs(rX) > Math.abs(rY)) {
-            currentGridSquare = gridSquares[currentGridSquare.x + dX][currentGridSquare.y];
-            dots.push(new Dot(currentGridSquare, "#FF0000"));
-            currentGridSquare = gridSquares[currentGridSquare.x][currentGridSquare.y + dY];
-            dots.push(new Dot(currentGridSquare, "#FF0000"));
-        }
+    //     if (Math.abs(rX) > Math.abs(rY)) {
+    //         currentGridSquare = gridSquares[currentGridSquare.x + dX][currentGridSquare.y];
+    //         dots.push(new Dot(currentGridSquare, "#FF0000"));
+    //         currentGridSquare = gridSquares[currentGridSquare.x][currentGridSquare.y + dY];
+    //         dots.push(new Dot(currentGridSquare, "#FF0000"));
+    //     }
 
 
-    }
+    // }
+
+    // for (let z = 0; z < distanceInSquares; z++) {
+
+    //     let aX = Math.abs(rX);
+    //     let aY = Math.abs(rY);
+
+    //     let xChunks = 0;
+    //     let yChunks  = 0;
+        
+
+    //     if (aX < aY) {
+    //         xChunks = 
+    //         yChunks = Math.floor(aY/aX);
+    //     } else {
+
+    //     }
+
+    // }
+
 
     return dots;
 

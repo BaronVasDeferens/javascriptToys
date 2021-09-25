@@ -577,7 +577,7 @@ function updateGameState() {
 
     // Recalculate available action points
     let apAvail = 0;
-    if (selectedGridSquares.length >= 1) {
+    if (selectedGridSquares.length > 1) {
         apAvail = actionPointsAvailable - (selectedGridSquares.length - 1);
     } else {
         apAvail = actionPointsAvailable;

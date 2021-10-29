@@ -327,7 +327,7 @@ export class Blob extends Entity {
     currentFrameIndex = 0;
     maxFrameIndex = 3;
     currentTick = 0;
-    maxTicks = 45;
+    maxTicks = 30;
 
     movementDrivers = new Array();
 

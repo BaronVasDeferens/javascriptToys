@@ -164,6 +164,8 @@ window.onmousedown = function (event) {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             moveEntity(selectedEntityPrimary, event);
+                        } else {
+                            console.log("too few AP to move", actionPointsAvailable, actionPointsCostPotential);
                         }
                         setState(States.IDLE);
                     } else {
@@ -491,6 +493,7 @@ function setState(state) {
             mousePointerHoverLine = null;
 
             actionPointCostAdjustment = 0;
+            actionPointsCostPotential = 0;
 
             selectedGridSquares.length = 0;
 

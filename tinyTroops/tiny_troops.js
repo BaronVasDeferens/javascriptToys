@@ -657,6 +657,10 @@ function calculateLineOfSight(origin, target) {
         isDiagonal = true;
     }
 
+
+    // I am convinced that there exists an algorithm for:
+    // given a line, find all (unti) squares that it passes through
+    // CONVINCED!!
     console.log(`slope = ${rY} / ${rX} horiz: ${isHorizontal} vert: ${isVertical} diag: ${isDiagonal}`);
 
 

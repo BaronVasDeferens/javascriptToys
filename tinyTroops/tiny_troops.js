@@ -590,12 +590,12 @@ function updateGameState() {
     // If there's a movement being plotted...
     if (selectedGridSquares.length > 0) {
         entitiesTransient.push(new TextLabel(
-            10, 600, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
+            10, 700, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
         ));
     } else {
         //...otherwise, display the remaining AP
         entitiesTransient.push(new TextLabel(
-            10, 600, "AP: " + apAvail, "#000000"
+            10, 700, "AP: " + apAvail, "#000000"
         ));
     }
 
@@ -645,45 +645,26 @@ function calculateLineOfSight(origin, target) {
         dY = 0;
     }
 
-    // abs(rX) + abs(dY) - 1 
-    // is the number of squares our LOS passes through and that must be checked;
-    let distanceInSquares = (Math.abs(rX) + Math.abs(rY)) - 1;
+    let isDiagonal = false;
+    let isHorizontal = false;
+    let isVertical = false;
 
-    console.log("rx, ry, dx, dy, squares", rX, rY, dX, dY, distanceInSquares);
+    if (rX == 0) {
+        isVertical = true;    
+    } else if (rY == 0) {
+        isHorizontal = true;
+    } else {
+        isDiagonal = true;
+    }
+
+    console.log(`slope = ${rY} / ${rX} horiz: ${isHorizontal} vert: ${isVertical} diag: ${isDiagonal}`);
+
 
     let currentGridSquare = origin;
 
-    // This works perfectly for straight horizontals
-    // for (let z = 0; z < Math.abs(rX) + Math.abs(rY); z++) {
 
 
-    //     if (Math.abs(rX) > Math.abs(rY)) {
-    //         currentGridSquare = gridSquares[currentGridSquare.x + dX][currentGridSquare.y];
-    //         dots.push(new Dot(currentGridSquare, "#FF0000"));
-    //         currentGridSquare = gridSquares[currentGridSquare.x][currentGridSquare.y + dY];
-    //         dots.push(new Dot(currentGridSquare, "#FF0000"));
-    //     }
-
-
-    // }
-
-    // for (let z = 0; z < distanceInSquares; z++) {
-
-    //     let aX = Math.abs(rX);
-    //     let aY = Math.abs(rY);
-
-    //     let xChunks = 0;
-    //     let yChunks  = 0;
-        
-
-    //     if (aX < aY) {
-    //         xChunks = 
-    //         yChunks = Math.floor(aY/aX);
-    //     } else {
-
-    //     }
-
-    // }
+  
 
 
     return dots;

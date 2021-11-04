@@ -633,46 +633,24 @@ function calculateLineOfSight(origin, target) {
 
     let dots = new Array();
 
-    let rX = target.x - origin.x;           // horizontal difference: run
-    let dX = Math.floor(rX / Math.abs(rX)); // direction; right (positive) or left (negative)?
-    if (isNaN(dX)) {
-        dX = 0;
+    let rise = target.y - origin.y;           // vertical difference: rise
+    let run = target.x - origin.x;           // horizontal difference: run
+
+    //console.log(`${rise} / ${run}`);
+
+
+    if (Math.abs(rise) == Math.abs(run)) {
+        // diagonal
+        console.log(`diagonal ${rise} / ${run}`);
+    } else if (rise < 0 && run < 0) {
+        // up left transit
+        console.log(`up left transit ${rise} / ${run}`);
+
+        
     }
-
-    let rY = target.y - origin.y;           // vertical difference: rise
-    let dY = Math.floor(rY / Math.abs(rY)); // direction: down (positive) or up (negative)
-    if (isNaN(dY)) {
-        dY = 0;
-    }
-
-    let isDiagonal = false;
-    let isHorizontal = false;
-    let isVertical = false;
-
-    if (rX == 0) {
-        isVertical = true;    
-    } else if (rY == 0) {
-        isHorizontal = true;
-    } else {
-        isDiagonal = true;
-    }
-
-
-    // I am convinced that there exists an algorithm for:
-    // given a line, find all (unti) squares that it passes through
-    // CONVINCED!!
-    console.log(`slope = ${rY} / ${rX} horiz: ${isHorizontal} vert: ${isVertical} diag: ${isDiagonal}`);
-
-
-    let currentGridSquare = origin;
-
-
-
-  
 
 
     return dots;
-
 }
 
 

@@ -128,6 +128,31 @@ export class Dot {
 
 }
 
+export class LittleDot {
+    x = 0;
+    y = 0;
+    color = "#FFFF00";
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    render(context) {
+
+        console.log("render!");
+
+        context.fillStyle = this.color;
+        context.strokeStyle = this.color;
+
+        context.lineWidth = 1.0;
+        context.beginPath();
+        context.ellipse(this.x, this.y, 2, 2, 2 * Math.PI, 2 * Math.PI, false);
+        context.stroke();
+    }
+
+}
+
 export class Ring {
 
     centerX = 0;

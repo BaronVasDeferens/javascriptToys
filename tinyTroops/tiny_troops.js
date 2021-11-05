@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -103,25 +103,42 @@ var setup = function () {
     gridSquares[6][6].isObstructed = true;
 
 
-    // Create some soldiers
-    for (var n = 0; n < 5; n++) {
-        shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
-        let center = home.getCenter();
-        let ent = new Soldier("soldier_" + n, center.x, center.y);
-        ent.setGridSquare(home);
-        entitiesResident.push(ent);
-    }
+    // // Create some soldiers
+    // for (var n = 0; n < 5; n++) {
+    //     shuffleArray(allSquares);
+    //     let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
+    //     let center = home.getCenter();
+    //     let ent = new Soldier("soldier_" + n, center.x, center.y);
+    //     ent.setGridSquare(home);
+    //     entitiesResident.push(ent);
+    // }
 
-    // Create some blobs
-    for (var n = 0; n < 7; n++) {
-        shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
-        let center = home.getCenter();
-        let ent = new Blob("blob_one", center.x, center.y);
-        ent.setGridSquare(home);
-        entitiesResident.push(ent);
-    }
+    // // Create some blobs
+    // for (var n = 0; n < 7; n++) {
+    //     shuffleArray(allSquares);
+    //     let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
+    //     let center = home.getCenter();
+    //     let ent = new Blob("blob_one", center.x, center.y);
+    //     ent.setGridSquare(home);
+    //     entitiesResident.push(ent);
+    // }
+
+    let sold = new Soldier("", gridSquares[4][4].getCenter().x, gridSquares[4][4].getCenter().y);
+    sold.setGridSquare(gridSquares[4][4]);
+    entitiesResident.push(sold);
+
+    let mon = new Blob("", gridSquares[6][1].getCenter().x, gridSquares[6][1].getCenter().y);
+    mon.setGridSquare(gridSquares[6][1]);
+    entitiesResident.push(mon);
+
+    let mon2 = new Blob("", gridSquares[8][1].getCenter().x, gridSquares[8][1].getCenter().y);
+    mon2.setGridSquare(gridSquares[8][1]);
+    entitiesResident.push(mon2);
+
+    let mon3 = new Blob("", gridSquares[5][1].getCenter().x, gridSquares[5][1].getCenter().y);
+    mon3.setGridSquare(gridSquares[5][1]);
+    entitiesResident.push(mon3);
+
 
     beginGame();
 }();
@@ -239,7 +256,7 @@ window.onmousemove = function (event) {
                 // sub-entity under mouse?
                 let subEnt = secondaryEntityUnderMouse(event);
                 selectedEntitySecondary = subEnt;
-                
+
 
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Ring(event.x, event.y, 50, "#000000");
@@ -638,6 +655,7 @@ function calculateLineOfSight(origin, target) {
 
     //console.log(`${rise} / ${run}`);
 
+    let theta = Math.atan(rise / run);
 
     if (Math.abs(rise) == Math.abs(run)) {
         // diagonal
@@ -645,8 +663,49 @@ function calculateLineOfSight(origin, target) {
     } else if (rise < 0 && run < 0) {
         // up left transit
         console.log(`up left transit ${rise} / ${run}`);
+    } else if (rise < 0 && run > 0) {
+        console.log(`up right transit ${rise} / ${run}`);
+        // Theta is positive in this quadrant
+        // theta = Math.abs(theta);
 
-        
+        let deltaX = Math.cos(theta) * (gridSquareSize / 2);
+        let deltaY = Math.sin(theta) * (gridSquareSize / 2);
+
+        console.log(` theta: ${theta} dx/dy: ${deltaX} / ${deltaY}`);
+
+        let candidate = origin;
+
+        let zPoint = {
+            x: candidate.getCenter().x + deltaX,
+            y: candidate.getCenter().y + deltaY
+        };
+
+        console.log("zPoint: ${zPoint}");
+
+        dots.push(new LittleDot(zPoint.x, zPoint.y));
+
+        zPoint = {
+            x: zPoint.x + (2 * deltaX),
+            y: zPoint.y + (2 * deltaY)
+        };
+
+        candidate = findGridSquareAtMouse(zPoint);
+
+        console.log(`candidate: ${candidate}`);
+
+        // while (candidate != target) {
+
+            zPoint = {
+                x: candidate.getCenter().x + deltaX,
+                y: candidate.getCenter().y + deltaY
+            };
+            let nextSquare = findGridSquareAtMouse(zPoint);
+
+            console.log(nextSquare)
+            dots.push(new LittleDot(zPoint.x, zPoint.y));
+            candidate = nextSquare;
+        // }
+
     }
 
 

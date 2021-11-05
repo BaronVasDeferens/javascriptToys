@@ -301,10 +301,6 @@ function shuffleArray(array) {
 
 function findGridSquareAtMouse(event) {
 
-    // Think of it like this...
-    // The layout of the first Array is horizontal (like normal)
-    // Then the sub-arrays start in the home element but extend downward, like columns.
-    // So, counter-intuitively...
     // columns: x
     // rows : y
 
@@ -645,7 +641,11 @@ function updateGameState() {
 
 
 
-
+/**
+ * Draw a line of sight from the center of one grid square (origin) to the another (target).
+ * Next, "sub-sample" points from the line at regular intervals and find any squares that contain
+ * the those points.
+ */
 function calculateLineOfSight(origin, target) {
 
     let dots = new Array();
@@ -666,10 +666,10 @@ function calculateLineOfSight(origin, target) {
     } else if (rise < 0 && run > 0) {
         console.log(`up right transit ${rise} / ${run}`);
         // Theta is positive in this quadrant
-        // theta = Math.abs(theta);
+        
 
-        let deltaX = Math.cos(theta) * (gridSquareSize / 2);
-        let deltaY = Math.sin(theta) * (gridSquareSize / 2);
+        let deltaX = Math.cos(theta) * (gridSquareSize / 4);
+        let deltaY = Math.sin(theta) * (gridSquareSize / 4);
 
         console.log(` theta: ${theta} dx/dy: ${deltaX} / ${deltaY}`);
 
@@ -680,9 +680,17 @@ function calculateLineOfSight(origin, target) {
             y: candidate.getCenter().y + deltaY
         };
 
-        console.log("zPoint: ${zPoint}");
+        dots.push(new LittleDot(zPoint.x, zPoint.y));
+        dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
+
+        zPoint = {
+            x: zPoint.x + deltaX,
+            y: zPoint.y  + deltaY
+        };
 
         dots.push(new LittleDot(zPoint.x, zPoint.y));
+        dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
+
 
         zPoint = {
             x: zPoint.x + deltaX,
@@ -690,13 +698,8 @@ function calculateLineOfSight(origin, target) {
         };
 
         dots.push(new LittleDot(zPoint.x, zPoint.y));
+        dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
 
-        zPoint = {
-            x: zPoint.x + deltaX,
-            y: zPoint.y + deltaY
-        };
-
-        dots.push(new LittleDot(zPoint.x, zPoint.y));
 
         candidate = findGridSquareAtMouse(zPoint);
 
@@ -710,8 +713,14 @@ function calculateLineOfSight(origin, target) {
             };
             let nextSquare = findGridSquareAtMouse(zPoint);
 
-            console.log(nextSquare)
+            if (nextSquare == null) {
+                break;
+            }
+
+            //console.log(nextSquare)
             dots.push(new LittleDot(zPoint.x, zPoint.y));
+            dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
+
             candidate = nextSquare;
         }
 

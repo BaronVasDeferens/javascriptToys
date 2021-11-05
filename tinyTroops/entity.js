@@ -140,8 +140,6 @@ export class LittleDot {
 
     render(context) {
 
-        console.log("render!");
-
         context.fillStyle = this.color;
         context.strokeStyle = this.color;
 

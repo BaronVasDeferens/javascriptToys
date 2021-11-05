@@ -685,26 +685,35 @@ function calculateLineOfSight(origin, target) {
         dots.push(new LittleDot(zPoint.x, zPoint.y));
 
         zPoint = {
-            x: zPoint.x + (2 * deltaX),
-            y: zPoint.y + (2 * deltaY)
+            x: zPoint.x + deltaX,
+            y: zPoint.y + deltaY
         };
+
+        dots.push(new LittleDot(zPoint.x, zPoint.y));
+
+        zPoint = {
+            x: zPoint.x + deltaX,
+            y: zPoint.y + deltaY
+        };
+
+        dots.push(new LittleDot(zPoint.x, zPoint.y));
 
         candidate = findGridSquareAtMouse(zPoint);
 
         console.log(`candidate: ${candidate}`);
 
-        // while (candidate != target) {
+        while (candidate != target) {
 
             zPoint = {
-                x: candidate.getCenter().x + deltaX,
-                y: candidate.getCenter().y + deltaY
+                x: zPoint.x + deltaX,
+                y: zPoint.y + deltaY
             };
             let nextSquare = findGridSquareAtMouse(zPoint);
 
             console.log(nextSquare)
             dots.push(new LittleDot(zPoint.x, zPoint.y));
             candidate = nextSquare;
-        // }
+        }
 
     }
 

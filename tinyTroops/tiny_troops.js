@@ -42,6 +42,7 @@ var selectedEntitySecondary = null;     // if selectedPrimary != null, this is t
 var mousePointerHoverDot = null;        // a ring which denotes the selected entity
 var mousePointerHoverLine = null;       // a line stretching from the selected unit to the mouse pointer
 
+var lineOfSightDots = new Set();
 
 
 const entitiesResident = [];    // All "permanent" entities (players, enemies)
@@ -103,42 +104,25 @@ var setup = function () {
     gridSquares[6][6].isObstructed = true;
 
 
-    // // Create some soldiers
-    // for (var n = 0; n < 5; n++) {
-    //     shuffleArray(allSquares);
-    //     let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
-    //     let center = home.getCenter();
-    //     let ent = new Soldier("soldier_" + n, center.x, center.y);
-    //     ent.setGridSquare(home);
-    //     entitiesResident.push(ent);
-    // }
+    // Create some soldiers
+    for (var n = 0; n < 5; n++) {
+        shuffleArray(allSquares);
+        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
+        let center = home.getCenter();
+        let ent = new Soldier("soldier_" + n, center.x, center.y);
+        ent.setGridSquare(home);
+        entitiesResident.push(ent);
+    }
 
-    // // Create some blobs
-    // for (var n = 0; n < 7; n++) {
-    //     shuffleArray(allSquares);
-    //     let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
-    //     let center = home.getCenter();
-    //     let ent = new Blob("blob_one", center.x, center.y);
-    //     ent.setGridSquare(home);
-    //     entitiesResident.push(ent);
-    // }
-
-    let sold = new Soldier("", gridSquares[4][4].getCenter().x, gridSquares[4][4].getCenter().y);
-    sold.setGridSquare(gridSquares[4][4]);
-    entitiesResident.push(sold);
-
-    let mon = new Blob("", gridSquares[6][1].getCenter().x, gridSquares[6][1].getCenter().y);
-    mon.setGridSquare(gridSquares[6][1]);
-    entitiesResident.push(mon);
-
-    let mon2 = new Blob("", gridSquares[8][1].getCenter().x, gridSquares[8][1].getCenter().y);
-    mon2.setGridSquare(gridSquares[8][1]);
-    entitiesResident.push(mon2);
-
-    let mon3 = new Blob("", gridSquares[5][1].getCenter().x, gridSquares[5][1].getCenter().y);
-    mon3.setGridSquare(gridSquares[5][1]);
-    entitiesResident.push(mon3);
-
+    // Create some blobs
+    for (var n = 0; n < 7; n++) {
+        shuffleArray(allSquares);
+        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
+        let center = home.getCenter();
+        let ent = new Blob("blob_one", center.x, center.y);
+        ent.setGridSquare(home);
+        entitiesResident.push(ent);
+    }
 
     beginGame();
 }();
@@ -261,11 +245,13 @@ window.onmousemove = function (event) {
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Ring(event.x, event.y, 50, "#000000");
                     mousePointerHoverLine = null;
+                    lineOfSightDots.clear();
                 } else {
                     let centerTarget = selectedEntitySecondary.gridSquare.getCenter();
                     mousePointerHoverDot = new Ring(centerTarget.x, centerTarget.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
                     mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, centerTarget.x, centerTarget.y, 2, "#FF0000");
+                    lineOfSightDots = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
                 }
             }
 
@@ -583,12 +569,11 @@ function updateGameState() {
     }
 
 
-    if (selectedEntityPrimary != null && selectedEntitySecondary != null) {
-        let LOSdots = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
-        LOSdots.forEach(dot => {
-            entitiesTransient.push(dot);
-        });
-    }
+
+    lineOfSightDots.forEach(dot => {
+        entitiesTransient.push(dot);
+    });
+
 
 
     // Recalculate available action points
@@ -648,84 +633,58 @@ function updateGameState() {
  */
 function calculateLineOfSight(origin, target) {
 
-    let dots = new Array();
+    let dots = new Set();
 
     let rise = target.y - origin.y;           // vertical difference: rise
     let run = target.x - origin.x;           // horizontal difference: run
-
-    //console.log(`${rise} / ${run}`);
-
     let theta = Math.atan(rise / run);
 
-    if (Math.abs(rise) == Math.abs(run)) {
-        // diagonal
-        console.log(`diagonal ${rise} / ${run}`);
-    } else if (rise < 0 && run < 0) {
-        // up left transit
-        console.log(`up left transit ${rise} / ${run}`);
-    } else if (rise < 0 && run > 0) {
-        console.log(`up right transit ${rise} / ${run}`);
-        // Theta is positive in this quadrant
-        
+    let deltaX = Math.cos(theta) * (gridSquareSize / 4);
+    //deltaX = deltaX * (run / Math.abs(run));    // if run is negative, delatX must be negative
 
-        let deltaX = Math.cos(theta) * (gridSquareSize / 4);
-        let deltaY = Math.sin(theta) * (gridSquareSize / 4);
+    let deltaY = Math.sin(theta) * (gridSquareSize / 4);
+    //deltaY = deltaY * (rise / Math.abs(rise));    // if rise is negative, deltaY must be negative
 
-        console.log(` theta: ${theta} dx/dy: ${deltaX} / ${deltaY}`);
 
-        let candidate = origin;
+    console.log(`rise: ${rise} run: ${run} theta: ${theta}`);
+    console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
 
-        let zPoint = {
-            x: candidate.getCenter().x + deltaX,
-            y: candidate.getCenter().y + deltaY
-        };
+    let candidate = origin;
 
-        dots.push(new LittleDot(zPoint.x, zPoint.y));
-        dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
+    let zPoint = {
+        x: candidate.getCenter().x + deltaX,
+        y: candidate.getCenter().y + deltaY
+    };
 
-        zPoint = {
-            x: zPoint.x + deltaX,
-            y: zPoint.y  + deltaY
-        };
+    // dots.add(new LittleDot(zPoint.x, zPoint.y));
+    // dots.add(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
 
-        dots.push(new LittleDot(zPoint.x, zPoint.y));
-        dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
-
+    while (candidate != target) {
 
         zPoint = {
             x: zPoint.x + deltaX,
             y: zPoint.y + deltaY
         };
 
-        dots.push(new LittleDot(zPoint.x, zPoint.y));
-        dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
 
 
-        candidate = findGridSquareAtMouse(zPoint);
+        let nextSquare = findGridSquareAtMouse(zPoint);
 
-        console.log(`candidate: ${candidate}`);
+        // console.log(zPoint);
+        // console.log(nextSquare);
 
-        while (candidate != target) {
-
-            zPoint = {
-                x: zPoint.x + deltaX,
-                y: zPoint.y + deltaY
-            };
-            let nextSquare = findGridSquareAtMouse(zPoint);
-
-            if (nextSquare == null) {
-                break;
-            }
-
-            //console.log(nextSquare)
-            dots.push(new LittleDot(zPoint.x, zPoint.y));
-            dots.push(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
-
-            candidate = nextSquare;
+        if (nextSquare == null) {
+            break;
         }
 
+        //console.log(nextSquare)
+        //dots.add(new LittleDot(zPoint.x, zPoint.y));
+        dots.add(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
+
+        candidate = nextSquare;
     }
 
+    // TODO: drop the origin
 
     return dots;
 }

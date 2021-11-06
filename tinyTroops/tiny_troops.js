@@ -495,7 +495,7 @@ function setState(state) {
             actionPointsCostPotential = 0;
 
             selectedGridSquares.length = 0;
-
+            lineOfSightDots.clear();
             break;
 
         case States.ANIMATION:
@@ -637,16 +637,20 @@ function calculateLineOfSight(origin, target) {
 
     let rise = target.y - origin.y;           // vertical difference: rise
     let run = target.x - origin.x;           // horizontal difference: run
-    let theta = Math.atan(rise / run);
+    let theta = Math.atan(Math.abs(rise) / Math.abs(run));
 
     let deltaX = Math.cos(theta) * (gridSquareSize / 4);
-    //deltaX = deltaX * (run / Math.abs(run));    // if run is negative, delatX must be negative
+    if (run < 0 && deltaX > 0) {
+        deltaX = deltaX * -1;
+    } 
 
     let deltaY = Math.sin(theta) * (gridSquareSize / 4);
-    //deltaY = deltaY * (rise / Math.abs(rise));    // if rise is negative, deltaY must be negative
+    if (rise < 0 && deltaY > 0) {
+        deltaY = deltaY * -1;
+    }
 
 
-    console.log(`rise: ${rise} run: ${run} theta: ${theta}`);
+    console.log(`rise: ${rise}\n run: ${run}\n theta: ${theta}\nangle: ${theta * 180 / Math.PI}`);
     console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
 
     let candidate = origin;
@@ -678,7 +682,7 @@ function calculateLineOfSight(origin, target) {
         }
 
         //console.log(nextSquare)
-        //dots.add(new LittleDot(zPoint.x, zPoint.y));
+        dots.add(new LittleDot(zPoint.x, zPoint.y));
         dots.add(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
 
         candidate = nextSquare;

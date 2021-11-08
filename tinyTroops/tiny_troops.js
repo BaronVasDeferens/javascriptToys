@@ -97,11 +97,12 @@ var setup = function () {
         arr.flat();
     }).flat();
 
-    // Obstruct a few squares
-    gridSquares[2][2].isObstructed = true;
-    gridSquares[6][2].isObstructed = true;
-    gridSquares[2][6].isObstructed = true;
-    gridSquares[6][6].isObstructed = true;
+    
+
+    for (var xyz = 0; xyz < 8; xyz++) {
+        shuffleArray(allSquares);
+        allSquares[0].isObstructed = true;
+    }
 
 
     // Create some soldiers
@@ -251,6 +252,8 @@ window.onmousemove = function (event) {
                     mousePointerHoverDot = new Ring(centerTarget.x, centerTarget.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
                     mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, centerTarget.x, centerTarget.y, 2, "#FF0000");
+                    
+                    // Draw LOS obstruction dots...
                     calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare).forEach(square => {
                         if ((square.isOccupied || square.isObstructed)) {
                             lineOfSightDots.add(new Dot(square, "#FFFF00", true));

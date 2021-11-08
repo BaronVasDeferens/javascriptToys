@@ -251,7 +251,13 @@ window.onmousemove = function (event) {
                     mousePointerHoverDot = new Ring(centerTarget.x, centerTarget.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
                     mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, centerTarget.x, centerTarget.y, 2, "#FF0000");
-                    lineOfSightDots = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
+                    calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare).forEach(square => {
+                        if ((square.isOccupied || square.isObstructed)) {
+                            lineOfSightDots.add(new Dot(square, "#FFFF00", true));
+                        } else {
+                            lineOfSightDots.add(new Dot(square, "#FFFF00", false));
+                        }
+                    });
                 }
             }
 
@@ -633,7 +639,7 @@ function updateGameState() {
  */
 function calculateLineOfSight(origin, target) {
 
-    let dots = new Set();
+    let pathSquares = new Set();
 
     let rise = target.y - origin.y;           // vertical difference: rise
     let run = target.x - origin.x;           // horizontal difference: run
@@ -642,16 +648,15 @@ function calculateLineOfSight(origin, target) {
     let deltaX = Math.cos(theta) * (gridSquareSize / 4);
     if (run < 0 && deltaX > 0) {
         deltaX = deltaX * -1;
-    } 
+    }
 
     let deltaY = Math.sin(theta) * (gridSquareSize / 4);
     if (rise < 0 && deltaY > 0) {
         deltaY = deltaY * -1;
     }
 
-
-    console.log(`rise: ${rise}\n run: ${run}\n theta: ${theta}\nangle: ${theta * 180 / Math.PI}`);
-    console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
+    // console.log(`rise: ${rise}\n run: ${run}\n theta: ${theta}\nangle: ${theta * 180 / Math.PI}`);
+    // console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
 
     let candidate = origin;
 
@@ -660,9 +665,6 @@ function calculateLineOfSight(origin, target) {
         y: candidate.getCenter().y + deltaY
     };
 
-    // dots.add(new LittleDot(zPoint.x, zPoint.y));
-    // dots.add(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
-
     while (candidate != target) {
 
         zPoint = {
@@ -670,27 +672,20 @@ function calculateLineOfSight(origin, target) {
             y: zPoint.y + deltaY
         };
 
-
-
         let nextSquare = findGridSquareAtMouse(zPoint);
-
-        // console.log(zPoint);
-        // console.log(nextSquare);
 
         if (nextSquare == null) {
             break;
         }
 
-        //console.log(nextSquare)
-        dots.add(new LittleDot(zPoint.x, zPoint.y));
-        dots.add(new Dot(findGridSquareAtMouse(zPoint), "#FFFF00", true));
+        if (candidate != target && candidate != origin) {
+            pathSquares.add(candidate);
+        }
 
         candidate = nextSquare;
     }
 
-    // TODO: drop the origin
-
-    return dots;
+    return pathSquares;
 }
 
 

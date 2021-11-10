@@ -6,6 +6,9 @@ FEATURE
 * Dramatic attack animation
 * games state as JSON
 * read/write to local storage
+* different weapons?
+* better monster pathing
+
 
 PERFORMANCE
 * Reduce GPU load! XD
@@ -13,6 +16,7 @@ PERFORMANCE
 ARTISTIC
 * Better soldier sprites (esp movement)
 * Ravening blob sprites with twichy jaws and moving tentacles
+* sprite facings change
 
 
 --------------------------------------

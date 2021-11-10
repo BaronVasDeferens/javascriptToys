@@ -268,7 +268,7 @@ export class Soldier extends Entity {
 
     constructor(id, x, y) {
         super(id, x, y);
-        this.image.src = "resources/guys_strip.png";
+        this.image.src = "resources/guys_strip_2.png";
     }
 
 

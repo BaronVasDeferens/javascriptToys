@@ -106,7 +106,7 @@ var setup = function () {
 
 
     // Create some soldiers
-    for (var n = 0; n < 5; n++) {
+    for (var n = 0; n < 3; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -448,12 +448,10 @@ function startEnemyTurn() {
 
 
     blobs.forEach(activeBlob => {
-        // Does the monster have a target?
+        // Does the monster have a target? If not, obtain one.
         if (activeBlob.target == null || activeBlob.target.alive == false) {
             activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
         }
-
-        console.log("target: ", activeBlob.target.gridSquare);
 
         // Move toward target
         let deltaX = activeBlob.x - activeBlob.target.x;
@@ -479,6 +477,62 @@ function startEnemyTurn() {
 
     });
 
+}
+
+/**
+ * Draw a line of sight from the center of one grid square (origin) to the another (target).
+ * Next, "sub-sample" points from the line at regular intervals and find any squares that contain
+ * the those points.
+ */
+ function calculateLineOfSight(origin, target) {
+
+    let pathSquares = new Set();
+
+    let rise = target.y - origin.y;           // vertical difference: rise
+    let run = target.x - origin.x;           // horizontal difference: run
+    let theta = Math.atan(Math.abs(rise) / Math.abs(run));
+
+    let deltaX = Math.cos(theta) * (gridSquareSize / 4);
+    if (run < 0 && deltaX > 0) {
+        deltaX = deltaX * -1;
+    }
+
+    let deltaY = Math.sin(theta) * (gridSquareSize / 4);
+    if (rise < 0 && deltaY > 0) {
+        deltaY = deltaY * -1;
+    }
+
+    // console.log(`rise: ${rise}\n run: ${run}\n theta: ${theta}\nangle: ${theta * 180 / Math.PI}`);
+    // console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
+
+    let candidate = origin;
+
+    let zPoint = {
+        x: candidate.getCenter().x + deltaX,
+        y: candidate.getCenter().y + deltaY
+    };
+
+    while (candidate != target) {
+
+        zPoint = {
+            x: zPoint.x + deltaX,
+            y: zPoint.y + deltaY
+        };
+
+        let nextSquare = findGridSquareAtMouse(zPoint);
+
+        if (nextSquare == null) {
+            break;
+        }
+
+        if (candidate != target && candidate != origin) {
+            pathSquares.add(candidate);
+        }
+
+        candidate = nextSquare;
+    }
+
+    return pathSquares;
 }
 
 function sleep(sleepDuration) {
@@ -631,70 +685,6 @@ function updateGameState() {
         }
     }
 }
-
-
-
-
-/**
- * Draw a line of sight from the center of one grid square (origin) to the another (target).
- * Next, "sub-sample" points from the line at regular intervals and find any squares that contain
- * the those points.
- */
-function calculateLineOfSight(origin, target) {
-
-    let pathSquares = new Set();
-
-    let rise = target.y - origin.y;           // vertical difference: rise
-    let run = target.x - origin.x;           // horizontal difference: run
-    let theta = Math.atan(Math.abs(rise) / Math.abs(run));
-
-    let deltaX = Math.cos(theta) * (gridSquareSize / 4);
-    if (run < 0 && deltaX > 0) {
-        deltaX = deltaX * -1;
-    }
-
-    let deltaY = Math.sin(theta) * (gridSquareSize / 4);
-    if (rise < 0 && deltaY > 0) {
-        deltaY = deltaY * -1;
-    }
-
-    // console.log(`rise: ${rise}\n run: ${run}\n theta: ${theta}\nangle: ${theta * 180 / Math.PI}`);
-    // console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
-
-    let candidate = origin;
-
-    let zPoint = {
-        x: candidate.getCenter().x + deltaX,
-        y: candidate.getCenter().y + deltaY
-    };
-
-    while (candidate != target) {
-
-        zPoint = {
-            x: zPoint.x + deltaX,
-            y: zPoint.y + deltaY
-        };
-
-        let nextSquare = findGridSquareAtMouse(zPoint);
-
-        if (nextSquare == null) {
-            break;
-        }
-
-        if (candidate != target && candidate != origin) {
-            pathSquares.add(candidate);
-        }
-
-        candidate = nextSquare;
-    }
-
-    return pathSquares;
-}
-
-
-
-
-
 
 // Display the underlying grid.
 // BIG GRIDS with intricate internal geometry make the game SLOW! 

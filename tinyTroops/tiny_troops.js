@@ -97,7 +97,7 @@ var setup = function () {
         arr.flat();
     }).flat();
 
-    
+
 
     for (var xyz = 0; xyz < 8; xyz++) {
         shuffleArray(allSquares);
@@ -106,7 +106,7 @@ var setup = function () {
 
 
     // Create some soldiers
-    for (var n = 0; n < 3; n++) {
+    for (var n = 0; n < 1; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -252,7 +252,7 @@ window.onmousemove = function (event) {
                     mousePointerHoverDot = new Ring(centerTarget.x, centerTarget.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
                     mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, centerTarget.x, centerTarget.y, 2, "#FF0000");
-                    
+
                     // Draw LOS obstruction dots...
                     calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare).forEach(square => {
                         if ((square.isOccupied || square.isObstructed)) {
@@ -467,13 +467,53 @@ function startEnemyTurn() {
         }
 
         let origin = activeBlob.gridSquare;
-        let destination = gridSquares[activeBlob.gridSquare.x - deltaX][activeBlob.gridSquare.y - deltaY];
-        if (destination != null && !destination.isOccupied && !destination.isObstructed) {
-            activeBlob.setGridSquare(destination);
-            movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, destination));
+
+        console.log(`dx/dx: ${deltaX} / ${deltaY}`)
+
+        let newX = activeBlob.gridSquare.x - deltaX;
+        let newY = activeBlob.gridSquare.y;
+        let possibleMove = gridSquares[0][0];
+    
+
+        console.log(`newX: ${newX}`);
+        if (newX <= gridSize - 1 && newX >= 0) {
+            possibleMove = gridSquares[newX][newY];
+            if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
+
+                // TODO: also check to see if this move actually gets the blob closer before committing to the move
+
+                origin = activeBlob.gridSquare
+                activeBlob.setGridSquare(possibleMove);
+                movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+            } 
+        }
+        
+        newX = activeBlob.gridSquare.x;
+        newY = activeBlob.gridSquare.y - deltaY;
+
+        console.log(`newY: ${newY}`);
+        if (newY <= gridSize - 1 && newY >= 0) {
+            possibleMove = gridSquares[newX][newY];
+            if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
+
+                // TODO: also check to see if this move actually gets the blob closer before committing to the move
+
+
+                origin = activeBlob.gridSquare
+                activeBlob.setGridSquare(possibleMove);
+                movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+            }
         }
 
-        // TODO: actual pathing
+
+
+        // let destination = gridSquares[activeBlob.gridSquare.x - deltaX][activeBlob.gridSquare.y - deltaY];
+        // if (destination != null && !destination.isOccupied && !destination.isObstructed) {
+        //     activeBlob.setGridSquare(destination);
+        //     movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, destination));
+        // }
+
+        // // TODO: actual pathing
 
     });
 
@@ -484,7 +524,7 @@ function startEnemyTurn() {
  * Next, "sub-sample" points from the line at regular intervals and find any squares that contain
  * the those points.
  */
- function calculateLineOfSight(origin, target) {
+function calculateLineOfSight(origin, target) {
 
     let pathSquares = new Set();
 

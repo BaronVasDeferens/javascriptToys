@@ -461,7 +461,7 @@ function startEnemyTurn() {
 
         // TODO: add "max moves" to blob
         // TODO: add attacks here
-        while (attemptedMoves < attemptedMovesMax && movesMade < movesMadeMax) {
+        while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
 
             let deltaX = 0; 
             if (activeBlob.gridSquare.x > activeBlob.target.gridSquare.x) {
@@ -478,10 +478,12 @@ function startEnemyTurn() {
             }
     
             // If multiple FAILED attempts to move were made, try backing up or moving left or right
-            if (attemptedMoves > 0 && movesMade == 0) {
+            if (attemptedMoves >= 2 && movesMade == 0) {
                 deltaX = deltaX * -1;
                 deltaY = deltaY * -1;
             }
+
+            // TODO: randomize which is first, horizontal or vertical movement
 
             let origin = activeBlob.gridSquare;    
             let newX = activeBlob.gridSquare.x + deltaX;
@@ -491,7 +493,7 @@ function startEnemyTurn() {
             console.log(`newX: ${newX}`);
             if (newX <= gridSize - 1 && newX >= 0) {
                 possibleMove = gridSquares[newX][newY];
-                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
+                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
                     movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
@@ -510,7 +512,7 @@ function startEnemyTurn() {
             console.log(`newY: ${newY}`);
             if (newY <= gridSize - 1 && newY >= 0) {
                 possibleMove = gridSquares[newX][newY];
-                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
+                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied  && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
                     movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));

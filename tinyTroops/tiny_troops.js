@@ -477,6 +477,12 @@ function startEnemyTurn() {
                 deltaY = 1;
             }
     
+            // If multiple FAILED attempts to move were made, try backing up or moving left or right
+            if (attemptedMoves > 0 && movesMade == 0) {
+                deltaX = deltaX * -1;
+                deltaY = deltaY * -1;
+            }
+
             let origin = activeBlob.gridSquare;    
             let newX = activeBlob.gridSquare.x + deltaX;
             let newY = activeBlob.gridSquare.y;

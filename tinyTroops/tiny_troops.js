@@ -446,7 +446,7 @@ function startEnemyTurn() {
         }
     });
 
-
+    shuffleArray(blobs);
     blobs.forEach(activeBlob => {
         // Does the monster have a target? If not, obtain one.
         if (activeBlob.target == null || activeBlob.target.alive == false) {
@@ -454,67 +454,72 @@ function startEnemyTurn() {
         }
 
         // Move toward target
-        let deltaX = activeBlob.x - activeBlob.target.x;
-        deltaX = deltaX / Math.abs(deltaX);
-        if (isNaN(deltaX)) {
-            deltaX = 0;
-        }
+        let attemptedMoves = 0;
+        let attemptedMovesMax = 4;
+        let movesMade = 0;
+        let movesMadeMax = 2;
 
-        let deltaY = activeBlob.y - activeBlob.target.y;
-        deltaY = deltaY / Math.abs(deltaY);
-        if (isNaN(deltaY)) {
-            deltaY = 0;
-        }
+        // TODO: add "max moves" to blob
+        // TODO: add attacks here
+        while (attemptedMoves < attemptedMovesMax && movesMade < movesMadeMax) {
 
-        let origin = activeBlob.gridSquare;
-
-        console.log(`dx/dx: ${deltaX} / ${deltaY}`)
-
-        let newX = activeBlob.gridSquare.x - deltaX;
-        let newY = activeBlob.gridSquare.y;
-        let possibleMove = gridSquares[0][0];
-    
-
-        console.log(`newX: ${newX}`);
-        if (newX <= gridSize - 1 && newX >= 0) {
-            possibleMove = gridSquares[newX][newY];
-            if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
-
-                // TODO: also check to see if this move actually gets the blob closer before committing to the move
-
-                origin = activeBlob.gridSquare
-                activeBlob.setGridSquare(possibleMove);
-                movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
-            } 
-        }
-        
-        newX = activeBlob.gridSquare.x;
-        newY = activeBlob.gridSquare.y - deltaY;
-
-        console.log(`newY: ${newY}`);
-        if (newY <= gridSize - 1 && newY >= 0) {
-            possibleMove = gridSquares[newX][newY];
-            if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
-
-                // TODO: also check to see if this move actually gets the blob closer before committing to the move
-
-
-                origin = activeBlob.gridSquare
-                activeBlob.setGridSquare(possibleMove);
-                movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+            let deltaX = 0; 
+            if (activeBlob.gridSquare.x > activeBlob.target.gridSquare.x) {
+                deltaX = -1
+            } else if (activeBlob.gridSquare.x < activeBlob.target.gridSquare.x) {
+                deltaX = 1;
             }
+    
+            let deltaY = 0; 
+            if (activeBlob.gridSquare.y > activeBlob.target.gridSquare.y) {
+                deltaY = -1
+            } else if (activeBlob.gridSquare.y < activeBlob.target.gridSquare.y) {
+                deltaY = 1;
+            }
+    
+            let origin = activeBlob.gridSquare;    
+            let newX = activeBlob.gridSquare.x + deltaX;
+            let newY = activeBlob.gridSquare.y;
+            let possibleMove = gridSquares[0][0];
+        
+            console.log(`newX: ${newX}`);
+            if (newX <= gridSize - 1 && newX >= 0) {
+                possibleMove = gridSquares[newX][newY];
+                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
+                    origin = activeBlob.gridSquare
+                    activeBlob.setGridSquare(possibleMove);
+                    movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+                    movesMade++;
+                    attemptedMoves++;
+                } else {
+                    attemptedMoves++;
+                }
+            } else {
+                attemptedMoves++;
+            }
+            
+            newX = activeBlob.gridSquare.x;
+            newY = activeBlob.gridSquare.y + deltaY;
+    
+            console.log(`newY: ${newY}`);
+            if (newY <= gridSize - 1 && newY >= 0) {
+                possibleMove = gridSquares[newX][newY];
+                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied) {
+                    origin = activeBlob.gridSquare
+                    activeBlob.setGridSquare(possibleMove);
+                    movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+                    movesMade++;
+                    attemptedMoves++;
+                } else {
+                    attemptedMoves++;
+                }
+            } else {
+                attemptedMoves++;
+            }
+
+            console.log("movesMade: " + movesMade);
+            console.log("attemptedMoves: " + attemptedMoves);
         }
-
-
-
-        // let destination = gridSquares[activeBlob.gridSquare.x - deltaX][activeBlob.gridSquare.y - deltaY];
-        // if (destination != null && !destination.isOccupied && !destination.isObstructed) {
-        //     activeBlob.setGridSquare(destination);
-        //     movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, destination));
-        // }
-
-        // // TODO: actual pathing
-
     });
 
 }

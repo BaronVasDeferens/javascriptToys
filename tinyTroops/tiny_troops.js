@@ -446,7 +446,9 @@ function startEnemyTurn() {
         }
     });
 
+    // Randomize the blobs' turn order
     shuffleArray(blobs);
+    
     blobs.forEach(activeBlob => {
         // Does the monster have a target? If not, obtain one.
         if (activeBlob.target == null || activeBlob.target.alive == false) {
@@ -459,7 +461,7 @@ function startEnemyTurn() {
         let movesMade = 0;
         let movesMadeMax = 2;
 
-        // TODO: add "max moves" to blob
+        // TODO: add "max moves" to monster class
         // TODO: add attacks here
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
 
@@ -490,7 +492,7 @@ function startEnemyTurn() {
             let newY = activeBlob.gridSquare.y;
             let possibleMove = gridSquares[0][0];
         
-            console.log(`newX: ${newX}`);
+            // console.log(`newX: ${newX}`);
             if (newX <= gridSize - 1 && newX >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
@@ -509,7 +511,7 @@ function startEnemyTurn() {
             newX = activeBlob.gridSquare.x;
             newY = activeBlob.gridSquare.y + deltaY;
     
-            console.log(`newY: ${newY}`);
+            // console.log(`newY: ${newY}`);
             if (newY <= gridSize - 1 && newY >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied  && (movesMade < movesMadeMax)) {
@@ -525,8 +527,8 @@ function startEnemyTurn() {
                 attemptedMoves++;
             }
 
-            console.log("movesMade: " + movesMade);
-            console.log("attemptedMoves: " + attemptedMoves);
+            // console.log("movesMade: " + movesMade);
+            // console.log("attemptedMoves: " + attemptedMoves);
         }
     });
 

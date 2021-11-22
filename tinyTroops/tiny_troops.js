@@ -448,7 +448,7 @@ function startEnemyTurn() {
 
     // Randomize the blobs' turn order
     shuffleArray(blobs);
-    
+
     blobs.forEach(activeBlob => {
         // Does the monster have a target? If not, obtain one.
         if (activeBlob.target == null || activeBlob.target.alive == false) {
@@ -465,20 +465,20 @@ function startEnemyTurn() {
         // TODO: add attacks here
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
 
-            let deltaX = 0; 
+            let deltaX = 0;
             if (activeBlob.gridSquare.x > activeBlob.target.gridSquare.x) {
                 deltaX = -1
             } else if (activeBlob.gridSquare.x < activeBlob.target.gridSquare.x) {
                 deltaX = 1;
             }
-    
-            let deltaY = 0; 
+
+            let deltaY = 0;
             if (activeBlob.gridSquare.y > activeBlob.target.gridSquare.y) {
                 deltaY = -1
             } else if (activeBlob.gridSquare.y < activeBlob.target.gridSquare.y) {
                 deltaY = 1;
             }
-    
+
             // If multiple FAILED attempts to move were made, try backing up or moving left or right
             if (attemptedMoves >= 2 && movesMade == 0) {
                 deltaX = deltaX * -1;
@@ -487,11 +487,11 @@ function startEnemyTurn() {
 
             // TODO: randomize which is first, horizontal or vertical movement
 
-            let origin = activeBlob.gridSquare;    
+            let origin = activeBlob.gridSquare;
             let newX = activeBlob.gridSquare.x + deltaX;
             let newY = activeBlob.gridSquare.y;
             let possibleMove = gridSquares[0][0];
-        
+
             // console.log(`newX: ${newX}`);
             if (newX <= gridSize - 1 && newX >= 0) {
                 possibleMove = gridSquares[newX][newY];
@@ -507,14 +507,14 @@ function startEnemyTurn() {
             } else {
                 attemptedMoves++;
             }
-            
+
             newX = activeBlob.gridSquare.x;
             newY = activeBlob.gridSquare.y + deltaY;
-    
+
             // console.log(`newY: ${newY}`);
             if (newY <= gridSize - 1 && newY >= 0) {
                 possibleMove = gridSquares[newX][newY];
-                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied  && (movesMade < movesMadeMax)) {
+                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
                     movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
@@ -687,7 +687,7 @@ function updateGameState() {
     }
 
 
-
+    // TODO: remove?
     lineOfSightDots.forEach(dot => {
         entitiesTransient.push(dot);
     });
@@ -702,18 +702,27 @@ function updateGameState() {
         apAvail = actionPointsAvailable;
     }
 
-    // Display available AP:
-    // If there's a movement being plotted...
-    if (selectedGridSquares.length > 0) {
+    // Display available AP
+
+    if (currentState == States.ENEMY_TURN) {
         entitiesTransient.push(new TextLabel(
-            10, 700, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
+            10, 700, "ENEMY TURN", "#000000"
         ));
     } else {
-        //...otherwise, display the remaining AP
-        entitiesTransient.push(new TextLabel(
-            10, 700, "AP: " + apAvail, "#000000"
-        ));
+        // If there's a movement being plotted...
+        if (selectedGridSquares.length > 0) {
+            entitiesTransient.push(new TextLabel(
+                10, 700, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
+            ));
+        } else {
+            //...otherwise, display the remaining AP
+            entitiesTransient.push(new TextLabel(
+                10, 700, "AP: " + apAvail, "#000000"
+            ));
+        }
     }
+
+
 
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);

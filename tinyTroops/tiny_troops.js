@@ -784,13 +784,14 @@ function updateGameState() {
 
     /* CULL DEAD ENTITIES */
     // let deadEntities = new Array();
-    // entitiesResident.forEach(entity => {
-    //     if (entity.isAlive == false) {
-    //         deadEntities.push(entity);
-    //     } else {
-    //         entity.update();
-    //     }
-    // });
+    entitiesResident.forEach(entity => {
+        // if (entity.isAlive == false) {
+        //     deadEntities.push(entity);
+        // } else {
+        //     entity.update();
+        // }
+        entity.update();
+    });
 
     // deadEntities.forEach(entity => {
     //     let index = entitiesResident.indexOf(entity);
@@ -826,8 +827,8 @@ function drawGrid(context) {
 
 function drawScene() {
 
-    let date = new Date();
-    let start = date.getMilliseconds();
+    // let date = new Date();
+    // let start = date.getMilliseconds();
 
     // Draw background
     context.fillStyle = "#b8bab9";

@@ -4,7 +4,7 @@ class Entity {
     x = 0;
     y = 0;
 
-    alive = true;
+    isAlive = true;
     gridSquare = null;
 
     constructor(id, x, y) {
@@ -406,7 +406,7 @@ export class Blob extends Entity {
 
     setTarget(target) {
         this.target = target;
-        console.log("blob " + this.id + " now targets soldier " + this.target.id);
+        //console.log("blob " + this.id + " now targets soldier " + this.target.id);
     }
 
     // Draws CENTERED on x,y
@@ -414,7 +414,7 @@ export class Blob extends Entity {
         context.save();
         context.translate(this.x, this.y);
 
-        if (this.alive) {
+        if (this.isAlive) {
             context.drawImage(this.imageAlive, 50 * this.currentFrameIndex, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
         } else {
             context.drawImage(this.imageDead, -(this.imageDead.width / 2), - (this.imageDead.height / 2));
@@ -425,6 +425,23 @@ export class Blob extends Entity {
 
 }
 
+export class CustomDriver {
+
+    lamda = null;
+
+    constructor(lamda) {
+        this.lamda = lamda;
+    }
+
+    update() {
+        this.lamda();
+    }
+
+    isDone() {
+        return true;
+    }
+
+}
 
 export class MovementAnimationDriver {
 

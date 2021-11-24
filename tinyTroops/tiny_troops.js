@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -62,6 +62,13 @@ var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
 
+
+
+var totalFrames = 0;
+var totalMilliSeconds = 0;
+
+
+
 function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
 };
@@ -99,14 +106,14 @@ var setup = function () {
 
 
 
-    for (var xyz = 0; xyz < 8; xyz++) {
+    for (var xyz = 0; xyz < 12; xyz++) {
         shuffleArray(allSquares);
         allSquares[0].isObstructed = true;
     }
 
 
     // Create some soldiers
-    for (var n = 0; n < 1; n++) {
+    for (var n = 0; n < 3; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -120,7 +127,7 @@ var setup = function () {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Blob("blob_one", center.x, center.y);
+        let ent = new Blob("blob_" + n, center.x, center.y);
         ent.setGridSquare(home);
         entitiesResident.push(ent);
     }
@@ -318,16 +325,22 @@ function selectPlayerEntityAtMouse(event) {
         let centeredOnClick = resident.isClicked(event);
         // A unit is found: set the primary selected unit; draw a temporary reticle over it; update the state
         if (centeredOnClick && resident instanceof Soldier) {
-            var dot = new Ring(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
-            entitiesTemporary.push(dot);
-            selectedEntityPrimary = resident;
 
-            // Add the selected unit's gridsquare to selectedGridSquares...MEANING when a unit is selected, the movement queue is NEVER empty
-            // This is convenient for calculating which squares are eligible to highlight during moevement
-            selectedGridSquares.push(findGridSquareAtMouse(event));
+            if (resident.isAlive == true) {
 
-            // Update game state
-            currentState = States.UNIT_SELECTED;
+                var dot = new Ring(centeredOnClick.x, centeredOnClick.y, 50, "#000000");
+                entitiesTemporary.push(dot);
+                selectedEntityPrimary = resident;
+
+                console.log(`selected ${selectedEntityPrimary.id}`);
+
+                // Add the selected unit's gridsquare to selectedGridSquares...MEANING when a unit is selected, the movement queue is NEVER empty
+                // This is convenient for calculating which squares are eligible to highlight during moevement
+                selectedGridSquares.push(findGridSquareAtMouse(event));
+
+                // Update game state
+                currentState = States.UNIT_SELECTED;
+            }
         }
     });
 }
@@ -350,6 +363,13 @@ function secondaryEntityUnderMouse(event) {
 
 function moveEntity(entity, event) {
 
+    let drivers = [];
+
+    drivers.push(new CustomDriver(() => {
+        setState(States.ANIMATION);
+    }));
+
+
     let destinationSquare = selectedGridSquares[selectedGridSquares.length - 1]; // last item in the list
     entity.setGridSquare(destinationSquare);
 
@@ -357,14 +377,18 @@ function moveEntity(entity, event) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
-                movementAnimationDrivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1]));
+                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1]));
             }
         });
 
         actionPointsAvailable -= (selectedGridSquares.length - 1);
     }
 
-    setState(States.ANIMATION);
+    drivers.push(new CustomDriver(() => {
+        setState(States.IDLE);
+    }));
+
+    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
 }
 
 function computeAttackStats() {
@@ -418,7 +442,7 @@ function attackEntity(aggressor, target) {
 
     if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
         console.log("attack success!");
-        target.alive = false;
+        target.isAlive = false;
     } else {
         console.log("attack fail");
     }
@@ -426,13 +450,21 @@ function attackEntity(aggressor, target) {
     // do some rolling here for wounds, effects, etc
 }
 
+/**
+ * START ENEMY TURN
+ */
 function startEnemyTurn() {
 
-    setState(States.ENEMY_TURN);
+    let drivers = [];
+
+    drivers.push(new CustomDriver(function () {
+        setState(States.ENEMY_TURN);
+    }));
+
 
     let blobs = entitiesResident.filter(ent => {
         if (ent instanceof Blob) {
-            return ent.alive;
+            return ent.isAlive == true;
         } else {
             return false;
         }
@@ -440,7 +472,7 @@ function startEnemyTurn() {
 
     let soldiers = entitiesResident.filter(ent => {
         if (ent instanceof Soldier) {
-            return ent.alive;
+            return ent.isAlive == true;
         } else {
             return false;
         }
@@ -451,7 +483,7 @@ function startEnemyTurn() {
 
     blobs.forEach(activeBlob => {
         // Does the monster have a target? If not, obtain one.
-        if (activeBlob.target == null || activeBlob.target.alive == false) {
+        if (activeBlob.target == null || activeBlob.target.isAlive == false) {
             activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
         }
 
@@ -492,13 +524,13 @@ function startEnemyTurn() {
             let newY = activeBlob.gridSquare.y;
             let possibleMove = gridSquares[0][0];
 
-            // console.log(`newX: ${newX}`);
+
             if (newX <= gridSize - 1 && newX >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
-                    movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
                     movesMade++;
                     attemptedMoves++;
                 } else {
@@ -517,7 +549,7 @@ function startEnemyTurn() {
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
-                    movementAnimationDrivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
                     movesMade++;
                     attemptedMoves++;
                 } else {
@@ -527,11 +559,29 @@ function startEnemyTurn() {
                 attemptedMoves++;
             }
 
-            // console.log("movesMade: " + movesMade);
-            // console.log("attemptedMoves: " + attemptedMoves);
+            // ATTACK! (if able)...
+            // let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
+            //     + Math.abs(activeBlob.gridSquare.y - activeBlob.target.gridSquare.y);
+            // let isAdjacent = distance < 2;
+            // console.log(`distance: ${distance} adj: ${distance <= 1}`);
+            // if (movesMade < 2 && isAdjacent == true) {
+            //     console.log(`monster ${activeBlob.id} ATTACKS and KILLS ${activeBlob.target.id}!`);
+            //     //attackEntity(activeBlob, activeBlob.target);
+            //     activeBlob.target.isAlive = false;
+            //     activeBlob.target.gridSquare.isOccupied = false;
+            //     activeBlob.target.gridSquare = null;
+            //     activeBlob.target = null;
+            //     break;
+            // }
+
         }
     });
 
+    drivers.push(new CustomDriver(() => {
+        setState(States.IDLE);
+    }));
+
+    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
 }
 
 /**
@@ -672,7 +722,6 @@ function updateGameState() {
     if (selectedEntitySecondary == null) {
         // Highlight the selected path (selectedGridSquares)
         selectedGridSquares.forEach((square, index) => {
-            // entitiesTransient.push(new GridSquare(square.x, square.y, square.size, "#FF0000"));
 
             let next = selectedGridSquares[index - 1];
 
@@ -691,8 +740,6 @@ function updateGameState() {
     lineOfSightDots.forEach(dot => {
         entitiesTransient.push(dot);
     });
-
-
 
     // Recalculate available action points
     let apAvail = 0;
@@ -722,8 +769,6 @@ function updateGameState() {
         }
     }
 
-
-
     if (mousePointerHoverDot != null) {
         entitiesTransient.push(mousePointerHoverDot);
     }
@@ -733,14 +778,29 @@ function updateGameState() {
     if (actionPointsAvailable == 0 && notBusy) {
         startEnemyTurn();
         actionPointsAvailable = actionPointsMax;
-        setState(States.IDLE);
+        //setState(States.IDLE);
     }
 
-    entitiesResident.forEach(entity => {
-        entity.update();
-    });
 
+    /* CULL DEAD ENTITIES */
+    // let deadEntities = new Array();
+    // entitiesResident.forEach(entity => {
+    //     if (entity.isAlive == false) {
+    //         deadEntities.push(entity);
+    //     } else {
+    //         entity.update();
+    //     }
+    // });
 
+    // deadEntities.forEach(entity => {
+    //     let index = entitiesResident.indexOf(entity);
+    //     if (index > -1) {
+    //         console.log(`removing dead entity: ${entity.id}`);
+    //         entitiesResident.splice(index);
+    //     }
+    // });
+
+    // Process each driver, one at a time starting at the head of the queue, until it is expired.
     if (movementAnimationDrivers.length > 0) {
         let driver = movementAnimationDrivers[0];
         driver.update();
@@ -765,21 +825,23 @@ function drawGrid(context) {
 
 
 function drawScene() {
+
+    let date = new Date();
+    let start = date.getMilliseconds();
+
     // Draw background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context);
-
-    if (currentState == States.INTRO
-        || currentState == States.IDLE
-        || currentState == States.UNIT_SELECTED) {
 
         context.imageSmoothingEnabled = false;
 
         // Draw entities
         // TODO: consider adding layer ordering
         entitiesResident.forEach(entity => {
-            entity.render(context);
+            if (entity.isAlive == true) {
+                entity.render(context);
+            }
         });
 
         entitiesTemporary.forEach(entity => {
@@ -792,5 +854,10 @@ function drawScene() {
 
         // Clear the transients
         entitiesTransient.length = 0;
-    }
+
+    // date = new Date();
+    // let end = date.getMilliseconds();
+    // totalFrames++;
+    // totalMilliSeconds = totalMilliSeconds + (end-start);
+    // console.log(`frames: ${totalFrames} millis: ${totalMilliSeconds} fps: ${(totalFrames/totalMilliSeconds)}`);
 }

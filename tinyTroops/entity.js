@@ -440,6 +440,73 @@ export class CustomDriver {
     isDone() {
         return true;
     }
+}
+
+export class CombatActionDriver {
+
+    x = 0;
+    y = 0;
+
+    lamda = null;
+    image = new Image();
+    currentTick = 0;
+    maxTicks = 120;
+
+    constructor(x, y, onComplete) {
+        this.x = x;
+        this.y = y;
+        this.lamda = onComplete;
+        this.image.src = "resources/logo.png";
+    }
+
+    update() {
+        this.currentTick++;
+        if (this.currentTick == this.maxTicks) {
+            this.lamda();
+        }
+    }
+
+    isDone() {
+        return this.currentTick >= this.maxTicks;
+    }
+
+    render(context) {
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+}
+
+export class ComboActionDriver {
+
+    x = 0;
+    y = 0;
+
+    lamda = null;
+    image = new Image();
+    currentTick = 0;
+    maxTicks = 120;
+
+    constructor(x, y, onComplete) {
+        this.x = x;
+        this.y = y;
+        this.lamda = onComplete;
+        this.image.src = "resources/logo.png";
+    }
+
+    update() {
+        this.currentTick++;
+        if (this.currentTick == this.maxTicks) {
+            this.lamda();
+        }
+    }
+
+    isDone() {
+        return this.currentTick >= this.maxTicks;
+    }
+
+    render(context) {
+        context.drawImage(this.image, this.x, this.y);
+    }
 
 }
 

@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatActionDriver } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -436,16 +436,19 @@ function computeAttackStats() {
 }
 
 function attackEntity(aggressor, target) {
+
     console.log(aggressor.id + " attacks " + target.id);
 
-    let attackStats = computeAttackStats();
+    // movementAnimationDrivers.push(new CombatActionDriver(100,100, () => { console.log("one");}));
 
-    if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-        console.log("attack success!");
-        target.isAlive = false;
-    } else {
-        console.log("attack fail");
-    }
+    // let attackStats = computeAttackStats();
+
+    // if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
+    //     console.log("attack success!");
+    //     target.isAlive = false;
+    // } else {
+    //     console.log("attack fail");
+    // }
 
     // do some rolling here for wounds, effects, etc
 }
@@ -805,6 +808,11 @@ function updateGameState() {
     if (movementAnimationDrivers.length > 0) {
         let driver = movementAnimationDrivers[0];
         driver.update();
+
+        if (driver instanceof CombatActionDriver) {
+            entitiesTransient.push(driver);
+        }
+
         if (driver.isDone()) {
             movementAnimationDrivers = movementAnimationDrivers.splice(1, movementAnimationDrivers.length - 1);
         }

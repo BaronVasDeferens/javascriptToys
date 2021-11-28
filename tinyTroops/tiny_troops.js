@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatActionDriver } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatActionDriver, CombatResolutionDriver, CombatResolutionState } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -149,7 +149,6 @@ window.onmousedown = function (event) {
             break;
 
         case States.IDLE:
-
             switch (event.button) {
                 // left click
                 case 0:
@@ -164,7 +163,6 @@ window.onmousedown = function (event) {
             }
             break;
         case States.UNIT_SELECTED:
-
             switch (event.button) {
                 // Left click
                 case 0:
@@ -361,36 +359,6 @@ function secondaryEntityUnderMouse(event) {
     return target;
 }
 
-function moveEntity(entity, event) {
-
-    let drivers = [];
-
-    drivers.push(new CustomDriver(() => {
-        setState(States.ANIMATION);
-    }));
-
-
-    let destinationSquare = selectedGridSquares[selectedGridSquares.length - 1]; // last item in the list
-    entity.setGridSquare(destinationSquare);
-
-    if (entity instanceof Soldier) {
-        // Add movement drivers
-        selectedGridSquares.forEach((sqr, index) => {
-            if (index + 1 < selectedGridSquares.length) {
-                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1]));
-            }
-        });
-
-        actionPointsAvailable -= (selectedGridSquares.length - 1);
-    }
-
-    drivers.push(new CustomDriver(() => {
-        setState(States.IDLE);
-    }));
-
-    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
-}
-
 function computeAttackStats() {
 
     let hit = "AUTO";
@@ -435,23 +403,97 @@ function computeAttackStats() {
 
 }
 
+function moveEntity(entity, event) {
+
+    let drivers = [];
+
+    drivers.push(new CustomDriver(() => {
+        setState(States.ANIMATION);
+    }));
+
+
+    let destinationSquare = selectedGridSquares[selectedGridSquares.length - 1]; // last item in the list
+    entity.setGridSquare(destinationSquare);
+
+    if (entity instanceof Soldier) {
+        // Add movement drivers
+        selectedGridSquares.forEach((sqr, index) => {
+            if (index + 1 < selectedGridSquares.length) {
+                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1]));
+            }
+        });
+
+        actionPointsAvailable -= (selectedGridSquares.length - 1);
+    }
+
+    drivers.push(new CustomDriver(() => {
+        setState(States.IDLE);
+    }));
+
+    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
+}
+
 function attackEntity(aggressor, target) {
 
     console.log(aggressor.id + " attacks " + target.id);
 
-    // movementAnimationDrivers.push(new CombatActionDriver(100,100, () => { console.log("one");}));
+    let kill = {
+        attacker: aggressor,
+        defender: target,
+        result: CombatResolutionState.KILL
+    };
 
-    // let attackStats = computeAttackStats();
+    let noEffect = {
+        attacker: aggressor,
+        defender: target,
+        result: CombatResolutionState.NO_EFFECT
+    };
 
-    // if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-    //     console.log("attack success!");
-    //     target.isAlive = false;
-    // } else {
-    //     console.log("attack fail");
-    // }
+
+    let attackStats = computeAttackStats();
+
+    let drivers = [];
+
+    drivers.push(new CustomDriver(function () {
+        setState(States.ANIMATION);
+    }));
+
+    if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
+        drivers.push(new CombatResolutionDriver(kill, () => {
+            console.log("attack success!");
+            killEntity(target);
+        }));
+    } else {
+        drivers.push(new CombatResolutionDriver(noEffect, () => {
+            console.log("attack fail");
+            setState(States.IDLE);
+        }));
+    }
+    
+    drivers.push(new CustomDriver(function () {
+        setState(States.IDLE);
+    }));
+
+    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
 
     // do some rolling here for wounds, effects, etc
 }
+
+function killEntity(condemned) {
+
+    // if (!(condemned instanceof Entity)) {
+    //     return;
+    // }
+
+    // if (!condemned.isAlive) {
+    //     return;
+    // }
+
+    condemned.isAlive = false
+    condemned.gridSquare.isOccupied = false;
+    condemned.gridSquare = null;
+}
+
 
 /**
  * START ENEMY TURN
@@ -473,18 +515,21 @@ function startEnemyTurn() {
         }
     });
 
-    let soldiers = entitiesResident.filter(ent => {
-        if (ent instanceof Soldier) {
-            return ent.isAlive == true;
-        } else {
-            return false;
-        }
-    });
+
 
     // Randomize the blobs' turn order
     shuffleArray(blobs);
 
     blobs.forEach(activeBlob => {
+
+        let soldiers = entitiesResident.filter(ent => {
+            if (ent instanceof Soldier) {
+                return ent.isAlive == true;
+            } else {
+                return false;
+            }
+        });
+
         // Does the monster have a target? If not, obtain one.
         if (activeBlob.target == null || activeBlob.target.isAlive == false) {
             activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
@@ -563,19 +608,31 @@ function startEnemyTurn() {
             }
 
             // ATTACK! (if able)...
-            // let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
-            //     + Math.abs(activeBlob.gridSquare.y - activeBlob.target.gridSquare.y);
-            // let isAdjacent = distance < 2;
-            // console.log(`distance: ${distance} adj: ${distance <= 1}`);
-            // if (movesMade < 2 && isAdjacent == true) {
-            //     console.log(`monster ${activeBlob.id} ATTACKS and KILLS ${activeBlob.target.id}!`);
-            //     //attackEntity(activeBlob, activeBlob.target);
-            //     activeBlob.target.isAlive = false;
-            //     activeBlob.target.gridSquare.isOccupied = false;
-            //     activeBlob.target.gridSquare = null;
-            //     activeBlob.target = null;
-            //     break;
-            // }
+            let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
+                + Math.abs(activeBlob.gridSquare.y - activeBlob.target.gridSquare.y);
+            let isAdjacent = distance < 2;
+            console.log(`distance: ${distance} adj: ${distance <= 1}`);
+            if (movesMade < 2 && isAdjacent == true) {
+
+                let kill = {
+                    attacker: activeBlob,
+                    defender: activeBlob.target,
+                    result: CombatResolutionState.KILL
+                };
+
+                drivers.push(new CombatResolutionDriver(kill, () => {
+                    console.log("KILL!")
+                    killEntity(activeBlob.target);
+                }));
+
+                // console.log(`monster ${activeBlob.id} ATTACKS and KILLS ${activeBlob.target.id}!`);
+                // //attackEntity(activeBlob, activeBlob.target);
+                // activeBlob.target.isAlive = false;
+                // activeBlob.target.gridSquare.isOccupied = false;
+                // activeBlob.target.gridSquare = null;
+                // activeBlob.target = null;
+                break;
+            }
 
         }
     });
@@ -786,30 +843,29 @@ function updateGameState() {
 
 
     /* CULL DEAD ENTITIES */
-    // let deadEntities = new Array();
+    let deadEntities = new Array();
     entitiesResident.forEach(entity => {
-        // if (entity.isAlive == false) {
-        //     deadEntities.push(entity);
-        // } else {
-        //     entity.update();
-        // }
-        entity.update();
+        if (entity.isAlive == false) {
+            deadEntities.push(entity);
+        } else {
+            entity.update();
+        }
     });
 
-    // deadEntities.forEach(entity => {
-    //     let index = entitiesResident.indexOf(entity);
-    //     if (index > -1) {
-    //         console.log(`removing dead entity: ${entity.id}`);
-    //         entitiesResident.splice(index);
-    //     }
-    // });
+    deadEntities.forEach(entity => {
+        let index = entitiesResident.indexOf(entity);
+        if (index > -1) {
+            console.log(`removing dead entity: ${entity.id}`);
+            entitiesResident.splice(index, 1);
+        }
+    });
 
     // Process each driver, one at a time starting at the head of the queue, until it is expired.
     if (movementAnimationDrivers.length > 0) {
         let driver = movementAnimationDrivers[0];
         driver.update();
 
-        if (driver instanceof CombatActionDriver) {
+        if (driver instanceof CombatResolutionDriver) {
             entitiesTransient.push(driver);
         }
 
@@ -843,26 +899,26 @@ function drawScene() {
     context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid(context);
 
-        context.imageSmoothingEnabled = false;
+    context.imageSmoothingEnabled = false;
 
-        // Draw entities
-        // TODO: consider adding layer ordering
-        entitiesResident.forEach(entity => {
-            if (entity.isAlive == true) {
-                entity.render(context);
-            }
-        });
-
-        entitiesTemporary.forEach(entity => {
+    // Draw entities
+    // TODO: consider adding layer ordering
+    entitiesResident.forEach(entity => {
+        if (entity.isAlive == true) {
             entity.render(context);
-        });
+        }
+    });
 
-        entitiesTransient.forEach(entity => {
-            entity.render(context);
-        });
+    entitiesTemporary.forEach(entity => {
+        entity.render(context);
+    });
 
-        // Clear the transients
-        entitiesTransient.length = 0;
+    entitiesTransient.forEach(entity => {
+        entity.render(context);
+    });
+
+    // Clear the transients
+    entitiesTransient.length = 0;
 
     // date = new Date();
     // let end = date.getMilliseconds();

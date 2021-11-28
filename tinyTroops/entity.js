@@ -476,38 +476,88 @@ export class CombatActionDriver {
 
 }
 
-export class ComboActionDriver {
+export var CombatResolutionState = Object.freeze({
+    NO_EFFECT: "NO_EFFECT",
+    STUN: "STUN",
+    KILL: "KILL"
+});
 
-    x = 0;
-    y = 0;
+export class CombatResolutionDriver {
 
-    lamda = null;
-    image = new Image();
-    currentTick = 0;
-    maxTicks = 120;
+    onComplete = null;
 
-    constructor(x, y, onComplete) {
-        this.x = x;
-        this.y = y;
-        this.lamda = onComplete;
-        this.image.src = "resources/logo.png";
+    image1 = new Image();
+    image2 = new Image();
+    image3 = new Image();
+
+
+    ticks = 0;
+    tickMax1 = 25;
+    tickMax2 = 75;
+    tickMax3 = 125;
+
+    tickMax = 300;
+
+    /**
+     * {
+     *      aggressor: entity,
+     *      defender: entity,
+     *      result: CombatResolution [KILL, STUN, NO_EFFECT]
+     *      
+     * }
+     * 
+     */
+
+    constructor(combatResult, onComplete) {
+
+        this.onComplete = onComplete;
+
+        if (combatResult.attacker instanceof Soldier) {
+            this.image1.src = "resources/soldier_focus_1.png";
+            this.image2.src = "resources/soldier_smg_1.png";
+        } else {
+            this.image1.src = "resources/soldier_shock_1.png";
+            this.image2.src = "resources/blob_grab_1.png";
+        }
+
+        if (combatResult.defender instanceof Blob) {
+            switch (combatResult.result) {
+                case CombatResolutionState.KILL:
+                    this.image3.src = "resources/blob_dies_1.png";
+                    break;
+                default:
+                    this.image3.src = "resources/blob_survives_1.png";
+                    break;
+            }
+        } else {
+            this.image3.src = "resources/blob_wins_1.png";
+        }
     }
 
     update() {
-        this.currentTick++;
-        if (this.currentTick == this.maxTicks) {
-            this.lamda();
+        this.ticks++;
+        if (this.ticks == this.tickMax) {
+            this.onComplete();
         }
     }
 
     isDone() {
-        return this.currentTick >= this.maxTicks;
+        return this.ticks >= this.tickMax;
     }
 
     render(context) {
-        context.drawImage(this.image, this.x, this.y);
-    }
+        if (this.ticks >= this.tickMax1) {
+            context.drawImage(this.image1, 100, 100);
+        }
 
+        if (this.ticks >= this.tickMax2) {
+            context.drawImage(this.image2, 250, 250);
+        }
+
+        if (this.ticks >= this.tickMax3) {
+            context.drawImage(this.image3, 400, 400);
+        }
+    }
 }
 
 export class MovementAnimationDriver {

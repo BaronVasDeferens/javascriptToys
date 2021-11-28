@@ -8,6 +8,10 @@ FEATURE
 * read/write to local storage
 * different weapons?
 * better monster pathing
+* GAME OVER state
+* Attack animation sound effects
+* Game over state music
+* Blobs who survive an attack will target the attacking soldier
 
 
 PERFORMANCE
@@ -32,3 +36,5 @@ CRAZY STUFF
 * Walls that move
 * Enemies that fragment instead of die
 * Combine soldiers into a single square? Split apart?
+* Morale: soldiers next to blobs without adjacent buddies suffer penalties
+* Captains: soldiers adjacent to captains enjoy bonuses

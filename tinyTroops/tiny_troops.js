@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatActionDriver, CombatResolutionDriver, CombatResolutionState } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -23,7 +23,9 @@ var States = Object.freeze({
     IDLE: "IDLE",
     UNIT_SELECTED: "UNIT_SELECTED",
     ENEMY_TURN: "ENEMY_TURN",
-    ANIMATION: "ANIMATION"
+    ANIMATION: "ANIMATION",
+    DEFEAT: "DEFEAT",
+    VICTORY: "VICTORY"
 });
 
 var currentState = States.INTRO;
@@ -179,6 +181,8 @@ window.onmousedown = function (event) {
 
                         if (actionPointsAvailable - actionPointCostTotal() >= 0) {
                             attackEntity(selectedEntityPrimary, selectedEntitySecondary);
+                            console.log(`apa: ${actionPointsAvailable} / apct: ${actionPointCostTotal()}`)
+                            actionPointsAvailable = actionPointsAvailable - actionPointCostTotal();
                         }
                         setState(States.IDLE);
                     }
@@ -419,7 +423,7 @@ function moveEntity(entity, event) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
-                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1]));
+                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], "resources/soldier_move_1.wav"));
             }
         });
 
@@ -469,7 +473,7 @@ function attackEntity(aggressor, target) {
             setState(States.IDLE);
         }));
     }
-    
+
     drivers.push(new CustomDriver(function () {
         setState(States.IDLE);
     }));
@@ -480,15 +484,6 @@ function attackEntity(aggressor, target) {
 }
 
 function killEntity(condemned) {
-
-    // if (!(condemned instanceof Entity)) {
-    //     return;
-    // }
-
-    // if (!condemned.isAlive) {
-    //     return;
-    // }
-
     condemned.isAlive = false
     condemned.gridSquare.isOccupied = false;
     condemned.gridSquare = null;
@@ -578,7 +573,7 @@ function startEnemyTurn() {
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
-                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, "resources/blob_move_1.wav"));
                     movesMade++;
                     attemptedMoves++;
                 } else {
@@ -597,7 +592,7 @@ function startEnemyTurn() {
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
-                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove));
+                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, "resources/blob_move_2.wav"));
                     movesMade++;
                     attemptedMoves++;
                 } else {
@@ -743,6 +738,11 @@ function beginGame() {
     requestAnimationFrame(beginGame);
 }
 
+/*******************
+ * UPDATE GAME STATE
+******************** 
+*/
+
 function updateGameState() {
 
     // Add transients for the last known mouse positions
@@ -872,7 +872,28 @@ function updateGameState() {
         if (driver.isDone()) {
             movementAnimationDrivers = movementAnimationDrivers.splice(1, movementAnimationDrivers.length - 1);
         }
+    } else {
+        if (currentState == States.IDLE) {
+            // Check for endgame
+            let blobs = entitiesResident.filter(entity => {
+                return entity instanceof Blob
+            });
+
+            let soldiers = entitiesResident.filter(entity => {
+                return entity instanceof Soldier
+            });
+
+            if (soldiers.length == 0) {
+                setState(States.DEFEAT);
+            } else if (blobs.length == 0) {
+                setState(States.VICTORY);
+            } else {
+                // keep playing
+            }
+        }
     }
+
+
 }
 
 // Display the underlying grid.

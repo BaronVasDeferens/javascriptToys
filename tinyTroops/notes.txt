@@ -12,6 +12,7 @@ FEATURE
 * Attack animation sound effects
 * Game over state music
 * Blobs who survive an attack will target the attacking soldier
+* "Focus" transient entity to orient which monster is moving/attacking
 
 
 PERFORMANCE

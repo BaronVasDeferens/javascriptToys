@@ -1,3 +1,4 @@
+
 class Entity {
 
     id = "";
@@ -442,40 +443,6 @@ export class CustomDriver {
     }
 }
 
-export class CombatActionDriver {
-
-    x = 0;
-    y = 0;
-
-    lamda = null;
-    image = new Image();
-    currentTick = 0;
-    maxTicks = 120;
-
-    constructor(x, y, onComplete) {
-        this.x = x;
-        this.y = y;
-        this.lamda = onComplete;
-        this.image.src = "resources/logo.png";
-    }
-
-    update() {
-        this.currentTick++;
-        if (this.currentTick == this.maxTicks) {
-            this.lamda();
-        }
-    }
-
-    isDone() {
-        return this.currentTick >= this.maxTicks;
-    }
-
-    render(context) {
-        context.drawImage(this.image, this.x, this.y);
-    }
-
-}
-
 export var CombatResolutionState = Object.freeze({
     NO_EFFECT: "NO_EFFECT",
     STUN: "STUN",
@@ -483,6 +450,8 @@ export var CombatResolutionState = Object.freeze({
 });
 
 export class CombatResolutionDriver {
+
+    smgSound = new Audio("resources/smg.wav");
 
     onComplete = null;
 
@@ -510,6 +479,8 @@ export class CombatResolutionDriver {
 
     constructor(combatResult, onComplete) {
 
+
+
         this.onComplete = onComplete;
 
         if (combatResult.attacker instanceof Soldier) {
@@ -536,7 +507,10 @@ export class CombatResolutionDriver {
 
     update() {
         this.ticks++;
-        if (this.ticks == this.tickMax) {
+
+        if (this.ticks == this.tickMax2) {
+            //this.smgSound.play();
+        } else if (this.ticks == this.tickMax) {
             this.onComplete();
         }
     }
@@ -565,6 +539,8 @@ export class MovementAnimationDriver {
     deltaX = 0;
     deltaY = 0;
 
+    sound = null;
+
     currentTick = 0;
     maxTicks = 2;
 
@@ -574,9 +550,10 @@ export class MovementAnimationDriver {
     entity = null;
     destination = null;
 
-    constructor(entity, origin, destination) {
+    constructor(entity, origin, destination, sound) {
         this.entity = entity;
         this.destination = destination;
+        this.sound = new Audio(sound);
 
         let destinationPos = destination.getOnScreenPos();
         let originScreenPos = origin.getOnScreenPos();
@@ -586,6 +563,11 @@ export class MovementAnimationDriver {
     }
 
     update() {
+
+        if (this.currentStep == 0 && this.currentTick == 0) {
+            //this.sound.play();
+        }
+
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {
             this.currentTick = 0;

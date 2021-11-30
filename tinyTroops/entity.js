@@ -479,8 +479,6 @@ export class CombatResolutionDriver {
 
     constructor(combatResult, onComplete) {
 
-
-
         this.onComplete = onComplete;
 
         if (combatResult.attacker instanceof Soldier) {

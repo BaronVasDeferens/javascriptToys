@@ -45,7 +45,7 @@ var mousePointerHoverDot = null;        // a ring which denotes the selected ent
 var mousePointerHoverLine = null;       // a line stretching from the selected unit to the mouse pointer
 
 var lineOfSightDots = new Set();
-
+var lineOfSightGridSquares = new Set();
 
 const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
@@ -178,8 +178,14 @@ window.onmousedown = function (event) {
                         }
                         setState(States.IDLE);
                     } else {
+                        
+                        let reducer = (sum, current) => {
+                            return sum || current.isObstructed || current.isOccupied;
+                        };
+                
+                        let isShotObstructed = Array.from(lineOfSightGridSquares).reduce(reducer, false);
 
-                        if (actionPointsAvailable - actionPointCostTotal() >= 0) {
+                        if (isShotObstructed == false && actionPointsAvailable - actionPointCostTotal() >= 0) {
                             attackEntity(selectedEntityPrimary, selectedEntitySecondary);
                             console.log(`apa: ${actionPointsAvailable} / apct: ${actionPointCostTotal()}`)
                             actionPointsAvailable = actionPointsAvailable - actionPointCostTotal();
@@ -252,18 +258,21 @@ window.onmousemove = function (event) {
                 selectedEntitySecondary = subEnt;
 
 
+                // Draw a ring under the mouse
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Ring(event.x, event.y, 50, "#000000");
                     mousePointerHoverLine = null;
                     lineOfSightDots.clear();
+                    lineOfSightGridSquares.clear();
                 } else {
                     let centerTarget = selectedEntitySecondary.gridSquare.getCenter();
                     mousePointerHoverDot = new Ring(centerTarget.x, centerTarget.y, 50, "#FF0000");
                     // TODO: make mousePointerHoverLine origin at circumference of hoverdot
                     mousePointerHoverLine = new Line(centeredCoords.x, centeredCoords.y, centerTarget.x, centerTarget.y, 2, "#FF0000");
 
-                    // Draw LOS obstruction dots...
-                    calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare).forEach(square => {
+                    // Caluilate LOS and draw LOS obstruction dots...
+                    lineOfSightGridSquares = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
+                    lineOfSightGridSquares.forEach(square => {
                         if ((square.isOccupied || square.isObstructed)) {
                             lineOfSightDots.add(new Dot(square, "#FFFF00", true));
                         } else {
@@ -368,7 +377,6 @@ function computeAttackStats() {
     let hit = "AUTO";
     let min = 0;
     let max = 3;
-
 
     switch (actionPointsCostPotential) {
         case 1:
@@ -719,6 +727,7 @@ function setState(state) {
 
             selectedGridSquares.length = 0;
             lineOfSightDots.clear();
+            lineOfSightGridSquares.clear();
             break;
 
         case States.ANIMATION:
@@ -748,32 +757,49 @@ function updateGameState() {
     // Add transients for the last known mouse positions
     if (mousePointerHoverLine != null) {
         entitiesTransient.push(mousePointerHoverLine);
-        var mousePointerHoverLineDistance = mousePointerHoverLine.getLength();
-        actionPointsCostPotential = mousePointerHoverLineDistance;
-        entitiesTransient.push(new TextLabel(
-            mousePointerHoverLine.endX,
-            mousePointerHoverLine.endY + 75,
-            actionPointCostTotal(),
-            "#FF0000"));
 
-        // Display hit chance and damage potential stats
-        if (selectedEntitySecondary != null) {
+        let asArray = Array.from(lineOfSightGridSquares);
+        let reducer = (sum, current) => {
+            return sum || current.isObstructed || current.isOccupied;
+        };
 
-            let attackStats = computeAttackStats();
+        let isShotObstructed = asArray.reduce(reducer, false);
 
-            entitiesTransient.push(
-                new TextLabel(
-                    mousePointerHoverLine.endX - 25,
-                    mousePointerHoverLine.endY + 100,
-                    "HIT: " + attackStats.hitChance,
-                    "#FF0000"));
+        if (isShotObstructed) {
+            entitiesTransient.push(new TextLabel(
+                mousePointerHoverLine.endX - 25,
+                mousePointerHoverLine.endY + 100,
+                "OBSTRUCTED",
+                "#FF0000"));
+        } else {
 
-            entitiesTransient.push(
-                new TextLabel(
-                    mousePointerHoverLine.endX - 25,
-                    mousePointerHoverLine.endY + 125,
-                    "DMG: " + attackStats.minDamage + "-" + attackStats.maxDamage,
-                    "#FF0000"));
+            var mousePointerHoverLineDistance = mousePointerHoverLine.getLength();
+            actionPointsCostPotential = mousePointerHoverLineDistance;
+            entitiesTransient.push(new TextLabel(
+                mousePointerHoverLine.endX,
+                mousePointerHoverLine.endY + 75,
+                actionPointCostTotal(),
+                "#FF0000"));
+
+            // Display hit chance and damage potential stats
+            if (selectedEntitySecondary != null) {
+
+                let attackStats = computeAttackStats();
+
+                entitiesTransient.push(
+                    new TextLabel(
+                        mousePointerHoverLine.endX - 25,
+                        mousePointerHoverLine.endY + 100,
+                        "HIT: " + attackStats.hitChance,
+                        "#FF0000"));
+
+                entitiesTransient.push(
+                    new TextLabel(
+                        mousePointerHoverLine.endX - 25,
+                        mousePointerHoverLine.endY + 125,
+                        "DMG: " + attackStats.minDamage + "-" + attackStats.maxDamage,
+                        "#FF0000"));
+            }
         }
 
     }

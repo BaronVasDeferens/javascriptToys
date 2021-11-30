@@ -823,9 +823,9 @@ function updateGameState() {
 
 
     // TODO: remove?
-    lineOfSightDots.forEach(dot => {
-        entitiesTransient.push(dot);
-    });
+    // lineOfSightDots.forEach(dot => {
+    //     entitiesTransient.push(dot);
+    // });
 
     // Recalculate available action points
     let apAvail = 0;

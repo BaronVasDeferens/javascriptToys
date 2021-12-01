@@ -545,7 +545,6 @@ function startEnemyTurn() {
         let movesMadeMax = 2;
 
         // TODO: add "max moves" to monster class
-        // TODO: add attacks here
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
 
             let deltaX = 0;
@@ -594,7 +593,6 @@ function startEnemyTurn() {
             newX = activeBlob.gridSquare.x;
             newY = activeBlob.gridSquare.y + deltaY;
 
-            // console.log(`newY: ${newY}`);
             if (newY <= gridSize - 1 && newY >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
@@ -628,15 +626,8 @@ function startEnemyTurn() {
                     killEntity(activeBlob.target);
                 }));
 
-                // console.log(`monster ${activeBlob.id} ATTACKS and KILLS ${activeBlob.target.id}!`);
-                // //attackEntity(activeBlob, activeBlob.target);
-                // activeBlob.target.isAlive = false;
-                // activeBlob.target.gridSquare.isOccupied = false;
-                // activeBlob.target.gridSquare = null;
-                // activeBlob.target = null;
                 break;
             }
-
         }
     });
 
@@ -670,9 +661,6 @@ function calculateLineOfSight(origin, target) {
         deltaY = deltaY * -1;
     }
 
-    // console.log(`rise: ${rise}\n run: ${run}\n theta: ${theta}\nangle: ${theta * 180 / Math.PI}`);
-    // console.log(`dx: ${deltaX} deltaY: ${deltaY}`)
-
     let candidate = origin;
 
     let zPoint = {
@@ -701,11 +689,6 @@ function calculateLineOfSight(origin, target) {
     }
 
     return pathSquares;
-}
-
-function sleep(sleepDuration) {
-    var now = new Date().getTime();
-    while (new Date().getTime() < now + sleepDuration) { /* do nothing */ }
 }
 
 function setState(state) {
@@ -821,8 +804,6 @@ function updateGameState() {
 
     }
 
-
-    // TODO: remove?
     // lineOfSightDots.forEach(dot => {
     //     entitiesTransient.push(dot);
     // });
@@ -940,9 +921,6 @@ function drawGrid(context) {
 
 function drawScene() {
 
-    // let date = new Date();
-    // let start = date.getMilliseconds();
-
     // Draw background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -968,10 +946,4 @@ function drawScene() {
 
     // Clear the transients
     entitiesTransient.length = 0;
-
-    // date = new Date();
-    // let end = date.getMilliseconds();
-    // totalFrames++;
-    // totalMilliSeconds = totalMilliSeconds + (end-start);
-    // console.log(`frames: ${totalFrames} millis: ${totalMilliSeconds} fps: ${(totalFrames/totalMilliSeconds)}`);
 }

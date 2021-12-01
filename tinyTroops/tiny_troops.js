@@ -478,6 +478,7 @@ function attackEntity(aggressor, target) {
     } else {
         drivers.push(new CombatResolutionDriver(noEffect, () => {
             console.log("attack fail");
+            target.setTarget(aggressor);
             setState(States.IDLE);
         }));
     }

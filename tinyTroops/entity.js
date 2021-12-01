@@ -507,7 +507,7 @@ export class CombatResolutionDriver {
         this.ticks++;
 
         if (this.ticks == this.tickMax2) {
-            //this.smgSound.play();
+            this.smgSound.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();
         }
@@ -563,7 +563,7 @@ export class MovementAnimationDriver {
     update() {
 
         if (this.currentStep == 0 && this.currentTick == 0) {
-            //this.sound.play();
+            this.sound.play();
         }
 
         this.currentTick++;
@@ -580,6 +580,50 @@ export class MovementAnimationDriver {
     }
 
 }
+
+export class DeathAnimationDriver {
+
+    image = new Image();
+
+    imageWidth = 50;
+    imageHeight = 50;
+
+    currentTick = 0;
+    ticksPerFrame = 15;
+
+    currentFrame = 0;
+    maxFrame = 7;
+
+    x = 0;
+    y = 0;
+
+    constructor(gridSquare) {
+        this.image.src = "resources/blob_death_strip.png";
+        this.x = gridSquare.x;
+        this.y = gridSquare.y;
+    }
+
+    update() {
+        this.currentTick++;
+        if (this.currentTick >= this.ticksPerFrame) {
+            this.currentTick = 0;
+            this.currentFrame++;
+        }
+    }
+
+    render(context) {
+        context.save();
+        context.translate(this.x, this.y);
+        context.drawImage(this.image, 50 * this.currentFrame, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
+        context.restore();
+    }
+
+    isDone() {
+        return (this.currentFrame >= this.maxFrame);
+    }
+
+}
+
 
 /**
  * Intro animation

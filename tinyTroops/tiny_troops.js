@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver } from './entity.js';
 
 
 const canvas = document.querySelector('canvas');
@@ -494,7 +494,6 @@ function attackEntity(aggressor, target) {
 function killEntity(condemned) {
     condemned.isAlive = false
     condemned.gridSquare.isOccupied = false;
-    condemned.gridSquare = null;
 }
 
 
@@ -836,7 +835,6 @@ function updateGameState() {
     }
 
     // Display available AP
-
     if (currentState == States.ENEMY_TURN) {
         entitiesTransient.push(new TextLabel(
             10, 700, "ENEMY TURN", "#000000"
@@ -873,6 +871,9 @@ function updateGameState() {
     entitiesResident.forEach(entity => {
         if (entity.isAlive == false) {
             deadEntities.push(entity);
+            if (entity instanceof Blob) {
+                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter()));
+            }
         } else {
             entity.update();
         }
@@ -891,7 +892,7 @@ function updateGameState() {
         let driver = movementAnimationDrivers[0];
         driver.update();
 
-        if (driver instanceof CombatResolutionDriver) {
+        if (driver instanceof CombatResolutionDriver || driver instanceof DeathAnimationDriver) {
             entitiesTransient.push(driver);
         }
 

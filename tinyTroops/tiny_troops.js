@@ -163,7 +163,7 @@ var setup = function () {
         // entitiesResident.push(blob);
     });
 
-    
+
 
 
 
@@ -212,11 +212,11 @@ window.onmousedown = function (event) {
                         }
                         setState(States.IDLE);
                     } else {
-                        
+
                         let reducer = (sum, current) => {
                             return sum || current.isObstructed || current.isOccupied;
                         };
-                
+
                         let isShotObstructed = Array.from(lineOfSightGridSquares).reduce(reducer, false);
 
                         if (isShotObstructed == false && actionPointsAvailable - actionPointCostTotal() >= 0) {
@@ -408,33 +408,30 @@ function secondaryEntityUnderMouse(event) {
 
 function findAndTargetClosestHuman(blob) {
 
-    let blobs = entitiesResident.filter (ent => {
-        return ent instanceof Blob;
-    });
-    
-    let soldiers = entitiesResident.filter (ent => {
+    let soldiers = entitiesResident.filter(ent => {
         return ent instanceof Soldier;
     });
 
-    blobs.forEach(blob => {
+    let blobGridSq = blob.gridSquare;
 
-        let blobGridSq = blob.gridSquare;
-
-        let distances = soldiers.map( soldier => {
-            let soldierGridSq = soldier.gridSquare
-            return Math.abs(blobGridSq.x - soldierGridSq.x) + Math.abs(blobGridSq.y - soldierGridSq.y);
-        });
-
-        let closestDistance = 0;
-        let closestIndex = 0;
-        for (var i = 0; i < soldiers.length; i++) {
-            if (distances[i] < closestDistance) {
-                closestIndex = i;
-            }
-        }
-
-        blob.setTarget(soldiers[closestIndex]);
+    let distances = soldiers.map(soldier => {
+        let soldierGridSq = soldier.gridSquare
+        return Math.abs(blobGridSq.x - soldierGridSq.x) + Math.abs(blobGridSq.y - soldierGridSq.y);
     });
+
+    let closestDistance = 999;
+    let closestIndex = 0;
+
+    for (var i = 0; i < soldiers.length; i++) {
+        if (distances[i] < closestDistance) {
+            closestDistance = distances[i];
+            closestIndex = i;
+        }
+    }
+
+    // console.log(`${distances} : ${closestIndex}`);
+
+    blob.setTarget(soldiers[closestIndex]);
 }
 
 function computeAttackStats() {

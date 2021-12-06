@@ -407,7 +407,7 @@ export class Blob extends Entity {
 
     setTarget(target) {
         this.target = target;
-        //console.log("blob " + this.id + " now targets soldier " + this.target.id);
+        console.log("blob " + this.id + " now targets soldier " + this.target.id);
     }
 
     // Draws CENTERED on x,y
@@ -507,6 +507,7 @@ export class CombatResolutionDriver {
         this.ticks++;
 
         if (this.ticks == this.tickMax2) {
+            this.smgSound.playbackRate = 1.20 - (Math.random() * 0.5);
             this.smgSound.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();
@@ -563,6 +564,7 @@ export class MovementAnimationDriver {
     update() {
 
         if (this.currentStep == 0 && this.currentTick == 0) {
+            this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
             this.sound.play();
         }
 

@@ -66,11 +66,6 @@ var actionPointCostAdjustment = 0;
 
 
 
-var totalFrames = 0;
-var totalMilliSeconds = 0;
-
-
-
 function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
 };
@@ -115,24 +110,63 @@ var setup = function () {
 
 
     // Create some soldiers
+    let soldiers = [];
     for (var n = 0; n < 3; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
         let ent = new Soldier("soldier_" + n, center.x, center.y);
         ent.setGridSquare(home);
-        entitiesResident.push(ent);
+        soldiers.push(ent);
     }
 
+    soldiers.forEach(soldier => {
+        entitiesResident.push(soldier);
+    });
+
+
     // Create some blobs
-    for (var n = 0; n < 7; n++) {
+    let blobs = [];
+    for (var n = 0; n < 10; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
         let ent = new Blob("blob_" + n, center.x, center.y);
         ent.setGridSquare(home);
-        entitiesResident.push(ent);
+        blobs.push(ent);
     }
+
+    // Find and target the closest soldier
+    blobs.forEach(blob => {
+
+        entitiesResident.push(blob);
+        findAndTargetClosestHuman(blob);
+
+        // let blobGridSq = blob.gridSquare;
+
+        // let distances = soldiers.map( soldier => {
+        //     let soldierGridSq = soldier.gridSquare
+        //     return Math.abs(blobGridSq.x - soldierGridSq.x) + Math.abs(blobGridSq.y - soldierGridSq.y);
+        // });
+
+        // console.log(distances);
+        // let closestDistance = 0;
+        // let closestIndex = 0;
+        // for (var i = 0; i < soldiers.length; i++) {
+        //     if (distances[i] < closestDistance) {
+        //         closestIndex = i;
+        //     }
+        // }
+        // blob.setTarget(soldiers[closestIndex]);
+
+
+        // entitiesResident.push(blob);
+    });
+
+    
+
+
+
 
     beginGame();
 }();
@@ -372,6 +406,37 @@ function secondaryEntityUnderMouse(event) {
     return target;
 }
 
+function findAndTargetClosestHuman(blob) {
+
+    let blobs = entitiesResident.filter (ent => {
+        return ent instanceof Blob;
+    });
+    
+    let soldiers = entitiesResident.filter (ent => {
+        return ent instanceof Soldier;
+    });
+
+    blobs.forEach(blob => {
+
+        let blobGridSq = blob.gridSquare;
+
+        let distances = soldiers.map( soldier => {
+            let soldierGridSq = soldier.gridSquare
+            return Math.abs(blobGridSq.x - soldierGridSq.x) + Math.abs(blobGridSq.y - soldierGridSq.y);
+        });
+
+        let closestDistance = 0;
+        let closestIndex = 0;
+        for (var i = 0; i < soldiers.length; i++) {
+            if (distances[i] < closestDistance) {
+                closestIndex = i;
+            }
+        }
+
+        blob.setTarget(soldiers[closestIndex]);
+    });
+}
+
 function computeAttackStats() {
 
     let hit = "AUTO";
@@ -524,17 +589,9 @@ function startEnemyTurn() {
 
     blobs.forEach(activeBlob => {
 
-        let soldiers = entitiesResident.filter(ent => {
-            if (ent instanceof Soldier) {
-                return ent.isAlive == true;
-            } else {
-                return false;
-            }
-        });
-
         // Does the monster have a target? If not, obtain one.
         if (activeBlob.target == null || activeBlob.target.isAlive == false) {
-            activeBlob.setTarget(soldiers[Math.floor(Math.random() * soldiers.length)]);
+            findAndTargetClosestHuman(activeBlob);
         }
 
         // Move toward target
@@ -613,7 +670,7 @@ function startEnemyTurn() {
             let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
                 + Math.abs(activeBlob.gridSquare.y - activeBlob.target.gridSquare.y);
             let isAdjacent = distance < 2;
-            console.log(`distance: ${distance} adj: ${distance <= 1}`);
+
             if (movesMade < 2 && isAdjacent == true) {
 
                 let kill = {

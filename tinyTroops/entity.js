@@ -451,7 +451,7 @@ export var CombatResolutionState = Object.freeze({
 
 export class CombatResolutionDriver {
 
-    smgSound = new Audio("resources/smg.wav");
+    sound = null;
 
     onComplete = null;
 
@@ -461,11 +461,11 @@ export class CombatResolutionDriver {
 
 
     ticks = 0;
-    tickMax1 = 25;
-    tickMax2 = 75;
-    tickMax3 = 125;
+    tickMax1 = 20;
+    tickMax2 = 60;
+    tickMax3 = 100;
 
-    tickMax = 300;
+    tickMax = 200;
 
     /**
      * {
@@ -484,9 +484,11 @@ export class CombatResolutionDriver {
         if (combatResult.attacker instanceof Soldier) {
             this.image1.src = "resources/soldier_focus_1.png";
             this.image2.src = "resources/soldier_smg_1.png";
+            this.sound = new Audio("resources/smg.wav");
         } else {
             this.image1.src = "resources/soldier_shock_1.png";
             this.image2.src = "resources/blob_grab_1.png";
+            this.sound = new Audio("resources/blob_whip.wav");
         }
 
         if (combatResult.defender instanceof Blob) {
@@ -507,8 +509,8 @@ export class CombatResolutionDriver {
         this.ticks++;
 
         if (this.ticks == this.tickMax2) {
-            //this.smgSound.playbackRate = 1.20 - (Math.random() * 0.5);
-            this.smgSound.play();
+            //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
+            this.sound.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();
         }
@@ -519,16 +521,19 @@ export class CombatResolutionDriver {
     }
 
     render(context) {
+
+        // images are 200x200
+
         if (this.ticks >= this.tickMax1) {
             context.drawImage(this.image1, 100, 100);
         }
 
         if (this.ticks >= this.tickMax2) {
-            context.drawImage(this.image2, 250, 250);
+            context.drawImage(this.image2, 350, 100);
         }
 
         if (this.ticks >= this.tickMax3) {
-            context.drawImage(this.image3, 400, 400);
+            context.drawImage(this.image3, 233, 350);
         }
     }
 }

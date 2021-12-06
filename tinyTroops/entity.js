@@ -507,7 +507,7 @@ export class CombatResolutionDriver {
         this.ticks++;
 
         if (this.ticks == this.tickMax2) {
-            this.smgSound.playbackRate = 1.20 - (Math.random() * 0.5);
+            //this.smgSound.playbackRate = 1.20 - (Math.random() * 0.5);
             this.smgSound.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();

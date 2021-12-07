@@ -221,7 +221,7 @@ window.onmousedown = function (event) {
 
                         if (isShotObstructed == false && actionPointsAvailable - actionPointCostTotal() >= 0) {
                             attackEntity(selectedEntityPrimary, selectedEntitySecondary);
-                            console.log(`apa: ${actionPointsAvailable} / apct: ${actionPointCostTotal()}`)
+                            // console.log(`apa: ${actionPointsAvailable} / apct: ${actionPointCostTotal()}`)
                             actionPointsAvailable = actionPointsAvailable - actionPointCostTotal();
                         }
                         setState(States.IDLE);
@@ -555,6 +555,7 @@ function attackEntity(aggressor, target) {
 }
 
 function killEntity(condemned) {
+    console.log(`${condemned.id} dies`);
     condemned.isAlive = false
     condemned.gridSquare.isOccupied = false;
 }
@@ -574,13 +575,13 @@ function startEnemyTurn() {
 
     let blobs = entitiesResident.filter(ent => {
         if (ent instanceof Blob) {
-            return ent.isAlive == true;
+            return (ent.isAlive == true);
         } else {
             return false;
         }
     });
 
-
+    console.log(`${blobs.length} blobs move...`);
 
     // Randomize the blobs' turn order
     shuffleArray(blobs);
@@ -676,7 +677,7 @@ function startEnemyTurn() {
                 };
 
                 drivers.push(new CombatResolutionDriver(kill, () => {
-                    console.log("KILL!")
+                    console.log(`${activeBlob.id} kills ${activeBlob.target.id}`);
                     killEntity(activeBlob.target);
                 }));
 
@@ -894,11 +895,10 @@ function updateGameState() {
     }
 
     // Check for remaining action points. When there are no more, it's the enemy's turn...
-    let notBusy = (currentState != States.ANIMATION && currentState != States.ENEMY_TURN);
+    let notBusy = (currentState != States.ANIMATION) && (currentState != States.ENEMY_TURN) && (movementAnimationDrivers.length == 0);
     if (actionPointsAvailable == 0 && notBusy) {
         startEnemyTurn();
         actionPointsAvailable = actionPointsMax;
-        //setState(States.IDLE);
     }
 
 

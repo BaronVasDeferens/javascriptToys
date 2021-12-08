@@ -451,7 +451,8 @@ export var CombatResolutionState = Object.freeze({
 
 export class CombatResolutionDriver {
 
-    sound = null;
+    soundOne = null;
+    soundTwo = null;
 
     onComplete = null;
 
@@ -484,17 +485,18 @@ export class CombatResolutionDriver {
         if (combatResult.attacker instanceof Soldier) {
             this.image1.src = "resources/soldier_focus_1.png";
             this.image2.src = "resources/soldier_smg_1.png";
-            this.sound = new Audio("resources/smg.wav");
+            this.soundOne = new Audio("resources/smg.wav");
         } else {
             this.image1.src = "resources/soldier_shock_1.png";
             this.image2.src = "resources/blob_grab_1.png";
-            this.sound = new Audio("resources/blob_whip.wav");
+            this.soundOne = new Audio("resources/blob_whip.wav");
         }
 
         if (combatResult.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
                     this.image3.src = "resources/panel_3_blob_death.png";
+                    this.soundTwo = new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
                     this.image3.src = "resources/blob_survives_1.png";
@@ -510,7 +512,9 @@ export class CombatResolutionDriver {
 
         if (this.ticks == this.tickMax2) {
             //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
-            this.sound.play();
+            this.soundOne.play();
+        } else if (this.ticks == this.tickMax3 && this.soundTwo != null) {
+            this.soundTwo.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();
         }

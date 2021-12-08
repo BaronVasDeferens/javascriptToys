@@ -465,7 +465,7 @@ export class CombatResolutionDriver {
     tickMax2 = 60;
     tickMax3 = 100;
 
-    tickMax = 200;
+    tickMax = 250;
 
     /**
      * {
@@ -494,7 +494,7 @@ export class CombatResolutionDriver {
         if (combatResult.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.image3.src = "resources/blob_dies_1.png";
+                    this.image3.src = "resources/panel_3_blob_death.png";
                     break;
                 default:
                     this.image3.src = "resources/blob_survives_1.png";
@@ -533,7 +533,7 @@ export class CombatResolutionDriver {
         }
 
         if (this.ticks >= this.tickMax3) {
-            context.drawImage(this.image3, 233, 350);
+            context.drawImage(this.image3, 100, 350);
         }
     }
 }

@@ -487,8 +487,8 @@ export class CombatResolutionDriver {
             this.image2.src = "resources/soldier_smg_1.png";
             this.soundOne = new Audio("resources/smg.wav");
         } else {
-            this.image1.src = "resources/soldier_shock_1.png";
-            this.image2.src = "resources/blob_grab_1.png";
+            this.image1.src = "resources/soldier_death_panel_1.png";
+            this.image2.src = "resources/soldier_death_panel_2.png";
             this.soundOne = new Audio("resources/blob_whip.wav");
         }
 

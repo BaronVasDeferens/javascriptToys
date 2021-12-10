@@ -503,7 +503,7 @@ export class CombatResolutionDriver {
                     break;
             }
         } else {
-            this.image3.src = "resources/blob_wins_1.png";
+            this.image3.src = "resources/soldier_death_panel_3.png";
         }
     }
 

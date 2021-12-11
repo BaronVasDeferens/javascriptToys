@@ -1,3 +1,4 @@
+import * as SoundModule from './SoundModule.js';
 
 class Entity {
 
@@ -462,11 +463,11 @@ export class CombatResolutionDriver {
 
 
     ticks = 0;
-    tickMax1 = 20;
-    tickMax2 = 60;
-    tickMax3 = 100;
+    tickMax1 = 60;
+    tickMax2 = 120;
+    tickMax3 = 180;
 
-    tickMax = 250;
+    tickMax = 330;
 
     /**
      * {
@@ -483,20 +484,20 @@ export class CombatResolutionDriver {
         this.onComplete = onComplete;
 
         if (combatResult.attacker instanceof Soldier) {
-            this.image1.src = "resources/soldier_focus_1.png";
-            this.image2.src = "resources/soldier_smg_1.png";
-            this.soundOne = new Audio("resources/smg.wav");
+            this.image1.src = "resources/soldier_focus_smg_1.png";
+            this.image2.src = "resources/soldier_firing_smg_1.png";
+            this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
         } else {
             this.image1.src = "resources/soldier_death_panel_1.png";
             this.image2.src = "resources/soldier_death_panel_2.png";
-            this.soundOne = new Audio("resources/blob_whip.wav");
+            this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_whip.wav");
         }
 
         if (combatResult.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.image3.src = "resources/panel_3_blob_death.png";
-                    this.soundTwo = new Audio("resources/blob_hit_smg.wav");
+                    this.image3.src = "resources/blob_dead_2.png";
+                    this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
                     this.image3.src = "resources/blob_survives_1.png";
@@ -561,7 +562,7 @@ export class MovementAnimationDriver {
     constructor(entity, origin, destination, sound) {
         this.entity = entity;
         this.destination = destination;
-        this.sound = new Audio(sound);
+        this.sound = SoundModule.getSound(sound);
 
         let destinationPos = destination.getOnScreenPos();
         let originScreenPos = origin.getOnScreenPos();

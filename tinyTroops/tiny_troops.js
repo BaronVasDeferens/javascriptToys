@@ -6,7 +6,7 @@
  */
 
 import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver } from './entity.js';
-
+import * as SoundModule from './SoundModule.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -29,7 +29,7 @@ var States = Object.freeze({
 });
 
 var currentState = States.INTRO;
-const introAudio = new Audio("resources/intro.wav");
+const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
 const gridSize = 9;
@@ -493,7 +493,7 @@ function moveEntity(entity, event) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
-                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], "resources/soldier_move_1.wav"));
+                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], SoundModule.SFX.SOLDIER_MOVE_1));
             }
         });
 
@@ -635,7 +635,7 @@ function startEnemyTurn() {
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
-                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, "resources/blob_move_1.wav"));
+                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, SoundModule.SFX.BLOB_MOVE_1));
                     movesMade++;
                     attemptedMoves++;
                 } else {
@@ -653,7 +653,7 @@ function startEnemyTurn() {
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
                     activeBlob.setGridSquare(possibleMove);
-                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, "resources/blob_move_2.wav"));
+                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, SoundModule.SFX.BLOB_MOVE_2));
                     movesMade++;
                     attemptedMoves++;
                 } else {

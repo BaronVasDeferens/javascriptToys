@@ -496,7 +496,11 @@ export class CombatResolutionDriver {
         if (combatResult.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.image3.src = "resources/blob_dead_2.png";
+                    let imgArray = ["resources/panel_3_blob_death.png",
+                    "resources/blob_dead_2.png",
+                    "resources/blob_dead_3.png"];
+                    this.shuffleArray(imgArray);
+                    this.image3.src = imgArray[0];
                     this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
@@ -505,6 +509,13 @@ export class CombatResolutionDriver {
             }
         } else {
             this.image3.src = "resources/soldier_death_panel_3.png";
+        }
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
     }
 

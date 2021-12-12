@@ -59,7 +59,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 7;
+const actionPointsMax = 5;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -540,8 +540,6 @@ function attackEntity(aggressor, target) {
     } else {
         drivers.push(new CombatResolutionDriver(noEffect, () => {
             console.log("attack fail");
-            target.setTarget(aggressor);
-            setState(States.IDLE);
         }));
     }
 
@@ -589,15 +587,15 @@ function startEnemyTurn() {
     blobs.forEach(activeBlob => {
 
         // Does the monster have a target? If not, obtain one.
-        if (activeBlob.target == null || activeBlob.target.isAlive == false) {
+        // if (activeBlob.target == null || activeBlob.target.isAlive == false) {
             findAndTargetClosestHuman(activeBlob);
-        }
+        // }
 
         // Move toward target
         let attemptedMoves = 0;
-        let attemptedMovesMax = 4;
+        let attemptedMovesMax = 5;
         let movesMade = 0;
-        let movesMadeMax = 2;
+        let movesMadeMax = 4;
 
         // TODO: add "max moves" to monster class
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {

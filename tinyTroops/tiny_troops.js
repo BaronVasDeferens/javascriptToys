@@ -434,6 +434,28 @@ function findAndTargetClosestHuman(blob) {
     blob.setTarget(soldiers[closestIndex]);
 }
 
+function targetClosestEnemy(attacker, targets) {
+
+    let attackerSq = attacker.gridSquare;
+
+    let distances = targets.map(target => {
+        let targetSq = target.gridSquare
+        return Math.abs(attackerSq.x - targetSq.x) + Math.abs(attackerSq.y - targetSq.y);
+    });
+
+    let closestDistance = 999;
+    let closestIndex = 0;
+
+    for (var i = 0; i < targets.length; i++) {
+        if (distances[i] < closestDistance) {
+            closestDistance = distances[i];
+            closestIndex = i;
+        }
+    }
+
+    attacker.setTarget(targets[closestIndex]);
+}
+
 function computeAttackStats() {
 
     let hit = "AUTO";

@@ -1,15 +1,3 @@
-const mazeRowsCols = 100;
-const roomSize =75;
-
-var mazeArray = new Array(mazeRowsCols);
-var allRooms = new Array();
-var frontier = new Array();
-var reachable = new Array();
-var inMaze = new Array();
-
-var windowX = 0;
-var windowY = 0;
-
 class Room {
 
     row = 0;
@@ -23,45 +11,112 @@ class Room {
     }
 };
 
+class Player {
+    x = 0;
+    y = 0;
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+};
+
+
+const mazeRowsCols = 50;
+const roomSize = 125;        // render size (pixels) of rooms 
+
+var mazeArray = new Array(mazeRowsCols);
+var allRooms = new Array();
+var frontier = new Array();
+var reachable = new Array();
+var inMaze = new Array();
+
+const mazeWindowSize = 7;       // Number of maze squares visible on screen at any time
+var mazeWindowX = 0;                // array position/s of maze window
+var mazeWindowY = 0;
+
+let player = new Player(2, 2);
+
 document.addEventListener('keydown', (e) => {
 
     switch (e.key) {
         case "a":
-            if (windowX >= 0 && windowX < mazeRowsCols) {
-                windowX--;
-                if (windowX < 0) {
-                    windowX = 0;
-                }
-                drawMaze();
+        case "ArrowLeft":
+            player.x--;
+            if (player.x < 0) {
+                player.x = 0;
             }
+
+            if (player.x < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
+                if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
+                    mazeWindowX--;
+                    if (mazeWindowX < 0) {
+                        mazeWindowX = 0;
+                    }
+
+                }
+            }
+            drawMaze();
             break;
-        case 'd':
-            if (windowX >= 0 && windowX < mazeRowsCols) {
-                windowX++;
-                if (windowX >= mazeRowsCols) {
-                    windowX = mazeRowsCols - 1;
-                }
-                 drawMaze();
+        case "d":
+        case "ArrowRight":
+            player.x++;
+            if (player.x >= mazeRowsCols) {
+                player.x = mazeRowsCols - 1;
             }
+
+            // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+            if (player.x >= Math.floor(mazeWindowSize / 2) + 1) {
+                if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
+                    mazeWindowX++;
+                    if (mazeWindowX >= mazeRowsCols - mazeWindowSize) {
+                        mazeWindowX = mazeRowsCols - mazeWindowSize;
+                    }
+
+                }
+            }
+            drawMaze();
             break;
         case "w":
-            if (windowY >= 0 && windowY < mazeRowsCols) {
-                windowY--;
-                if (windowY < 0) {
-                    windowY = 0;
-                }
-                drawMaze();
+        case "ArrowUp":
+            player.y--;
+            if (player.y < 0) {
+                player.y = 0;
             }
-            break;
-        case 's':
-            if (windowY >= 0 && windowY < mazeRowsCols) {
-                windowY++;
-                if (windowY >= mazeRowsCols) {
-                    windowY = mazeRowsCols - 1;
+
+            if (player.y < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
+                if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
+                    mazeWindowY--;
+                    if (mazeWindowY < 0) {
+                        mazeWindowY = 0;
+                    }
+                    
                 }
-                drawMaze();
             }
+            drawMaze();
             break;
+        case "s":
+        case "ArrowDown":
+            player.y++;
+            if (player.y >= mazeRowsCols) {
+                player.y = mazeRowsCols - 1;
+            }
+
+            // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
+            if (player.y >= Math.floor(mazeWindowSize / 2) + 1) {
+                if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
+                    mazeWindowY++;
+                    if (mazeWindowY >= mazeRowsCols - mazeWindowSize) {
+                        mazeWindowY = mazeRowsCols - mazeWindowSize;
+                    }
+                }
+            }
+            drawMaze();
+            break;
+        default:
+            console.log(e);
+            break;
+
     }
 });
 
@@ -71,14 +126,13 @@ document.addEventListener('keydown', (e) => {
 var setup = function () {
 
     var mazeArea = document.getElementById('gameArea');
-    mazeArea.innerHTML = "<canvas id=\"myCanvas\" width=\"750\" height=\"750\"></canvas>"
+    mazeArea.innerHTML = "<canvas id=\"myCanvas\" width=\"875\" height=\"875\"></canvas>"
 
     for (var i = 0; i < mazeRowsCols; i++) {
 
         mazeArray[i] = new Array(mazeRowsCols);
 
         for (var j = 0; j < mazeRowsCols; j++) {
-
             var room = new Room(i, j, false);
             allRooms.push(room);
             mazeArray[i][j] = room;
@@ -242,11 +296,7 @@ function drawMaze() {
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-
-    // allRooms
-
-    let subRooms = getMazeSubsection(windowY, windowX, 10);
-    console.log(`subrooms: ${subRooms.length}`);
+    let subRooms = getMazeSubsection(mazeWindowY, mazeWindowX, mazeWindowSize);
 
     subRooms.forEach(room => {
 
@@ -258,15 +308,22 @@ function drawMaze() {
         }
 
         context.fillRect(
-            (room.col - windowX) * roomSize,
-            (room.row - windowY) * roomSize,
+            (room.col - mazeWindowX) * roomSize,
+            (room.row - mazeWindowY) * roomSize,
             roomSize,
             roomSize);
     });
+
+    // render player
+    context.fillStyle = "#FF0000";
+    context.fillRect((player.x - mazeWindowX) * roomSize + 50, (player.y - mazeWindowY) * roomSize + 50, 25, 25);
+    console.log(player);
 }
 
 
 function getMazeSubsection(row, col, size) {
+
+    size = size - 1;
 
     if (col < 0) {
         col = 0;
@@ -286,7 +343,7 @@ function getMazeSubsection(row, col, size) {
         lowerBound = mazeRowsCols - 1;
     }
 
-    console.log(`looking X: ${col}-${rightBound} looking Y: ${row}-${lowerBound}`)
+    // console.log(`looking X: ${col}-${rightBound} looking Y: ${row}-${lowerBound}`)
 
     let subRooms = [];
 
@@ -300,10 +357,3 @@ function getMazeSubsection(row, col, size) {
 
     return subRooms;
 }
-
-function drawMazeSubsection(rooms, context) {
-
-
-
-}
-

@@ -43,7 +43,6 @@ document.addEventListener('keydown', (e) => {
         case "a":
         case "ArrowLeft":
             maybeRoom = getRoom(player.y, player.x - 1);
-            console.log(maybeRoom);
             if (maybeRoom.open == true) {
                 player.x--;
                 if (player.x < 0) {
@@ -66,7 +65,6 @@ document.addEventListener('keydown', (e) => {
         case "d":
         case "ArrowRight":
             maybeRoom = getRoom(player.y, player.x + 1);
-            console.log(maybeRoom);
             if (maybeRoom.open == true) {
                 player.x++;
                 if (player.x >= mazeRowsCols) {
@@ -88,7 +86,6 @@ document.addEventListener('keydown', (e) => {
             break;
         case "w":
         case "ArrowUp":
-
             maybeRoom = getRoom(player.y - 1, player.x);
             if (maybeRoom.open == true) {
 
@@ -110,7 +107,6 @@ document.addEventListener('keydown', (e) => {
             break;
         case "s":
         case "ArrowDown":
-
             maybeRoom = getRoom(player.y + 1, player.x);
             if (maybeRoom.open == true) {
                 player.y++;
@@ -334,7 +330,6 @@ function drawMaze() {
     // render player
     context.fillStyle = "#FF0000";
     context.fillRect((player.x - mazeWindowX) * roomSize + 50, (player.y - mazeWindowY) * roomSize + 50, 25, 25);
-    console.log(player);
 }
 
 

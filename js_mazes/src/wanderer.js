@@ -42,72 +42,89 @@ document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case "a":
         case "ArrowLeft":
-            player.x--;
-            if (player.x < 0) {
-                player.x = 0;
-            }
+            maybeRoom = getRoom(player.y, player.x - 1);
+            console.log(maybeRoom);
+            if (maybeRoom.open == true) {
+                player.x--;
+                if (player.x < 0) {
+                    player.x = 0;
+                }
 
-            if (player.x < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
-                if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
-                    mazeWindowX--;
-                    if (mazeWindowX < 0) {
-                        mazeWindowX = 0;
+
+                if (player.x < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
+                    if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
+                        mazeWindowX--;
+                        if (mazeWindowX < 0) {
+                            mazeWindowX = 0;
+                        }
                     }
-
                 }
             }
+
             drawMaze();
             break;
         case "d":
         case "ArrowRight":
-            player.x++;
-            if (player.x >= mazeRowsCols) {
-                player.x = mazeRowsCols - 1;
-            }
+            maybeRoom = getRoom(player.y, player.x + 1);
+            console.log(maybeRoom);
+            if (maybeRoom.open == true) {
+                player.x++;
+                if (player.x >= mazeRowsCols) {
+                    player.x = mazeRowsCols - 1;
+                }
 
-            // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-            if (player.x >= Math.floor(mazeWindowSize / 2) + 1) {
-                if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
-                    mazeWindowX++;
-                    if (mazeWindowX >= mazeRowsCols - mazeWindowSize) {
-                        mazeWindowX = mazeRowsCols - mazeWindowSize;
+                // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+                if (player.x >= Math.floor(mazeWindowSize / 2) + 1) {
+                    if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
+                        mazeWindowX++;
+                        if (mazeWindowX >= mazeRowsCols - mazeWindowSize) {
+                            mazeWindowX = mazeRowsCols - mazeWindowSize;
+                        }
                     }
-
                 }
             }
+
             drawMaze();
             break;
         case "w":
         case "ArrowUp":
-            player.y--;
-            if (player.y < 0) {
-                player.y = 0;
-            }
 
-            if (player.y < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
-                if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
-                    mazeWindowY--;
-                    if (mazeWindowY < 0) {
-                        mazeWindowY = 0;
+            maybeRoom = getRoom(player.y - 1, player.x);
+            if (maybeRoom.open == true) {
+
+                player.y--;
+                if (player.y < 0) {
+                    player.y = 0;
+                }
+
+                if (player.y < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
+                    if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
+                        mazeWindowY--;
+                        if (mazeWindowY < 0) {
+                            mazeWindowY = 0;
+                        }
                     }
-                    
                 }
             }
             drawMaze();
             break;
         case "s":
         case "ArrowDown":
-            player.y++;
-            if (player.y >= mazeRowsCols) {
-                player.y = mazeRowsCols - 1;
-            }
 
-            // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
-            if (player.y >= Math.floor(mazeWindowSize / 2) + 1) {
-                if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
-                    mazeWindowY++;
-                    if (mazeWindowY >= mazeRowsCols - mazeWindowSize) {
-                        mazeWindowY = mazeRowsCols - mazeWindowSize;
+            maybeRoom = getRoom(player.y + 1, player.x);
+            if (maybeRoom.open == true) {
+                player.y++;
+                if (player.y >= mazeRowsCols) {
+                    player.y = mazeRowsCols - 1;
+                }
+
+                // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
+                if (player.y >= Math.floor(mazeWindowSize / 2) + 1) {
+                    if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
+                        mazeWindowY++;
+                        if (mazeWindowY >= mazeRowsCols - mazeWindowSize) {
+                            mazeWindowY = mazeRowsCols - mazeWindowSize;
+                        }
                     }
                 }
             }

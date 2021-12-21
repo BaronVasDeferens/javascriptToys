@@ -60,7 +60,7 @@ document.addEventListener('keydown', (e) => {
                 }
             }
 
-            drawMaze();
+            drawWindowedMaze();
             break;
         case "d":
         case "ArrowRight":
@@ -82,7 +82,7 @@ document.addEventListener('keydown', (e) => {
                 }
             }
 
-            drawMaze();
+            drawWindowedMaze();
             break;
         case "w":
         case "ArrowUp":
@@ -103,7 +103,7 @@ document.addEventListener('keydown', (e) => {
                     }
                 }
             }
-            drawMaze();
+            drawWindowedMaze();
             break;
         case "s":
         case "ArrowDown":
@@ -124,7 +124,10 @@ document.addEventListener('keydown', (e) => {
                     }
                 }
             }
-            drawMaze();
+            drawWindowedMaze();
+            break;
+        case " ":
+            drawEntireMaze();
             break;
         default:
             console.log(e);
@@ -298,10 +301,10 @@ function createMaze() {
         //            console.log("frontier size = " + frontier.length);
     }
 
-    drawMaze();
+    drawWindowedMaze();
 }
 
-function drawMaze() {
+function drawWindowedMaze() {
 
     var canvas = document.getElementById("myCanvas");
     var context = canvas.getContext("2d");
@@ -330,6 +333,36 @@ function drawMaze() {
     // render player
     context.fillStyle = "#FF0000";
     context.fillRect((player.x - mazeWindowX) * roomSize + 50, (player.y - mazeWindowY) * roomSize + 50, 25, 25);
+}
+
+function drawEntireMaze() {
+
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+
+    context.fillStyle = "#b8bab9";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+
+
+    allRooms.forEach(room => {
+
+        let size = 17.5;
+
+        if (room.open) {
+            context.fillStyle = "#FFFFFF";
+
+        } else {
+            context.fillStyle = "#000000";
+        }
+
+        context.fillRect(
+            room.col  * size,
+            room.row * size,
+            size,
+            size);
+    });
+
 }
 
 

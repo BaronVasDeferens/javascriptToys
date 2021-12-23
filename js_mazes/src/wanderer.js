@@ -343,11 +343,9 @@ function drawEntireMaze() {
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-
+    let size = 17.5;
 
     allRooms.forEach(room => {
-
-        let size = 17.5;
 
         if (room.open) {
             context.fillStyle = "#FFFFFF";
@@ -363,6 +361,9 @@ function drawEntireMaze() {
             size);
     });
 
+    // TESTING ONLY
+    context.fillStyle = "#FF0000";
+    context.fillRect(player.x * size, player.y * size, size, size);
 }
 
 

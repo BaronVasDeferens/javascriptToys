@@ -141,8 +141,8 @@ document.addEventListener('keydown', (e) => {
 // TODO: parameterize the canvas size
 var setup = function () {
 
-    var mazeArea = document.getElementById('gameArea');
-    mazeArea.innerHTML = "<canvas id=\"myCanvas\" width=\"875\" height=\"875\"></canvas>"
+    // var mazeArea = document.getElementById('gameArea');
+    // mazeArea.innerHTML = "<canvas id=\"myCanvas\" width=\"875\" height=\"875\"></canvas>"
 
     for (var i = 0; i < mazeRowsCols; i++) {
 

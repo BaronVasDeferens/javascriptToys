@@ -1,5 +1,5 @@
 
-var MovingState = Object.freeze({
+var Moving = Object.freeze({
     STOP: "STOP",
     MOVING_RIGHT: "MOVING_RIGHT",
     MOVING_LEFT: "MOVING_LEFT",
@@ -7,7 +7,7 @@ var MovingState = Object.freeze({
     MOVING_DOWN: "MOVING_DOWN"
 });
 
-var movingDirection = MovingState.STOP;
+var movingDirection = Moving.STOP;
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -17,7 +17,7 @@ let countMax = 100;
 
 var playerX = 0;
 var playerY = 0;
-const pixelsPerIncrement = 10;
+const pixelsPerIncrement = 2;
 
 
 document.addEventListener('keydown', (e) => {
@@ -25,27 +25,66 @@ document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case "a":
         case "ArrowLeft":
-            movingDirection = MovingState.MOVING_LEFT;
+            movingDirection = Moving.MOVING_LEFT;
             break;
         case "d":
         case "ArrowRight":
-            movingDirection = MovingState.MOVING_RIGHT;
+            movingDirection = Moving.MOVING_RIGHT;
             break;
         case "w":
         case "ArrowUp":
-            movingDirection = MovingState.MOVING_UP;
+            movingDirection = Moving.MOVING_UP;
             break;
         case "s":
         case "ArrowDown":
-            movingDirection = MovingState.MOVING_DOWN;
+            movingDirection = Moving.MOVING_DOWN;
             break;
         case " ":
-            movingDirection = MovingState.STOP;
+            movingDirection = Moving.STOP;
             break;
         default:
             break;
     }
+
+    //console.log(`key down: ${e.key}`);
 });
+
+// document.addEventListener('keyup', (e) => {
+
+//     switch (e.key) {
+//         case "a":
+//         case "ArrowLeft":
+//             if (movingDirection == Moving.MOVING_LEFT) {
+//                 movingDirection = Moving.STOP;
+//             }
+//             break;
+//         case "d":
+//         case "ArrowRight":
+//             if (movingDirection == Moving.MOVING_RIGHT) {
+//                 movingDirection = Moving.STOP;
+//             }
+//             break;
+//         case "w":
+//         case "ArrowUp":
+//             if (movingDirection == Moving.MOVING_UP) {
+//                 movingDirection = Moving.STOP;
+//             }
+//             break;
+//         case "s":
+//         case "ArrowDown":
+//             if (movingDirection == Moving.MOVING_DOWN) {
+//                 movingDirection = Moving.STOP;
+//             }
+//             break;
+//         case " ":
+//             movingDirection = Moving.STOP;
+//             break;
+//         default:
+//             break;
+//     }
+
+//     //console.log(`key up: ${e.key}`);
+// });
 
 
 // Setup (IFFE function)
@@ -63,22 +102,22 @@ function runGame() {
 function update() {
     countCurrent = (countCurrent + 1) % countMax;
 
-    let movement = pixelsPerIncrement / (countCurrent + 1);
+    let movement = pixelsPerIncrement  // / (countCurrent + 1);
 
     switch (movingDirection) {
-        case MovingState.MOVING_UP:
+        case Moving.MOVING_UP:
             playerY = playerY - movement;
             break;
-        case MovingState.MOVING_DOWN:
+        case Moving.MOVING_DOWN:
             playerY = playerY + movement;
             break;
-        case MovingState.MOVING_LEFT:
+        case Moving.MOVING_LEFT:
             playerX = playerX - movement;
             break;
-        case MovingState.MOVING_RIGHT:
+        case Moving.MOVING_RIGHT:
             playerX = playerX + movement;
             break;
-        case MovingState.STOP:
+        case Moving.STOP:
         default:
             break;
 
@@ -96,11 +135,10 @@ function render() {
     // context.strokeText(countCurrent, 150, 100);
     // context.strokeText(movingDirection, 150, 150);
 
-    context.fillStyle = "#FF0000";
+    context.fillStyle = "#FFE600";
     context.lineWidth = 1.0;
     context.beginPath();
-    context.ellipse(playerX, playerY, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
+    context.ellipse(playerX, playerY, 15, 15, 2 * Math.PI, 2 * Math.PI, false);
     // context.stroke();
     context.fill();
 }
-

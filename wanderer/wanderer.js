@@ -1,19 +1,39 @@
+var EventType = Object.freeze({
+    TEXT_ONLY: "TEXT_ONLY",
+    ENCOUNTER: "ENCOUNTER",
+});
+
 class Event {
 
     title = "Corridor";
+    type = null;
+    colorDiscovered = "#FFFFFF";
+    colorUndiscovered = "#FFFFFF";
     isLive = true;
+    isDiscovered = false;
     event = null;
 
-    constructor(title, event) {
+    constructor(title, type, colorUndiscovered, colorDiscovered, event) {
         this.title = title;
+        this.type = type;
+        this.colorUndiscovered = colorUndiscovered;
+        this.colorDiscovered = colorDiscovered;
         this.event = event;
+    }
+
+    getColor() {
+        if (this.isDiscovered == true) {
+            return this.colorDiscovered;
+        } else {
+            return this.colorUndiscovered;
+        }
     }
 
     triggerEvent() {
         this.event();
-        // this.isLive = false;
-        // this.event = null;
     }
+
+
 }
 
 
@@ -67,7 +87,7 @@ var mazeWindowY = 0;
 
 let player = new Player(2, 2);
 
-var bigMapMode = true;
+var bigMapMode = false;
 
 
 document.addEventListener('keydown', (e) => {
@@ -196,11 +216,13 @@ var setup = function () {
     // Populate the maze with random events
     let subDivisions = 10;
     let chunkSize = Math.floor(mazeRowsCols / subDivisions);
-    for (var divCol = 0; divCol < subDivisions; divCol++) {
 
+    let events = shuffleArray(createEvents());
+
+    for (var divCol = 0; divCol < subDivisions; divCol++) {
         for (var divRow = 0; divRow < subDivisions; divRow++) {
             let rooms = getMazeSubsection(divCol * chunkSize, divRow * chunkSize, chunkSize);
-            createDestinations(rooms, 1);
+            createDestinations(rooms, 1, events.pop());
         }
     }
 
@@ -387,7 +409,26 @@ function getMazeSubsection(row, col, size) {
     return subRooms;
 }
 
-function createDestinations(roomList, numDestinations) {
+function createEvents() {
+
+    let events = [];
+
+    for (var i = 0; i < 100; i++) {
+        if (i % 2 == 0) {
+            events.push(new Event("Locator", EventType.TEXT_ONLY, "#FFFFFF", "#4E4E4E", () => {
+                console.log("There is a beacon here.");
+            }));
+        } else {
+            events.push(new Event("Enemy", EventType.ENCOUNTER, "#FFFFFF", "#000000", () => {
+                console.log("A hideously deformed mutant lurches nearby.");
+            }));
+        }
+    }
+
+    return events;
+}
+
+function createDestinations(roomList, numDestinations, event) {
 
     for (var i = 0; i < numDestinations; i++) {
 
@@ -398,9 +439,7 @@ function createDestinations(roomList, numDestinations) {
         })[0];
 
         if (targetRoom != null) {
-            targetRoom.setEvent(new Event("Transmitter", () => {
-                console.log("There is a pulsing beacon here.");
-            }));
+            targetRoom.setEvent(event);
         }
     }
 }
@@ -428,7 +467,6 @@ function drawWindowedMaze() {
 
         if (room.open) {
             context.fillStyle = "#606060";
-
         } else {
             context.fillStyle = "#000000";
         }
@@ -441,7 +479,8 @@ function drawWindowedMaze() {
 
         // Render a dot
         if (room.event != null) {
-            context.fillStyle = "#FFFFFF";
+            room.event.isDiscovered = true;
+            context.fillStyle = room.event.getColor();
             context.lineWidth = 1.0;
             context.beginPath();
             context.ellipse(
@@ -451,15 +490,12 @@ function drawWindowedMaze() {
                 2 * Math.PI,
                 2 * Math.PI,
                 false);
-            context.stroke();
             context.fill();
         }
-
     });
 
     // render player
-
-    context.fillStyle = "#FF0000";
+    context.fillStyle = "#6E0000";
     context.fillRect((player.x - mazeWindowX) * roomSize + 50, (player.y - mazeWindowY) * roomSize + 50, 25, 25);
 }
 
@@ -486,13 +522,15 @@ function drawEntireMaze() {
                 size);
 
             // Draw dot 
-            context.fillStyle = "#FFFFFF";
+
+
+            context.fillStyle = room.event.getColor();
             context.lineWidth = 1.0;
             context.beginPath();
             context.ellipse(
                 (room.col * size) + (size / 2),
                 (room.row * size) + (size / 2),
-                size / 4, 
+                size / 4,
                 size / 4,
                 2 * Math.PI,
                 2 * Math.PI,
@@ -512,28 +550,21 @@ function drawEntireMaze() {
                 room.row * size,
                 size,
                 size);
-        } 
-
-        // context.fillRect(
-        //     room.col * size,
-        //     room.row * size,
-        //     size,
-        //     size);
-
-        // if (room.event != null) {
-        //     context.fillStyle = "#0000FF";
-        //     context.fillRect(
-        //         room.col * size,
-        //         room.row * size,
-        //         size,
-        //         size);
-        // }
-
-        // Render a dot
+        }
 
     });
 
     // Draw player
     context.fillStyle = "#FF0000";
-    context.fillRect(player.x * size, player.y * size, size, size);
+    context.lineWidth = 1.0;
+    context.beginPath();
+    context.ellipse(
+        (player.x * size) + (size / 2),
+        (player.y * size) + (size / 2),
+        size / 4,
+        size / 4,
+        2 * Math.PI,
+        2 * Math.PI,
+        false);
+    context.fill();
 }

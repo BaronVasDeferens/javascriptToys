@@ -36,7 +36,6 @@ class Event {
 
 }
 
-
 class Room {
 
     row = 0;
@@ -89,6 +88,8 @@ let player = new Player(2, 2);
 
 var bigMapMode = false;
 
+var turnsMade = 0;
+const turnsMax = 1000;
 
 document.addEventListener('keydown', (e) => {
 
@@ -102,6 +103,7 @@ document.addEventListener('keydown', (e) => {
                     player.x = 0;
                 }
 
+                turnsMade++;
                 maybeRoom.triggerEvent();
 
                 // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
@@ -124,6 +126,7 @@ document.addEventListener('keydown', (e) => {
                     player.x = mazeRowsCols - 1;
                 }
 
+                turnsMade++;
                 maybeRoom.triggerEvent();
 
                 // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
@@ -147,6 +150,7 @@ document.addEventListener('keydown', (e) => {
                     player.y = 0;
                 }
 
+                turnsMade++;
                 maybeRoom.triggerEvent();
 
                 // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
@@ -169,6 +173,7 @@ document.addEventListener('keydown', (e) => {
                     player.y = mazeRowsCols - 1;
                 }
 
+                turnsMade++;
                 maybeRoom.triggerEvent();
 
                 // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
@@ -450,6 +455,8 @@ function render() {
     } else {
         drawWindowedMaze();
     }
+
+    drawStatus();
 }
 
 // Draws the section of the maze occupied by the player
@@ -458,7 +465,7 @@ function drawWindowedMaze() {
     var canvas = document.getElementById("myCanvas");
     var context = canvas.getContext("2d");
 
-    context.fillStyle = "#b8bab9";
+    context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     let subRooms = getMazeSubsection(mazeWindowY, mazeWindowX, mazeWindowSize);
@@ -567,4 +574,16 @@ function drawEntireMaze() {
         2 * Math.PI,
         false);
     context.fill();
+}
+
+function drawStatus() {
+
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+
+    context.strokeStyle = "#FF0000";
+    context.fillStyle = "#FF0000";
+    context.lineWidth = 2.0;
+    context.font = "12px sans-serif";
+    context.strokeText(`RADIATION: ${turnsMade} / ${turnsMax}`, 15, 893);
 }

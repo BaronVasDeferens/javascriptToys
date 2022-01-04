@@ -9,9 +9,10 @@ PLAYER
     * has some kind of other EQUIPMENT
 
 WEAPON
-    * has a LETHALITY rating
-    * mah have a DEFENSE rating
-    * may have limited USES (ammunition, etc)
+    * has a LETHALITY rating. 
+    * has a DEFENSE rating.
+    * may have limited uses (ammunition, etc)
+    * May require STAMINA expense to strike first
 
 ENEMY
     * has DEFENSE and LETHALITY ratings
@@ -22,12 +23,26 @@ ENEMY ENCOUNTER
     * Committing to the attack proceeds to COMBAT  
 
 FIGHT    
-    * PLAYER chooses weapon and assigns STAMINA DICE to weapon's DEFENSE and LETHALITY counters
+    * PLAYER chooses a viable weapon and assigns STAMINA DICE to weapon's DEFENSE and LETHALITY counters.
+    * PLAYER may have the option to spend additional STAMINA to strike first (depending on weapon)
     * PLAYER then chooses to commit to the attack
+
+COMBAT ORDER
+    * Unless otherwise noted, ENEMY attacks first
+    * Some weapons allow PLAYER to attack first, usually through spending STAMINA
+
+ENEMY ATTACK
     * ENEMY LETHALITY dice are rolled and totalled.
     * PLAYER DEFENSE dice are rolled and totalled.
     * If the ENEMY'S LETHALITY is greater than the PLAYER'S DEFENSE, suffer WOUNDS.
-    * If the PLAYER'S DEFENSE is greater than or equal to the ENEMY LETHALITY,  
+    * If the PLAYER'S DEFENSE is greater than or equal to the ENEMY LETHALITY, the attack is turned.
+
+PLAYER ATTACK
+    * PLAYER LETHALITY dice are rolled and totalled.
+    * ENEMY DEFENSE dice are rolled and totalled.
+    * If the PLAYER'S LETHALITY is greater than the ENEMY'S DEFENSE, the ENEMY IS SLAIN.
+    * If the ENEMY'S DEFENSE is greater than or equal to the PLAYER'S LETHALITY, the attack is turned.
+    * If the PLAYER'S chosen weapon has ammunition, 1 is subtracted from the total.
 
 STAMINA
     * Echa STAMINA point equates to one die roll in combat
@@ -38,7 +53,11 @@ STAMINA
 FLEEING
     * Player may commit any number of avaialable STAMINA to attempt to roll a 5+.
     * Rolling a 5+ means escape to a random adjacent square.
-    * Failure menas staying in the combat encounter.
+    * Failure means staying in the combat encounter and 
+
+ENEMY IS SLAIN
+    * May produce treasure, clues, or something
+    * Game returns to windowed map view
 
 HEALTH and WOUNDS
     * PLAYER starts the game with full HEALTH.

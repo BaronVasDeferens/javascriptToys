@@ -1,0 +1,89 @@
+RADIATION LEVEL
+    * include a weapon RADIUM PISTOL that is powerful but increases player's rad exposure
+
+PLAYER
+    * has HEALTH points
+    * has a pool of STAMINA POINTS
+    * has a MELEE weapon
+    * has a RANGED weapon
+    * has some kind of other EQUIPMENT
+
+WEAPON
+    * has a LETHALITY rating
+    * mah have a DEFENSE rating
+    * may have limited USES (ammunition, etc)
+
+ENEMY
+    * has DEFENSE and LETHALITY ratings
+
+ENEMY ENCOUNTER
+    * ENEMY portrait and LETHALITY and DEFENSE ratings are shown
+    * PLAYER can attempt to FIGHT or FLEE. See below
+    * Committing to the attack proceeds to COMBAT  
+
+FIGHT    
+    * PLAYER chooses weapon and assigns STAMINA DICE to weapon's DEFENSE and LETHALITY counters
+    * PLAYER then chooses to commit to the attack
+    * ENEMY LETHALITY dice are rolled and totalled.
+    * PLAYER DEFENSE dice are rolled and totalled.
+    * If the ENEMY'S LETHALITY is greater than the PLAYER'S DEFENSE, suffer WOUNDS.
+    * If the PLAYER'S DEFENSE is greater than or equal to the ENEMY LETHALITY,  
+
+STAMINA
+    * Echa STAMINA point equates to one die roll in combat
+    * PLAYER starts the game with full STAMINA. (7 dice)
+    * Each combat round, STAMINA replenishes at a rate determined by PLAYER's RECOVERY stat (3/round)
+    * As the PLAYER accrues RADIATION damage, RECOVERY decreases
+
+FLEEING
+    * Player may commit any number of avaialable STAMINA to attempt to roll a 5+.
+    * Rolling a 5+ means escape to a random adjacent square.
+    * Failure menas staying in the combat encounter.
+
+HEALTH and WOUNDS
+    * PLAYER starts the game with full HEALTH.
+    * HEALTH or STAMINA recovery may decrease.
+    * Not all damage is physical. 
+
+
+WOUND TABLE
+    When PLAYER takes damage, the ENEMY LETHALITY is rolled and the table is consulted.
+
+(1-6)
+01  No damage
+02  -1 HP
+03  -1 HP
+04  -1 HP
+05  -2 HP
+06  -1 STAMINA
+
+(2-12)
+02  No damage  
+03  -1 HP
+04  -1 HP
+05  -2 HP
+06  -2 HP
+07  -3 HP
+08  -3 HP
+09  -3 HP
+10  -4 HP
+11  -1 STAMINA
+12  -2 STAMINA
+
+(03-18)
+03  
+04  
+05  
+06  
+07  
+08  
+09  
+10  
+11  
+12  
+13  
+14  
+15  
+16  
+17  
+18  

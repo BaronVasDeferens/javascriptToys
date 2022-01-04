@@ -1,4 +1,4 @@
-var EventType = Object.freeze({
+const EventType = Object.freeze({
     TEXT_ONLY: "TEXT_ONLY",
     ENCOUNTER: "ENCOUNTER",
 });
@@ -71,6 +71,14 @@ class Player {
 };
 
 
+const GameState = Object.freeze({
+    ROAMING: "ROAMING",
+    ENCOUNTER: "ENCOUNTER"
+});
+
+var currentState = GameState.ROAMING;
+
+
 const mazeRowsCols = 50;
 const roomSize = 125;        // render size (pixels) of rooms 
 
@@ -93,114 +101,126 @@ const turnsMax = 1000;
 
 document.addEventListener('keydown', (e) => {
 
-    switch (e.key) {
-        case "a":
-        case "ArrowLeft":
-            maybeRoom = getRoom(player.y, player.x - 1);
-            if (!bigMapMode && maybeRoom.open == true) {
-                player.x--;
-                if (player.x < 0) {
-                    player.x = 0;
-                }
+    if (currentState == GameState.ROAMING) {
+        switch (e.key) {
+            case "a":
+            case "ArrowLeft":
+                maybeRoom = getRoom(player.y, player.x - 1);
+                if (!bigMapMode && maybeRoom.open == true) {
+                    player.x--;
+                    if (player.x < 0) {
+                        player.x = 0;
+                    }
 
-                turnsMade++;
-                maybeRoom.triggerEvent();
+                    turnsMade++;
+                    maybeRoom.triggerEvent();
 
-                // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                if (player.x < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
-                    if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
-                        mazeWindowX--;
-                        if (mazeWindowX < 0) {
-                            mazeWindowX = 0;
+                    // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+                    if (player.x < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
+                        if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
+                            mazeWindowX--;
+                            if (mazeWindowX < 0) {
+                                mazeWindowX = 0;
+                            }
                         }
                     }
                 }
-            }
-            break;
-        case "d":
-        case "ArrowRight":
-            maybeRoom = getRoom(player.y, player.x + 1);
-            if (!bigMapMode && maybeRoom.open == true) {
-                player.x++;
-                if (player.x >= mazeRowsCols) {
-                    player.x = mazeRowsCols - 1;
-                }
+                break;
+            case "d":
+            case "ArrowRight":
+                maybeRoom = getRoom(player.y, player.x + 1);
+                if (!bigMapMode && maybeRoom.open == true) {
+                    player.x++;
+                    if (player.x >= mazeRowsCols) {
+                        player.x = mazeRowsCols - 1;
+                    }
 
-                turnsMade++;
-                maybeRoom.triggerEvent();
+                    turnsMade++;
+                    maybeRoom.triggerEvent();
 
-                // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                if (player.x >= Math.floor(mazeWindowSize / 2) + 1) {
-                    if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
-                        mazeWindowX++;
-                        if (mazeWindowX >= mazeRowsCols - mazeWindowSize) {
-                            mazeWindowX = mazeRowsCols - mazeWindowSize;
+                    // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+                    if (player.x >= Math.floor(mazeWindowSize / 2) + 1) {
+                        if (mazeWindowX >= 0 && mazeWindowX < mazeRowsCols) {
+                            mazeWindowX++;
+                            if (mazeWindowX >= mazeRowsCols - mazeWindowSize) {
+                                mazeWindowX = mazeRowsCols - mazeWindowSize;
+                            }
                         }
                     }
                 }
-            }
-            break;
-        case "w":
-        case "ArrowUp":
-            maybeRoom = getRoom(player.y - 1, player.x);
-            if (!bigMapMode && maybeRoom.open == true) {
+                break;
+            case "w":
+            case "ArrowUp":
+                maybeRoom = getRoom(player.y - 1, player.x);
+                if (!bigMapMode && maybeRoom.open == true) {
 
-                player.y--;
-                if (player.y < 0) {
-                    player.y = 0;
-                }
+                    player.y--;
+                    if (player.y < 0) {
+                        player.y = 0;
+                    }
 
-                turnsMade++;
-                maybeRoom.triggerEvent();
+                    turnsMade++;
+                    maybeRoom.triggerEvent();
 
-                // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                if (player.y < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
-                    if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
-                        mazeWindowY--;
-                        if (mazeWindowY < 0) {
-                            mazeWindowY = 0;
+                    // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+                    if (player.y < mazeRowsCols - Math.floor(mazeWindowSize / 2) - 1) {
+                        if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
+                            mazeWindowY--;
+                            if (mazeWindowY < 0) {
+                                mazeWindowY = 0;
+                            }
                         }
                     }
                 }
-            }
-            break;
-        case "s":
-        case "ArrowDown":
-            maybeRoom = getRoom(player.y + 1, player.x);
-            if (!bigMapMode && maybeRoom.open == true) {
-                player.y++;
-                if (player.y >= mazeRowsCols) {
-                    player.y = mazeRowsCols - 1;
-                }
+                break;
+            case "s":
+            case "ArrowDown":
+                maybeRoom = getRoom(player.y + 1, player.x);
+                if (!bigMapMode && maybeRoom.open == true) {
+                    player.y++;
+                    if (player.y >= mazeRowsCols) {
+                        player.y = mazeRowsCols - 1;
+                    }
 
-                turnsMade++;
-                maybeRoom.triggerEvent();
+                    turnsMade++;
+                    maybeRoom.triggerEvent();
 
-                // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
-                if (player.y >= Math.floor(mazeWindowSize / 2) + 1) {
-                    if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
-                        mazeWindowY++;
-                        if (mazeWindowY >= mazeRowsCols - mazeWindowSize) {
-                            mazeWindowY = mazeRowsCols - mazeWindowSize;
+                    // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
+                    if (player.y >= Math.floor(mazeWindowSize / 2) + 1) {
+                        if (mazeWindowY >= 0 && mazeWindowY < mazeRowsCols) {
+                            mazeWindowY++;
+                            if (mazeWindowY >= mazeRowsCols - mazeWindowSize) {
+                                mazeWindowY = mazeRowsCols - mazeWindowSize;
+                            }
                         }
                     }
                 }
-            }
 
-            break;
-        case " ":
-            bigMapMode = !bigMapMode;
-            break;
-        case "Escape":
-            bigMapMode = false;
-            break;
-        default:
-            console.log(e);
-            break;
+                break;
+            case " ":
+                bigMapMode = !bigMapMode;
+                break;
+            case "Escape":
+                bigMapMode = false;
+                break;
+            default:
+                console.log(e);
+                break;
+        }
+
+        render();
+    } else if (currentState == GameState.ENCOUNTER) {
+
     }
-
-    render();
 });
+
+document.addEventListener('mousedown', (e) => {
+    if (currentState == GameState.ENCOUNTER) {
+        currentState = GameState.ROAMING;
+        render();
+    }
+});
+
 
 // Setup (IFFE function)
 var setup = function () {
@@ -426,6 +446,7 @@ function createEvents() {
         } else {
             events.push(new Event("Enemy", EventType.ENCOUNTER, "#FFFFFF", "#000000", () => {
                 console.log("A hideously deformed mutant lurches nearby.");
+                currentState = GameState.ENCOUNTER;
             }));
         }
     }
@@ -450,10 +471,15 @@ function createDestinations(roomList, numDestinations, event) {
 }
 
 function render() {
-    if (bigMapMode == true) {
-        drawEntireMaze();
+
+    if (currentState == GameState.ROAMING) {
+        if (bigMapMode == true) {
+            drawEntireMaze();
+        } else {
+            drawWindowedMaze();
+        }
     } else {
-        drawWindowedMaze();
+        drawEncounterPanel();
     }
 
     drawStatus();
@@ -576,6 +602,14 @@ function drawEntireMaze() {
     context.fill();
 }
 
+function drawEncounterPanel() {
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 function drawStatus() {
 
     var canvas = document.getElementById("myCanvas");
@@ -585,5 +619,5 @@ function drawStatus() {
     context.fillStyle = "#FF0000";
     context.lineWidth = 2.0;
     context.font = "12px sans-serif";
-    context.strokeText(`RADIATION: ${turnsMade} / ${turnsMax}`, 15, 893);
+    context.strokeText(`TURN: ${turnsMade} / ${turnsMax}`, 15, 893);
 }

@@ -555,8 +555,6 @@ function drawEntireMaze() {
                 size);
 
             // Draw dot 
-
-
             context.fillStyle = room.event.getColor();
             context.lineWidth = 1.0;
             context.beginPath();
@@ -608,6 +606,123 @@ function drawEncounterPanel() {
 
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
+
+    let offset = 10;
+
+    context.fillStyle = "#515151";
+    context.fillRect(offset, offset, 350, 350);
+
+    drawDie(400, 300, 85, 1, "#A64200", context);
+    drawDie(400, 400, 85, 2, "#A64200", context);
+    drawDie(400, 500, 85, 3, "#A64200", context);
+    drawDie(400, 600, 85, 4, "#A64200", context);
+    drawDie(400, 700, 85, 5, "#A64200", context);
+    drawDie(400, 800, 85, 6, "#A64200", context);
+
+
+}
+
+function drawDie(x, y, size, pips, color, context) {
+
+    context.fillStyle = color;
+    context.fillRect(x, y, size, size);
+
+    // Draw pips
+    context.fillStyle = "#000000";
+
+    // Center pip
+    if (pips == 1 || pips == 3 || pips == 5) {
+        context.beginPath();
+        context.ellipse(
+            x + (size / 2),
+            y + (size / 2),
+            size / 10,
+            size / 10,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+    }
+
+    
+    if (pips == 2 || pips == 3 || pips == 4 || pips == 5 || pips == 6) {
+        // upper left
+        context.beginPath();
+        context.ellipse(
+            x + (size / 6),
+            y + (size / 6),
+            size / 10,
+            size / 10,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+
+        // lower right
+        context.beginPath();
+        context.ellipse(
+            x + (size / 1.25),
+            y + (size / 1.25),
+            size / 10,
+            size / 10,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+    }
+
+    if (pips == 4 || pips == 5 || pips == 6) {
+        // lower left
+        context.beginPath();
+        context.ellipse(
+            x + (size / 6),
+            y + (size / 1.25),
+            size / 10,
+            size / 10,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+
+        // upper right
+        context.beginPath();
+        context.ellipse(
+            x + (size / 1.25),
+            y + (size / 6),
+            size / 10,
+            size / 10,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+    }
+
+    if (pips == 6) {
+                // center left
+                context.beginPath();
+                context.ellipse(
+                    x + (size / 6),
+                    y + (size / 2),
+                    size / 10,
+                    size / 10,
+                    2 * Math.PI,
+                    2 * Math.PI,
+                    false);
+                context.fill();
+        
+                // center right
+                context.beginPath();
+                context.ellipse(
+                    x + (size / 1.25),
+                    y + (size / 2),
+                    size / 10,
+                    size / 10,
+                    2 * Math.PI,
+                    2 * Math.PI,
+                    false);
+                context.fill();
+    }
+
 }
 
 function drawStatus() {

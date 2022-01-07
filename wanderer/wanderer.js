@@ -70,6 +70,172 @@ class Player {
     }
 };
 
+class Clickable {
+
+    x = 0;
+    y = 0;
+    width = 0;
+    height = 0;
+    functionOnClick = null;
+
+    constructor(x, y, width, height, functionOnClick) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.functionOnClick = functionOnClick;
+    }
+
+    containsClick(click) {
+        return (click.offsetX >= this.x) && (click.offsetX <= (this.x + this.width)) && (click.offsetY >= this.y) && (click.offsetY <= (this.y + this.height));
+    }
+
+    onClick() {
+        this.functionOnClick();
+    }
+}
+
+class Die extends Clickable {
+
+    size = 100;
+    pips = 1;
+    color = "#A64200";
+
+    constructor(x, y, size, pips, functionOnClick) {
+        super(x, y, size, size, functionOnClick);
+        this.size = size;
+        this.pips = pips;
+    }
+
+    render(context) {
+
+        context.fillStyle = "#A64200";
+        context.fillRect(this.x, this.y, this.size, this.size);
+
+        // Draw pips
+        context.fillStyle = "#000000";
+
+        // Center pip
+        if (this.pips == 1 || this.pips == 3 || this.pips == 5) {
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 2),
+                this.y + (this.size / 2),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+        }
+
+        if (this.pips == 2 || this.pips == 3 || this.pips == 4 || this.pips == 5 || this.pips == 6) {
+            // upper left
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 6),
+                this.y + (this.size / 6),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+
+            // lower right
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 1.25),
+                this.y + (this.size / 1.25),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+        }
+
+        if (this.pips == 4 || this.pips == 5 || this.pips == 6) {
+            // lower left
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 6),
+                this.y + (this.size / 1.25),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+
+            // upper right
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 1.25),
+                this.y + (this.size / 6),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+        }
+
+        if (this.pips == 6) {
+            // center left
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 6),
+                this.y + (this.size / 2),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+
+            // center right
+            context.beginPath();
+            context.ellipse(
+                this.x + (this.size / 1.25),
+                this.y + (this.size / 2),
+                this.size / 10,
+                this.size / 10,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+        }
+    }
+}
+
+class CombatState {
+
+    clickables = [];
+
+    addClickable(clickable) {
+        this.clickables.push(clickable);
+    }
+
+    processClick(click) {
+        this.clickables.forEach(clickable => {
+            if (clickable.containsClick(click)) {
+                // clickable.onClick();
+                clickable.pips = rollDie(1,6);
+            }
+        });
+    }
+
+    render(context) {
+        let offset = 10;
+        context.fillStyle = "#515151";
+        context.fillRect(offset, offset, 350, 350);
+
+        this.clickables.forEach(clickable => {
+            clickable.render(context);
+        });
+    }
+}
 
 const GameState = Object.freeze({
     ROAMING: "ROAMING",
@@ -77,7 +243,7 @@ const GameState = Object.freeze({
 });
 
 var currentState = GameState.ROAMING;
-
+var combatState = new CombatState();
 
 const mazeRowsCols = 50;
 const roomSize = 125;        // render size (pixels) of rooms 
@@ -98,6 +264,8 @@ var bigMapMode = false;
 
 var turnsMade = 0;
 const turnsMax = 1000;
+
+
 
 document.addEventListener('keydown', (e) => {
 
@@ -215,10 +383,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('mousedown', (e) => {
-    if (currentState == GameState.ENCOUNTER) {
-        currentState = GameState.ROAMING;
-        render();
-    }
+
+    combatState.processClick(e);
+    render();
+
+    // if (currentState == GameState.ENCOUNTER) {
+    //     currentState = GameState.ROAMING;
+    //     render();
+    // }
 });
 
 
@@ -249,6 +421,12 @@ var setup = function () {
             let rooms = getMazeSubsection(divCol * chunkSize, divRow * chunkSize, chunkSize);
             createDestinations(rooms, 1, events.pop());
         }
+    }
+
+    for (var i = 0; i < 5; i++) {
+        combatState.addClickable(new Die(400, 300 + (100 * i), 85, rollDie(1, 6), () => {
+            
+        }));
     }
 
     render();
@@ -472,6 +650,11 @@ function createDestinations(roomList, numDestinations, event) {
 
 function render() {
 
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
     if (currentState == GameState.ROAMING) {
         if (bigMapMode == true) {
             drawEntireMaze();
@@ -479,7 +662,7 @@ function render() {
             drawWindowedMaze();
         }
     } else {
-        drawEncounterPanel();
+        drawEncounterPanel(context);
     }
 
     drawStatus();
@@ -600,130 +783,15 @@ function drawEntireMaze() {
     context.fill();
 }
 
-function drawEncounterPanel() {
-    var canvas = document.getElementById("myCanvas");
-    var context = canvas.getContext("2d");
-
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    let offset = 10;
-
-    context.fillStyle = "#515151";
-    context.fillRect(offset, offset, 350, 350);
-
-    drawDie(400, 300, 85, 1, "#A64200", context);
-    drawDie(400, 400, 85, 2, "#A64200", context);
-    drawDie(400, 500, 85, 3, "#A64200", context);
-    drawDie(400, 600, 85, 4, "#A64200", context);
-    drawDie(400, 700, 85, 5, "#A64200", context);
-    drawDie(400, 800, 85, 6, "#A64200", context);
-
-
+function drawEncounterPanel(context) {
+    combatState.render(context);
 }
 
-function drawDie(x, y, size, pips, color, context) {
-
-    context.fillStyle = color;
-    context.fillRect(x, y, size, size);
-
-    // Draw pips
-    context.fillStyle = "#000000";
-
-    // Center pip
-    if (pips == 1 || pips == 3 || pips == 5) {
-        context.beginPath();
-        context.ellipse(
-            x + (size / 2),
-            y + (size / 2),
-            size / 10,
-            size / 10,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
-    }
-
-    
-    if (pips == 2 || pips == 3 || pips == 4 || pips == 5 || pips == 6) {
-        // upper left
-        context.beginPath();
-        context.ellipse(
-            x + (size / 6),
-            y + (size / 6),
-            size / 10,
-            size / 10,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
-
-        // lower right
-        context.beginPath();
-        context.ellipse(
-            x + (size / 1.25),
-            y + (size / 1.25),
-            size / 10,
-            size / 10,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
-    }
-
-    if (pips == 4 || pips == 5 || pips == 6) {
-        // lower left
-        context.beginPath();
-        context.ellipse(
-            x + (size / 6),
-            y + (size / 1.25),
-            size / 10,
-            size / 10,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
-
-        // upper right
-        context.beginPath();
-        context.ellipse(
-            x + (size / 1.25),
-            y + (size / 6),
-            size / 10,
-            size / 10,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
-    }
-
-    if (pips == 6) {
-                // center left
-                context.beginPath();
-                context.ellipse(
-                    x + (size / 6),
-                    y + (size / 2),
-                    size / 10,
-                    size / 10,
-                    2 * Math.PI,
-                    2 * Math.PI,
-                    false);
-                context.fill();
-        
-                // center right
-                context.beginPath();
-                context.ellipse(
-                    x + (size / 1.25),
-                    y + (size / 2),
-                    size / 10,
-                    size / 10,
-                    2 * Math.PI,
-                    2 * Math.PI,
-                    false);
-                context.fill();
-    }
-
+function rollDie(low, high) {
+    return low + Math.floor((Math.random() * high));
 }
+
+
 
 function drawStatus() {
 

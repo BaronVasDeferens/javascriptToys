@@ -76,44 +76,70 @@ class Clickable {
     y = 0;
     width = 0;
     height = 0;
-    functionOnClick = null;
 
-    constructor(x, y, width, height, functionOnClick) {
+    constructor(x, y, width, height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.functionOnClick = functionOnClick;
     }
 
     containsClick(click) {
         return (click.offsetX >= this.x) && (click.offsetX <= (this.x + this.width)) && (click.offsetY >= this.y) && (click.offsetY <= (this.y + this.height));
     }
-
-    onClick() {
-        this.functionOnClick();
-    }
 }
+
+const DieMode = Object.freeze({
+    ATTACK: "ATTACK",
+    DEFEND: "DEFEND",
+    INITIATIVE: "INITIATIVE"
+});
+
 
 class Die extends Clickable {
 
     size = 100;
     pips = 1;
+    type = DieMode.ATTACK;
     color = "#A64200";
 
-    constructor(x, y, size, pips, functionOnClick) {
-        super(x, y, size, size, functionOnClick);
+    constructor(x, y, size, pips) {
+        super(x, y, size, size);
         this.size = size;
         this.pips = pips;
     }
 
+    setPips(pips) {
+        this.pips = pips;
+    }
+
+    nextType() {
+        switch (this.type) {
+            case DieMode.ATTACK:
+                this.type = DieMode.DEFEND;
+                this.color = "#0055ff";
+                break;
+            case DieMode.DEFEND:
+                this.type = DieMode.INITIATIVE;
+                this.color = "#ff0890";
+                break;
+            case DieMode.INITIATIVE:
+                this.type = DieMode.ATTACK;
+                this.color = "#A64200";
+                break;
+        }
+    }
+
     render(context) {
 
-        context.fillStyle = "#A64200";
+        context.fillStyle = this.color;
         context.fillRect(this.x, this.y, this.size, this.size);
 
         // Draw pips
         context.fillStyle = "#000000";
+
+
+        console.log(this.type, this.pips);
 
         // Center pip
         if (this.pips == 1 || this.pips == 3 || this.pips == 5) {
@@ -220,8 +246,8 @@ class CombatState {
     processClick(click) {
         this.clickables.forEach(clickable => {
             if (clickable.containsClick(click)) {
-                // clickable.onClick();
-                clickable.pips = rollDie(1,6);
+                clickable.nextType();
+                render();
             }
         });
     }
@@ -386,11 +412,6 @@ document.addEventListener('mousedown', (e) => {
 
     combatState.processClick(e);
     render();
-
-    // if (currentState == GameState.ENCOUNTER) {
-    //     currentState = GameState.ROAMING;
-    //     render();
-    // }
 });
 
 
@@ -424,9 +445,7 @@ var setup = function () {
     }
 
     for (var i = 0; i < 5; i++) {
-        combatState.addClickable(new Die(400, 300 + (100 * i), 85, rollDie(1, 6), () => {
-            
-        }));
+        combatState.addClickable(new Die(200 + (100 * i), 600, 85, 0));
     }
 
     render();

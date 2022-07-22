@@ -32,7 +32,14 @@ var currentState = States.INTRO;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
-const gridSize = 9;
+const gridCols = 17;
+const gridRows = 9;
+
+const numObstructedSquares = 20;
+
+const numSoldiers = 4;
+const numBlobs = 13;
+
 const gridSquares = new Array(0);
 var allSquares = [];
 const gridSquareSize = 75;
@@ -66,6 +73,8 @@ var actionPointCostAdjustment = 0;
 
 
 
+
+
 function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
 };
@@ -90,9 +99,9 @@ var setup = function () {
 
 
     // Setup grid squares
-    for (var i = 0; i < gridSize; i++) {
+    for (var i = 0; i < gridCols; i++) {
         gridSquares[i] = new Array(0);
-        for (var j = 0; j < gridSize; j++) {
+        for (var j = 0; j < gridRows; j++) {
             gridSquares[i].push(new GridSquare(i, j, gridSquareSize));
         }
     }
@@ -102,16 +111,15 @@ var setup = function () {
     }).flat();
 
 
-
-    for (var xyz = 0; xyz < 12; xyz++) {
-        shuffleArray(allSquares);
-        allSquares[0].isObstructed = true;
+    // Set up obstructed squares
+    shuffleArray(allSquares);
+    for (var xyz = 0; xyz < numObstructedSquares; xyz++) {
+        allSquares[xyz].isObstructed = true;
     }
-
 
     // Create some soldiers
     let soldiers = [];
-    for (var n = 0; n < 3; n++) {
+    for (var n = 0; n < numSoldiers; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -127,7 +135,7 @@ var setup = function () {
 
     // Create some blobs
     let blobs = [];
-    for (var n = 0; n < 10; n++) {
+    for (var n = 0; n < numBlobs; n++) {
         shuffleArray(allSquares);
         let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
@@ -281,6 +289,9 @@ window.onmousemove = function (event) {
                         selectedGridSquares = selectedGridSquares.slice(0, indexOfSelected);
                     }
                 }
+            } else {
+                // Debugging
+                console.log("no gridsquare at x,y {} {}", event.x, event.y);
             }
 
             if (selectedEntityPrimary != null) {
@@ -354,7 +365,7 @@ function findGridSquareAtMouse(event) {
     let column = Math.floor(event.x / gridSquareSize);
     let row = Math.floor(event.y / gridSquareSize);
 
-    if (row > gridSize || column > gridSize) {
+    if (column > gridCols || row > gridRows) {
         return;
     }
 
@@ -650,7 +661,7 @@ function startEnemyTurn() {
             let possibleMove = gridSquares[0][0];
 
 
-            if (newX <= gridSize - 1 && newX >= 0) {
+            if (newX <= gridRows - 1 && newX >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
@@ -668,7 +679,7 @@ function startEnemyTurn() {
             newX = activeBlob.gridSquare.x;
             newY = activeBlob.gridSquare.y + deltaY;
 
-            if (newY <= gridSize - 1 && newY >= 0) {
+            if (newY <= gridCols - 1 && newY >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
@@ -983,8 +994,8 @@ function updateGameState() {
 // BIG GRIDS with intricate internal geometry make the game SLOW! 
 // TODO: Render once and re-use
 function drawGrid(context) {
-    for (var i = 0; i < gridSize; i++) {
-        for (var j = 0; j < gridSize; j++) {
+    for (var i = 0; i < gridCols; i++) {
+        for (var j = 0; j < gridRows; j++) {
             gridSquares[i].forEach(square => {
                 square.render(context);
             });

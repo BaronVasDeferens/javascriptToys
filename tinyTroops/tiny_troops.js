@@ -289,9 +289,6 @@ window.onmousemove = function (event) {
                         selectedGridSquares = selectedGridSquares.slice(0, indexOfSelected);
                     }
                 }
-            } else {
-                // Debugging
-                console.log("no gridsquare at x,y {} {}", event.x, event.y);
             }
 
             if (selectedEntityPrimary != null) {

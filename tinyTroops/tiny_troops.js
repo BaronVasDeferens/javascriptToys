@@ -632,11 +632,10 @@ function startEnemyTurn() {
         // TODO: add "max moves" to monster class
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
 
-            // Does the monster have a target? If not, obtain one.
-            //findAndTargetClosestHuman(activeBlob);
+            // Does the monster have a LIVE target? If not, obtain one.
             if (activeBlob.target == undefined || !activeBlob.target.isAlive) {
                 let index = randomIntInRange(0, soldiers.length);
-                console.log(`target index: {} : {}`, index, soldiers[index]);
+                // console.log(`target index: {} : {}`, index, soldiers[index]);
                 activeBlob.setTarget(soldiers[index]);
             }
 

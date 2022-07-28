@@ -32,12 +32,12 @@ var currentState = States.INTRO;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
-const gridCols = 21;
+const gridCols = 24;
 const gridRows = 9;
 
-const numObstructedSquares = 20;
+const numObstructedSquares = 17;
 
-const numSoldiers = 4;
+const numSoldiers = 5;
 const numBlobs = 13;
 
 const gridSquares = new Array(0);
@@ -654,7 +654,7 @@ function startEnemyTurn() {
             }
 
             // If multiple FAILED attempts to move were made, try backing up or moving left or right
-            if (attemptedMoves >= 1 && movesMade == 0) {
+            if (attemptedMoves >= 2 && movesMade == 0) {
                 deltaX = deltaX * -1;
                 deltaY = deltaY * -1;
             }

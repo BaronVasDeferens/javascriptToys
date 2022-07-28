@@ -173,12 +173,8 @@ var setup = function () {
         // entitiesResident.push(blob);
     });
 
-
-
-
-
-
     beginGame();
+
 }();
 
 
@@ -614,6 +610,7 @@ function startEnemyTurn() {
     console.log(`${blobs.length} blobs move...`);
 
     // Randomize the blobs' turn order
+    // TODO: ...or don't. Predicatability might need to work in the player's favor
     shuffleArray(blobs);
 
     blobs.forEach(activeBlob => {
@@ -647,7 +644,7 @@ function startEnemyTurn() {
             }
 
             // If multiple FAILED attempts to move were made, try backing up or moving left or right
-            if (attemptedMoves >= 2 && movesMade == 0) {
+            if (attemptedMoves >= 1 && movesMade == 0) {
                 deltaX = deltaX * -1;
                 deltaY = deltaY * -1;
             }
@@ -660,7 +657,7 @@ function startEnemyTurn() {
             let possibleMove = gridSquares[0][0];
 
 
-            if (newX <= gridRows - 1 && newX >= 0) {
+            if (newX <= gridCols - 1 && newX >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare
@@ -678,7 +675,7 @@ function startEnemyTurn() {
             newX = activeBlob.gridSquare.x;
             newY = activeBlob.gridSquare.y + deltaY;
 
-            if (newY <= gridCols - 1 && newY >= 0) {
+            if (newY <= gridRows - 1 && newY >= 0) {
                 possibleMove = gridSquares[newX][newY];
                 if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
                     origin = activeBlob.gridSquare

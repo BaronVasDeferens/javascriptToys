@@ -32,7 +32,7 @@ var currentState = States.INTRO;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
-const gridCols = 17;
+const gridCols = 21;
 const gridRows = 9;
 
 const numObstructedSquares = 20;
@@ -117,11 +117,12 @@ var setup = function () {
         allSquares[xyz].isObstructed = true;
     }
 
-    // Create some soldiers
+    // Create some soldiers in the LEFT third of the map
+    let firstThird = allSquares.filter(sq => sq.x <= gridCols / 3);
     let soldiers = [];
     for (var n = 0; n < numSoldiers; n++) {
-        shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
+        shuffleArray(firstThird);
+        let home = firstThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
         let ent = new Soldier("soldier_" + n, center.x, center.y);
         ent.setGridSquare(home);
@@ -133,11 +134,12 @@ var setup = function () {
     });
 
 
-    // Create some blobs
+    // Create some blobs in the RIGHT third of the map
+    let lastThird = allSquares.filter(sq => sq.x >= (gridCols - (1 / 3 * gridCols)));
     let blobs = [];
     for (var n = 0; n < numBlobs; n++) {
-        shuffleArray(allSquares);
-        let home = allSquares.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
+        shuffleArray(lastThird);
+        let home = lastThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
         let ent = new Blob("blob_" + n, center.x, center.y);
         ent.setGridSquare(home);

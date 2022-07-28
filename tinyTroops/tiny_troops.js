@@ -79,8 +79,8 @@ function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
 };
 
-function randomValueInRange(min, max) {
-    return Math.random() * max + min;
+function randomIntInRange(min, max) {
+    return parseInt(Math.random() * max + min);
 };
 
 
@@ -150,7 +150,7 @@ var setup = function () {
     blobs.forEach(blob => {
 
         entitiesResident.push(blob);
-        findAndTargetClosestHuman(blob);
+        //findAndTargetClosestHuman(blob);
 
         // let blobGridSq = blob.gridSquare;
 
@@ -607,6 +607,14 @@ function startEnemyTurn() {
         }
     });
 
+    let soldiers = entitiesResident.filter(ent => {
+        if (ent instanceof Soldier) {
+            return ent.isAlive;
+        } else {
+            return false;
+        }
+    });
+
     console.log(`${blobs.length} blobs move...`);
 
     // Randomize the blobs' turn order
@@ -614,11 +622,6 @@ function startEnemyTurn() {
     shuffleArray(blobs);
 
     blobs.forEach(activeBlob => {
-
-        // Does the monster have a target? If not, obtain one.
-        // if (activeBlob.target == null || activeBlob.target.isAlive == false) {
-            findAndTargetClosestHuman(activeBlob);
-        // }
 
         // Move toward target
         let attemptedMoves = 0;
@@ -628,6 +631,14 @@ function startEnemyTurn() {
 
         // TODO: add "max moves" to monster class
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
+
+            // Does the monster have a target? If not, obtain one.
+            //findAndTargetClosestHuman(activeBlob);
+            if (activeBlob.target == undefined || !activeBlob.target.isAlive) {
+                let index = randomIntInRange(0, soldiers.length);
+                console.log(`target index: {} : {}`, index, soldiers[index]);
+                activeBlob.setTarget(soldiers[index]);
+            }
 
             let deltaX = 0;
             if (activeBlob.gridSquare.x > activeBlob.target.gridSquare.x) {

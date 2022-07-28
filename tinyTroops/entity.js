@@ -340,6 +340,9 @@ export class Helpless extends Entity {
     }
 }
 
+/**
+ * BLOB
+ */
 export class Blob extends Entity {
 
     imageAlive = new Image();

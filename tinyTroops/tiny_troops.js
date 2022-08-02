@@ -37,7 +37,7 @@ const gridRows = 9;
 
 const numObstructedSquares = 17;
 
-const numSoldiers = 5;
+const numSoldiers = 1;
 const numBlobs = 13;
 
 const gridSquares = new Array(0);
@@ -703,7 +703,10 @@ function startEnemyTurn() {
             // ATTACK! (if able)...
             let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
                 + Math.abs(activeBlob.gridSquare.y - activeBlob.target.gridSquare.y);
+            
             let isAdjacent = distance < 2;
+
+            let isWithinSpittingDistance = distance <= 5
 
             if (movesMade < 2 && isAdjacent == true) {
 
@@ -719,6 +722,18 @@ function startEnemyTurn() {
                 }));
 
                 break;
+            } else if (isWithinSpittingDistance) {
+                let gridSquares = calculateLineOfSight(activeBlob.gridSquare, activeBlob.target.gridSquare)
+                let gridSquareArray = new Array();
+                gridSquares.forEach( element => {
+                    gridSquareArray.push(element);
+                })
+                let isWithinLOS = gridSquareArray.every(element => {return !element.isObstructed && !element.isOccupied});
+                if (isWithinLOS) {
+                    console.log(`${activeBlob.id} can spit at ${activeBlob.target.id}`);
+                } else {
+                    console.log(`${activeBlob.id} has no LOS to at ${ activeBlob.target.id}`);
+                }
             }
         }
     });
@@ -734,6 +749,8 @@ function startEnemyTurn() {
  * Draw a line of sight from the center of one grid square (origin) to the another (target).
  * Next, "sub-sample" points from the line at regular intervals and find any squares that contain
  * the those points.
+ * 
+ * Returns the GridSquares between the origin and target.
  */
 function calculateLineOfSight(origin, target) {
 

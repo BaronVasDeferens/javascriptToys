@@ -134,6 +134,7 @@ export class LittleDot {
     x = 0;
     y = 0;
     color = "#FFFF00";
+    isFilled = true;
 
     constructor(x, y) {
         this.x = x;
@@ -149,6 +150,10 @@ export class LittleDot {
         context.beginPath();
         context.ellipse(this.x, this.y, 2, 2, 2 * Math.PI, 2 * Math.PI, false);
         context.stroke();
+
+        if (this.isFilled) {
+            context.fill();
+        }
     }
 
 }

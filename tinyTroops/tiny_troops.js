@@ -37,7 +37,7 @@ const gridRows = 9;
 
 const numObstructedSquares = 17;
 
-const numSoldiers = 1;
+const numSoldiers = 5;
 const numBlobs = 13;
 
 const gridSquares = new Array(0);
@@ -144,34 +144,8 @@ var setup = function () {
         let ent = new Blob("blob_" + n, center.x, center.y);
         ent.setGridSquare(home);
         blobs.push(ent);
+        entitiesResident.push(ent);
     }
-
-    // Find and target the closest soldier
-    blobs.forEach(blob => {
-
-        entitiesResident.push(blob);
-        //findAndTargetClosestHuman(blob);
-
-        // let blobGridSq = blob.gridSquare;
-
-        // let distances = soldiers.map( soldier => {
-        //     let soldierGridSq = soldier.gridSquare
-        //     return Math.abs(blobGridSq.x - soldierGridSq.x) + Math.abs(blobGridSq.y - soldierGridSq.y);
-        // });
-
-        // console.log(distances);
-        // let closestDistance = 0;
-        // let closestIndex = 0;
-        // for (var i = 0; i < soldiers.length; i++) {
-        //     if (distances[i] < closestDistance) {
-        //         closestIndex = i;
-        //     }
-        // }
-        // blob.setTarget(soldiers[closestIndex]);
-
-
-        // entitiesResident.push(blob);
-    });
 
     beginGame();
 
@@ -786,13 +760,21 @@ function calculateLineOfSight(origin, target) {
 
         let nextSquare = findGridSquareAtMouse(zPoint);
 
+
         if (nextSquare == null) {
             break;
         }
 
         if (candidate != target && candidate != origin) {
+            // DEBUG: display points along the LOS line
+            let dot = new LittleDot(zPoint.x, zPoint.y);
+            dot.isFilled = nextSquare.isOccupied || nextSquare.isObstructed;
+            lineOfSightDots.add(dot);
+
             pathSquares.add(candidate);
         }
+
+
 
         candidate = nextSquare;
     }
@@ -913,9 +895,10 @@ function updateGameState() {
 
     }
 
-    // lineOfSightDots.forEach(dot => {
-    //     entitiesTransient.push(dot);
-    // });
+    // DEBUG: render LOS info
+    lineOfSightDots.forEach(dot => {
+        entitiesTransient.push(dot);
+    });
 
     // Recalculate available action points
     let apAvail = 0;

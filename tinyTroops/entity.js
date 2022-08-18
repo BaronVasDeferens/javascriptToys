@@ -257,6 +257,25 @@ export class TextLabel {
         context.strokeText(this.text, this.startX, this.startY);
     }
 }
+
+export class Weapon {
+
+    name = "";
+    rangeCostMap = {
+        1: 1,
+    };
+
+    constructor(name, rangeCostMap) {
+        this.name = name;
+        this.rangeCostMap = rangeCostMap;
+    }
+
+    getApCostForRange(range) {
+        return this.rangeCostMap[range]; 
+    }
+
+}
+
 /**
  * SOLDIER
  */
@@ -265,6 +284,14 @@ export class Soldier extends Entity {
     image = new Image();
     imageWidth = 50;
     imageHeight = 50;
+
+    weapon = new Weapon("SMG", {
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5
+    });
 
     currentFrameIndex = 0;
     maxFrameIndex = 3;
@@ -275,9 +302,13 @@ export class Soldier extends Entity {
 
     constructor(id, x, y) {
         super(id, x, y);
-        this.image.src = "resources/guys_strip_2.png";
+        this.image.src = "resources/soldier_new_strip.png";
     }
 
+
+    getApCostForRange(range) {
+        return this.weapon.getApCostForRange(range);
+    }
 
     // Returns the coordinates of this entity if the click was within this image's bounds;
     isClicked(event) {
@@ -323,6 +354,10 @@ export class Soldier extends Entity {
         context.restore();
     }
 }
+
+/**
+ * HELPLESS
+ */
 
 export class Helpless extends Entity {
 

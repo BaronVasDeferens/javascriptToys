@@ -237,7 +237,7 @@ window.onmousemove = function (event) {
             let selected = findGridSquareAtMouse(event);
             if (selected != null) {
 
-                //Is the gridSquare under the mouse is already in the set
+                //Is the gridSquare under the mouse is already in the set?
                 let indexOfSelected = selectedGridSquares.indexOf(selected);
                 if (indexOfSelected == -1) {
 
@@ -271,7 +271,6 @@ window.onmousemove = function (event) {
                 let subEnt = secondaryEntityUnderMouse(event);
                 selectedEntitySecondary = subEnt;
 
-
                 // Draw a ring under the mouse
                 if (selectedEntitySecondary == null) {
                     mousePointerHoverDot = new Ring(event.x, event.y, 50, "#000000");
@@ -286,6 +285,8 @@ window.onmousemove = function (event) {
 
                     // Caluilate LOS and draw LOS obstruction dots...
                     lineOfSightGridSquares = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
+                    
+                    // debug: LOS dots
                     lineOfSightGridSquares.forEach(square => {
                         if ((square.isOccupied || square.isObstructed)) {
                             lineOfSightDots.add(new Dot(square, "#FFFF00", true));
@@ -436,7 +437,7 @@ function targetClosestEnemy(attacker, targets) {
     attacker.setTarget(targets[closestIndex]);
 }
 
-function computeAttackStats() {
+function computeAttackStats(aggressor, target, range) {
 
     let hit = "AUTO";
     let min = 0;
@@ -526,7 +527,7 @@ function attackEntity(aggressor, target) {
     };
 
 
-    let attackStats = computeAttackStats();
+    let attackStats = computeAttackStats(aggressor, target);
 
     let drivers = [];
 
@@ -847,6 +848,7 @@ function updateGameState() {
                 "#FF0000"));
         } else {
 
+            // Display AP cost when hovering over potential target
             var mousePointerHoverLineDistance = mousePointerHoverLine.getLength();
             actionPointsCostPotential = mousePointerHoverLineDistance;
             entitiesTransient.push(new TextLabel(
@@ -858,7 +860,7 @@ function updateGameState() {
             // Display hit chance and damage potential stats
             if (selectedEntitySecondary != null) {
 
-                let attackStats = computeAttackStats();
+                let attackStats = computeAttackStats(selectedEntityPrimary, selectedEntitySecondary);
 
                 entitiesTransient.push(
                     new TextLabel(
@@ -896,9 +898,9 @@ function updateGameState() {
     }
 
     // DEBUG: render LOS info
-    lineOfSightDots.forEach(dot => {
-        entitiesTransient.push(dot);
-    });
+    // lineOfSightDots.forEach(dot => {
+    //     entitiesTransient.push(dot);
+    // });
 
     // Recalculate available action points
     let apAvail = 0;

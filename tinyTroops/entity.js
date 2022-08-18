@@ -401,7 +401,7 @@ export class Blob extends Entity {
 
     constructor(id, x, y) {
         super(id, x, y);
-        this.imageAlive.src = "resources/blob_strip_2.png";
+        this.imageAlive.src = "resources/blob_new_strip.png";
         this.imageDead.src = "resources/blob_dead_1.png";
     }
 

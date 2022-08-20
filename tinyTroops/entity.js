@@ -37,6 +37,8 @@ export class GridSquare {
     isOccupied = false;
     isObstructed = false;
 
+    image = new Image();
+
     constructor(x, y, size, color) {
         this.x = x;
         this.y = y;
@@ -44,6 +46,9 @@ export class GridSquare {
         if (color != undefined) {
             this.color = color;
         }
+
+        this.image.src = "resources/floor_tile.png";
+
     }
 
     setColor(color) {
@@ -85,11 +90,6 @@ export class GridSquare {
             context.strokeStyle = this.color;
             context.lineWidth = 1.0;
             context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
-            // Circle in the center
-            // context.beginPath();
-            // let center = this.getCenter();
-            // context.ellipse(center.x, center.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
-            // context.stroke();
         }
     }
 }

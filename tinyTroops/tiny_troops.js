@@ -37,8 +37,8 @@ const gridRows = 9;
 
 const numObstructedSquares = 17;
 
-const numSoldiers = 1;
-const numBlobs = 10;
+const numSoldiers = 3;
+const numBlobs = 13;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -656,16 +656,9 @@ function startEnemyTurn() {
                 let currentGridSquare =  activeBlob.gridSquare;
                 let neighbors = getAdjacentSquares(currentGridSquare);
 
-                console.log(`blob at: ${activeBlob.gridSquare.x},${activeBlob.gridSquare.y}`);
-                console.log(`blob considers ${neighbors.length} adjacent squares... `);
-                
-
-
-                // let neightborsSorted = neighbors
-                // .map( sq => { return Math.abs(sq.x - activeBlob.target.gridSquare.x) - Math.abs(sq.y - activeBlob.target.gridSquare.y) });    
-                // neightborsSorted.sort()
-                // console.log(neightborsSorted);    
-
+                // console.log(`blob at: ${activeBlob.gridSquare.x},${activeBlob.gridSquare.y}`);
+                // console.log(`blob considers ${neighbors.length} adjacent squares... `);
+             
                 neighbors = neighbors.sort( (sq1, sq2) => { 
                     let dist1 = Math.abs(activeBlob.target.gridSquare.x - sq1.x) + Math.abs(activeBlob.target.gridSquare.y - sq1.y);
                     let dist2 = Math.abs(activeBlob.target.gridSquare.x - sq2.x) + Math.abs(activeBlob.target.gridSquare.y - sq2.y);
@@ -682,13 +675,7 @@ function startEnemyTurn() {
                 neighbors = neighbors.filter( sq => { return path.includes(sq) == false });
                 neighbors = neighbors.filter( sq => { return sq.isOccupied == false });
                 neighbors = neighbors.filter( sq => { return sq.isObstructed == false });
-                
-                
-                console.log(neighbors);
-                
                 let candidate = neighbors[0];
-
-                console.log(candidate);
 
                 if (candidate != undefined) {
                     movesMade++;

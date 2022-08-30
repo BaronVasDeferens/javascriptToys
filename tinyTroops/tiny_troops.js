@@ -37,8 +37,8 @@ const gridRows = 9;
 
 const numObstructedSquares = 17;
 
-const numSoldiers = 5;
-const numBlobs = 13;
+const numSoldiers = 1;
+const numBlobs = 10;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -598,82 +598,23 @@ function startEnemyTurn() {
 
     blobs.forEach(activeBlob => {
 
-        // Move toward target
+        let path = new Array();
+        let bad = new Array();
         let attemptedMoves = 0;
         let attemptedMovesMax = 5;
         let movesMade = 0;
-        let movesMadeMax = 4;
+        let movesMadeMax = 5;
+
+       // Does the monster have a LIVE target? If not, obtain one.
+       if (activeBlob.target == undefined || activeBlob.target == null || !activeBlob.target.isAlive) {
+            let index = randomIntInRange(0, soldiers.length);
+            activeBlob.setTarget(soldiers[index]);
+        }
+
+        console.log(`blob ${activeBlob.id} target ${activeBlob.target.id} at: ${activeBlob.target.gridSquare.x},${activeBlob.target.gridSquare.y}`);
 
         // TODO: add "max moves" to monster class
         while ((attemptedMoves < attemptedMovesMax) && (movesMade < movesMadeMax)) {
-
-            // Does the monster have a LIVE target? If not, obtain one.
-            if (activeBlob.target == undefined || !activeBlob.target.isAlive) {
-                let index = randomIntInRange(0, soldiers.length);
-                // console.log(`target index: {} : {}`, index, soldiers[index]);
-                activeBlob.setTarget(soldiers[index]);
-            }
-
-            let deltaX = 0;
-            if (activeBlob.gridSquare.x > activeBlob.target.gridSquare.x) {
-                deltaX = -1
-            } else if (activeBlob.gridSquare.x < activeBlob.target.gridSquare.x) {
-                deltaX = 1;
-            }
-
-            let deltaY = 0;
-            if (activeBlob.gridSquare.y > activeBlob.target.gridSquare.y) {
-                deltaY = -1
-            } else if (activeBlob.gridSquare.y < activeBlob.target.gridSquare.y) {
-                deltaY = 1;
-            }
-
-            // If multiple FAILED attempts to move were made, try backing up or moving left or right
-            if (attemptedMoves >= 2 && movesMade == 0) {
-                deltaX = deltaX * -1;
-                deltaY = deltaY * -1;
-            }
-
-            // TODO: randomize which is first, horizontal or vertical movement
-
-            let origin = activeBlob.gridSquare;
-            let newX = activeBlob.gridSquare.x + deltaX;
-            let newY = activeBlob.gridSquare.y;
-            let possibleMove = gridSquares[0][0];
-
-
-            if (newX <= gridCols - 1 && newX >= 0) {
-                possibleMove = gridSquares[newX][newY];
-                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
-                    origin = activeBlob.gridSquare
-                    activeBlob.setGridSquare(possibleMove);
-                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, SoundModule.SFX.BLOB_MOVE_1));
-                    movesMade++;
-                    attemptedMoves++;
-                } else {
-                    attemptedMoves++;
-                }
-            } else {
-                attemptedMoves++;
-            }
-
-            newX = activeBlob.gridSquare.x;
-            newY = activeBlob.gridSquare.y + deltaY;
-
-            if (newY <= gridRows - 1 && newY >= 0) {
-                possibleMove = gridSquares[newX][newY];
-                if (possibleMove != undefined && !possibleMove.isObstructed && !possibleMove.isOccupied && (movesMade < movesMadeMax)) {
-                    origin = activeBlob.gridSquare
-                    activeBlob.setGridSquare(possibleMove);
-                    drivers.push(new MovementAnimationDriver(activeBlob, origin, possibleMove, SoundModule.SFX.BLOB_MOVE_2));
-                    movesMade++;
-                    attemptedMoves++;
-                } else {
-                    attemptedMoves++;
-                }
-            } else {
-                attemptedMoves++;
-            }
 
             // ATTACK! (if able)...
             let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
@@ -683,7 +624,7 @@ function startEnemyTurn() {
 
             let isWithinSpittingDistance = distance <= 5
 
-            if (movesMade < 2 && isAdjacent == true) {
+            if (movesMadeMax - movesMade >= 1 && isAdjacent == true) {
 
                 let kill = {
                     attacker: activeBlob,
@@ -697,19 +638,71 @@ function startEnemyTurn() {
                 }));
 
                 break;
-            } else if (isWithinSpittingDistance) {
-                let gridSquares = calculateLineOfSight(activeBlob.gridSquare, activeBlob.target.gridSquare)
-                let gridSquareArray = new Array();
-                gridSquares.forEach( element => {
-                    gridSquareArray.push(element);
-                })
-                let isWithinLOS = gridSquareArray.every(element => {return !element.isObstructed && !element.isOccupied});
-                if (isWithinLOS) {
-                    console.log(`${activeBlob.id} can spit at ${activeBlob.target.id}`);
+            } 
+            // else if (isWithinSpittingDistance) {
+            //     let gridSquares = calculateLineOfSight(activeBlob.gridSquare, activeBlob.target.gridSquare)
+            //     let gridSquareArray = new Array();
+            //     gridSquares.forEach( element => {
+            //         gridSquareArray.push(element);
+            //     })
+            //     let isWithinLOS = gridSquareArray.every(element => {return !element.isObstructed && !element.isOccupied});
+            //     if (isWithinLOS) {
+            //         console.log(`${activeBlob.id} can spit at ${activeBlob.target.id}`);
+            //     } else {
+            //         console.log(`${activeBlob.id} has no LOS to at ${ activeBlob.target.id}`);
+            //     }
+            // } 
+            else {
+                let currentGridSquare =  activeBlob.gridSquare;
+                let neighbors = getAdjacentSquares(currentGridSquare);
+
+                console.log(`blob at: ${activeBlob.gridSquare.x},${activeBlob.gridSquare.y}`);
+                console.log(`blob considers ${neighbors.length} adjacent squares... `);
+                
+
+
+                // let neightborsSorted = neighbors
+                // .map( sq => { return Math.abs(sq.x - activeBlob.target.gridSquare.x) - Math.abs(sq.y - activeBlob.target.gridSquare.y) });    
+                // neightborsSorted.sort()
+                // console.log(neightborsSorted);    
+
+                neighbors = neighbors.sort( (sq1, sq2) => { 
+                    let dist1 = Math.abs(activeBlob.target.gridSquare.x - sq1.x) + Math.abs(activeBlob.target.gridSquare.y - sq1.y);
+                    let dist2 = Math.abs(activeBlob.target.gridSquare.x - sq2.x) + Math.abs(activeBlob.target.gridSquare.y - sq2.y);
+                    if (dist1 < dist2) {
+                        return -1;
+                    }
+
+                    if (dist2 > dist1) {
+                        return 1;
+                    }
+
+                    return 0;
+                });
+                neighbors = neighbors.filter( sq => { return path.includes(sq) == false });
+                neighbors = neighbors.filter( sq => { return sq.isOccupied == false });
+                neighbors = neighbors.filter( sq => { return sq.isObstructed == false });
+                
+                
+                console.log(neighbors);
+                
+                let candidate = neighbors[0];
+
+                console.log(candidate);
+
+                if (candidate != undefined) {
+                    movesMade++;
+                    activeBlob.setGridSquare(candidate);
+                    path.push(candidate);
+                    drivers.push(new MovementAnimationDriver(activeBlob, currentGridSquare, candidate, "resources/sounds/blob_move_1.wav"));
                 } else {
-                    console.log(`${activeBlob.id} has no LOS to at ${ activeBlob.target.id}`);
+                    attemptedMoves++;
                 }
             }
+
+
+            //console.log(`${movesMade} / ${attemptedMoves}`);
+
         }
     });
 
@@ -718,6 +711,29 @@ function startEnemyTurn() {
     }));
 
     movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
+}
+
+
+function getAdjacentSquares(center) {
+    let neighbors = [];
+
+    if (center.x + 1 < gridCols && gridSquares[center.x + 1][center.y] != undefined) {
+        neighbors.push(gridSquares[center.x + 1][center.y]);
+    }
+
+    if (center.x - 1 >= 0 && gridSquares[center.x - 1][center.y] != undefined) {
+        neighbors.push(gridSquares[center.x - 1][center.y]);
+    }
+
+    if (center.y + 1 < gridRows && gridSquares[center.x][center.y + 1] != undefined) {
+        neighbors.push(gridSquares[center.x][center.y + 1]);
+    }
+
+    if (center.y - 1 >= 0 && gridSquares[center.x][center.y - 1] != undefined) {
+        neighbors.push(gridSquares[center.x][center.y - 1]);
+    }
+
+    return neighbors;
 }
 
 /**

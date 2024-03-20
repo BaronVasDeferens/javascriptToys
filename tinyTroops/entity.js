@@ -495,6 +495,9 @@ export var CombatResolutionState = Object.freeze({
 
 export class CombatResolutionDriver {
 
+    // Upper two combat portraits are 200x200 px
+    // Lower portrait (result) is 450x200 px
+
     soundOne = null;
     soundTwo = null;
 
@@ -522,9 +525,14 @@ export class CombatResolutionDriver {
      * 
      */
 
-    constructor(combatResult, onComplete) {
+    constructor(windowWidth, windowHeight, combatResult, onComplete) {
+
+
+        console.log(`window ${windowWidth} x ${windowHeight}`);
 
         this.onComplete = onComplete;
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
 
         if (combatResult.attacker instanceof Soldier) {
             this.image1.src = "resources/soldier_focus_smg_1.png";
@@ -581,18 +589,24 @@ export class CombatResolutionDriver {
 
     render(context) {
 
-        // images are 200x200
+        let gapSize = 25;
+        var image1X = (this.windowWidth / 2) - gapSize - 200;
+        var image1Y = (this.windowHeight / 2) - gapSize - 200;
 
         if (this.ticks >= this.tickMax1) {
-            context.drawImage(this.image1, 100, 100);
+            context.drawImage(this.image1, image1X, image1Y);
         }
 
         if (this.ticks >= this.tickMax2) {
-            context.drawImage(this.image2, 350, 100);
+            let image2X = image1X + gapSize + gapSize + 200;
+            let image2Y = image1Y;
+            context.drawImage(this.image2, image2X, image2Y);
         }
 
         if (this.ticks >= this.tickMax3) {
-            context.drawImage(this.image3, 100, 350);
+            let image3X = image1X;
+            let image3Y = image1Y + 200 + gapSize + gapSize;
+            context.drawImage(this.image3, image3X, image3Y);
         }
     }
 }

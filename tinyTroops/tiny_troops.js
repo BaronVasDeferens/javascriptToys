@@ -512,6 +512,10 @@ function moveEntity(entity, event) {
 
 function attackEntity(aggressor, target) {
 
+    var canvas = document.getElementById('playArea');
+    var windowWidth = canvas.width;
+    var windowHeight = canvas.height;
+
     console.log(aggressor.id + " attacks " + target.id);
 
     let kill = {
@@ -536,12 +540,12 @@ function attackEntity(aggressor, target) {
     }));
 
     if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-        drivers.push(new CombatResolutionDriver(kill, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, kill, () => {
             console.log("attack success!");
             killEntity(target);
         }));
     } else {
-        drivers.push(new CombatResolutionDriver(noEffect, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, noEffect, () => {
             console.log("attack fail");
         }));
     }

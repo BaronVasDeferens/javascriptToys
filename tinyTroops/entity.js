@@ -506,11 +506,11 @@ export class CombatResolutionDriver {
 
 
     ticks = 0;
-    tickMax1 = 60;
-    tickMax2 = 120;
-    tickMax3 = 180;
+    tickMax1 = 30;
+    tickMax2 = 60;
+    tickMax3 = 90;
 
-    tickMax = 330;
+    tickMax = 140;
 
     /**
      * {
@@ -605,7 +605,7 @@ export class MovementAnimationDriver {
     sound = null;
 
     currentTick = 0;
-    maxTicks = 2;
+    maxTicks = 1;
 
     currentStep = 0;
     maxSteps = 20;
@@ -655,7 +655,7 @@ export class DeathAnimationDriver {
     imageHeight = 50;
 
     currentTick = 0;
-    ticksPerFrame = 15;
+    ticksPerFrame = 5;
 
     currentFrame = 0;
     maxFrame = 7;

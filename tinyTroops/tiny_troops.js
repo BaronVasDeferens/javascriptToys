@@ -32,8 +32,8 @@ var currentState = States.INTRO;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
-const gridCols = 24;
-const gridRows = 9;
+const gridCols = 13;
+const gridRows = 8;
 
 const numObstructedSquares = 17;
 
@@ -66,7 +66,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 5;
+const actionPointsMax = 20;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -832,6 +832,11 @@ function beginGame() {
 
 function updateGameState() {
 
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var gridLowerBound = (gridRows * gridSquareSize) + 25;     // the bottom of the grid (plus an offset)
+
+
     // Add transients for the last known mouse positions
     if (mousePointerHoverLine != null) {
         entitiesTransient.push(mousePointerHoverLine);
@@ -916,18 +921,18 @@ function updateGameState() {
     // Display available AP
     if (currentState == States.ENEMY_TURN) {
         entitiesTransient.push(new TextLabel(
-            10, 700, "ENEMY TURN", "#000000"
+            10, gridLowerBound, "ENEMY TURN", "#000000"
         ));
     } else {
         // If there's a movement being plotted...
         if (selectedGridSquares.length > 0) {
             entitiesTransient.push(new TextLabel(
-                10, 700, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
+                10, gridLowerBound, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
             ));
         } else {
             //...otherwise, display the remaining AP
             entitiesTransient.push(new TextLabel(
-                10, 700, "AP: " + apAvail, "#000000"
+                10, gridLowerBound, "AP: " + apAvail, "#000000"
             ));
         }
     }

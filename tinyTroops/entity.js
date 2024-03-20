@@ -509,11 +509,11 @@ export class CombatResolutionDriver {
 
 
     ticks = 0;
-    tickMax1 = 30;
-    tickMax2 = 60;
-    tickMax3 = 90;
+    tickMax1 = 0;
+    tickMax2 = 30;
+    tickMax3 = 60;
 
-    tickMax = 140;
+    tickMax = 90;
 
     /**
      * {
@@ -525,16 +525,16 @@ export class CombatResolutionDriver {
      * 
      */
 
-    constructor(windowWidth, windowHeight, combatResult, onComplete) {
+    constructor(windowWidth, windowHeight, attacker, defender, combatResult, onComplete) {
 
-
-        console.log(`window ${windowWidth} x ${windowHeight}`);
-
-        this.onComplete = onComplete;
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
-
-        if (combatResult.attacker instanceof Soldier) {
+        this.attacker = attacker;
+        this.defender = defender;
+        this.combatResult = combatResult;
+        this.onComplete = onComplete;
+        
+        if (this.attacker instanceof Soldier) {
             this.image1.src = "resources/soldier_focus_smg_1.png";
             this.image2.src = "resources/soldier_firing_smg_1.png";
             this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
@@ -544,7 +544,7 @@ export class CombatResolutionDriver {
             this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_whip.wav");
         }
 
-        if (combatResult.defender instanceof Blob) {
+        if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
                     let imgArray = ["resources/panel_3_blob_death.png",

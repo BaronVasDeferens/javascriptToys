@@ -495,6 +495,9 @@ export var CombatResolutionState = Object.freeze({
 
 export class CombatResolutionDriver {
 
+    // Upper two combat portraits are 200x200 px
+    // Lower portrait (result) is 450x200 px
+
     soundOne = null;
     soundTwo = null;
 
@@ -506,11 +509,11 @@ export class CombatResolutionDriver {
 
 
     ticks = 0;
-    tickMax1 = 60;
-    tickMax2 = 120;
-    tickMax3 = 180;
+    tickMax1 = 0;
+    tickMax2 = 30;
+    tickMax3 = 60;
 
-    tickMax = 330;
+    tickMax = 90;
 
     /**
      * {
@@ -522,11 +525,16 @@ export class CombatResolutionDriver {
      * 
      */
 
-    constructor(combatResult, onComplete) {
+    constructor(windowWidth, windowHeight, attacker, defender, combatResult, onComplete) {
 
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
+        this.attacker = attacker;
+        this.defender = defender;
+        this.combatResult = combatResult;
         this.onComplete = onComplete;
-
-        if (combatResult.attacker instanceof Soldier) {
+        
+        if (this.attacker instanceof Soldier) {
             this.image1.src = "resources/soldier_focus_smg_1.png";
             this.image2.src = "resources/soldier_firing_smg_1.png";
             this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
@@ -536,7 +544,7 @@ export class CombatResolutionDriver {
             this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_whip.wav");
         }
 
-        if (combatResult.defender instanceof Blob) {
+        if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
                     let imgArray = ["resources/panel_3_blob_death.png",
@@ -581,18 +589,24 @@ export class CombatResolutionDriver {
 
     render(context) {
 
-        // images are 200x200
+        let gapSize = 25;
+        var image1X = (this.windowWidth / 2) - gapSize - 200;
+        var image1Y = (this.windowHeight / 2) - gapSize - 200;
 
         if (this.ticks >= this.tickMax1) {
-            context.drawImage(this.image1, 100, 100);
+            context.drawImage(this.image1, image1X, image1Y);
         }
 
         if (this.ticks >= this.tickMax2) {
-            context.drawImage(this.image2, 350, 100);
+            let image2X = image1X + gapSize + gapSize + 200;
+            let image2Y = image1Y;
+            context.drawImage(this.image2, image2X, image2Y);
         }
 
         if (this.ticks >= this.tickMax3) {
-            context.drawImage(this.image3, 100, 350);
+            let image3X = image1X;
+            let image3Y = image1Y + 200 + gapSize + gapSize;
+            context.drawImage(this.image3, image3X, image3Y);
         }
     }
 }
@@ -605,7 +619,7 @@ export class MovementAnimationDriver {
     sound = null;
 
     currentTick = 0;
-    maxTicks = 2;
+    maxTicks = 1;
 
     currentStep = 0;
     maxSteps = 20;
@@ -655,7 +669,7 @@ export class DeathAnimationDriver {
     imageHeight = 50;
 
     currentTick = 0;
-    ticksPerFrame = 15;
+    ticksPerFrame = 5;
 
     currentFrame = 0;
     maxFrame = 7;

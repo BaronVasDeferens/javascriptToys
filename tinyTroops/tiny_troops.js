@@ -32,8 +32,8 @@ var currentState = States.INTRO;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
-const gridCols = 24;
-const gridRows = 9;
+const gridCols = 13;
+const gridRows = 8;
 
 const numObstructedSquares = 17;
 
@@ -66,7 +66,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 5;
+const actionPointsMax = 20;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -512,6 +512,10 @@ function moveEntity(entity, event) {
 
 function attackEntity(aggressor, target) {
 
+    var canvas = document.getElementById('playArea');
+    var windowWidth = canvas.width;
+    var windowHeight = canvas.height;
+
     console.log(aggressor.id + " attacks " + target.id);
 
     let kill = {
@@ -536,12 +540,12 @@ function attackEntity(aggressor, target) {
     }));
 
     if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-        drivers.push(new CombatResolutionDriver(kill, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, () => {
             console.log("attack success!");
             killEntity(target);
         }));
     } else {
-        drivers.push(new CombatResolutionDriver(noEffect, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, () => {
             console.log("attack fail");
         }));
     }
@@ -566,6 +570,10 @@ function killEntity(condemned) {
  * START ENEMY TURN
  */
 function startEnemyTurn() {
+
+    var canvas = document.getElementById('playArea');
+    var windowWidth = canvas.width;
+    var windowHeight = canvas.height;
 
     let drivers = [];
 
@@ -632,7 +640,7 @@ function startEnemyTurn() {
                     result: CombatResolutionState.KILL
                 };
 
-                drivers.push(new CombatResolutionDriver(kill, () => {
+                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, () => {
                     console.log(`${activeBlob.id} kills ${activeBlob.target.id}`);
                     killEntity(activeBlob.target);
                 }));
@@ -832,6 +840,11 @@ function beginGame() {
 
 function updateGameState() {
 
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var gridLowerBound = (gridRows * gridSquareSize) + 25;     // the bottom of the grid (plus an offset)
+
+
     // Add transients for the last known mouse positions
     if (mousePointerHoverLine != null) {
         entitiesTransient.push(mousePointerHoverLine);
@@ -916,18 +929,18 @@ function updateGameState() {
     // Display available AP
     if (currentState == States.ENEMY_TURN) {
         entitiesTransient.push(new TextLabel(
-            10, 700, "ENEMY TURN", "#000000"
+            10, gridLowerBound, "ENEMY TURN", "#000000"
         ));
     } else {
         // If there's a movement being plotted...
         if (selectedGridSquares.length > 0) {
             entitiesTransient.push(new TextLabel(
-                10, 700, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
+                10, gridLowerBound, "AP: " + apAvail + " / " + actionPointsAvailable, "#000000"
             ));
         } else {
             //...otherwise, display the remaining AP
             entitiesTransient.push(new TextLabel(
-                10, 700, "AP: " + apAvail, "#000000"
+                10, gridLowerBound, "AP: " + apAvail, "#000000"
             ));
         }
     }

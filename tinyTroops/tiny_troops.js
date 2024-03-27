@@ -35,7 +35,7 @@ const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("re
 const gridCols = 13;
 const gridRows = 8;
 
-const numObstructedSquares = 17;
+const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
 const numSoldiers = 3;
 const numBlobs = 13;
@@ -66,7 +66,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 20;
+const actionPointsMax = numSoldiers * 3;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;

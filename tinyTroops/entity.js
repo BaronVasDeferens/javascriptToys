@@ -271,7 +271,7 @@ export class Weapon {
     }
 
     getApCostForRange(range) {
-        return this.rangeCostMap[range]; 
+        return this.rangeCostMap[range];
     }
 
 }
@@ -495,17 +495,16 @@ export var CombatResolutionState = Object.freeze({
 
 export class CombatResolutionDriver {
 
-    // Upper two combat portraits are 200x200 px
-    // Lower portrait (result) is 450x200 px
+    // images are 200x200
 
     soundOne = null;
     soundTwo = null;
 
     onComplete = null;
 
-    image1 = new Image();
-    image2 = new Image();
-    image3 = new Image();
+    imageLeft = new Image();
+    imageCenter = new Image();
+    imageRight = new Image();
 
 
     ticks = 0;
@@ -533,33 +532,43 @@ export class CombatResolutionDriver {
         this.defender = defender;
         this.combatResult = combatResult;
         this.onComplete = onComplete;
-        
+
+        this.isLive = true;
+
         if (this.attacker instanceof Soldier) {
-            this.image1.src = "resources/soldier_focus_smg_1.png";
-            this.image2.src = "resources/soldier_firing_smg_1.png";
+            this.imageLeft.src = "resources/soldier_firing_2.png";
             this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
         } else {
-            this.image1.src = "resources/soldier_death_panel_1.png";
-            this.image2.src = "resources/soldier_death_panel_2.png";
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_whip.wav");
+            this.imageLeft.src = "resources/soldier_death_panel_1.png";
+            this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_attack_1.wav");
         }
 
         if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    let imgArray = ["resources/panel_3_blob_death.png",
-                    "resources/blob_dead_2.png",
-                    "resources/blob_dead_3.png"];
-                    this.shuffleArray(imgArray);
-                    this.image3.src = imgArray[0];
+                    this.imageRight.src = "resources/blob_dead_4.png"
+                    this.imageCenter.src = "resources/result_kill.png"
                     this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
-                    this.image3.src = "resources/blob_survives_1.png";
+                    this.imageRight.src = "resources/blob_survives_1.png";
+                    this.imageCenter.src = "resources/result_miss.png"
+
                     break;
             }
         } else {
-            this.image3.src = "resources/soldier_death_panel_3.png";
+            this.imageLeft.src = "resources/blob_attack_1.png";
+            switch (combatResult.result) {
+                case CombatResolutionState.KILL:
+                    this.imageRight.src = "resources/blob_attack_2.png"
+                    this.imageCenter.src = "resources/result_kill.png"
+                    //this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
+                    break;
+                default:
+                    // this.imageRight.src = "resources/blob_survives_1.png";
+                    // this.imageCenter.src = "resources/result_miss.png"
+                    break;
+            }
         }
     }
 
@@ -572,6 +581,15 @@ export class CombatResolutionDriver {
 
     update() {
         this.ticks++;
+
+        // FIXME: experimental hack
+        if (this.defender.isAlive == false) {
+            this.isLive = false;
+        }
+
+        if (this.isLive == false) {
+            return;
+        }
 
         if (this.ticks == this.tickMax2) {
             //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
@@ -589,24 +607,28 @@ export class CombatResolutionDriver {
 
     render(context) {
 
+        if (this.isLive == false) {
+            return;
+        }
+
         let gapSize = 25;
         var image1X = (this.windowWidth / 2) - gapSize - 200;
         var image1Y = (this.windowHeight / 2) - gapSize - 200;
 
         if (this.ticks >= this.tickMax1) {
-            context.drawImage(this.image1, image1X, image1Y);
+            context.drawImage(this.imageLeft, image1X, image1Y);
         }
 
         if (this.ticks >= this.tickMax2) {
-            let image2X = image1X + gapSize + gapSize + 200;
+            let image2X = image1X + 200 + gapSize;
             let image2Y = image1Y;
-            context.drawImage(this.image2, image2X, image2Y);
+            context.drawImage(this.imageRight, image2X, image2Y);
         }
 
         if (this.ticks >= this.tickMax3) {
-            let image3X = image1X;
-            let image3Y = image1Y + 200 + gapSize + gapSize;
-            context.drawImage(this.image3, image3X, image3Y);
+            let image3X = image1X + ((200 + gapSize) / 2);
+            let image3Y = image1Y;
+            context.drawImage(this.imageCenter, image3X, image3Y);
         }
     }
 }

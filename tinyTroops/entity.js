@@ -495,7 +495,8 @@ export var CombatResolutionState = Object.freeze({
 
 export class CombatResolutionDriver {
 
-    // images are 200x200
+    // left/rightvimages are 200x200
+    // result images are 400x400
 
     soundOne = null;
     soundTwo = null;
@@ -535,8 +536,14 @@ export class CombatResolutionDriver {
 
         this.isLive = true;
 
+        let soldiersFiring = [1, 2];
+        let blobsDying = [4, 5];
+        let blobSurviving = [1];
+        let resultKill = [1, 2];
+
+
         if (this.attacker instanceof Soldier) {
-            this.imageLeft.src = "resources/soldier_firing_2.png";
+            this.imageLeft.src = this.getRandomPanel("soldier_firing", soldiersFiring);
             this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
         } else {
             this.imageLeft.src = "resources/soldier_death_panel_1.png";
@@ -546,13 +553,13 @@ export class CombatResolutionDriver {
         if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight.src = "resources/blob_dead_4.png"
-                    this.imageCenter.src = "resources/result_kill.png"
+                    this.imageRight.src = this.getRandomPanel("blob_dead", blobsDying);
+                    this.imageCenter.src = "resources/result_blob_death.png";
                     this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
                     this.imageRight.src = "resources/blob_survives_1.png";
-                    this.imageCenter.src = "resources/result_miss.png"
+                    this.imageCenter.src = "resources/result_miss_2.png"
 
                     break;
             }
@@ -561,7 +568,7 @@ export class CombatResolutionDriver {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
                     this.imageRight.src = "resources/blob_attack_2.png"
-                    this.imageCenter.src = "resources/result_kill.png"
+                    this.imageCenter.src = "resources/result_human_death.png"
                     //this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
@@ -570,6 +577,10 @@ export class CombatResolutionDriver {
                     break;
             }
         }
+    }
+
+    getRandomPanel(name, array) {
+        return `resources/${name}_${array[Math.floor(Math.random() * array.length)]}.png`;
     }
 
     shuffleArray(array) {
@@ -612,22 +623,22 @@ export class CombatResolutionDriver {
         }
 
         let gapSize = 25;
-        var image1X = (this.windowWidth / 2) - gapSize - 200;
-        var image1Y = (this.windowHeight / 2) - gapSize - 200;
+        var image1X = (this.windowWidth / 2) - 300;
+        var image1Y = (this.windowHeight / 2) - 100;
 
         if (this.ticks >= this.tickMax1) {
             context.drawImage(this.imageLeft, image1X, image1Y);
         }
 
         if (this.ticks >= this.tickMax2) {
-            let image2X = image1X + 200 + gapSize;
+            let image2X = image1X + 400;
             let image2Y = image1Y;
             context.drawImage(this.imageRight, image2X, image2Y);
         }
 
         if (this.ticks >= this.tickMax3) {
-            let image3X = image1X + ((200 + gapSize) / 2);
-            let image3Y = image1Y;
+            let image3X = image1X + 100;
+            let image3Y = image1Y - 100;
             context.drawImage(this.imageCenter, image3X, image3Y);
         }
     }
@@ -763,5 +774,24 @@ export class IntroAnimation {
 
     randomRange(min, max) {
         return Math.floor(Math.random() * max) + min;
+    }
+}
+
+export class DefeatAnimation {
+    
+    image = new Image();
+    canvasWidth = 0;
+    canvasHeight = 0;
+    x = 0;
+    y = 0;
+
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.image.src = "resources/defeat_1.png";
+    }
+
+    render(context) {
+        context.drawImage(this.image, this.x, this.y);
     }
 }

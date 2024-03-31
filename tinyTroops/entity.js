@@ -737,6 +737,44 @@ export class DeathAnimationDriver {
 
 }
 
+export class BonusActionPointTile {
+    value = 0;
+    x = 0;
+    y = 0;
+    gridSquareSize = 50;
+    color = "#0000FF";
+    isAlive = true;
+
+    textLabel = null;
+
+    constructor(value, x, y, gridSquareSize) {
+        this.value = value;
+        this.x = x;
+        this.y = y;
+        this.gridSquareSize = gridSquareSize;
+
+        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize / 2), this.value, this.color);
+    }
+
+    update() {
+
+    }
+
+
+    isClicked(event) {
+        return false;
+    }
+
+    render(context) {
+        //context.fillStyle = "#00FF00";
+        // context.fillRect(this.x + (this.size / 4), this.y + (this.size / 4), this.size, this.size);
+        this.textLabel.render(context);
+    }
+
+    collect() {
+        this.isAlive = false;
+    }
+}
 
 /**
  * Intro animation
@@ -778,20 +816,32 @@ export class IntroAnimation {
 }
 
 export class DefeatAnimation {
-    
-    image = new Image();
+
+    imageA = new Image();
+    imageB = new Image();
+
     canvasWidth = 0;
     canvasHeight = 0;
+
     x = 0;
     y = 0;
 
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.image.src = "resources/defeat_1.png";
+        this.imageA.src = "resources/defeat_1.png";
+        this.imageB.src = "resources/defeat_2.png";
     }
 
     render(context) {
-        context.drawImage(this.image, this.x, this.y);
+        if (Math.random() < 0.5) {
+            context.drawImage(this.imageA, this.x, this.y);
+        } else {
+            context.drawImage(this.imageB, this.x, this.y);
+        }
+    }
+
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
     }
 }

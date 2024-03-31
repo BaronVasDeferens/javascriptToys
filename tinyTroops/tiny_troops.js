@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, DefeatAnimation } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, DefeatAnimation, BonusActionPointTile } from './entity.js';
 import * as SoundModule from './SoundModule.js';
 
 const canvas = document.querySelector('canvas');
@@ -38,7 +38,7 @@ const gridRows = 8;
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
 const numSoldiers = 3;
-const numBlobs = 6;
+const numBlobs = 10;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -66,7 +66,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = numSoldiers * 3;
+const actionPointsMax = 7; //= numSoldiers * 3;
 var actionPointsAvailable = actionPointsMax;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -145,6 +145,20 @@ var setup = function () {
         ent.setGridSquare(home);
         blobs.push(ent);
         entitiesResident.push(ent);
+    }
+
+    // ------------ ADD BONUS SQUARES --------------------
+    let bonusSquares = allSquares.filter(square => {
+        return (square.isObstructed == false && square.isOccupied == false);
+    });
+
+    shuffleArray(bonusSquares);
+
+    for (var sqz = 0; sqz < 10; sqz++) {
+        let square = bonusSquares[sqz];
+        var bonusTile = new BonusActionPointTile("+2", square.x, square.y, gridSquareSize);
+        console.log(bonusTile);
+        entitiesResident.push(bonusTile);
     }
 
     beginGame();
@@ -285,7 +299,7 @@ window.onmousemove = function (event) {
 
                     // Caluilate LOS and draw LOS obstruction dots...
                     lineOfSightGridSquares = calculateLineOfSight(selectedEntityPrimary.gridSquare, selectedEntitySecondary.gridSquare);
-                    
+
                     // debug: LOS dots
                     lineOfSightGridSquares.forEach(square => {
                         if ((square.isOccupied || square.isObstructed)) {
@@ -491,7 +505,6 @@ function moveEntity(entity, event) {
 
     let destinationSquare = selectedGridSquares[selectedGridSquares.length - 1]; // last item in the list
     entity.setGridSquare(destinationSquare);
-
     if (entity instanceof Soldier) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
@@ -613,8 +626,8 @@ function startEnemyTurn() {
         let movesMade = 0;
         let movesMadeMax = 5;
 
-       // Does the monster have a LIVE target? If not, obtain one.
-       if (activeBlob.target == undefined || activeBlob.target == null || !activeBlob.target.isAlive) {
+        // Does the monster have a LIVE target? If not, obtain one.
+        if (activeBlob.target == undefined || activeBlob.target == null || !activeBlob.target.isAlive) {
             let index = randomIntInRange(0, soldiers.length);
             activeBlob.setTarget(soldiers[index]);
         }
@@ -627,7 +640,7 @@ function startEnemyTurn() {
             // ATTACK! (if able)...
             let distance = Math.abs(activeBlob.gridSquare.x - activeBlob.target.gridSquare.x)
                 + Math.abs(activeBlob.gridSquare.y - activeBlob.target.gridSquare.y);
-            
+
             let isAdjacent = distance < 2;
 
             let isWithinSpittingDistance = distance <= 5
@@ -646,7 +659,7 @@ function startEnemyTurn() {
                 }));
 
                 break;
-            } 
+            }
             // else if (isWithinSpittingDistance) {
             //     let gridSquares = calculateLineOfSight(activeBlob.gridSquare, activeBlob.target.gridSquare)
             //     let gridSquareArray = new Array();
@@ -661,13 +674,13 @@ function startEnemyTurn() {
             //     }
             // } 
             else {
-                let currentGridSquare =  activeBlob.gridSquare;
+                let currentGridSquare = activeBlob.gridSquare;
                 let neighbors = getAdjacentSquares(currentGridSquare);
 
                 // console.log(`blob at: ${activeBlob.gridSquare.x},${activeBlob.gridSquare.y}`);
                 // console.log(`blob considers ${neighbors.length} adjacent squares... `);
-             
-                neighbors = neighbors.sort( (sq1, sq2) => { 
+
+                neighbors = neighbors.sort((sq1, sq2) => {
                     let dist1 = Math.abs(activeBlob.target.gridSquare.x - sq1.x) + Math.abs(activeBlob.target.gridSquare.y - sq1.y);
                     let dist2 = Math.abs(activeBlob.target.gridSquare.x - sq2.x) + Math.abs(activeBlob.target.gridSquare.y - sq2.y);
                     if (dist1 < dist2) {
@@ -680,9 +693,9 @@ function startEnemyTurn() {
 
                     return 0;
                 });
-                neighbors = neighbors.filter( sq => { return path.includes(sq) == false });
-                neighbors = neighbors.filter( sq => { return sq.isOccupied == false });
-                neighbors = neighbors.filter( sq => { return sq.isObstructed == false });
+                neighbors = neighbors.filter(sq => { return path.includes(sq) == false });
+                neighbors = neighbors.filter(sq => { return sq.isOccupied == false });
+                neighbors = neighbors.filter(sq => { return sq.isObstructed == false });
                 let candidate = neighbors[0];
 
                 if (candidate != undefined) {
@@ -988,10 +1001,31 @@ function updateGameState() {
         }
 
         if (driver.isDone()) {
+
+            // ----------- PROCESS BONUS SQUARES ----------------
+            // As the movement drivers expire, check whether the destination contains a bonus.
+            // If yes, award the bonus and clear the bonus tile.
+            if (driver instanceof MovementAnimationDriver) {
+                let bonusSquare = entitiesResident.filter(ent => {
+                    return (ent instanceof BonusActionPointTile && ent.x == driver.destination.x && ent.y == driver.destination.y)
+                })[0];
+
+                if (bonusSquare != undefined) {
+                    bonusSquare.isAlive = false;
+                    // Only award bonus AP if the entity is a soldier!
+                    if (driver.entity instanceof Soldier) {
+                        actionPointsAvailable += parseInt(bonusSquare.value);
+                    }
+                }
+            }
+
+
+
             movementAnimationDrivers = movementAnimationDrivers.splice(1, movementAnimationDrivers.length - 1);
         }
     } else {
         if (currentState == States.IDLE) {
+
             // Check for endgame
             let blobs = entitiesResident.filter(entity => {
                 return entity instanceof Blob

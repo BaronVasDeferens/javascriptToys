@@ -525,7 +525,7 @@ export class CombatResolutionDriver {
      * 
      */
 
-    constructor(windowWidth, windowHeight, attacker, defender, combatResult, onComplete) {
+    constructor(windowWidth, windowHeight, attacker, defender, combatResult, imageModule, onComplete) {
 
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
@@ -543,32 +543,31 @@ export class CombatResolutionDriver {
 
 
         if (this.attacker instanceof Soldier) {
-            this.imageLeft.src = this.getRandomPanel("soldier_firing", soldiersFiring);
+            this.imageLeft = imageModule.getImage(ImageAsset.SOLDIER_FIRING);
             this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
         } else {
-            this.imageLeft.src = "resources/soldier_death_panel_1.png";
+            this.imageLeft = imageModule.getImage(ImageAsset.BLOB_ATTACKING);
             this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_attack_1.wav");
         }
 
         if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight.src = this.getRandomPanel("blob_dead", blobsDying);
-                    this.imageCenter.src = "resources/result_blob_death.png";
+                    this.imageRight = imageModule.getImage(ImageAsset.BLOB_DYING);
+                    this.imageCenter = imageModule.getImage(ImageAsset.RESULT_BLOB_DEATH);
                     this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
-                    this.imageRight.src = "resources/blob_survives_1.png";
-                    this.imageCenter.src = "resources/result_miss_2.png"
-
+                    this.imageRight = imageModule.getImage(ImageAsset.BLOB_SURVIVES);
+                    this.imageCenter = imageModule.getImage(ImageAsset.RESULT_SOLDIER_MISS);
                     break;
             }
         } else {
-            this.imageLeft.src = "resources/blob_attack_1.png";
+            this.imageLeft = imageModule.getImage(ImageAsset.BLOB_ATTACKING);
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight.src = "resources/blob_attack_2.png"
-                    this.imageCenter.src = "resources/result_human_death.png"
+                    this.imageRight = imageModule.getImage(ImageAsset.SOLDIER_DYING);
+                    this.imageCenter = imageModule.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
                     //this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
@@ -790,7 +789,7 @@ export class IntroAnimation {
     y = 0;
 
 
-    constructor(columns, rows, gridSsquareSize, imageModule) {     
+    constructor(columns, rows, gridSsquareSize, imageModule) {
         this.introImage = imageModule.getImage(ImageAsset.INTRO);
         this.x = ((columns / 2) * gridSsquareSize) - (this.introImage.width / 2);
         this.y = ((rows / 2) * gridSsquareSize) - (this.introImage.height / 2);
@@ -823,7 +822,7 @@ export class DefeatAnimation {
     x = 0;
     y = 0;
 
-    constructor(columns, rows, gridSsquareSize, imageModule) {     
+    constructor(columns, rows, gridSsquareSize, imageModule) {
         this.imageA = imageModule.getImage(ImageAsset.DEFEAT_1);
         this.imageB = imageModule.getImage(ImageAsset.DEFEAT_2);
         this.x = ((columns / 2) * gridSsquareSize) - (this.imageA.width / 2);

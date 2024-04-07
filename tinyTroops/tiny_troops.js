@@ -571,12 +571,12 @@ function attackEntity(aggressor, target) {
     }));
 
     if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, imageModule, () => {
             console.log("attack success!");
             killEntity(target);
         }));
     } else {
-        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, imageModule, () => {
             console.log("attack fail");
         }));
     }
@@ -671,7 +671,7 @@ function startEnemyTurn() {
                     result: CombatResolutionState.KILL
                 };
 
-                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, () => {
+                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, imageModule, () => {
                     console.log(`${activeBlob.id} kills ${activeBlob.target.id}`);
                     killEntity(activeBlob.target);
                 }));

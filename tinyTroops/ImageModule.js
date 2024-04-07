@@ -9,6 +9,8 @@ export var ImageAsset = Object.freeze({
     SOLDIER_FIRING: "resources/soldier_firing_2.png",
     BLOB_DYING: "resources/blob_dead_4.png",
     RESULT_BLOB_DEATH: "resources/result_blob_death.png",
+    RESULT_SOLDIER_MISS: "resources/result_miss.png",
+    BLOB_SURVIVES: "resources/blob_survives_1.png",
 
     // Action panels: Blob attacking / Soldier dying
     BLOB_ATTACKING: "resources/blob_attack_1.png",
@@ -47,7 +49,6 @@ export class ImageModule {
     }
 
     getImage(imgAsset) {
-        console.log(`returning ${imgAsset} : ${this.imageMap.get(imgAsset)}`)
         return this.imageMap.get(imgAsset);
     };
 }

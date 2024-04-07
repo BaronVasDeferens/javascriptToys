@@ -32,24 +32,18 @@ export class GridSquare {
 
     x = 0;
     y = 0;
-    size = 50;
+    size = 64;
     color = "#a8a8a8";
 
     isOccupied = false;
     isObstructed = false;
 
-    image = new Image();
-
-    constructor(x, y, size, color) {
+    constructor(x, y, size, color, imageModule) {
         this.x = x;
         this.y = y;
         this.size = size;
-        if (color != undefined) {
-            this.color = color;
-        }
-
-        this.image.src = "resources/floor_tile.png";
-
+        this.color = color;
+        this.image = imageModule.getImage(ImageAsset.FLOOR_TILE);
     }
 
     setColor(color) {
@@ -88,9 +82,10 @@ export class GridSquare {
             context.fillStyle = "#000000";
             context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
         } else {
-            context.strokeStyle = this.color;
-            context.lineWidth = 1.0;
-            context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            // context.strokeStyle = this.color;
+            // context.lineWidth = 1.0;
+            // context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            context.drawImage(this.image, this.x * this.size, this.y * this.size);
         }
     }
 }
@@ -498,16 +493,6 @@ export class CombatResolutionDriver {
     // left/rightvimages are 200x200
     // result images are 400x400
 
-    soundOne = null;
-    soundTwo = null;
-
-    onComplete = null;
-
-    imageLeft = new Image();
-    imageCenter = new Image();
-    imageRight = new Image();
-
-
     ticks = 0;
     tickMax1 = 0;
     tickMax2 = 30;
@@ -520,7 +505,6 @@ export class CombatResolutionDriver {
      *      aggressor: entity,
      *      defender: entity,
      *      result: CombatResolution [KILL, STUN, NO_EFFECT]
-     *      
      * }
      * 
      */
@@ -535,12 +519,6 @@ export class CombatResolutionDriver {
         this.onComplete = onComplete;
 
         this.isLive = true;
-
-        let soldiersFiring = [1, 2];
-        let blobsDying = [4, 5];
-        let blobSurviving = [1];
-        let resultKill = [1, 2];
-
 
         if (this.attacker instanceof Soldier) {
             this.imageLeft = imageModule.getImage(ImageAsset.SOLDIER_FIRING);
@@ -575,17 +553,6 @@ export class CombatResolutionDriver {
                     // this.imageCenter.src = "resources/result_miss.png"
                     break;
             }
-        }
-    }
-
-    getRandomPanel(name, array) {
-        return `resources/${name}_${array[Math.floor(Math.random() * array.length)]}.png`;
-    }
-
-    shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
@@ -626,7 +593,10 @@ export class CombatResolutionDriver {
         var image1Y = (this.windowHeight / 2) - 100;
 
         if (this.ticks >= this.tickMax1) {
+            // context.save();
+            // context.rotate(Math.PI / 8);
             context.drawImage(this.imageLeft, image1X, image1Y);
+            // context.restore();
         }
 
         if (this.ticks >= this.tickMax2) {
@@ -648,16 +618,11 @@ export class MovementAnimationDriver {
     deltaX = 0;
     deltaY = 0;
 
-    sound = null;
-
     currentTick = 0;
     maxTicks = 1;
 
     currentStep = 0;
     maxSteps = 20;
-
-    entity = null;
-    destination = null;
 
     constructor(entity, origin, destination, sound) {
         this.entity = entity;
@@ -695,8 +660,6 @@ export class MovementAnimationDriver {
 
 export class DeathAnimationDriver {
 
-    image = new Image();
-
     imageWidth = 50;
     imageHeight = 50;
 
@@ -709,8 +672,8 @@ export class DeathAnimationDriver {
     x = 0;
     y = 0;
 
-    constructor(gridSquare) {
-        this.image.src = "resources/blob_death_strip.png";
+    constructor(gridSquare, imageModule) {
+        this.image = imageModule.getImage(ImageAsset.BLOB_DEATH_STRIP);
         this.x = gridSquare.x;
         this.y = gridSquare.y;
     }
@@ -781,13 +744,8 @@ export class BonusActionPointTile {
  */
 export class IntroAnimation {
 
-    introImage = new Image();
-
-    canvasWidth = 0;
-    canvasHeight = 0;
     x = 0;
     y = 0;
-
 
     constructor(columns, rows, gridSsquareSize, imageModule) {
         this.introImage = imageModule.getImage(ImageAsset.INTRO);
@@ -815,9 +773,6 @@ export class IntroAnimation {
 }
 
 export class DefeatAnimation {
-
-    imageA = new Image();
-    imageB = new Image();
 
     x = 0;
     y = 0;

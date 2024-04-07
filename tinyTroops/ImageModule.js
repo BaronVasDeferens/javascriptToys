@@ -1,8 +1,12 @@
 export var ImageAsset = Object.freeze({
     INTRO: "resources/logo.png",
 
+    // Environment
+    FLOOR_TILE: "resources/floor_tile.png",
+
     // Sprites
     BLOB_STRIP: "resources/blob_new_strip.png",
+    BLOB_DEATH_STRIP: "resources/blob_death_strip.png",
     SOLDIER_STRIP: "resources/soldier_new_strip.png",
 
     // Action panels: Soldier firing / Blob dying

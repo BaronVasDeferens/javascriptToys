@@ -42,8 +42,8 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 1;
-const numBlobs = 1;
+const numSoldiers = 5;
+const numBlobs = 15;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -71,7 +71,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 7; //= numSoldiers * 3;
+const actionPointsMax = numSoldiers * 3;
 var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -119,7 +119,7 @@ function initialize() {
     for (var i = 0; i < gridCols; i++) {
         gridSquares[i] = new Array(0);
         for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].push(new GridSquare(i, j, gridSquareSize));
+            gridSquares[i].push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageModule));
         }
     }
 
@@ -994,7 +994,7 @@ function updateGameState() {
         if (entity.isAlive == false) {
             deadEntities.push(entity);
             if (entity instanceof Blob) {
-                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter()));
+                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageModule));
             }
         } else {
             entity.update();

@@ -3,6 +3,7 @@ export var ImageAsset = Object.freeze({
 
     // Environment
     FLOOR_TILE: "resources/floor_tile.png",
+    FLOOR_TILE_OBSTRUCTED: "resources/obstructed_tile.png",
 
     // Sprites
     BLOB_STRIP: "resources/blob_new_strip.png",

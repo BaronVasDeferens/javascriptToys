@@ -37,7 +37,7 @@ const gridRows = 8;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 3;
+const numSoldiers = 1;
 const numBlobs = 10;
 
 const gridSquares = new Array(0);
@@ -91,11 +91,20 @@ function randomIntInRange(min, max) {
 
 var setup = function () {
     console.log(">>> Starting...");
+    initialize();
+    beginGame();
+}();
 
+function initialize() {
     // Set intro mode, animation, music
     setState(States.INTRO);
-    let introAnim = new IntroAnimation(90, 180);
-    entitiesTemporary.push(introAnim);
+
+    // Clear away prior squares and entities
+    entitiesTemporary.length = 0;
+    entitiesResident.length = 0;
+    gridSquares.length = 0;
+
+    entitiesTemporary.push(new IntroAnimation(90, 180));
 
 
     // Setup grid squares
@@ -157,15 +166,9 @@ var setup = function () {
     for (var sqz = 0; sqz < 10; sqz++) {
         let square = bonusSquares[sqz];
         var bonusTile = new BonusActionPointTile("+2", square.x, square.y, gridSquareSize);
-        console.log(bonusTile);
         entitiesResident.push(bonusTile);
     }
-
-    beginGame();
-
-}();
-
-
+}
 
 // Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
 document.addEventListener('contextmenu', event => event.preventDefault());
@@ -176,6 +179,10 @@ window.onmousedown = function (event) {
     switch (currentState) {
         case States.INTRO:
             setState(States.IDLE);
+            break;
+
+        case States.DEFEAT:
+            initialize();
             break;
 
         case States.IDLE:
@@ -192,6 +199,7 @@ window.onmousedown = function (event) {
                     break;
             }
             break;
+
         case States.UNIT_SELECTED:
             switch (event.button) {
                 // Left click
@@ -222,6 +230,7 @@ window.onmousedown = function (event) {
                     }
 
                     break;
+
                 // Right click: dismiss
                 case 2:
                     setState(States.IDLE);

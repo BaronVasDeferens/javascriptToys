@@ -251,10 +251,10 @@ export class TextLabel {
 
     render(context) {
         context.strokeStyle = this.color;
-        context.fillStyle = "#000000";
+        context.fillStyle = this.color;
         context.lineWidth = 2.0;
         context.font = "24px sans-serif";
-        context.strokeText(this.text, this.startX, this.startY);
+        context.fillText(this.text, this.startX, this.startY);
     }
 }
 
@@ -753,7 +753,7 @@ export class BonusActionPointTile {
         this.y = y;
         this.gridSquareSize = gridSquareSize;
 
-        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize / 2), this.value, this.color);
+        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize * 0.65), this.value, this.color);
     }
 
     update() {
@@ -766,7 +766,7 @@ export class BonusActionPointTile {
     }
 
     render(context) {
-        //context.fillStyle = "#00FF00";
+        context.fillStyle = "#00FF00";
         // context.fillRect(this.x + (this.size / 4), this.y + (this.size / 4), this.size, this.size);
         this.textLabel.render(context);
     }

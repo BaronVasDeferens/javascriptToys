@@ -32,17 +32,17 @@ var currentState = States.INTRO;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
-const gridCols = 13;
-const gridRows = 8;
+const gridCols = 20;
+const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
 const numSoldiers = 1;
-const numBlobs = 10;
+const numBlobs = 1;
 
 const gridSquares = new Array(0);
 var allSquares = [];
-const gridSquareSize = 75;
+const gridSquareSize = 64;
 var selectedGridSquares = [];
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
@@ -165,7 +165,7 @@ function initialize() {
 
     for (var sqz = 0; sqz < 10; sqz++) {
         let square = bonusSquares[sqz];
-        var bonusTile = new BonusActionPointTile("+2", square.x, square.y, gridSquareSize);
+        var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize);
         entitiesResident.push(bonusTile);
     }
 }
@@ -182,6 +182,7 @@ window.onmousedown = function (event) {
             break;
 
         case States.DEFEAT:
+        case States.VICTORY:    
             initialize();
             break;
 

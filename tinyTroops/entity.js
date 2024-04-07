@@ -1,3 +1,4 @@
+import { ImageAsset } from './ImageModule.js';
 import * as SoundModule from './SoundModule.js';
 
 class Entity {
@@ -789,8 +790,8 @@ export class IntroAnimation {
     y = 0;
 
 
-    constructor(columns, rows, gridSsquareSize) {     
-        this.introImage.src = "resources/logo.png";
+    constructor(columns, rows, gridSsquareSize, imageModule) {     
+        this.introImage = imageModule.getImage(ImageAsset.INTRO);
         this.x = ((columns / 2) * gridSsquareSize) - (this.introImage.width / 2);
         this.y = ((rows / 2) * gridSsquareSize) - (this.introImage.height / 2);
     }
@@ -819,17 +820,14 @@ export class DefeatAnimation {
     imageA = new Image();
     imageB = new Image();
 
-    canvasWidth = 0;
-    canvasHeight = 0;
-
     x = 0;
     y = 0;
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.imageA.src = "resources/defeat_1.png";
-        this.imageB.src = "resources/defeat_2.png";
+    constructor(columns, rows, gridSsquareSize, imageModule) {     
+        this.imageA = imageModule.getImage(ImageAsset.DEFEAT_1);
+        this.imageB = imageModule.getImage(ImageAsset.DEFEAT_2);
+        this.x = ((columns / 2) * gridSsquareSize) - (this.imageA.width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.imageA.height / 2);
     }
 
     render(context) {

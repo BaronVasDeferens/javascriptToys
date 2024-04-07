@@ -6,7 +6,11 @@
  */
 
 import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, DefeatAnimation, BonusActionPointTile } from './entity.js';
+import { ImageModule } from './ImageModule.js';
+
 import * as SoundModule from './SoundModule.js';
+
+const imageModule = new ImageModule();
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -19,6 +23,7 @@ canvas.height = innerHeight;
  * GAME STATES
  */
 var States = Object.freeze({
+    LOADING: "LOADING...",
     INTRO: "INTRO",
     IDLE: "IDLE",
     UNIT_SELECTED: "UNIT_SELECTED",
@@ -28,7 +33,7 @@ var States = Object.freeze({
     VICTORY: "VICTORY"
 });
 
-var currentState = States.INTRO;
+var currentState = States.LOADING;
 const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
@@ -67,7 +72,7 @@ var movementAnimationDrivers = new Array();
 
 // Action point tracking
 const actionPointsMax = 7; //= numSoldiers * 3;
-var actionPointsAvailable = actionPointsMax;
+var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
 
@@ -90,23 +95,24 @@ function randomIntInRange(min, max) {
  */
 
 var setup = function () {
-    console.log(">>> Starting...");
-    initialize();
-    beginGame();
+    imageModule.loadImages(function () {
+        initialize();
+        beginGame();
+    });
 }();
 
 function initialize() {
     // Set intro mode, animation, music
-    setState(States.INTRO);
+    setState(States.INTRO)
+
+    actionPointsAvailable = actionPointsMax;
 
     // Clear away prior squares and entities
     entitiesTemporary.length = 0;
     entitiesResident.length = 0;
     gridSquares.length = 0;
 
-
-    console.log(`${gridCols} x ${gridRows}`)
-    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize));
+    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageModule));
 
 
     // Setup grid squares
@@ -184,7 +190,7 @@ window.onmousedown = function (event) {
             break;
 
         case States.DEFEAT:
-        case States.VICTORY:    
+        case States.VICTORY:
             initialize();
             break;
 
@@ -1049,7 +1055,7 @@ function updateGameState() {
 
             if (soldiers.length == 0) {
                 setState(States.DEFEAT);
-                entitiesTemporary.push(new DefeatAnimation(90, 180));
+                entitiesTemporary.push(new DefeatAnimation(gridCols, gridRows, gridSquareSize, imageModule));
             } else if (blobs.length == 0) {
                 setState(States.VICTORY);
             } else {

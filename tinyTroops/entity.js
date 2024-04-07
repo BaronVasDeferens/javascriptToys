@@ -402,7 +402,6 @@ export class Blob extends Entity {
     constructor(id, x, y) {
         super(id, x, y);
         this.imageAlive.src = "resources/blob_new_strip.png";
-        this.imageDead.src = "resources/blob_dead_1.png";
     }
 
     /**
@@ -760,7 +759,6 @@ export class BonusActionPointTile {
 
     }
 
-
     isClicked(event) {
         return false;
     }
@@ -790,24 +788,25 @@ export class IntroAnimation {
     x = 0;
     y = 0;
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+
+    constructor(columns, rows, gridSsquareSize) {     
         this.introImage.src = "resources/logo.png";
+        this.x = ((columns / 2) * gridSsquareSize) - (this.introImage.width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.introImage.height / 2);
     }
 
     render(context) {
 
         context.drawImage(this.introImage, this.x, this.y);
 
-        context.fillStyle = "#000000";
-        for (var i = 0; i < 100; i++) {
-            let startX = this.randomRange(this.x, this.introImage.width - 50);
-            let startY = this.randomRange(this.y, this.introImage.height - 50);
-            let sizeX = Math.random() * 50;
-            let sizeY = Math.random() * 50;
-            context.fillRect(startX, startY, sizeX, sizeY);
-        }
+        // context.fillStyle = "#000000";
+        // for (var i = 0; i < 100; i++) {
+        //     let startX = this.randomRange(this.x, this.introImage.width - 50);
+        //     let startY = this.randomRange(this.y, this.introImage.height - 50);
+        //     let sizeX = Math.random() * 50;
+        //     let sizeY = Math.random() * 50;
+        //     context.fillRect(startX, startY, sizeX, sizeY);
+        // }
     }
 
     randomRange(min, max) {

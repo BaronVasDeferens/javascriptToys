@@ -104,7 +104,9 @@ function initialize() {
     entitiesResident.length = 0;
     gridSquares.length = 0;
 
-    entitiesTemporary.push(new IntroAnimation(90, 180));
+
+    console.log(`${gridCols} x ${gridRows}`)
+    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize));
 
 
     // Setup grid squares

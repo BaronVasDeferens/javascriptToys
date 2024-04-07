@@ -1,7 +1,22 @@
 export var ImageAsset = Object.freeze({
+    INTRO: "resources/logo.png",
+
+    // Sprites
+    BLOB_STRIP: "resources/blob_new_strip.png",
+    SOLDIER_STRIP: "resources/soldier_new_strip.png",
+
+    // Action panels: Soldier firing / Blob dying
+    SOLDIER_FIRING: "resources/soldier_firing_2.png",
+    BLOB_DYING: "resources/blob_dead_4.png",
+    RESULT_BLOB_DEATH: "resources/result_blob_death.png",
+
+    // Action panels: Blob attacking / Soldier dying
+    BLOB_ATTACKING: "resources/blob_attack_1.png",
+    SOLDIER_DYING: "resources/blob_attack_2.png",
+    RESULT_SOLDIER_DEATH: "resources/result_human_death.png",
+
     DEFEAT_1: "resources/defeat_1.png",
     DEFEAT_2: "resources/defeat_2.png",
-    INTRO: "resources/logo.png"
 });
 
 export class ImageModule {
@@ -19,11 +34,10 @@ export class ImageModule {
             img.onload = function () {
                 console.log(`${img.src} loaded: ${img.width} x ${img.height}`);
                 readinessCheck.set(img.src, true);
-                console.log(readinessCheck);
                 let values = Array.from(readinessCheck.values());
                 let isReady = values.every(v => v === true );
                 if (isReady == true) {
-                    console.log(`LOADING FINISHED!`);
+                    console.log(`Image loading complete!`);
                     callback();
                 }
             }

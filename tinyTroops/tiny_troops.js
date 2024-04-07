@@ -141,7 +141,7 @@ function initialize() {
         shuffleArray(firstThird);
         let home = firstThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Soldier("soldier_" + n, center.x, center.y);
+        let ent = new Soldier("soldier_" + n, center.x, center.y, imageModule);
         ent.setGridSquare(home);
         soldiers.push(ent);
     }
@@ -158,7 +158,7 @@ function initialize() {
         shuffleArray(lastThird);
         let home = lastThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Blob("blob_" + n, center.x, center.y);
+        let ent = new Blob("blob_" + n, center.x, center.y, imageModule);
         ent.setGridSquare(home);
         blobs.push(ent);
         entitiesResident.push(ent);

@@ -301,9 +301,9 @@ export class Soldier extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y) {
+    constructor(id, x, y, imageModule) {
         super(id, x, y);
-        this.image.src = "resources/soldier_new_strip.png";
+        this.image = imageModule.getImage(ImageAsset.SOLDIER_STRIP);
     }
 
 
@@ -400,9 +400,9 @@ export class Blob extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y) {
+    constructor(id, x, y, imageModule) {
         super(id, x, y);
-        this.imageAlive.src = "resources/blob_new_strip.png";
+        this.imageAlive = imageModule.getImage(ImageAsset.BLOB_STRIP);
     }
 
     /**

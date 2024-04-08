@@ -1,4 +1,4 @@
-import * as SoundModule from './SoundModule.js';
+import { ImageAsset, SoundAsset } from './AssetLoader.js';
 
 class Entity {
 
@@ -31,24 +31,18 @@ export class GridSquare {
 
     x = 0;
     y = 0;
-    size = 50;
+    size = 64;
     color = "#a8a8a8";
 
     isOccupied = false;
     isObstructed = false;
 
-    image = new Image();
-
-    constructor(x, y, size, color) {
+    constructor(x, y, size, color, imageModule) {
         this.x = x;
         this.y = y;
         this.size = size;
-        if (color != undefined) {
-            this.color = color;
-        }
-
-        this.image.src = "resources/floor_tile.png";
-
+        this.color = color;
+        this.image = imageModule.getImage(ImageAsset.FLOOR_TILE);
     }
 
     setColor(color) {
@@ -87,9 +81,10 @@ export class GridSquare {
             context.fillStyle = "#000000";
             context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
         } else {
-            context.strokeStyle = this.color;
-            context.lineWidth = 1.0;
-            context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            // context.strokeStyle = this.color;
+            // context.lineWidth = 1.0;
+            // context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            context.drawImage(this.image, this.x * this.size, this.y * this.size);
         }
     }
 }
@@ -251,10 +246,10 @@ export class TextLabel {
 
     render(context) {
         context.strokeStyle = this.color;
-        context.fillStyle = "#000000";
+        context.fillStyle = this.color;
         context.lineWidth = 2.0;
         context.font = "24px sans-serif";
-        context.strokeText(this.text, this.startX, this.startY);
+        context.fillText(this.text, this.startX, this.startY);
     }
 }
 
@@ -281,7 +276,6 @@ export class Weapon {
  */
 export class Soldier extends Entity {
 
-    image = new Image();
     imageWidth = 50;
     imageHeight = 50;
 
@@ -300,9 +294,9 @@ export class Soldier extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y) {
+    constructor(id, x, y, imageLoader) {
         super(id, x, y);
-        this.image.src = "resources/soldier_new_strip.png";
+        this.image = imageLoader.getImage(ImageAsset.SOLDIER_STRIP);
     }
 
 
@@ -399,10 +393,9 @@ export class Blob extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y) {
+    constructor(id, x, y, imageLoader) {
         super(id, x, y);
-        this.imageAlive.src = "resources/blob_new_strip.png";
-        this.imageDead.src = "resources/blob_dead_1.png";
+        this.imageAlive = imageLoader.getImage(ImageAsset.BLOB_STRIP);
     }
 
     /**
@@ -498,16 +491,6 @@ export class CombatResolutionDriver {
     // left/rightvimages are 200x200
     // result images are 400x400
 
-    soundOne = null;
-    soundTwo = null;
-
-    onComplete = null;
-
-    imageLeft = new Image();
-    imageCenter = new Image();
-    imageRight = new Image();
-
-
     ticks = 0;
     tickMax1 = 0;
     tickMax2 = 30;
@@ -520,12 +503,11 @@ export class CombatResolutionDriver {
      *      aggressor: entity,
      *      defender: entity,
      *      result: CombatResolution [KILL, STUN, NO_EFFECT]
-     *      
      * }
      * 
      */
 
-    constructor(windowWidth, windowHeight, attacker, defender, combatResult, onComplete) {
+    constructor(windowWidth, windowHeight, attacker, defender, combatResult, imageLoader, soundLoader, onComplete) {
 
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
@@ -536,39 +518,32 @@ export class CombatResolutionDriver {
 
         this.isLive = true;
 
-        let soldiersFiring = [1, 2];
-        let blobsDying = [4, 5];
-        let blobSurviving = [1];
-        let resultKill = [1, 2];
-
-
         if (this.attacker instanceof Soldier) {
-            this.imageLeft.src = this.getRandomPanel("soldier_firing", soldiersFiring);
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
+            this.imageLeft = imageLoader.getImage(ImageAsset.SOLDIER_FIRING);
+            this.soundOne = soundLoader.getSound(SoundAsset.SMG_1);
         } else {
-            this.imageLeft.src = "resources/soldier_death_panel_1.png";
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_attack_1.wav");
+            this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
+            this.soundOne = soundLoader.getSound(SoundAsset.BLOB_WHIP);
         }
 
         if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight.src = this.getRandomPanel("blob_dead", blobsDying);
-                    this.imageCenter.src = "resources/result_blob_death.png";
-                    this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
+                    this.imageRight = imageLoader.getImage(ImageAsset.BLOB_DYING);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_BLOB_DEATH);
+                    this.soundTwo = soundLoader.getSound(SoundAsset.BLOB_SMG_DEATH); 
                     break;
                 default:
-                    this.imageRight.src = "resources/blob_survives_1.png";
-                    this.imageCenter.src = "resources/result_miss_2.png"
-
+                    this.imageRight = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_MISS);
                     break;
             }
         } else {
-            this.imageLeft.src = "resources/blob_attack_1.png";
+            this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight.src = "resources/blob_attack_2.png"
-                    this.imageCenter.src = "resources/result_human_death.png"
+                    this.imageRight = imageLoader.getImage(ImageAsset.SOLDIER_DYING);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
                     //this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
@@ -576,17 +551,6 @@ export class CombatResolutionDriver {
                     // this.imageCenter.src = "resources/result_miss.png"
                     break;
             }
-        }
-    }
-
-    getRandomPanel(name, array) {
-        return `resources/${name}_${array[Math.floor(Math.random() * array.length)]}.png`;
-    }
-
-    shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
@@ -601,11 +565,14 @@ export class CombatResolutionDriver {
         if (this.isLive == false) {
             return;
         }
-
-        if (this.ticks == this.tickMax2) {
-            //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
+        if (this.ticks == 1) {
+            this.soundOne.pause();
+            this.soundOne.currentTime = 0;
             this.soundOne.play();
-        } else if (this.ticks == this.tickMax3 && this.soundTwo != null) {
+        }
+        else if (this.ticks == this.tickMax2 && this.soundTwo != null) {
+            this.soundTwo.pause();
+            this.soundTwo.currentTime = 0;
             this.soundTwo.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();
@@ -627,7 +594,10 @@ export class CombatResolutionDriver {
         var image1Y = (this.windowHeight / 2) - 100;
 
         if (this.ticks >= this.tickMax1) {
+            // context.save();
+            // context.rotate(Math.PI / 8);
             context.drawImage(this.imageLeft, image1X, image1Y);
+            // context.restore();
         }
 
         if (this.ticks >= this.tickMax2) {
@@ -649,21 +619,21 @@ export class MovementAnimationDriver {
     deltaX = 0;
     deltaY = 0;
 
-    sound = null;
-
     currentTick = 0;
     maxTicks = 1;
 
     currentStep = 0;
     maxSteps = 20;
 
-    entity = null;
-    destination = null;
-
-    constructor(entity, origin, destination, sound) {
+    constructor(entity, origin, destination, soundLoader) {
         this.entity = entity;
         this.destination = destination;
-        this.sound = SoundModule.getSound(sound);
+        
+        if (entity instanceof Soldier) {
+            this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
+        } else {
+            this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_2);
+        }
 
         let destinationPos = destination.getOnScreenPos();
         let originScreenPos = origin.getOnScreenPos();
@@ -696,8 +666,6 @@ export class MovementAnimationDriver {
 
 export class DeathAnimationDriver {
 
-    image = new Image();
-
     imageWidth = 50;
     imageHeight = 50;
 
@@ -710,8 +678,8 @@ export class DeathAnimationDriver {
     x = 0;
     y = 0;
 
-    constructor(gridSquare) {
-        this.image.src = "resources/blob_death_strip.png";
+    constructor(gridSquare, imageModule) {
+        this.image = imageModule.getImage(ImageAsset.BLOB_DEATH_STRIP);
         this.x = gridSquare.x;
         this.y = gridSquare.y;
     }
@@ -753,20 +721,19 @@ export class BonusActionPointTile {
         this.y = y;
         this.gridSquareSize = gridSquareSize;
 
-        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize / 2), this.value, this.color);
+        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize * 0.65), this.value, this.color);
     }
 
     update() {
 
     }
 
-
     isClicked(event) {
         return false;
     }
 
     render(context) {
-        //context.fillStyle = "#00FF00";
+        context.fillStyle = "#00FF00";
         // context.fillRect(this.x + (this.size / 4), this.y + (this.size / 4), this.size, this.size);
         this.textLabel.render(context);
     }
@@ -783,31 +750,27 @@ export class BonusActionPointTile {
  */
 export class IntroAnimation {
 
-    introImage = new Image();
-
-    canvasWidth = 0;
-    canvasHeight = 0;
     x = 0;
     y = 0;
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.introImage.src = "resources/logo.png";
+    constructor(columns, rows, gridSsquareSize, imageModule, soundModule) {
+        this.introImage = imageModule.getImage(ImageAsset.INTRO);
+        this.x = ((columns / 2) * gridSsquareSize) - (this.introImage.width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.introImage.height / 2);
     }
 
     render(context) {
 
         context.drawImage(this.introImage, this.x, this.y);
 
-        context.fillStyle = "#000000";
-        for (var i = 0; i < 100; i++) {
-            let startX = this.randomRange(this.x, this.introImage.width - 50);
-            let startY = this.randomRange(this.y, this.introImage.height - 50);
-            let sizeX = Math.random() * 50;
-            let sizeY = Math.random() * 50;
-            context.fillRect(startX, startY, sizeX, sizeY);
-        }
+        // context.fillStyle = "#000000";
+        // for (var i = 0; i < 100; i++) {
+        //     let startX = this.randomRange(this.x, this.introImage.width - 50);
+        //     let startY = this.randomRange(this.y, this.introImage.height - 50);
+        //     let sizeX = Math.random() * 50;
+        //     let sizeY = Math.random() * 50;
+        //     context.fillRect(startX, startY, sizeX, sizeY);
+        // }
     }
 
     randomRange(min, max) {
@@ -817,20 +780,18 @@ export class IntroAnimation {
 
 export class DefeatAnimation {
 
-    imageA = new Image();
-    imageB = new Image();
-
-    canvasWidth = 0;
-    canvasHeight = 0;
-
     x = 0;
     y = 0;
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.imageA.src = "resources/defeat_1.png";
-        this.imageB.src = "resources/defeat_2.png";
+    constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
+        this.imageA = imageLoader.getImage(ImageAsset.DEFEAT_1);
+        this.imageB = imageLoader.getImage(ImageAsset.DEFEAT_2);
+        this.x = ((columns / 2) * gridSsquareSize) - (this.imageA.width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.imageA.height / 2);
+        this.audio = soundLoader.getSound(SoundAsset.INTRO);
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.audio.play();
     }
 
     render(context) {
@@ -843,5 +804,9 @@ export class DefeatAnimation {
 
     getRandomInt(max) {
         return Math.floor(Math.random() * max);
+    }
+
+    onDestroy() {
+        this.audio.pause();
     }
 }

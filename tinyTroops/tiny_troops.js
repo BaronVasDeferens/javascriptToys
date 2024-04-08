@@ -6,7 +6,11 @@
  */
 
 import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, DefeatAnimation, BonusActionPointTile } from './entity.js';
-import * as SoundModule from './SoundModule.js';
+import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
+
+const assetLoader = new AssetLoader();
+const imageLoader = new ImageLoader();
+const soundLoader = new SoundLoader();
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -19,6 +23,7 @@ canvas.height = innerHeight;
  * GAME STATES
  */
 var States = Object.freeze({
+    LOADING: "LOADING...",
     INTRO: "INTRO",
     IDLE: "IDLE",
     UNIT_SELECTED: "UNIT_SELECTED",
@@ -28,21 +33,20 @@ var States = Object.freeze({
     VICTORY: "VICTORY"
 });
 
-var currentState = States.INTRO;
-const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
+var currentState = States.LOADING;
 
 // Map data
-const gridCols = 13;
-const gridRows = 8;
+const gridCols = 20;
+const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 3;
-const numBlobs = 10;
+const numSoldiers = 4;
+const numBlobs = 16;
 
 const gridSquares = new Array(0);
 var allSquares = [];
-const gridSquareSize = 75;
+const gridSquareSize = 64;
 var selectedGridSquares = [];
 
 var selectedEntityPrimary = null;       // the currently "selected" entity
@@ -66,8 +70,8 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 7; //= numSoldiers * 3;
-var actionPointsAvailable = actionPointsMax;
+const actionPointsMax = 15;
+var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
 
@@ -90,19 +94,36 @@ function randomIntInRange(min, max) {
  */
 
 var setup = function () {
-    console.log(">>> Starting...");
+    assetLoader.loadAssets(imageLoader, soundLoader, () => {
+        initialize();
+        beginGame();
+    });
+}();
 
+function initialize() {
     // Set intro mode, animation, music
-    setState(States.INTRO);
-    let introAnim = new IntroAnimation(90, 180);
-    entitiesTemporary.push(introAnim);
+    setState(States.INTRO)
+
+    actionPointsAvailable = actionPointsMax;
+
+    // Ensure the failure sound stops
+    entitiesTemporary.forEach(temp => {
+        temp.onDestroy();
+    });
+
+    // Clear away prior squares and entities
+    entitiesTemporary.length = 0;
+    entitiesResident.length = 0;
+    gridSquares.length = 0;
+
+    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
 
 
     // Setup grid squares
     for (var i = 0; i < gridCols; i++) {
         gridSquares[i] = new Array(0);
         for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].push(new GridSquare(i, j, gridSquareSize));
+            gridSquares[i].push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageLoader));
         }
     }
 
@@ -124,7 +145,7 @@ var setup = function () {
         shuffleArray(firstThird);
         let home = firstThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Soldier("soldier_" + n, center.x, center.y);
+        let ent = new Soldier("soldier_" + n, center.x, center.y, imageLoader);
         ent.setGridSquare(home);
         soldiers.push(ent);
     }
@@ -141,7 +162,7 @@ var setup = function () {
         shuffleArray(lastThird);
         let home = lastThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Blob("blob_" + n, center.x, center.y);
+        let ent = new Blob("blob_" + n, center.x, center.y, imageLoader);
         ent.setGridSquare(home);
         blobs.push(ent);
         entitiesResident.push(ent);
@@ -156,16 +177,10 @@ var setup = function () {
 
     for (var sqz = 0; sqz < 10; sqz++) {
         let square = bonusSquares[sqz];
-        var bonusTile = new BonusActionPointTile("+2", square.x, square.y, gridSquareSize);
-        console.log(bonusTile);
+        var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize);
         entitiesResident.push(bonusTile);
     }
-
-    beginGame();
-
-}();
-
-
+}
 
 // Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
 document.addEventListener('contextmenu', event => event.preventDefault());
@@ -176,6 +191,11 @@ window.onmousedown = function (event) {
     switch (currentState) {
         case States.INTRO:
             setState(States.IDLE);
+            break;
+
+        case States.DEFEAT:
+        case States.VICTORY:
+            initialize();
             break;
 
         case States.IDLE:
@@ -192,6 +212,7 @@ window.onmousedown = function (event) {
                     break;
             }
             break;
+
         case States.UNIT_SELECTED:
             switch (event.button) {
                 // Left click
@@ -222,6 +243,7 @@ window.onmousedown = function (event) {
                     }
 
                     break;
+
                 // Right click: dismiss
                 case 2:
                     setState(States.IDLE);
@@ -244,7 +266,7 @@ window.onmousemove = function (event) {
             //introAudio.play();
             break;
         case States.IDLE:
-            introAudio.pause();
+            //introAudio.pause();
             break;
         case States.UNIT_SELECTED:
             // Compute the selection path (selectedGridSquares)
@@ -509,7 +531,7 @@ function moveEntity(entity, event) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
-                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], SoundModule.SFX.SOLDIER_MOVE_1));
+                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], soundLoader));
             }
         });
 
@@ -553,12 +575,12 @@ function attackEntity(aggressor, target) {
     }));
 
     if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, imageLoader, soundLoader, () => {
             console.log("attack success!");
             killEntity(target);
         }));
     } else {
-        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, imageLoader, soundLoader, () => {
             console.log("attack fail");
         }));
     }
@@ -653,7 +675,7 @@ function startEnemyTurn() {
                     result: CombatResolutionState.KILL
                 };
 
-                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, () => {
+                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, imageLoader, soundLoader, () => {
                     console.log(`${activeBlob.id} kills ${activeBlob.target.id}`);
                     killEntity(activeBlob.target);
                 }));
@@ -702,7 +724,7 @@ function startEnemyTurn() {
                     movesMade++;
                     activeBlob.setGridSquare(candidate);
                     path.push(candidate);
-                    drivers.push(new MovementAnimationDriver(activeBlob, currentGridSquare, candidate, "resources/sounds/blob_move_1.wav"));
+                    drivers.push(new MovementAnimationDriver(activeBlob, currentGridSquare, candidate, soundLoader));
                 } else {
                     attemptedMoves++;
                 }
@@ -976,7 +998,7 @@ function updateGameState() {
         if (entity.isAlive == false) {
             deadEntities.push(entity);
             if (entity instanceof Blob) {
-                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter()));
+                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageLoader));
             }
         } else {
             entity.update();
@@ -1037,7 +1059,7 @@ function updateGameState() {
 
             if (soldiers.length == 0) {
                 setState(States.DEFEAT);
-                entitiesTemporary.push(new DefeatAnimation(90, 180));
+                entitiesTemporary.push(new DefeatAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
             } else if (blobs.length == 0) {
                 setState(States.VICTORY);
             } else {

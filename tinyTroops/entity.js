@@ -507,10 +507,10 @@ export class CombatResolutionDriver {
      * 
      */
 
-    constructor(windowWidth, windowHeight, attacker, defender, combatResult, imageLoader, soundLoader, onComplete) {
+    constructor(columns, rows, gridSquareSize, attacker, defender, combatResult, imageLoader, soundLoader, onComplete) {
 
-        this.windowWidth = windowWidth;
-        this.windowHeight = windowHeight;
+        this.x = (columns * gridSquareSize) / 2;
+        this.y = (rows * gridSquareSize) / 2;
         this.attacker = attacker;
         this.defender = defender;
         this.combatResult = combatResult;
@@ -590,8 +590,8 @@ export class CombatResolutionDriver {
         }
 
         let gapSize = 25;
-        var image1X = (this.windowWidth / 2) - 300;
-        var image1Y = (this.windowHeight / 2) - 100;
+        var image1X = this.x - 300;
+        var image1Y = this.y - 100;
 
         if (this.ticks >= this.tickMax1) {
             // context.save();
@@ -632,7 +632,12 @@ export class MovementAnimationDriver {
         if (entity instanceof Soldier) {
             this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
         } else {
-            this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_2);
+            // Random blob sound
+            if (Math.random() > 0.5) {
+                this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_1);
+            } else {
+                this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_2);
+            }
         }
 
         let destinationPos = destination.getOnScreenPos();
@@ -646,6 +651,8 @@ export class MovementAnimationDriver {
 
         if (this.currentStep == 0 && this.currentTick == 0) {
             this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
+            this.sound.pause();
+            this.sound.currentTime = 0;
             this.sound.play();
         }
 

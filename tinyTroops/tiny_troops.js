@@ -41,8 +41,8 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 1;
-const numBlobs = 2;
+const numSoldiers = 4;
+const numBlobs = 16;
 
 const gridSquares = new Array(0);
 var allSquares = [];

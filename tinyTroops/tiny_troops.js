@@ -6,11 +6,11 @@
  */
 
 import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, DefeatAnimation, BonusActionPointTile } from './entity.js';
-import { ImageModule } from './ImageModule.js';
+import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
-import * as SoundModule from './SoundModule.js';
-
-const imageModule = new ImageModule();
+const assetLoader = new AssetLoader();
+const imageLoader = new ImageLoader();
+const soundLoader = new SoundLoader();
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -34,7 +34,6 @@ var States = Object.freeze({
 });
 
 var currentState = States.LOADING;
-const introAudio = SoundModule.getSound(SoundModule.SFX.INTRO); // new Audio("resources/intro.wav");
 
 // Map data
 const gridCols = 20;
@@ -42,8 +41,8 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 5;
-const numBlobs = 15;
+const numSoldiers = 1;
+const numBlobs = 2;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -71,7 +70,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = numSoldiers * 3;
+const actionPointsMax = 15;
 var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -95,7 +94,7 @@ function randomIntInRange(min, max) {
  */
 
 var setup = function () {
-    imageModule.loadImages(function () {
+    assetLoader.loadAssets(imageLoader, soundLoader, () => {
         initialize();
         beginGame();
     });
@@ -107,19 +106,24 @@ function initialize() {
 
     actionPointsAvailable = actionPointsMax;
 
+    // Ensure the failure sound stops
+    entitiesTemporary.forEach(temp => {
+        temp.onDestroy();
+    });
+
     // Clear away prior squares and entities
     entitiesTemporary.length = 0;
     entitiesResident.length = 0;
     gridSquares.length = 0;
 
-    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageModule));
+    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
 
 
     // Setup grid squares
     for (var i = 0; i < gridCols; i++) {
         gridSquares[i] = new Array(0);
         for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageModule));
+            gridSquares[i].push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageLoader));
         }
     }
 
@@ -141,7 +145,7 @@ function initialize() {
         shuffleArray(firstThird);
         let home = firstThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Soldier("soldier_" + n, center.x, center.y, imageModule);
+        let ent = new Soldier("soldier_" + n, center.x, center.y, imageLoader);
         ent.setGridSquare(home);
         soldiers.push(ent);
     }
@@ -158,7 +162,7 @@ function initialize() {
         shuffleArray(lastThird);
         let home = lastThird.filter(sq => sq.isOccupied == false && sq.isObstructed == false).pop();
         let center = home.getCenter();
-        let ent = new Blob("blob_" + n, center.x, center.y, imageModule);
+        let ent = new Blob("blob_" + n, center.x, center.y, imageLoader);
         ent.setGridSquare(home);
         blobs.push(ent);
         entitiesResident.push(ent);
@@ -262,7 +266,7 @@ window.onmousemove = function (event) {
             //introAudio.play();
             break;
         case States.IDLE:
-            introAudio.pause();
+            //introAudio.pause();
             break;
         case States.UNIT_SELECTED:
             // Compute the selection path (selectedGridSquares)
@@ -527,7 +531,7 @@ function moveEntity(entity, event) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
             if (index + 1 < selectedGridSquares.length) {
-                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], SoundModule.SFX.SOLDIER_MOVE_1));
+                drivers.push(new MovementAnimationDriver(entity, sqr, selectedGridSquares[index + 1], soundLoader));
             }
         });
 
@@ -571,12 +575,12 @@ function attackEntity(aggressor, target) {
     }));
 
     if (Math.floor(Math.random() * 100) <= attackStats.hitChance) {
-        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, imageModule, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, kill, imageLoader, soundLoader, () => {
             console.log("attack success!");
             killEntity(target);
         }));
     } else {
-        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, imageModule, () => {
+        drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, aggressor, target, noEffect, imageLoader, soundLoader, () => {
             console.log("attack fail");
         }));
     }
@@ -671,7 +675,7 @@ function startEnemyTurn() {
                     result: CombatResolutionState.KILL
                 };
 
-                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, imageModule, () => {
+                drivers.push(new CombatResolutionDriver(windowWidth, windowHeight, activeBlob, activeBlob.target, kill, imageLoader, soundLoader, () => {
                     console.log(`${activeBlob.id} kills ${activeBlob.target.id}`);
                     killEntity(activeBlob.target);
                 }));
@@ -720,7 +724,7 @@ function startEnemyTurn() {
                     movesMade++;
                     activeBlob.setGridSquare(candidate);
                     path.push(candidate);
-                    drivers.push(new MovementAnimationDriver(activeBlob, currentGridSquare, candidate, "resources/sounds/blob_move_1.wav"));
+                    drivers.push(new MovementAnimationDriver(activeBlob, currentGridSquare, candidate, soundLoader));
                 } else {
                     attemptedMoves++;
                 }
@@ -994,7 +998,7 @@ function updateGameState() {
         if (entity.isAlive == false) {
             deadEntities.push(entity);
             if (entity instanceof Blob) {
-                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageModule));
+                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageLoader));
             }
         } else {
             entity.update();
@@ -1055,7 +1059,7 @@ function updateGameState() {
 
             if (soldiers.length == 0) {
                 setState(States.DEFEAT);
-                entitiesTemporary.push(new DefeatAnimation(gridCols, gridRows, gridSquareSize, imageModule));
+                entitiesTemporary.push(new DefeatAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
             } else if (blobs.length == 0) {
                 setState(States.VICTORY);
             } else {

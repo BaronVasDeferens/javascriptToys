@@ -1,5 +1,4 @@
-import { ImageAsset } from './ImageModule.js';
-import * as SoundModule from './SoundModule.js';
+import { ImageAsset, SoundAsset } from './AssetLoader.js';
 
 class Entity {
 
@@ -277,7 +276,6 @@ export class Weapon {
  */
 export class Soldier extends Entity {
 
-    image = new Image();
     imageWidth = 50;
     imageHeight = 50;
 
@@ -296,9 +294,9 @@ export class Soldier extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y, imageModule) {
+    constructor(id, x, y, imageLoader) {
         super(id, x, y);
-        this.image = imageModule.getImage(ImageAsset.SOLDIER_STRIP);
+        this.image = imageLoader.getImage(ImageAsset.SOLDIER_STRIP);
     }
 
 
@@ -395,9 +393,9 @@ export class Blob extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y, imageModule) {
+    constructor(id, x, y, imageLoader) {
         super(id, x, y);
-        this.imageAlive = imageModule.getImage(ImageAsset.BLOB_STRIP);
+        this.imageAlive = imageLoader.getImage(ImageAsset.BLOB_STRIP);
     }
 
     /**
@@ -509,7 +507,7 @@ export class CombatResolutionDriver {
      * 
      */
 
-    constructor(windowWidth, windowHeight, attacker, defender, combatResult, imageModule, onComplete) {
+    constructor(windowWidth, windowHeight, attacker, defender, combatResult, imageLoader, soundLoader, onComplete) {
 
         this.windowWidth = windowWidth;
         this.windowHeight = windowHeight;
@@ -521,31 +519,31 @@ export class CombatResolutionDriver {
         this.isLive = true;
 
         if (this.attacker instanceof Soldier) {
-            this.imageLeft = imageModule.getImage(ImageAsset.SOLDIER_FIRING);
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
+            this.imageLeft = imageLoader.getImage(ImageAsset.SOLDIER_FIRING);
+            this.soundOne = soundLoader.getSound(SoundAsset.SMG_1);
         } else {
-            this.imageLeft = imageModule.getImage(ImageAsset.BLOB_ATTACKING);
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_attack_1.wav");
+            this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
+            this.soundOne = soundLoader.getSound(SoundAsset.BLOB_WHIP);
         }
 
         if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight = imageModule.getImage(ImageAsset.BLOB_DYING);
-                    this.imageCenter = imageModule.getImage(ImageAsset.RESULT_BLOB_DEATH);
-                    this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
+                    this.imageRight = imageLoader.getImage(ImageAsset.BLOB_DYING);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_BLOB_DEATH);
+                    this.soundTwo = soundLoader.getSound(SoundAsset.BLOB_SMG_DEATH); 
                     break;
                 default:
-                    this.imageRight = imageModule.getImage(ImageAsset.BLOB_SURVIVES);
-                    this.imageCenter = imageModule.getImage(ImageAsset.RESULT_SOLDIER_MISS);
+                    this.imageRight = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_MISS);
                     break;
             }
         } else {
-            this.imageLeft = imageModule.getImage(ImageAsset.BLOB_ATTACKING);
+            this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight = imageModule.getImage(ImageAsset.SOLDIER_DYING);
-                    this.imageCenter = imageModule.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
+                    this.imageRight = imageLoader.getImage(ImageAsset.SOLDIER_DYING);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
                     //this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
                     break;
                 default:
@@ -624,10 +622,15 @@ export class MovementAnimationDriver {
     currentStep = 0;
     maxSteps = 20;
 
-    constructor(entity, origin, destination, sound) {
+    constructor(entity, origin, destination, soundLoader) {
         this.entity = entity;
         this.destination = destination;
-        this.sound = SoundModule.getSound(sound);
+        
+        if (entity instanceof Soldier) {
+            this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
+        } else {
+            this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_1);
+        }
 
         let destinationPos = destination.getOnScreenPos();
         let originScreenPos = origin.getOnScreenPos();
@@ -747,7 +750,7 @@ export class IntroAnimation {
     x = 0;
     y = 0;
 
-    constructor(columns, rows, gridSsquareSize, imageModule) {
+    constructor(columns, rows, gridSsquareSize, imageModule, soundModule) {
         this.introImage = imageModule.getImage(ImageAsset.INTRO);
         this.x = ((columns / 2) * gridSsquareSize) - (this.introImage.width / 2);
         this.y = ((rows / 2) * gridSsquareSize) - (this.introImage.height / 2);
@@ -777,11 +780,13 @@ export class DefeatAnimation {
     x = 0;
     y = 0;
 
-    constructor(columns, rows, gridSsquareSize, imageModule) {
-        this.imageA = imageModule.getImage(ImageAsset.DEFEAT_1);
-        this.imageB = imageModule.getImage(ImageAsset.DEFEAT_2);
+    constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
+        this.imageA = imageLoader.getImage(ImageAsset.DEFEAT_1);
+        this.imageB = imageLoader.getImage(ImageAsset.DEFEAT_2);
         this.x = ((columns / 2) * gridSsquareSize) - (this.imageA.width / 2);
         this.y = ((rows / 2) * gridSsquareSize) - (this.imageA.height / 2);
+        this.audio = soundLoader.getSound(SoundAsset.INTRO);
+        this.audio.play();
     }
 
     render(context) {
@@ -794,5 +799,9 @@ export class DefeatAnimation {
 
     getRandomInt(max) {
         return Math.floor(Math.random() * max);
+    }
+
+    onDestroy() {
+        this.audio.pause();
     }
 }

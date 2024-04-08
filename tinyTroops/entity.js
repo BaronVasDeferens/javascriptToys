@@ -552,10 +552,6 @@ export class CombatResolutionDriver {
                     break;
             }
         }
-
-        this.soundOne.pause();
-        this.soundOne.currentTime = 0;
-        this.soundOne.play();
     }
 
     update() {
@@ -569,8 +565,14 @@ export class CombatResolutionDriver {
         if (this.isLive == false) {
             return;
         }
-
-        if (this.ticks == this.tickMax2 && this.soundTwo != null) {
+        if (this.ticks == 1) {
+            this.soundOne.pause();
+            this.soundOne.currentTime = 0;
+            this.soundOne.play();
+        }
+        else if (this.ticks == this.tickMax2 && this.soundTwo != null) {
+            this.soundTwo.pause();
+            this.soundTwo.currentTime = 0;
             this.soundTwo.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();

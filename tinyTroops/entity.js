@@ -552,6 +552,10 @@ export class CombatResolutionDriver {
                     break;
             }
         }
+
+        this.soundOne.pause();
+        this.soundOne.currentTime = 0;
+        this.soundOne.play();
     }
 
     update() {
@@ -566,10 +570,7 @@ export class CombatResolutionDriver {
             return;
         }
 
-        if (this.ticks == this.tickMax2) {
-            //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
-            this.soundOne.play();
-        } else if (this.ticks == this.tickMax3 && this.soundTwo != null) {
+        if (this.ticks == this.tickMax2 && this.soundTwo != null) {
             this.soundTwo.play();
         } else if (this.ticks == this.tickMax) {
             this.onComplete();
@@ -629,7 +630,7 @@ export class MovementAnimationDriver {
         if (entity instanceof Soldier) {
             this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
         } else {
-            this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_1);
+            this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_2);
         }
 
         let destinationPos = destination.getOnScreenPos();
@@ -786,6 +787,8 @@ export class DefeatAnimation {
         this.x = ((columns / 2) * gridSsquareSize) - (this.imageA.width / 2);
         this.y = ((rows / 2) * gridSsquareSize) - (this.imageA.height / 2);
         this.audio = soundLoader.getSound(SoundAsset.INTRO);
+        this.audio.pause();
+        this.audio.currentTime = 0;
         this.audio.play();
     }
 

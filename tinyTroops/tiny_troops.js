@@ -70,7 +70,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 15;
+const actionPointsMax = 10;
 var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -606,10 +606,6 @@ function killEntity(condemned) {
  */
 function startEnemyTurn() {
 
-    var canvas = document.getElementById('playArea');
-    var windowWidth = canvas.width;
-    var windowHeight = canvas.height;
-
     let drivers = [];
 
     drivers.push(new CustomDriver(function () {
@@ -617,12 +613,14 @@ function startEnemyTurn() {
     }));
 
 
-    let blobs = entitiesResident.filter(ent => {
+    var blobs = entitiesResident.filter(ent => {
         if (ent instanceof Blob) {
             return (ent.isAlive == true);
         } else {
             return false;
         }
+    }).sort((a, b) => {
+        return a.gridSquare.x - b.gridSquare.x
     });
 
     let soldiers = entitiesResident.filter(ent => {
@@ -633,11 +631,7 @@ function startEnemyTurn() {
         }
     });
 
-    console.log(`${blobs.length} blobs move...`);
-
-    // Randomize the blobs' turn order
-    // TODO: ...or don't. Predicatability might need to work in the player's favor
-    shuffleArray(blobs);
+    console.log(`The blobs move...`);
 
     blobs.forEach(activeBlob => {
 
@@ -646,7 +640,7 @@ function startEnemyTurn() {
         let attemptedMoves = 0;
         let attemptedMovesMax = 5;
         let movesMade = 0;
-        let movesMadeMax = 5;
+        let movesMadeMax = 6;
 
         // Does the monster have a LIVE target? If not, obtain one.
         if (activeBlob.target == undefined || activeBlob.target == null || !activeBlob.target.isAlive) {
@@ -729,10 +723,6 @@ function startEnemyTurn() {
                     attemptedMoves++;
                 }
             }
-
-
-            //console.log(`${movesMade} / ${attemptedMoves}`);
-
         }
     });
 

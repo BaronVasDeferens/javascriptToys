@@ -84,9 +84,11 @@ export var SoundAsset = Object.freeze({
     BLOB_MOVE_2: "resources/sounds/blob_move_2.wav",
     BLOB_SMG_DEATH: "resources/sounds/blob_smg_dies.wav",
     BLOB_WHIP: "resources/sounds/blob_whip.wav",
+    SOLDIER_SCREAM: "resources/sounds/soldier_scream_1.wav",
 
     SOLDIER_MOVE_1: "resources/sounds/soldier_move_1.wav",
-    SMG_1: "resources/sounds/smg.wav"
+    SMG_1: "resources/sounds/smg.wav",
+    RICOCHET_1: "resources/sounds/ricochet_1.wav"
 });
 
 

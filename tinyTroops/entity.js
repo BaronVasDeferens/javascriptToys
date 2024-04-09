@@ -520,6 +520,7 @@ export class CombatResolutionDriver {
 
         if (this.attacker instanceof Soldier) {
             this.imageLeft = imageLoader.getImage(ImageAsset.SOLDIER_FIRING);
+            this.imageRightA = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
             this.soundOne = soundLoader.getSound(SoundAsset.SMG_1);
         } else {
             this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
@@ -529,22 +530,23 @@ export class CombatResolutionDriver {
         if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight = imageLoader.getImage(ImageAsset.BLOB_DYING);
+                    this.imageRightB = imageLoader.getImage(ImageAsset.BLOB_DYING);
                     this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_BLOB_DEATH);
                     this.soundTwo = soundLoader.getSound(SoundAsset.BLOB_SMG_DEATH); 
                     break;
                 default:
-                    this.imageRight = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
+                    this.imageRightB = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
                     this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_MISS);
+                    this.soundTwo = soundLoader.getSound(SoundAsset.RICOCHET_1); 
                     break;
             }
         } else {
             this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    this.imageRight = imageLoader.getImage(ImageAsset.SOLDIER_DYING);
+                    this.imageRightB = imageLoader.getImage(ImageAsset.SOLDIER_DYING);
                     this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
-                    //this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
+                    this.soundTwo = soundLoader.getSound(SoundAsset.SOLDIER_SCREAM); 
                     break;
                 default:
                     // this.imageRight.src = "resources/blob_survives_1.png";
@@ -570,7 +572,7 @@ export class CombatResolutionDriver {
             this.soundOne.currentTime = 0;
             this.soundOne.play();
         }
-        else if (this.ticks == this.tickMax2 && this.soundTwo != null) {
+        else if (this.ticks == this.tickMax2 && this.soundTwo != undefined) {
             this.soundTwo.pause();
             this.soundTwo.currentTime = 0;
             this.soundTwo.play();
@@ -594,16 +596,19 @@ export class CombatResolutionDriver {
         var image1Y = this.y - 100;
 
         if (this.ticks >= this.tickMax1) {
-            // context.save();
-            // context.rotate(Math.PI / 8);
             context.drawImage(this.imageLeft, image1X, image1Y);
-            // context.restore();
+            if (this.imageRightA != undefined) {
+                let image2X = image1X + 400;
+                let image2Y = image1Y;
+                context.drawImage(this.imageRightA, image2X, image2Y);
+            }
+            
         }
 
         if (this.ticks >= this.tickMax2) {
             let image2X = image1X + 400;
             let image2Y = image1Y;
-            context.drawImage(this.imageRight, image2X, image2Y);
+            context.drawImage(this.imageRightB, image2X, image2Y);
         }
 
         if (this.ticks >= this.tickMax3) {

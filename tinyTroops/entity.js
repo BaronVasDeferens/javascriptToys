@@ -37,12 +37,15 @@ export class GridSquare {
     isOccupied = false;
     isObstructed = false;
 
+
     constructor(x, y, size, color, imageModule) {
         this.x = x;
         this.y = y;
         this.size = size;
         this.color = color;
-        this.image = imageModule.getImage(ImageAsset.FLOOR_TILE);
+        this.imageObstructed = imageModule.getImage(ImageAsset.FLOOR_OBSTRUCTION_1);      // THIS IS WASTEFUL! LOLOL
+        this.imageClear = imageModule.getImage(ImageAsset.FLOOR_TILE);
+
     }
 
     setColor(color) {
@@ -76,15 +79,10 @@ export class GridSquare {
     }
 
     render(context) {
-
         if (this.isObstructed) {
-            context.fillStyle = "#000000";
-            context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            context.drawImage(this.imageObstructed, this.x * this.size, this.y * this.size);
         } else {
-            // context.strokeStyle = this.color;
-            // context.lineWidth = 1.0;
-            // context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
-            context.drawImage(this.image, this.x * this.size, this.y * this.size);
+            context.drawImage(this.imageClear, this.x * this.size, this.y * this.size);
         }
     }
 }
@@ -532,12 +530,12 @@ export class CombatResolutionDriver {
                 case CombatResolutionState.KILL:
                     this.imageRightB = imageLoader.getImage(ImageAsset.BLOB_DYING);
                     this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_BLOB_DEATH);
-                    this.soundTwo = soundLoader.getSound(SoundAsset.BLOB_SMG_DEATH); 
+                    this.soundTwo = soundLoader.getSound(SoundAsset.BLOB_SMG_DEATH);
                     break;
                 default:
                     this.imageRightB = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
                     this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_MISS);
-                    this.soundTwo = soundLoader.getSound(SoundAsset.RICOCHET_1); 
+                    this.soundTwo = soundLoader.getSound(SoundAsset.RICOCHET_1);
                     break;
             }
         } else {
@@ -546,7 +544,7 @@ export class CombatResolutionDriver {
                 case CombatResolutionState.KILL:
                     this.imageRightB = imageLoader.getImage(ImageAsset.SOLDIER_DYING);
                     this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
-                    this.soundTwo = soundLoader.getSound(SoundAsset.SOLDIER_SCREAM); 
+                    this.soundTwo = soundLoader.getSound(SoundAsset.SOLDIER_SCREAM);
                     break;
                 default:
                     // this.imageRight.src = "resources/blob_survives_1.png";
@@ -602,7 +600,7 @@ export class CombatResolutionDriver {
                 let image2Y = image1Y;
                 context.drawImage(this.imageRightA, image2X, image2Y);
             }
-            
+
         }
 
         if (this.ticks >= this.tickMax2) {
@@ -633,7 +631,7 @@ export class MovementAnimationDriver {
     constructor(entity, origin, destination, soundLoader) {
         this.entity = entity;
         this.destination = destination;
-        
+
         if (entity instanceof Soldier) {
             this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
         } else {

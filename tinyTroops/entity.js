@@ -788,16 +788,54 @@ export class IntroAnimation {
     }
 }
 
+export class VictoryAnimation {
+
+    x = 0;
+    y = 0;
+
+    images = new Array();
+
+    constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
+        
+        this.images.push(imageLoader.getImage(ImageAsset.VICTORY_1));
+
+        this.x = ((columns / 2) * gridSsquareSize) - (this.images[0].width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.images[0].height / 2);
+        //this.audio = soundLoader.getSound(SoundAsset.VICTORY_1);
+        //this.audio.pause();
+        //this.audio.currentTime = 0;
+        //this.audio.play();
+    }
+
+    render(context) {
+        context.drawImage(this.images[0], this.x, this.y);
+    }
+
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    onDestroy() {
+        //this.audio.pause();
+    }
+}
+
 export class DefeatAnimation {
 
     x = 0;
     y = 0;
 
+    images = new Array();
+
     constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
-        this.imageA = imageLoader.getImage(ImageAsset.DEFEAT_1);
-        this.imageB = imageLoader.getImage(ImageAsset.DEFEAT_2);
-        this.x = ((columns / 2) * gridSsquareSize) - (this.imageA.width / 2);
-        this.y = ((rows / 2) * gridSsquareSize) - (this.imageA.height / 2);
+        
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_1));
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_2));
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_3));
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_4));
+
+        this.x = ((columns / 2) * gridSsquareSize) - (this.images[0].width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.images[0].height / 2);
         this.audio = soundLoader.getSound(SoundAsset.INTRO);
         this.audio.pause();
         this.audio.currentTime = 0;
@@ -805,11 +843,8 @@ export class DefeatAnimation {
     }
 
     render(context) {
-        if (Math.random() < 0.5) {
-            context.drawImage(this.imageA, this.x, this.y);
-        } else {
-            context.drawImage(this.imageB, this.x, this.y);
-        }
+        let index = this.getRandomInt(this.images.length);
+        context.drawImage(this.images[index], this.x, this.y);
     }
 
     getRandomInt(max) {

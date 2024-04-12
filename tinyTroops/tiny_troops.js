@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, DefeatAnimation, BonusActionPointTile } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -41,8 +41,8 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 4;
-const numBlobs = 16;
+const numSoldiers = 1;
+const numBlobs = 1;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -1052,6 +1052,7 @@ function updateGameState() {
                 entitiesTemporary.push(new DefeatAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
             } else if (blobs.length == 0) {
                 setState(States.VICTORY);
+                entitiesTemporary.push(new VictoryAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
             } else {
                 // keep playing
             }

@@ -28,7 +28,7 @@ export var ImageAsset = Object.freeze({
     SOLDIER_FIRING: "resources/soldier_firing_2.png",
     BLOB_DYING: "resources/blob_dead_4.png",
     RESULT_BLOB_DEATH: "resources/result_blob_death.png",
-    RESULT_SOLDIER_MISS: "resources/result_miss.png",
+    RESULT_SOLDIER_MISS: "resources/result_miss_3.png",
     BLOB_SURVIVES: "resources/blob_survives_1.png",
 
     // Action panels: Blob attacking / Soldier dying
@@ -38,6 +38,10 @@ export var ImageAsset = Object.freeze({
 
     DEFEAT_1: "resources/defeat_1.png",
     DEFEAT_2: "resources/defeat_2.png",
+    DEFEAT_3: "resources/defeat_3.png",
+    DEFEAT_4: "resources/defeat_4.png",
+
+    VICTORY_1: "resources/victory_1.png"
 });
 
 export class ImageLoader {

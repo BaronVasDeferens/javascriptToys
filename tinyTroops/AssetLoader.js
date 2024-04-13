@@ -26,6 +26,7 @@ export var ImageAsset = Object.freeze({
 
     // Interstitials / turn changes
     INTERSTITIAL_PLAYER_TURN: "resources/turn_player.png",
+    INTERSTITIAL_ENEMY_TURN: "resources/turn_enemy.png",
 
     // Action panels: Soldier firing / Blob dying
     SOLDIER_FIRING: "resources/soldier_firing_2.png",

@@ -875,23 +875,34 @@ export class TurnStartAnimation extends Animation {
 
     ticksCurrent = 0;
 
-    constructor(columns, rows, gridSquareSize, imageLoader) {
+    constructor(columns, rows, gridSquareSize, imageLoader, isPlayerTurn, onComplete) {
         super();
-        this.image = imageLoader.getImage(ImageAsset.INTERSTITIAL_PLAYER_TURN);
-        this.startX = 0 - this.image.width;
-        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
-        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
-        this.endY = this.startY;
+
+        if (isPlayerTurn == true) {
+            this.image = imageLoader.getImage(ImageAsset.INTERSTITIAL_PLAYER_TURN);
+            this.startX = 0 - this.image.width;
+            this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+            this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+            this.endY = this.startY;
+        } else {
+            this.image = imageLoader.getImage(ImageAsset.INTERSTITIAL_ENEMY_TURN);
+            this.startX = 0 - this.image.width;
+            this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+            this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+            this.endY = this.startY;
+        }
+
         this.x = this.startX;
         this.y = this.startY;
+        this.onComplete = onComplete;
     }
 
     update() {
-        console.log(`tick: ${this.ticksCurrent}`)
-
         if (!this.isDone()) {
             this.ticksCurrent++;
             this.x = (75 * Math.log(5 * this.ticksCurrent));
+        } else {
+            this.onComplete();
         }
     }
 

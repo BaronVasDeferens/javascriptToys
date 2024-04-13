@@ -94,6 +94,16 @@ function randomIntInRange(min, max) {
  */
 
 var setup = function () {
+    // Set background to display "loading" text
+    context.fillStyle = "#FF0000";
+    context.fillRect(0, 0, innerWidth, innerHeight);
+    context.strokeStyle = "#000000";
+    context.fillStyle = "#000000";
+    context.lineWidth = 2.0;
+    context.font = "24px sans-serif";
+    context.fillText("LOADING", (innerWidth / 2) - 48, (innerHeight / 2));
+
+    // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, soundLoader, () => {
         initialize();
         beginGame();
@@ -190,8 +200,8 @@ window.onmousedown = function (event) {
 
     switch (currentState) {
         case States.INTRO:
-            //entitiesTemporary.push(new TurnStartAnimation(gridCols, gridRows, gridSquareSize, imageLoader));
-            setState(States.IDLE);
+            startPlayerTurn();
+            //setState(States.IDLE);
             break;
 
         case States.DEFEAT:
@@ -354,6 +364,14 @@ window.onmousewheel = function (event) {
 window.onmouseover = function (event) {
     // when leaving the game window. Maybe handy later?
 };
+
+
+function startPlayerTurn() {
+    entitiesTemporary.length = 0;
+    entitiesTemporary.push(
+        new TurnStartAnimation(gridCols, gridRows, gridSquareSize, imageLoader, true, () => { setState(States.IDLE) })
+    );    
+}
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -605,6 +623,11 @@ function killEntity(condemned) {
  */
 function startEnemyTurn() {
 
+    entitiesTemporary.length = 0;
+    entitiesTemporary.push(
+        new TurnStartAnimation(gridCols, gridRows, gridSquareSize, imageLoader, false, () => { setState(States.IDLE) })
+    ); 
+
     let drivers = [];
 
     drivers.push(new CustomDriver(function () {
@@ -726,7 +749,7 @@ function startEnemyTurn() {
     });
 
     drivers.push(new CustomDriver(() => {
-        setState(States.IDLE);
+        startPlayerTurn();
     }));
 
     movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
@@ -1029,8 +1052,6 @@ function updateGameState() {
                     }
                 }
             }
-
-
 
             movementAnimationDrivers = movementAnimationDrivers.splice(1, movementAnimationDrivers.length - 1);
         }

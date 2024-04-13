@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimation } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -116,9 +116,6 @@ function initialize() {
     entitiesResident.length = 0;
     gridSquares.length = 0;
 
-    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
-
-
     // Setup grid squares
     for (var i = 0; i < gridCols; i++) {
         gridSquares[i] = new Array(0);
@@ -180,6 +177,9 @@ function initialize() {
         var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize);
         entitiesResident.push(bonusTile);
     }
+
+    // Add intro splash
+    entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
 }
 
 // Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
@@ -190,6 +190,7 @@ window.onmousedown = function (event) {
 
     switch (currentState) {
         case States.INTRO:
+            //entitiesTemporary.push(new TurnStartAnimation(gridCols, gridRows, gridSquareSize, imageLoader));
             setState(States.IDLE);
             break;
 
@@ -263,10 +264,8 @@ window.onmousemove = function (event) {
 
     switch (currentState) {
         case States.INTRO:
-            //introAudio.play();
             break;
         case States.IDLE:
-            //introAudio.pause();
             break;
         case States.UNIT_SELECTED:
             // Compute the selection path (selectedGridSquares)

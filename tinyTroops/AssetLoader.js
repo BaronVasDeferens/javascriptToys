@@ -24,6 +24,9 @@ export var ImageAsset = Object.freeze({
     BLOB_DEATH_STRIP: "resources/blob_death_strip.png",
     SOLDIER_STRIP: "resources/soldier_new_strip.png",
 
+    // Interstitials / turn changes
+    INTERSTITIAL_PLAYER_TURN: "resources/turn_player.png",
+
     // Action panels: Soldier firing / Blob dying
     SOLDIER_FIRING: "resources/soldier_firing_2.png",
     BLOB_DYING: "resources/blob_dead_4.png",
@@ -36,6 +39,7 @@ export var ImageAsset = Object.freeze({
     SOLDIER_DYING: "resources/blob_attack_2.png",
     RESULT_SOLDIER_DEATH: "resources/result_human_death.png",
 
+    // End game
     DEFEAT_1: "resources/defeat_1.png",
     DEFEAT_2: "resources/defeat_2.png",
     DEFEAT_3: "resources/defeat_3.png",

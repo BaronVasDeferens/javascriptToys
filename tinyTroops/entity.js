@@ -753,6 +753,21 @@ export class BonusActionPointTile {
     }
 }
 
+export class Animation {
+
+    update() {
+
+    }
+
+    render(context) {
+
+    }
+
+    onDestroy() {
+
+    }
+}
+
 /**
  * Intro animation
  * Designed as a Temporary Entity (disposed when INTRO state changes)
@@ -776,7 +791,7 @@ export class IntroAnimation {
         // context.fillStyle = "#000000";
         // for (var i = 0; i < 100; i++) {
         //     let startX = this.randomRange(this.x, this.introImage.width - 50);
-        //     let startY = this.randomRange(this.y, this.introImage.height - 50);
+        //     let startY = this.randomRange(this.y + 65, this.introImage.height - 175);
         //     let sizeX = Math.random() * 50;
         //     let sizeY = Math.random() * 50;
         //     context.fillRect(startX, startY, sizeX, sizeY);
@@ -796,7 +811,7 @@ export class VictoryAnimation {
     images = new Array();
 
     constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
-        
+
         this.images.push(imageLoader.getImage(ImageAsset.VICTORY_1));
 
         this.x = ((columns / 2) * gridSsquareSize) - (this.images[0].width / 2);
@@ -828,7 +843,7 @@ export class DefeatAnimation {
     images = new Array();
 
     constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
-        
+
         this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_1));
         this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_2));
         this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_3));
@@ -854,4 +869,43 @@ export class DefeatAnimation {
     onDestroy() {
         this.audio.pause();
     }
+}
+
+export class TurnStartAnimation extends Animation {
+
+    ticksCurrent = 0;
+
+    constructor(columns, rows, gridSquareSize, imageLoader) {
+        super();
+        this.image = imageLoader.getImage(ImageAsset.INTERSTITIAL_PLAYER_TURN);
+        this.startX = 0 - this.image.width;
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
+        this.x = this.startX;
+        this.y = this.startY;
+    }
+
+    update() {
+        console.log(`tick: ${this.ticksCurrent}`)
+
+        if (!this.isDone()) {
+            this.ticksCurrent++;
+            this.x = (75 * Math.log(5 * this.ticksCurrent));
+        }
+    }
+
+    render(context) {
+        this.update();
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+    isDone() {
+        return this.x >= this.endX;
+    }
+
+    onDestroy() {
+
+    }
+
 }

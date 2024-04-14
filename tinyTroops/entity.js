@@ -871,39 +871,33 @@ export class DefeatAnimation {
     }
 }
 
-export class TurnStartAnimation extends Animation {
+export class TurnStartAnimationLeftToRight extends Animation {
 
     ticksCurrent = 0;
 
-    constructor(columns, rows, gridSquareSize, imageLoader, isPlayerTurn, onComplete) {
+    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
         super();
 
-        if (isPlayerTurn == true) {
-            this.image = imageLoader.getImage(ImageAsset.INTERSTITIAL_PLAYER_TURN);
-            this.startX = 0 - this.image.width;
-            this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
-            this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
-            this.endY = this.startY;
-        } else {
-            this.image = imageLoader.getImage(ImageAsset.INTERSTITIAL_ENEMY_TURN);
-            this.startX = 0 - this.image.width;
-            this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
-            this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
-            this.endY = this.startY;
-        }
+        this.image = imageLoader.getImage(assetId);
+        this.startX = 0 - this.image.width;
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
 
         this.x = this.startX;
         this.y = this.startY;
         this.onComplete = onComplete;
+
+        console.log(`LR startXY: ${this.startX}, ${this.startY}`);
+        console.log(`LR endXY: ${this.endX}, ${this.endY}`);
     }
 
     update() {
         if (!this.isDone()) {
             this.ticksCurrent++;
+            this.x = this.startX + (185 * (Math.log(this.ticksCurrent)));
+            console.log(`LR tick: ${this.ticksCurrent} x: ${this.x}`);
 
-            this.x = 75 * (Math.log(5 * this.ticksCurrent));
-
-            console.log(`tick: ${this.ticksCurrent} x: ${this.x}`);
         } else {
             this.onComplete();
         }
@@ -918,6 +912,54 @@ export class TurnStartAnimation extends Animation {
 
     isDone() {
         return this.x >= this.endX;
+    }
+
+    onDestroy() {
+
+    }
+
+}
+
+export class TurnStartAnimationRightToLeft extends Animation {
+
+    ticksCurrent = 0;
+
+    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
+        super();
+
+        this.image = imageLoader.getImage(assetId);
+        this.startX = (columns * gridSquareSize);
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
+
+        this.x = this.startX;
+        this.y = this.startY;
+        this.onComplete = onComplete;
+
+        console.log(`RL startXY: ${this.startX}, ${this.startY}`);
+        console.log(`RL endXY: ${this.endX}, ${this.endY}`);
+    }
+
+    update() {
+        if (!this.isDone()) {
+            this.ticksCurrent++;
+            this.x = this.startX - (185 * (Math.log(this.ticksCurrent)));
+            console.log(`RL tick: ${this.ticksCurrent} x: ${this.x}`);
+        } else {
+            this.onComplete();
+        }
+    }
+
+    render(context) {
+        this.update();
+        context.globalAlpha = (this.currentTick) / 100.0;
+        context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 1.0;
+    }
+
+    isDone() {
+        return this.x <= this.endX;
     }
 
     onDestroy() {

@@ -19,6 +19,7 @@ canvas.width = innerWidth;
 canvas.height = innerHeight;
 
 
+
 /**
  * GAME STATES
  */
@@ -49,6 +50,8 @@ var allSquares = [];
 const gridSquareSize = 64;
 var selectedGridSquares = [];
 
+var backgroundImage = new Image();
+
 var selectedEntityPrimary = null;       // the currently "selected" entity
 var selectedEntitySecondary = null;     // if selectedPrimary != null, this is the entity (if any) under the mouse
 
@@ -74,9 +77,6 @@ const actionPointsMax = 10;
 var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
-
-
-
 
 
 function actionPointCostTotal() {
@@ -134,6 +134,7 @@ function initialize() {
         }
     }
 
+    
     allSquares = gridSquares.flat(arr => {
         arr.flat();
     }).flat();
@@ -144,6 +145,8 @@ function initialize() {
     for (var xyz = 0; xyz < numObstructedSquares; xyz++) {
         allSquares[xyz].isObstructed = true;
     }
+
+    renderBackground(context);
 
     // Create some soldiers in the LEFT third of the map
     let firstThird = allSquares.filter(sq => sq.x <= gridCols / 3);
@@ -160,7 +163,6 @@ function initialize() {
     soldiers.forEach(soldier => {
         entitiesResident.push(soldier);
     });
-
 
     // Create some blobs in the RIGHT third of the map
     let lastThird = allSquares.filter(sq => sq.x >= (gridCols - (1 / 3 * gridCols)));
@@ -365,6 +367,22 @@ window.onmouseover = function (event) {
     // when leaving the game window. Maybe handy later?
 };
 
+function renderBackground(context) {
+    // Renders the background once and re-uses the image
+    console.log("Rendering background...");
+    context.fillStyle = "#b8bab9";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < gridCols; i++) {
+        for (var j = 0; j < gridRows; j++) {
+            gridSquares[i].forEach(square => {
+                square.render(context);
+            });
+        }
+    }
+
+    var updatedSrc = canvas.toDataURL();
+    backgroundImage.src = updatedSrc;
+}
 
 function startPlayerTurn() {
     entitiesTemporary.length = 0;
@@ -617,10 +635,6 @@ function killEntity(condemned) {
     condemned.gridSquare.isOccupied = false;
 }
 
-
-/**
- * START ENEMY TURN
- */
 function startEnemyTurn() {
 
     entitiesTemporary.length = 0;
@@ -755,7 +769,6 @@ function startEnemyTurn() {
     movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
 }
 
-
 function getAdjacentSquares(center) {
     let neighbors = [];
 
@@ -879,11 +892,6 @@ function beginGame() {
     drawScene();
     requestAnimationFrame(beginGame);
 }
-
-/*******************
- * UPDATE GAME STATE
-******************** 
-*/
 
 function updateGameState() {
 
@@ -1081,26 +1089,12 @@ function updateGameState() {
 
 }
 
-// Display the underlying grid.
-// BIG GRIDS with intricate internal geometry make the game SLOW! 
-// TODO: Render once and re-use
-function drawGrid(context) {
-    for (var i = 0; i < gridCols; i++) {
-        for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].forEach(square => {
-                square.render(context);
-            });
-        }
-    }
-}
-
-
 function drawScene() {
 
     // Draw background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    drawGrid(context);
+    context.drawImage(backgroundImage, 0 , 0);
 
     context.imageSmoothingEnabled = false;
 

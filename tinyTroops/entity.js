@@ -900,7 +900,10 @@ export class TurnStartAnimation extends Animation {
     update() {
         if (!this.isDone()) {
             this.ticksCurrent++;
-            this.x = (75 * Math.log(5 * this.ticksCurrent));
+
+            this.x = 75 * (Math.log(5 * this.ticksCurrent));
+
+            console.log(`tick: ${this.ticksCurrent} x: ${this.x}`);
         } else {
             this.onComplete();
         }
@@ -908,7 +911,9 @@ export class TurnStartAnimation extends Animation {
 
     render(context) {
         this.update();
+        context.globalAlpha = (this.currentTick) / 100.0;
         context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 1.0;
     }
 
     isDone() {

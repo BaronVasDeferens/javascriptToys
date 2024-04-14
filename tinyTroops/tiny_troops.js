@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimation } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -73,7 +73,7 @@ const entitiesTransient = [];   // Cleared after every render
 var movementAnimationDrivers = new Array();
 
 // Action point tracking
-const actionPointsMax = 10;
+const actionPointsMax = 5;
 var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
@@ -387,7 +387,7 @@ function renderBackground(context) {
 function startPlayerTurn() {
     entitiesTemporary.length = 0;
     entitiesTemporary.push(
-        new TurnStartAnimation(gridCols, gridRows, gridSquareSize, imageLoader, true, () => { setState(States.IDLE) })
+        new TurnStartAnimationLeftToRight(gridCols, gridRows, gridSquareSize, imageLoader, ImageAsset.INTERSTITIAL_PLAYER_TURN, () => { setState(States.IDLE) })
     );    
 }
 
@@ -639,7 +639,7 @@ function startEnemyTurn() {
 
     entitiesTemporary.length = 0;
     entitiesTemporary.push(
-        new TurnStartAnimation(gridCols, gridRows, gridSquareSize, imageLoader, false, () => { setState(States.IDLE) })
+        new TurnStartAnimationRightToLeft(gridCols, gridRows, gridSquareSize, imageLoader, ImageAsset.INTERSTITIAL_ENEMY_TURN, () => { setState(States.IDLE) })
     ); 
 
     let drivers = [];

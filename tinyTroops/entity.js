@@ -887,17 +887,12 @@ export class TurnStartAnimationLeftToRight extends Animation {
         this.x = this.startX;
         this.y = this.startY;
         this.onComplete = onComplete;
-
-        console.log(`LR startXY: ${this.startX}, ${this.startY}`);
-        console.log(`LR endXY: ${this.endX}, ${this.endY}`);
     }
 
     update() {
         if (!this.isDone()) {
             this.ticksCurrent++;
             this.x = this.startX + (185 * (Math.log(this.ticksCurrent)));
-            console.log(`LR tick: ${this.ticksCurrent} x: ${this.x}`);
-
         } else {
             this.onComplete();
         }
@@ -936,16 +931,12 @@ export class TurnStartAnimationRightToLeft extends Animation {
         this.x = this.startX;
         this.y = this.startY;
         this.onComplete = onComplete;
-
-        console.log(`RL startXY: ${this.startX}, ${this.startY}`);
-        console.log(`RL endXY: ${this.endX}, ${this.endY}`);
     }
 
     update() {
         if (!this.isDone()) {
             this.ticksCurrent++;
             this.x = this.startX - (185 * (Math.log(this.ticksCurrent)));
-            console.log(`RL tick: ${this.ticksCurrent} x: ${this.x}`);
         } else {
             this.onComplete();
         }

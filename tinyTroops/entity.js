@@ -878,6 +878,9 @@ export class TurnStartAnimationLeftToRight extends Animation {
     constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
         super();
 
+        this.screenWidth = columns * gridSquareSize;
+        this.screenHeight = rows * gridSquareSize;
+
         this.image = imageLoader.getImage(assetId);
         this.startX = 0 - this.image.width;
         this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
@@ -892,7 +895,7 @@ export class TurnStartAnimationLeftToRight extends Animation {
     update() {
         if (!this.isDone()) {
             this.ticksCurrent++;
-            this.x = this.startX + (185 * (Math.log(this.ticksCurrent)));
+            this.x = this.startX + (200 * (Math.log(this.ticksCurrent)));
         } else {
             this.onComplete();
         }
@@ -900,9 +903,11 @@ export class TurnStartAnimationLeftToRight extends Animation {
 
     render(context) {
         this.update();
-        context.globalAlpha = (this.currentTick) / 100.0;
-        context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 0.25;
+        context.fillStyle = "#0000FF";
+        context.fillRect(0,0,this.screenWidth, this.screenHeight);
         context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x, this.y);
     }
 
     isDone() {
@@ -922,6 +927,9 @@ export class TurnStartAnimationRightToLeft extends Animation {
     constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
         super();
 
+        this.screenWidth = columns * gridSquareSize;
+        this.screenHeight = rows * gridSquareSize;
+
         this.image = imageLoader.getImage(assetId);
         this.startX = (columns * gridSquareSize);
         this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
@@ -936,7 +944,7 @@ export class TurnStartAnimationRightToLeft extends Animation {
     update() {
         if (!this.isDone()) {
             this.ticksCurrent++;
-            this.x = this.startX - (185 * (Math.log(this.ticksCurrent)));
+            this.x = this.startX - (200 * (Math.log(this.ticksCurrent)));
         } else {
             this.onComplete();
         }
@@ -944,9 +952,11 @@ export class TurnStartAnimationRightToLeft extends Animation {
 
     render(context) {
         this.update();
-        context.globalAlpha = (this.currentTick) / 100.0;
-        context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 0.25;
+        context.fillStyle = "#FF0000";
+        context.fillRect(0,0,this.screenWidth, this.screenHeight);
         context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x, this.y);
     }
 
     isDone() {

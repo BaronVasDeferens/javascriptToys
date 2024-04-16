@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -65,12 +65,8 @@ const entitiesResident = [];    // All "permanent" entities (players, enemies)
 const entitiesTemporary = [];   // Temporary entities; cleared after the phase changes
 const entitiesTransient = [];   // Cleared after every render
 
-
-/**
- * Movement Animation Drivers
- * An ordered queue of classes which incrementally adjust entity positions on screen
- */
-var movementAnimationDrivers = new Array();
+// An ordered queue of objects that modify the game (game state, player positions, etc)
+var blockingDrivers = new Array();
 
 // Action point tracking
 const actionPointsMax = 5;
@@ -134,7 +130,7 @@ function initialize() {
         }
     }
 
-    
+
     allSquares = gridSquares.flat(arr => {
         arr.flat();
     }).flat();
@@ -202,8 +198,8 @@ window.onmousedown = function (event) {
 
     switch (currentState) {
         case States.INTRO:
+            entitiesTemporary.length = 0;
             startPlayerTurn();
-            //setState(States.IDLE);
             break;
 
         case States.DEFEAT:
@@ -385,10 +381,11 @@ function renderBackground(context) {
 }
 
 function startPlayerTurn() {
-    entitiesTemporary.length = 0;
-    entitiesTemporary.push(
-        new TurnStartAnimationLeftToRight(gridCols, gridRows, gridSquareSize, imageLoader, ImageAsset.INTERSTITIAL_PLAYER_TURN, () => { setState(States.IDLE) })
-    );    
+    blockingDrivers.push(
+        new TurnStartAnimationLeftToRight(gridCols, gridRows, gridSquareSize, imageLoader, ImageAsset.INTERSTITIAL_PLAYER_TURN, () => {
+            setState(States.IDLE);
+        })
+    );
 }
 
 function shuffleArray(array) {
@@ -577,7 +574,7 @@ function moveEntity(entity, event) {
         setState(States.IDLE);
     }));
 
-    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
+    blockingDrivers = blockingDrivers.concat(drivers);
 }
 
 function attackEntity(aggressor, target) {
@@ -624,7 +621,7 @@ function attackEntity(aggressor, target) {
         setState(States.IDLE);
     }));
 
-    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
+    blockingDrivers = blockingDrivers.concat(drivers);
 
     // do some rolling here for wounds, effects, etc
 }
@@ -637,17 +634,15 @@ function killEntity(condemned) {
 
 function startEnemyTurn() {
 
-    entitiesTemporary.length = 0;
-    entitiesTemporary.push(
-        new TurnStartAnimationRightToLeft(gridCols, gridRows, gridSquareSize, imageLoader, ImageAsset.INTERSTITIAL_ENEMY_TURN, () => { setState(States.IDLE) })
-    ); 
-
     let drivers = [];
 
     drivers.push(new CustomDriver(function () {
         setState(States.ENEMY_TURN);
     }));
 
+    drivers.push(
+        new TurnStartAnimationRightToLeft(gridCols, gridRows, gridSquareSize, imageLoader, ImageAsset.INTERSTITIAL_ENEMY_TURN, () => { })
+    );
 
     var blobs = entitiesResident.filter(ent => {
         if (ent instanceof Blob) {
@@ -766,7 +761,7 @@ function startEnemyTurn() {
         startPlayerTurn();
     }));
 
-    movementAnimationDrivers = movementAnimationDrivers.concat(drivers);
+    blockingDrivers = blockingDrivers.concat(drivers);
 }
 
 function getAdjacentSquares(center) {
@@ -1005,7 +1000,7 @@ function updateGameState() {
     }
 
     // Check for remaining action points. When there are no more, it's the enemy's turn...
-    let notBusy = (currentState != States.ANIMATION) && (currentState != States.ENEMY_TURN) && (movementAnimationDrivers.length == 0);
+    let notBusy = (currentState != States.ANIMATION) && (currentState != States.ENEMY_TURN) && (blockingDrivers.length == 0);
     if (actionPointsAvailable == 0 && notBusy) {
         startEnemyTurn();
         actionPointsAvailable = actionPointsMax;
@@ -1018,7 +1013,7 @@ function updateGameState() {
         if (entity.isAlive == false) {
             deadEntities.push(entity);
             if (entity instanceof Blob) {
-                movementAnimationDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageLoader));
+                blockingDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageLoader));
             }
         } else {
             entity.update();
@@ -1034,11 +1029,11 @@ function updateGameState() {
     });
 
     // Process each driver, one at a time starting at the head of the queue, until it is expired.
-    if (movementAnimationDrivers.length > 0) {
-        let driver = movementAnimationDrivers[0];
+    if (blockingDrivers.length > 0) {
+        let driver = blockingDrivers[0];
         driver.update();
 
-        if (driver instanceof CombatResolutionDriver || driver instanceof DeathAnimationDriver) {
+        if (driver instanceof BlockingDriver) {
             entitiesTransient.push(driver);
         }
 
@@ -1061,7 +1056,9 @@ function updateGameState() {
                 }
             }
 
-            movementAnimationDrivers = movementAnimationDrivers.splice(1, movementAnimationDrivers.length - 1);
+            console.log(driver);
+            driver.onDestroy();
+            blockingDrivers = blockingDrivers.splice(1, blockingDrivers.length - 1);
         }
     } else {
         if (currentState == States.IDLE) {
@@ -1094,7 +1091,7 @@ function drawScene() {
     // Draw background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(backgroundImage, 0 , 0);
+    context.drawImage(backgroundImage, 0, 0);
 
     context.imageSmoothingEnabled = false;
 

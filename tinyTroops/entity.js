@@ -461,11 +461,71 @@ export class Blob extends Entity {
 
 }
 
-export class CustomDriver {
+
+
+
+export class BonusActionPointTile {
+    value = 0;
+    x = 0;
+    y = 0;
+    gridSquareSize = 50;
+    color = "#0000FF";
+    isAlive = true;
+
+    textLabel = null;
+
+    constructor(value, x, y, gridSquareSize) {
+        this.value = value;
+        this.x = x;
+        this.y = y;
+        this.gridSquareSize = gridSquareSize;
+
+        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize * 0.65), this.value, this.color);
+    }
+
+    update() {
+
+    }
+
+    isClicked(event) {
+        return false;
+    }
+
+    render(context) {
+        context.fillStyle = "#00FF00";
+        // context.fillRect(this.x + (this.size / 4), this.y + (this.size / 4), this.size, this.size);
+        this.textLabel.render(context);
+    }
+
+    collect() {
+        this.isAlive = false;
+    }
+}
+
+/* ---------------------------- DRIVERS ------------------------------------- */
+
+// A "blocking" animation will block all other game operations until it is finished.
+export class BlockingDriver {
+
+    update() {
+
+    }
+
+    render(context) {
+
+    }
+
+    onDestroy() {
+
+    }
+}
+
+export class CustomDriver extends BlockingDriver {
 
     lamda = null;
 
     constructor(lamda) {
+        super();
         this.lamda = lamda;
     }
 
@@ -476,6 +536,10 @@ export class CustomDriver {
     isDone() {
         return true;
     }
+
+    onDestroy() {
+
+    }
 }
 
 export var CombatResolutionState = Object.freeze({
@@ -484,7 +548,7 @@ export var CombatResolutionState = Object.freeze({
     KILL: "KILL"
 });
 
-export class CombatResolutionDriver {
+export class CombatResolutionDriver extends BlockingDriver {
 
     // left/rightvimages are 200x200
     // result images are 400x400
@@ -506,7 +570,7 @@ export class CombatResolutionDriver {
      */
 
     constructor(columns, rows, gridSquareSize, attacker, defender, combatResult, imageLoader, soundLoader, onComplete) {
-
+        super();
         this.x = (columns * gridSquareSize) / 2;
         this.y = (rows * gridSquareSize) / 2;
         this.attacker = attacker;
@@ -574,9 +638,7 @@ export class CombatResolutionDriver {
             this.soundTwo.pause();
             this.soundTwo.currentTime = 0;
             this.soundTwo.play();
-        } else if (this.ticks == this.tickMax) {
-            this.onComplete();
-        }
+        } 
     }
 
     isDone() {
@@ -615,9 +677,13 @@ export class CombatResolutionDriver {
             context.drawImage(this.imageCenter, image3X, image3Y);
         }
     }
+
+    onDestroy() {
+        this.onComplete();
+    }
 }
 
-export class MovementAnimationDriver {
+export class MovementAnimationDriver extends BlockingDriver {
 
     deltaX = 0;
     deltaY = 0;
@@ -629,6 +695,7 @@ export class MovementAnimationDriver {
     maxSteps = 20;
 
     constructor(entity, origin, destination, soundLoader) {
+        super();
         this.entity = entity;
         this.destination = destination;
 
@@ -672,9 +739,13 @@ export class MovementAnimationDriver {
         return this.currentStep >= this.maxSteps;
     }
 
+    onDestroy() {
+
+    }
+
 }
 
-export class DeathAnimationDriver {
+export class DeathAnimationDriver extends BlockingDriver {
 
     imageWidth = 50;
     imageHeight = 50;
@@ -689,6 +760,7 @@ export class DeathAnimationDriver {
     y = 0;
 
     constructor(gridSquare, imageModule) {
+        super();
         this.image = imageModule.getImage(ImageAsset.BLOB_DEATH_STRIP);
         this.x = gridSquare.x;
         this.y = gridSquare.y;
@@ -713,59 +785,102 @@ export class DeathAnimationDriver {
         return (this.currentFrame >= this.maxFrame);
     }
 
-}
-
-export class BonusActionPointTile {
-    value = 0;
-    x = 0;
-    y = 0;
-    gridSquareSize = 50;
-    color = "#0000FF";
-    isAlive = true;
-
-    textLabel = null;
-
-    constructor(value, x, y, gridSquareSize) {
-        this.value = value;
-        this.x = x;
-        this.y = y;
-        this.gridSquareSize = gridSquareSize;
-
-        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize * 0.65), this.value, this.color);
-    }
-
-    update() {
-
-    }
-
-    isClicked(event) {
-        return false;
-    }
-
-    render(context) {
-        context.fillStyle = "#00FF00";
-        // context.fillRect(this.x + (this.size / 4), this.y + (this.size / 4), this.size, this.size);
-        this.textLabel.render(context);
-    }
-
-    collect() {
-        this.isAlive = false;
-    }
-}
-
-export class Animation {
-
-    update() {
-
-    }
-
-    render(context) {
-
-    }
-
     onDestroy() {
 
     }
+
+}
+
+export class TurnStartAnimationLeftToRight extends BlockingDriver {
+
+    ticksCurrent = 0;
+
+    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
+        super();
+
+        this.screenWidth = columns * gridSquareSize;
+        this.screenHeight = rows * gridSquareSize;
+
+        this.image = imageLoader.getImage(assetId);
+        this.startX = 0 - this.image.width;
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
+
+        this.x = this.startX;
+        this.y = this.startY;
+        this.onComplete = onComplete;
+    }
+
+    update() {
+        if (!this.isDone()) {
+            this.ticksCurrent++;
+            this.x = this.startX + (200 * (Math.log(this.ticksCurrent)));
+        }
+    }
+
+    render(context) {
+        context.globalAlpha = 0.25;
+        context.fillStyle = "#0000FF";
+        context.fillRect(0,0,this.screenWidth, this.screenHeight);
+        context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+    isDone() {
+        return this.x >= this.endX;
+    }
+
+    onDestroy() {
+        this.onComplete();
+    }
+
+}
+
+export class TurnStartAnimationRightToLeft extends BlockingDriver {
+
+    ticksCurrent = 0;
+
+    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
+        super();
+
+        this.screenWidth = columns * gridSquareSize;
+        this.screenHeight = rows * gridSquareSize;
+
+        this.image = imageLoader.getImage(assetId);
+        this.startX = (columns * gridSquareSize);
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
+
+        this.x = this.startX;
+        this.y = this.startY;
+        this.onComplete = onComplete;
+    }
+
+    update() {
+        if (!this.isDone()) {
+            this.ticksCurrent++;
+            this.x = this.startX - (200 * (Math.log(this.ticksCurrent)));
+        }
+    }
+
+    render(context) {
+        context.globalAlpha = 0.25;
+        context.fillStyle = "#FF0000";
+        context.fillRect(0,0,this.screenWidth, this.screenHeight);
+        context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+    isDone() {
+        return this.x <= this.endX;
+    }
+
+    onDestroy() {
+        this.onComplete();
+    }
+
 }
 
 /**
@@ -871,100 +986,3 @@ export class DefeatAnimation {
     }
 }
 
-export class TurnStartAnimationLeftToRight extends Animation {
-
-    ticksCurrent = 0;
-
-    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
-        super();
-
-        this.screenWidth = columns * gridSquareSize;
-        this.screenHeight = rows * gridSquareSize;
-
-        this.image = imageLoader.getImage(assetId);
-        this.startX = 0 - this.image.width;
-        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
-        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
-        this.endY = this.startY;
-
-        this.x = this.startX;
-        this.y = this.startY;
-        this.onComplete = onComplete;
-    }
-
-    update() {
-        if (!this.isDone()) {
-            this.ticksCurrent++;
-            this.x = this.startX + (200 * (Math.log(this.ticksCurrent)));
-        } else {
-            this.onComplete();
-        }
-    }
-
-    render(context) {
-        this.update();
-        context.globalAlpha = 0.25;
-        context.fillStyle = "#0000FF";
-        context.fillRect(0,0,this.screenWidth, this.screenHeight);
-        context.globalAlpha = 1.0;
-        context.drawImage(this.image, this.x, this.y);
-    }
-
-    isDone() {
-        return this.x >= this.endX;
-    }
-
-    onDestroy() {
-
-    }
-
-}
-
-export class TurnStartAnimationRightToLeft extends Animation {
-
-    ticksCurrent = 0;
-
-    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
-        super();
-
-        this.screenWidth = columns * gridSquareSize;
-        this.screenHeight = rows * gridSquareSize;
-
-        this.image = imageLoader.getImage(assetId);
-        this.startX = (columns * gridSquareSize);
-        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
-        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
-        this.endY = this.startY;
-
-        this.x = this.startX;
-        this.y = this.startY;
-        this.onComplete = onComplete;
-    }
-
-    update() {
-        if (!this.isDone()) {
-            this.ticksCurrent++;
-            this.x = this.startX - (200 * (Math.log(this.ticksCurrent)));
-        } else {
-            this.onComplete();
-        }
-    }
-
-    render(context) {
-        this.update();
-        context.globalAlpha = 0.25;
-        context.fillStyle = "#FF0000";
-        context.fillRect(0,0,this.screenWidth, this.screenHeight);
-        context.globalAlpha = 1.0;
-        context.drawImage(this.image, this.x, this.y);
-    }
-
-    isDone() {
-        return this.x <= this.endX;
-    }
-
-    onDestroy() {
-
-    }
-
-}

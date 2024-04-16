@@ -42,8 +42,8 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 1;
-const numBlobs = 1;
+const numSoldiers = 4;
+const numBlobs = 12;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -1056,7 +1056,6 @@ function updateGameState() {
                 }
             }
 
-            console.log(driver);
             driver.onDestroy();
             blockingDrivers = blockingDrivers.splice(1, blockingDrivers.length - 1);
         }

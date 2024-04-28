@@ -638,7 +638,7 @@ export class CombatResolutionDriver extends BlockingDriver {
             this.soundTwo.pause();
             this.soundTwo.currentTime = 0;
             this.soundTwo.play();
-        } 
+        }
     }
 
     isDone() {
@@ -822,7 +822,7 @@ export class TurnStartAnimationLeftToRight extends BlockingDriver {
     render(context) {
         context.globalAlpha = 0.25;
         context.fillStyle = "#0000FF";
-        context.fillRect(0,0,this.screenWidth, this.screenHeight);
+        context.fillRect(0, 0, this.screenWidth, this.screenHeight);
         context.globalAlpha = 1.0;
         context.drawImage(this.image, this.x, this.y);
     }
@@ -868,7 +868,7 @@ export class TurnStartAnimationRightToLeft extends BlockingDriver {
     render(context) {
         context.globalAlpha = 0.25;
         context.fillStyle = "#FF0000";
-        context.fillRect(0,0,this.screenWidth, this.screenHeight);
+        context.fillRect(0, 0, this.screenWidth, this.screenHeight);
         context.globalAlpha = 1.0;
         context.drawImage(this.image, this.x, this.y);
     }
@@ -893,24 +893,30 @@ export class IntroAnimation {
     x = 0;
     y = 0;
 
-    constructor(columns, rows, gridSsquareSize, imageModule, soundModule) {
+    constructor(columns, rows, gridSquareSize, imageModule, soundModule) {
+        this.columns = columns;
+        this.rows = rows;
+        this.gridSquareSize = gridSquareSize;
         this.introImage = imageModule.getImage(ImageAsset.INTRO);
-        this.x = ((columns / 2) * gridSsquareSize) - (this.introImage.width / 2);
-        this.y = ((rows / 2) * gridSsquareSize) - (this.introImage.height / 2);
+        this.x = ((columns / 2) * gridSquareSize) - (this.introImage.width / 2);
+        this.y = ((rows / 2) * gridSquareSize) - (this.introImage.height / 2);
     }
 
     render(context) {
-
-        context.drawImage(this.introImage, this.x, this.y);
-
         // context.fillStyle = "#000000";
-        // for (var i = 0; i < 100; i++) {
-        //     let startX = this.randomRange(this.x, this.introImage.width - 50);
-        //     let startY = this.randomRange(this.y + 65, this.introImage.height - 175);
-        //     let sizeX = Math.random() * 50;
-        //     let sizeY = Math.random() * 50;
+        // for (var i = 0; i < 200; i++) {
+        //     let startX = this.randomRange(this.x - 30, this.x + this.introImage.width + 30);
+        //     let startY = this.randomRange(this.y - 30, 400);
+        //     let sizeX = (Math.random() * 50) + 30;
+        //     let sizeY = (Math.random() * 50) + 30;
         //     context.fillRect(startX, startY, sizeX, sizeY);
         // }
+
+        context.fillStyle = "#000000";
+        context.globalAlpha = 0.50;
+        context.fillRect(0, 0, this.columns * this.gridSquareSize, this.rows * this.gridSquareSize);
+        context.globalAlpha = 1.0;
+        context.drawImage(this.introImage, this.x, this.y);
     }
 
     randomRange(min, max) {

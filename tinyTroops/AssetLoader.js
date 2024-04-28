@@ -40,6 +40,9 @@ export var ImageAsset = Object.freeze({
     SOLDIER_DYING: "resources/blob_attack_2.png",
     RESULT_SOLDIER_DEATH: "resources/result_human_death.png",
 
+    // SPECIAL EFFECTS
+    FIRE: "resources/fire.png",
+
     // End game
     DEFEAT_1: "resources/defeat_1.png",
     DEFEAT_2: "resources/defeat_2.png",

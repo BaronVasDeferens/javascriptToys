@@ -502,6 +502,54 @@ export class BonusActionPointTile {
     }
 }
 
+export class FireEffectTile {
+
+    x = 0;
+    y = 0;
+
+    animationframes = [];
+    ticksCurrent = 0;
+    ticksMax = 3;
+    frameCurrent = 0;
+    frameMax = 3;
+    tileImageSize = 50;
+    framesTotal = 4;
+
+    isAlive = true;
+
+    constructor(x, y, gridsquareSize, imageLoader) {
+
+
+        this.x = x;
+        this.y = y;
+        this.gridSquareSize = gridsquareSize;
+        this.image = imageLoader.getImage(ImageAsset.FIRE);
+
+        this.offset = (this.gridSquareSize / 2) - (this.tileImageSize / 2);
+
+    }
+
+    update() {
+        this.ticksCurrent++;
+        if (this.ticksCurrent >= this.ticksMax) {
+            this.ticksCurrent = 0;
+            // this.currentFrameIndex++;
+            // if (this.currentFrameIndex > this.frameMax) {
+            //     this.currentFrameIndex = 0;
+            // }
+            this.frameCurrent = Math.floor(Math.random() * this.frameMax);
+        }
+    }
+
+    render(context) {
+        context.save();
+        context.translate(this.x * this.gridSquareSize + this.offset, this.y * this.gridSquareSize + this.offset);
+        context.drawImage(this.image, this.frameCurrent * this.tileImageSize, 0, this.tileImageSize, this.tileImageSize, 0, 0, this.tileImageSize, this.tileImageSize);
+        context.restore();
+    }
+
+}
+
 /* ---------------------------- DRIVERS ------------------------------------- */
 
 // A "blocking" animation will block all other game operations until it is finished.
@@ -777,7 +825,7 @@ export class DeathAnimationDriver extends BlockingDriver {
     render(context) {
         context.save();
         context.translate(this.x, this.y);
-        context.drawImage(this.image, 50 * this.currentFrame, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
+        context.drawImage(this.image, 50 * this.currentFrame, 0, 50, 50, -(this.imageWidth / 2), -(this.imageHeight / 2), 50, 50);
         context.restore();
     }
 

@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver, FireEffectTile } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -44,6 +44,9 @@ const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
 const numSoldiers = 4;
 const numBlobs = 12;
+
+const numBonusTiles = 10;
+const numFires = 5;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -174,17 +177,30 @@ function initialize() {
     }
 
     // ------------ ADD BONUS SQUARES --------------------
-    let bonusSquares = allSquares.filter(square => {
+    var availableSquares = allSquares.filter(square => {
         return (square.isObstructed == false && square.isOccupied == false);
     });
 
-    shuffleArray(bonusSquares);
+    shuffleArray(availableSquares);
 
-    for (var sqz = 0; sqz < 10; sqz++) {
-        let square = bonusSquares[sqz];
+    for (var bonusIndex = 0; bonusIndex < numBonusTiles; bonusIndex++) {
+        console.log(`bonusTileIdx: ${bonusIndex}`)
+        var square = availableSquares[bonusIndex];
         var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize);
         entitiesResident.push(bonusTile);
     }
+
+    availableSquares = availableSquares.slice(numBonusTiles, availableSquares.length - 1);
+
+    // --------------- ADD FIRE SQUARES -------------------
+    for (var fireIndex = 0; fireIndex < numFires; fireIndex++) {
+        var square = availableSquares[fireIndex];
+        var fireTile = new FireEffectTile(square.x, square.y, gridSquareSize, imageLoader);
+        entitiesResident.push(fireTile);
+    }
+
+    availableSquares = availableSquares.slice(numFires, availableSquares.length - 1);
+
 
     // Add intro splash
     entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));

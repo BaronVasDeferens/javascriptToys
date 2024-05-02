@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver, FireEffectTile } from './entity.js';
+import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver, EffectTile, FireEffectTile } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -42,11 +42,11 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 4;
-const numBlobs = 12;
+const numSoldiers = 1;
+const numBlobs = 1;
 
 const numBonusTiles = 10;
-const numFires = 5;
+const numFires = 10;
 
 const gridSquares = new Array(0);
 var allSquares = [];
@@ -184,9 +184,13 @@ function initialize() {
     shuffleArray(availableSquares);
 
     for (var bonusIndex = 0; bonusIndex < numBonusTiles; bonusIndex++) {
-        console.log(`bonusTileIdx: ${bonusIndex}`)
         var square = availableSquares[bonusIndex];
-        var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize);
+        var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize, (entity) => {
+            console.log(`Bonus tile!`);
+            if (entity instanceof Soldier) {
+                actionPointsAvailable += 3;
+            }
+        });
         entitiesResident.push(bonusTile);
     }
 
@@ -195,7 +199,10 @@ function initialize() {
     // --------------- ADD FIRE SQUARES -------------------
     for (var fireIndex = 0; fireIndex < numFires; fireIndex++) {
         var square = availableSquares[fireIndex];
-        var fireTile = new FireEffectTile(square.x, square.y, gridSquareSize, imageLoader);
+        var fireTile = new FireEffectTile(square.x, square.y, gridSquareSize, imageLoader, (entity) => {
+            console.log(`${entity.id} gets hot!`);
+            killEntity(entity);
+        });
         entitiesResident.push(fireTile);
     }
 
@@ -646,6 +653,9 @@ function killEntity(condemned) {
     console.log(`${condemned.id} dies`);
     condemned.isAlive = false
     condemned.gridSquare.isOccupied = false;
+    if (condemned instanceof Blob || condemned instanceof Soldier) {
+        blockingDrivers.push(new DeathAnimationDriver(condemned.gridSquare.getCenter(), condemned, imageLoader));
+    }
 }
 
 function startEnemyTurn() {
@@ -1028,9 +1038,6 @@ function updateGameState() {
     entitiesResident.forEach(entity => {
         if (entity.isAlive == false) {
             deadEntities.push(entity);
-            if (entity instanceof Blob) {
-                blockingDrivers.push(new DeathAnimationDriver(entity.gridSquare.getCenter(), imageLoader));
-            }
         } else {
             entity.update();
         }
@@ -1047,6 +1054,7 @@ function updateGameState() {
     // Process each driver, one at a time starting at the head of the queue, until it is expired.
     if (blockingDrivers.length > 0) {
         let driver = blockingDrivers[0];
+        
         driver.update();
 
         if (driver instanceof BlockingDriver) {
@@ -1055,20 +1063,17 @@ function updateGameState() {
 
         if (driver.isDone()) {
 
-            // ----------- PROCESS BONUS SQUARES ----------------
+            // ----------- PROCESS EFFECT SQUARES ----------------
             // As the movement drivers expire, check whether the destination contains a bonus.
             // If yes, award the bonus and clear the bonus tile.
             if (driver instanceof MovementAnimationDriver) {
-                let bonusSquare = entitiesResident.filter(ent => {
-                    return (ent instanceof BonusActionPointTile && ent.x == driver.destination.x && ent.y == driver.destination.y)
+
+                let effectTile = entitiesResident.filter(tile => {
+                    return (tile instanceof EffectTile && tile.x == driver.destination.x && tile.y == driver.destination.y)
                 })[0];
 
-                if (bonusSquare != undefined) {
-                    bonusSquare.isAlive = false;
-                    // Only award bonus AP if the entity is a soldier!
-                    if (driver.entity instanceof Soldier) {
-                        actionPointsAvailable += parseInt(bonusSquare.value);
-                    }
+                if (effectTile != undefined) {
+                    effectTile.applyEffect(driver.entity);
                 }
             }
 

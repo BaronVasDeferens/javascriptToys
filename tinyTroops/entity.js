@@ -462,22 +462,37 @@ export class Blob extends Entity {
 }
 
 
+export class EffectTile {
 
-
-export class BonusActionPointTile {
-    value = 0;
     x = 0;
     y = 0;
-    gridSquareSize = 50;
-    color = "#0000FF";
     isAlive = true;
+
+    constructor(x, y, onEntityEntered) {
+        console.log(`${x} ${y}`);
+        this.x = x;
+        this.y = y;
+        this.onEntityEntered = onEntityEntered;
+    }
+
+    isClicked(event) {
+
+    }
+
+    applyEffect(entity) {
+
+    }
+}
+
+export class BonusActionPointTile extends EffectTile {
+    value = 0;
+    color = "#0000FF";
 
     textLabel = null;
 
-    constructor(value, x, y, gridSquareSize) {
+    constructor(value, x, y, gridSquareSize, onEntityEntered) {
+        super(x, y, onEntityEntered);
         this.value = value;
-        this.x = x;
-        this.y = y;
         this.gridSquareSize = gridSquareSize;
 
         this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize * 0.65), this.value, this.color);
@@ -493,51 +508,46 @@ export class BonusActionPointTile {
 
     render(context) {
         context.fillStyle = "#00FF00";
-        // context.fillRect(this.x + (this.size / 4), this.y + (this.size / 4), this.size, this.size);
         this.textLabel.render(context);
     }
 
-    collect() {
+    applyEffect(entity) {
+        this.onEntityEntered(entity);
         this.isAlive = false;
     }
 }
 
-export class FireEffectTile {
-
-    x = 0;
-    y = 0;
+export class FireEffectTile extends EffectTile {
 
     animationframes = [];
     ticksCurrent = 0;
-    ticksMax = 3;
+    ticksMax = 5;
     frameCurrent = 0;
     frameMax = 3;
     tileImageSize = 50;
-    framesTotal = 4;
 
     isAlive = true;
 
-    constructor(x, y, gridsquareSize, imageLoader) {
-
-
-        this.x = x;
-        this.y = y;
+    constructor(x, y, gridsquareSize, imageLoader, onEntityEntered) {
+        super(x, y, onEntityEntered);
         this.gridSquareSize = gridsquareSize;
         this.image = imageLoader.getImage(ImageAsset.FIRE);
-
         this.offset = (this.gridSquareSize / 2) - (this.tileImageSize / 2);
+    }
 
+    isClicked(event) {
+        return false;
     }
 
     update() {
         this.ticksCurrent++;
         if (this.ticksCurrent >= this.ticksMax) {
             this.ticksCurrent = 0;
-            // this.currentFrameIndex++;
-            // if (this.currentFrameIndex > this.frameMax) {
-            //     this.currentFrameIndex = 0;
-            // }
             this.frameCurrent = Math.floor(Math.random() * this.frameMax);
+            // this.frameCurrent++;
+            // if (this.frameCurrent > this.frameMax) {
+            //     this.frameCurrent = 0;
+            // }
         }
     }
 
@@ -546,6 +556,11 @@ export class FireEffectTile {
         context.translate(this.x * this.gridSquareSize + this.offset, this.y * this.gridSquareSize + this.offset);
         context.drawImage(this.image, this.frameCurrent * this.tileImageSize, 0, this.tileImageSize, this.tileImageSize, 0, 0, this.tileImageSize, this.tileImageSize);
         context.restore();
+    }
+
+    applyEffect(entity) {
+        this.onEntityEntered(entity);
+        this.alive = false;
     }
 
 }
@@ -742,6 +757,7 @@ export class MovementAnimationDriver extends BlockingDriver {
     currentStep = 0;
     maxSteps = 20;
 
+
     constructor(entity, origin, destination, soundLoader) {
         super();
         this.entity = entity;
@@ -784,7 +800,7 @@ export class MovementAnimationDriver extends BlockingDriver {
     }
 
     isDone() {
-        return this.currentStep >= this.maxSteps;
+        return (this.currentStep >= this.maxSteps);
     }
 
     onDestroy() {
@@ -807,9 +823,13 @@ export class DeathAnimationDriver extends BlockingDriver {
     x = 0;
     y = 0;
 
-    constructor(gridSquare, imageModule) {
+    constructor(gridSquare, entity, imageLoader) {
         super();
-        this.image = imageModule.getImage(ImageAsset.BLOB_DEATH_STRIP);
+        if (entity instanceof Soldier) {
+            this.image = imageLoader.getImage(ImageAsset.SOLDIER_DEATH_STRIP);
+        } else {
+            this.image = imageLoader.getImage(ImageAsset.BLOB_DEATH_STRIP);
+        }
         this.x = gridSquare.x;
         this.y = gridSquare.y;
     }

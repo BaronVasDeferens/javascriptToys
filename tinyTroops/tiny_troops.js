@@ -42,7 +42,7 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 1;
+const numSoldiers = 5;
 const numBlobs = 1;
 
 const numBonusTiles = 10;
@@ -186,7 +186,6 @@ function initialize() {
     for (var bonusIndex = 0; bonusIndex < numBonusTiles; bonusIndex++) {
         var square = availableSquares[bonusIndex];
         var bonusTile = new BonusActionPointTile("+3", square.x, square.y, gridSquareSize, (entity) => {
-            console.log(`Bonus tile!`);
             if (entity instanceof Soldier) {
                 actionPointsAvailable += 3;
             }
@@ -581,7 +580,7 @@ function moveEntity(entity, event) {
 
 
     let destinationSquare = selectedGridSquares[selectedGridSquares.length - 1]; // last item in the list
-    entity.setGridSquare(destinationSquare);
+    //entity.setGridSquare(destinationSquare);
     if (entity instanceof Soldier) {
         // Add movement drivers
         selectedGridSquares.forEach((sqr, index) => {
@@ -1054,7 +1053,7 @@ function updateGameState() {
     // Process each driver, one at a time starting at the head of the queue, until it is expired.
     if (blockingDrivers.length > 0) {
         let driver = blockingDrivers[0];
-        
+
         driver.update();
 
         if (driver instanceof BlockingDriver) {

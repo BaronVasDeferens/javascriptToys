@@ -85,6 +85,41 @@ export class GridSquare {
             context.drawImage(this.imageClear, this.x * this.size, this.y * this.size);
         }
     }
+
+    toJson() {
+        return `{
+            \"x\": ${this.x},
+            \"y\":  ${this.y},
+            
+            \"size\": ${this.size},
+            \"color\": \"${this.color}\",
+            \"isOccupied\": ${this.isOccupied},
+            \"isObstructed\": ${this.isObstructed}
+        }`;
+    }
+}
+
+export class GridMap {
+    
+
+    constructor(gridSquares) {
+        this.gridSquares = gridSquares;
+    }
+
+    toJson(mapFileName) {
+
+        var gridContent = "";
+        this.gridSquares.flat().forEach ((sq) => {
+            gridContent += (sq.toJson() + ',');
+        });
+
+        return `{
+            \"mapName\": \"${mapFileName}\",
+            \"gridSquares\": [
+                ${gridContent.slice(0, gridContent.length - 1)}
+            ]
+        }`;
+    }
 }
 
 export class Dot {
@@ -469,7 +504,6 @@ export class EffectTile {
     isAlive = true;
 
     constructor(x, y, onEntityEntered) {
-        console.log(`${x} ${y}`);
         this.x = x;
         this.y = y;
         this.onEntityEntered = onEntityEntered;
@@ -761,6 +795,7 @@ export class MovementAnimationDriver extends BlockingDriver {
     constructor(entity, origin, destination, soundLoader) {
         super();
         this.entity = entity;
+        this.origin = origin;
         this.destination = destination;
 
         if (entity instanceof Soldier) {
@@ -782,6 +817,11 @@ export class MovementAnimationDriver extends BlockingDriver {
     }
 
     update() {
+        if (this.isDone() == true) {
+            this.origin.isOccupied = false;
+            this.entity.setGridSquare(this.destination);
+            return;
+        }
 
         if (this.currentStep == 0 && this.currentTick == 0) {
             this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
@@ -800,11 +840,11 @@ export class MovementAnimationDriver extends BlockingDriver {
     }
 
     isDone() {
-        return (this.currentStep >= this.maxSteps);
+        return (this.currentStep >= this.maxSteps) || this.entity.isAlive == false;
     }
 
     onDestroy() {
-
+        this.entity.setGridSquare(this.destination);
     }
 
 }

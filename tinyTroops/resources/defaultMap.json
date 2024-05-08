@@ -1,0 +1,1606 @@
+{
+            "mapName": "1715144234548.json",
+            "gridSquares": [
+                {
+            "x": 0,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 0,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 1,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 2,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 3,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 4,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 4,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 4,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 4,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 4,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 4,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 4,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 4,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 4,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 4,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 5,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 5,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 5,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 6,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 6,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 6,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 7,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 7,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 7,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 7,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 8,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 8,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 8,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 8,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 9,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 9,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 9,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 9,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 9,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 9,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 9,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 9,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 9,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 9,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 10,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 10,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 10,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 10,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 11,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 11,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 11,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 11,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 12,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 12,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 12,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 13,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 13,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 13,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 14,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 14,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 14,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 14,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 14,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 14,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": true
+        },{
+            "x": 14,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 14,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 14,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 14,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 15,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 16,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 17,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 18,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  0,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  1,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  2,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  3,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  4,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  5,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  6,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  7,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  8,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        },{
+            "x": 19,
+            "y":  9,
+            
+            "size": 64,
+            "color": "a8a8a8",
+            "isOccupied": false,
+            "isObstructed": false
+        }
+            ]
+        }

@@ -27,10 +27,10 @@ window.onkeydown = function (event) {
         case 's':
             console.log("Saving map...");
             var mapFileName = `${Date.now()}.json`;
-            downloadMapfile(mapFileName, gridMap.toJson(mapFileName));
+            downloadMapfile(mapFileName, JSON.stringify(gridMap));
             break;
         case 'l':
-            loadMapFile("defaultMap.json");
+            loadMapFile("test.json");
             break;
         default:
             break;
@@ -60,9 +60,9 @@ function initialize() {
     console.log("Initializing...");
     // Setup grid squares
     for (var i = 0; i < gridCols; i++) {
-        gridSquares[i] = new Array(0);
+        //gridSquares[i] = new Array(0);
         for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageLoader));
+            gridSquares.push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageLoader));
         }
     }
 }
@@ -92,42 +92,48 @@ function drawScene() {
 
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < gridCols; i++) {
-        for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].forEach(square => {
-                square.render(context);
-            });
-        }
-    }
+
+    gridSquares.forEach(square => {
+        square.render(context);
+    });
+
+
 }
 
-function downloadMapfile(filename, text) {
-    var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    pom.setAttribute('download', filename);
+async function downloadMapfile(filename, content) {
+    const options = {
+        types: [
+          {
+            description: "",
+            accept: {
+              "text/plain": [".json"],
+            },
+          },
+        ],
+      };
 
-    if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        pom.dispatchEvent(event);
-    }
-    else {
-        pom.click();
-    }
+      const handle = await window.showSaveFilePicker(options);
+      const writable = await handle.createWritable();
+      
+      await writable.write(content);
+      await writable.close();
+      
+      return handle;
 }
+
 
 function loadMapFile(mapName) {
     console.log(`Loading map: ${mapName}...`);
     var client = new XMLHttpRequest();
     client.open("GET", `resources/${mapName}`);
     client.setRequestHeader("Cache-Control", "no-cache");
-    client.onload = function () { 
+    client.onload = function () {
         var mapAsJson = client.responseText;
         var mapObject = JSON.parse(mapAsJson);
         gridSquares = new Array();
-  
+
         for (var i = 0; i < gridCols; i++) {
-            gridSquares[i] = new Array(0);
+            //gridSquares[i] = new Array(0);
             for (var j = 0; j < gridRows; j++) {
                 var patternSquare = mapObject.gridSquares.filter((sq) => {
                     return sq.x == i && sq.y == j
@@ -136,7 +142,7 @@ function loadMapFile(mapName) {
                 var newSquare = new GridSquare(patternSquare.x, patternSquare.y, patternSquare.size, patternSquare.color, imageLoader)
                 newSquare.isObstructed = patternSquare.isObstructed;
                 newSquare.isOccupied = patternSquare.isOccupied;
-                gridSquares[i].push(newSquare);
+                gridSquares.push(newSquare);
             }
         }
 

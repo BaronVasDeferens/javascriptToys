@@ -85,40 +85,18 @@ export class GridSquare {
             context.drawImage(this.imageClear, this.x * this.size, this.y * this.size);
         }
     }
-
-    toJson() {
-        return `{
-            \"x\": ${this.x},
-            \"y\":  ${this.y},
-            
-            \"size\": ${this.size},
-            \"color\": \"${this.color}\",
-            \"isOccupied\": ${this.isOccupied},
-            \"isObstructed\": ${this.isObstructed}
-        }`;
-    }
 }
 
 export class GridMap {
     
+    rows = 10;
+    columns = 20;
+    soldiers = [];
+    blobs = [];
+    gridSquares = [];
 
     constructor(gridSquares) {
         this.gridSquares = gridSquares;
-    }
-
-    toJson(mapFileName) {
-
-        var gridContent = "";
-        this.gridSquares.flat().forEach ((sq) => {
-            gridContent += (sq.toJson() + ',');
-        });
-
-        return `{
-            \"mapName\": \"${mapFileName}\",
-            \"gridSquares\": [
-                ${gridContent.slice(0, gridContent.length - 1)}
-            ]
-        }`;
     }
 }
 

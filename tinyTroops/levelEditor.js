@@ -90,7 +90,8 @@ function initialize() {
     }
 
     if (!window.isSecureContext) {
-        console.log(">>> NOT SECURE :: Browse to localhost or http://127.0.0.1:8080/ instead! <<<");
+        console.log("-------------------------- WARNING: SAVING WILL NOT WORK --------------------")
+        console.log(">>> You MUST browse to localhost (http://127.0.0.1:8080) in order to save! <<<");
     }
 }
 

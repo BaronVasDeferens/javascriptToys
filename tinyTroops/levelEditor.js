@@ -17,6 +17,19 @@ const gridSquareSize = 64;
 var gridSquares = new Array(0);
 var gridMap = new GridMap(gridSquares);
 
+const EntityPlacementType = Object.freeze({
+    OBSTRUCTION: "OBSTRUCTION",
+    SOLDIER: "SOLDIER",
+    BLOB: "BLOB"
+});
+
+const entityPlacementTypes = [
+    EntityPlacementType.OBSTRUCTION,
+    EntityPlacementType.SOLDIER,
+    EntityPlacementType.BLOB
+];
+var placementIndex = 0;
+var placementType = entityPlacementTypes[placementIndex];
 
 window.onmousedown = function (event) {
     toggleGridSquareAtClick(event);
@@ -24,12 +37,22 @@ window.onmousedown = function (event) {
 
 window.onkeydown = function (event) {
     switch (event.key) {
-        case 's':
-            console.log("Saving map...");
-            var mapFileName = `${Date.now()}.json`;
-            downloadMapfile(mapFileName, JSON.stringify(gridMap));
+        case 'e':
+            // Cycle through placement modes
+            placementIndex = (placementIndex + 1) % entityPlacementTypes.length;
+            placementType = entityPlacementTypes[placementIndex];
+            console.log(`Placing entity: ${placementType}`);
             break;
+
+        case 's':
+            // Save map
+            console.log("Saving map file...");
+            downloadMapfile(JSON.stringify(gridMap));
+            break;
+
         case 'l':
+            // Load map
+            console.log("Loading map file...");
             loadMapFile("test.json");
             break;
         default:
@@ -65,6 +88,10 @@ function initialize() {
             gridSquares.push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageLoader));
         }
     }
+
+    if (!window.isSecureContext) {
+        console.log(">>> NOT SECURE :: Browse to localhost or http://127.0.0.1:8080/ instead! <<<");
+    }
 }
 
 function beginGameLoop() {
@@ -73,16 +100,81 @@ function beginGameLoop() {
 }
 
 function toggleGridSquareAtClick(event) {
-    console.log(event);
     var x = Math.floor(event.pageX / gridSquareSize);
     var y = Math.floor(event.pageY / gridSquareSize);
     var targetSquare = gridSquares.flat().filter((sq) => {
         return (sq.x == x) && (sq.y == y);
     })[0];
 
-    if (targetSquare != null) {
-        targetSquare.isObstructed = !targetSquare.isObstructed;
+    if (targetSquare == null) {
+        return;
     }
+
+    switch (placementType) {
+        case EntityPlacementType.OBSTRUCTION:
+            // Toggle obstructions in the selected square
+            targetSquare.isObstructed = !targetSquare.isObstructed;
+            break;
+        case EntityPlacementType.SOLDIER:
+            // Toggle placement of SOLDIER entity in the selected square
+            var newEntity = {
+                x: targetSquare.x,
+                y: targetSquare.y
+            };
+
+            var existingEntity = gridMap.soldiers.filter((ent) => {
+                return (ent.x == newEntity.x) && (ent.y == newEntity.y);
+            })[0];
+
+            if (existingEntity == undefined) {
+                console.log(`Adding soldier...`)
+                gridMap.soldiers.push(newEntity);
+                console.log(gridMap.soldiers);
+            } else {
+                console.log(`Removing soldier at ${existingEntity.x},${existingEntity.y} `)
+                gridMap.soldiers = gridMap.soldiers.filter((ent) => {
+                    if (ent.x == existingEntity.x && ent.y == existingEntity.y) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
+                console.log(gridMap.soldiers);
+            }
+            break;
+        case EntityPlacementType.BLOB:
+            // Toggle placement of BLOB entity in the selected square
+            var newEntity = {
+                x: targetSquare.x,
+                y: targetSquare.y
+            };
+
+            var existingEntity = gridMap.blobs.filter((ent) => {
+                return (ent.x == newEntity.x) && (ent.y == newEntity.y);
+            })[0];
+
+            if (existingEntity == undefined) {
+                console.log(`Adding blob...`)
+                gridMap.blobs.push(newEntity);
+                console.log(gridMap.soldiers);
+            } else {
+                console.log(`Removing blob at ${existingEntity.x},${existingEntity.y} `)
+                gridMap.blobs = gridMap.blobs.filter((ent) => {
+                    if (ent.x == existingEntity.x && ent.y == existingEntity.y) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
+                console.log(gridMap.blobs);
+            }
+            break;
+        default:
+            break;
+    }
+
+
+
 }
 
 function drawScene() {
@@ -97,28 +189,40 @@ function drawScene() {
         square.render(context);
     });
 
+    var soldierPlaceholder = imageLoader.getImage(ImageAsset.SOLDIER_PLACEHOLDER);
+    var blobPlaceholder = imageLoader.getImage(ImageAsset.BLOB_PLACEHOLDER);
+    var placeholderOffset = Math.floor(50 / 4);
+
+    gridMap.soldiers.forEach((soldier) => {
+        context.drawImage(soldierPlaceholder, (soldier.x * gridSquareSize) + placeholderOffset, (soldier.y * gridSquareSize) + placeholderOffset);
+    });
+
+    gridMap.blobs.forEach((blob) => {
+        context.drawImage(blobPlaceholder, (blob.x * gridSquareSize) + placeholderOffset, (blob.y * gridSquareSize) + placeholderOffset);
+    });
+
 
 }
 
-async function downloadMapfile(filename, content) {
+async function downloadMapfile(content) {
     const options = {
         types: [
-          {
-            description: "",
-            accept: {
-              "text/plain": [".json"],
+            {
+                description: "",
+                accept: {
+                    "text/plain": [".json"],
+                },
             },
-          },
         ],
-      };
+    };
 
-      const handle = await window.showSaveFilePicker(options);
-      const writable = await handle.createWritable();
-      
-      await writable.write(content);
-      await writable.close();
-      
-      return handle;
+    const handle = await window.showSaveFilePicker(options);
+    const writable = await handle.createWritable();
+
+    await writable.write(content);
+    await writable.close();
+
+    return handle;
 }
 
 
@@ -130,10 +234,10 @@ function loadMapFile(mapName) {
     client.onload = function () {
         var mapAsJson = client.responseText;
         var mapObject = JSON.parse(mapAsJson);
-        gridSquares = new Array();
 
+        // Transform the JSON representation into GridSquare objects
+        gridSquares = new Array();
         for (var i = 0; i < gridCols; i++) {
-            //gridSquares[i] = new Array(0);
             for (var j = 0; j < gridRows; j++) {
                 var patternSquare = mapObject.gridSquares.filter((sq) => {
                     return sq.x == i && sq.y == j
@@ -147,6 +251,16 @@ function loadMapFile(mapName) {
         }
 
         gridMap = new GridMap(gridSquares);
+
+        mapObject.soldiers.forEach((soldier) => {
+            gridMap.soldiers.push(soldier);
+        });
+
+        mapObject.blobs.forEach((blob) => {
+            gridMap.blobs.push(blob);
+        });
+
+
         console.log(gridMap);
     }
     client.send();

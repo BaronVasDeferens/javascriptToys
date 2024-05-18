@@ -24,6 +24,8 @@ export var ImageAsset = Object.freeze({
     BLOB_DEATH_STRIP: "resources/blob_death_strip.png",
     SOLDIER_STRIP: "resources/soldier_new_strip.png",
     SOLDIER_DEATH_STRIP: "resources/soldier_death_strip.png",
+    SOLDIER_PLACEHOLDER: "resources/soldier_placeholder.png",
+    BLOB_PLACEHOLDER: "resources/blob_placeholder.png",
 
     // Interstitials / turn changes
     INTERSTITIAL_PLAYER_TURN: "resources/turn_player.png",

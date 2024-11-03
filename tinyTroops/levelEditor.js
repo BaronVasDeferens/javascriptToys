@@ -31,9 +31,17 @@ const entityPlacementTypes = [
 var placementIndex = 0;
 var placementType = entityPlacementTypes[placementIndex];
 
+
+/* --- MOUSE --- */
+
 window.onmousedown = function (event) {
-    toggleGridSquareAtClick(event);
+    processClick(event);
 }
+
+// Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
+document.addEventListener('contextmenu', event => event.preventDefault());
+
+/* --- KEYBOARD --- */
 
 window.onkeydown = function (event) {
     switch (event.key) {
@@ -60,6 +68,8 @@ window.onkeydown = function (event) {
     }
 };
 
+/* --- GAME LOGIC --- */
+
 var setup = function () {
     // Set background to display "loading" text
     context.fillStyle = "#FF0000";
@@ -80,18 +90,20 @@ var setup = function () {
 }();
 
 function initialize() {
+
     console.log("Initializing...");
-    // Setup grid squares
+
+    if (!window.isSecureContext) {
+        console.log("-------------------------- WARNING: SAVING WILL NOT WORK --------------------");
+        console.log(">>> You MUST browse to localhost (http://127.0.0.1:8080) in order to save! <<<");
+        alert("Insecure context! You will not be able to save your map. See console output for more info.");
+    }
+
+    // Setup basic, blank grid squares
     for (var i = 0; i < gridCols; i++) {
-        //gridSquares[i] = new Array(0);
         for (var j = 0; j < gridRows; j++) {
             gridSquares.push(new GridSquare(i, j, gridSquareSize, "a8a8a8", imageLoader));
         }
-    }
-
-    if (!window.isSecureContext) {
-        console.log("-------------------------- WARNING: SAVING WILL NOT WORK --------------------")
-        console.log(">>> You MUST browse to localhost (http://127.0.0.1:8080) in order to save! <<<");
     }
 }
 
@@ -100,7 +112,12 @@ function beginGameLoop() {
     requestAnimationFrame(beginGameLoop);
 }
 
-function toggleGridSquareAtClick(event) {
+function processClick(event) {
+
+    if (event.button != 0) {
+        return;
+    }
+
     var x = Math.floor(event.pageX / gridSquareSize);
     var y = Math.floor(event.pageY / gridSquareSize);
     var targetSquare = gridSquares.flat().filter((sq) => {

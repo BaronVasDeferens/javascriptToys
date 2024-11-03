@@ -98,6 +98,16 @@ export class GridMap {
     constructor(gridSquares) {
         this.gridSquares = gridSquares;
     }
+
+    getGridSquare(col, row) {
+        return this.gridSquares.filter( (sq) => {
+            if (sq.x == col && sq.y == row) {
+                return true;
+            } else {
+                return false;
+            }
+        })[0];
+    }
 }
 
 export class Dot {

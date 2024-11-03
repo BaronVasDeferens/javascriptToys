@@ -5,7 +5,7 @@
  * And if THAT doesn't work (and you use BASH), try: "sudo npm install --global http-server"
  */
 
-import { Blob, Ring, GridSquare, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver, EffectTile, FireEffectTile } from './entity.js';
+import { Blob, Ring, GridSquare, GridMap, IntroAnimation, Line, MovementAnimationDriver, Soldier, TextLabel, Dot, LittleDot, CustomDriver, CombatResolutionDriver, CombatResolutionState, DeathAnimationDriver, VictoryAnimation, DefeatAnimation, BonusActionPointTile, TurnStartAnimationLeftToRight, TurnStartAnimationRightToLeft, BlockingDriver, EffectTile, FireEffectTile } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundLoader, SoundAsset } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -49,7 +49,7 @@ const numBonusTiles = 10;
 const numFires = 10;
 
 const gridSquares = new Array(0);
-var allSquares = [];
+
 const gridSquareSize = 64;
 var selectedGridSquares = [];
 
@@ -133,7 +133,7 @@ function initialize() {
         }
     }
 
-
+    var allSquares = [];
     allSquares = gridSquares.flat(arr => {
         arr.flat();
     }).flat();
@@ -214,6 +214,17 @@ function initialize() {
 
 // Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
 document.addEventListener('contextmenu', event => event.preventDefault());
+
+window.onkeydown = function (event) {
+    switch (event.key) {
+        case 'l':
+            console.log("Loading map...");
+            loadMap();
+            break;
+        default:
+            break;
+    }
+}
 
 // Process mouse clicks
 window.onmousedown = function (event) {
@@ -390,13 +401,13 @@ function renderBackground(context) {
     console.log("Rendering background...");
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < gridCols; i++) {
-        for (var j = 0; j < gridRows; j++) {
-            gridSquares[i].forEach(square => {
-                square.render(context);
-            });
-        }
-    }
+
+
+    gridSquares.flat(arr => {
+        arr.flat();
+    }).flat().forEach(square => {
+        square.render(context);
+    });
 
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
@@ -692,7 +703,6 @@ function startEnemyTurn() {
     blobs.forEach(activeBlob => {
 
         let path = new Array();
-        let bad = new Array();
         let attemptedMoves = 0;
         let attemptedMovesMax = 5;
         let movesMade = 0;
@@ -715,8 +725,6 @@ function startEnemyTurn() {
 
             let isAdjacent = distance < 2;
 
-            let isWithinSpittingDistance = distance <= 5
-
             if (movesMadeMax - movesMade >= 1 && isAdjacent == true) {
 
                 let kill = {
@@ -731,43 +739,21 @@ function startEnemyTurn() {
                 }));
 
                 break;
-            }
-            // else if (isWithinSpittingDistance) {
-            //     let gridSquares = calculateLineOfSight(activeBlob.gridSquare, activeBlob.target.gridSquare)
-            //     let gridSquareArray = new Array();
-            //     gridSquares.forEach( element => {
-            //         gridSquareArray.push(element);
-            //     })
-            //     let isWithinLOS = gridSquareArray.every(element => {return !element.isObstructed && !element.isOccupied});
-            //     if (isWithinLOS) {
-            //         console.log(`${activeBlob.id} can spit at ${activeBlob.target.id}`);
-            //     } else {
-            //         console.log(`${activeBlob.id} has no LOS to at ${ activeBlob.target.id}`);
-            //     }
-            // } 
-            else {
+            } else {
                 let currentGridSquare = activeBlob.gridSquare;
                 let neighbors = getAdjacentSquares(currentGridSquare);
-
-                // console.log(`blob at: ${activeBlob.gridSquare.x},${activeBlob.gridSquare.y}`);
-                // console.log(`blob considers ${neighbors.length} adjacent squares... `);
 
                 neighbors = neighbors.sort((sq1, sq2) => {
                     let dist1 = Math.abs(activeBlob.target.gridSquare.x - sq1.x) + Math.abs(activeBlob.target.gridSquare.y - sq1.y);
                     let dist2 = Math.abs(activeBlob.target.gridSquare.x - sq2.x) + Math.abs(activeBlob.target.gridSquare.y - sq2.y);
-                    if (dist1 < dist2) {
-                        return -1;
-                    }
-
-                    if (dist2 > dist1) {
-                        return 1;
-                    }
-
-                    return 0;
+                    
+                    return (dist1 - dist2); 
                 });
+
                 neighbors = neighbors.filter(sq => { return path.includes(sq) == false });
                 neighbors = neighbors.filter(sq => { return sq.isOccupied == false });
                 neighbors = neighbors.filter(sq => { return sq.isObstructed == false });
+
                 let candidate = neighbors[0];
 
                 if (candidate != undefined) {
@@ -1132,4 +1118,92 @@ function drawScene() {
 
     // Clear the transients
     entitiesTransient.length = 0;
+}
+
+function loadMap() {
+
+    setState(States.INTRO);
+
+    // Clear prior entities
+    gridSquares.length = 0;
+    entitiesResident.length = 0;
+    entitiesTemporary.length = 0;
+    entitiesTransient.length = 0;
+
+    var mapName = "test.json"
+    console.log(`Loading map: ${mapName}...`);
+    var client = new XMLHttpRequest();
+    client.open("GET", `resources/${mapName}`);
+    client.setRequestHeader("Cache-Control", "no-cache");
+    client.onload = function () {
+        var mapAsJson = client.responseText;
+        var mapObject = JSON.parse(mapAsJson);
+
+        console.log(mapAsJson);
+
+        // Transform the JSON representation into GridSquare objects
+        var tempGridSquares = [];
+        for (var i = 0; i < mapObject.columns; i++) {
+            for (var j = 0; j < mapObject.rows; j++) {
+
+                var patternSquare = mapObject.gridSquares.filter((sq) => {
+                    if (sq.x == i && sq.y == j) {
+                        return true;
+                    } else { return false; }
+                })[0];
+
+                if (patternSquare == undefined) {
+                    console.error(`undefined patternSquare: ${i} ${j}`);
+                }
+
+                var newSquare = new GridSquare(patternSquare.x, patternSquare.y, gridSquareSize, patternSquare.color, imageLoader)
+                newSquare.isObstructed = patternSquare.isObstructed;
+                newSquare.isOccupied = patternSquare.isOccupied;
+                tempGridSquares.push(newSquare);
+            }
+        }
+
+        console.log(tempGridSquares);
+
+        var gridMap = new GridMap(tempGridSquares);
+
+        mapObject.soldiers.forEach((soldierTemplate) => {
+            var occupiedSquare = gridMap.getGridSquare(soldierTemplate.x, soldierTemplate.y);
+            if (occupiedSquare != undefined) {
+                var home = occupiedSquare.getCenter();
+                var soldier = new Soldier("soldier", home.x, home.y, imageLoader);
+                soldier.setGridSquare(occupiedSquare);
+                entitiesResident.push(soldier);
+            } else {
+                console.log(`ERROR: undefined soldier ${soldierTemplate.x} ${soldierTemplate.y}`);
+            }
+        });
+
+        mapObject.blobs.forEach((blobTemplate) => {
+            var occupiedSquare = gridMap.getGridSquare(blobTemplate.x, blobTemplate.y);
+            if (occupiedSquare != undefined) {
+                var home = occupiedSquare.getCenter();
+                var blob = new Blob("blob", home.x, home.y, imageLoader);
+                blob.setGridSquare(occupiedSquare);
+                entitiesResident.push(blob);
+            } else {
+                console.log(`ERROR: undefined blob ${blobTemplate.x} ${blobTemplate.y}`);
+            }
+        });
+
+        console.log(gridSquares);
+
+        // Setup grid squares
+        for (var i = 0; i < gridCols; i++) {
+            gridSquares[i] = new Array(0);
+            for (var j = 0; j < gridRows; j++) {
+                gridSquares[i].push(gridMap.getGridSquare(i, j));
+            }
+        }
+
+        renderBackground(context);
+        // Add intro splash
+        //entitiesTemporary.push(new IntroAnimation(gridCols, gridRows, gridSquareSize, imageLoader, soundLoader));
+    }
+    client.send();
 }

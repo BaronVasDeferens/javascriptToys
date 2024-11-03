@@ -6,8 +6,8 @@ const imageLoader = new ImageLoader();
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width = 640;
+canvas.height = 640;
 
 var backgroundImage = new Image();
 
@@ -46,17 +46,18 @@ function updateGameState() {
 
 function renderBackground(context) {
 
+    let tilesSze = 64;
+
     // get random tiles
     let tiles = [
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_1),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_2),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_3),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_4),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_5),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_6),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_7),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_8),
-        imageLoader.getImage(ImageAsset.FLOOR_TILE_9)];
+        imageLoader.getImage(ImageAsset.TILE_1),
+        imageLoader.getImage(ImageAsset.TILE_2),
+        imageLoader.getImage(ImageAsset.TILE_3),
+        imageLoader.getImage(ImageAsset.TILE_4),
+        imageLoader.getImage(ImageAsset.TILE_5),
+        imageLoader.getImage(ImageAsset.TILE_6),
+        imageLoader.getImage(ImageAsset.TILE_7),
+        imageLoader.getImage(ImageAsset.TILE_8)];
 
 
     // Renders the background once and re-uses the image
@@ -66,10 +67,10 @@ function renderBackground(context) {
 
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {
-            context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * 16, j * 16);
+            context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tilesSze, j * tilesSze);
         }
     }
-    
+
 
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;

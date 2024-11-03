@@ -15,15 +15,24 @@ export class AssetLoader {
 export var ImageAsset = Object.freeze({
 
     // Floors
-    FLOOR_TILE_1: "resources/floor1.png",
-    FLOOR_TILE_2: "resources/floor2.png",
-    FLOOR_TILE_3: "resources/floor3.png",
-    FLOOR_TILE_4: "resources/floor4.png",
-    FLOOR_TILE_5: "resources/floor5.png",
-    FLOOR_TILE_6: "resources/floor6.png",
-    FLOOR_TILE_7: "resources/floor7.png",
-    FLOOR_TILE_8: "resources/floor8.png",
-    FLOOR_TILE_9: "resources/floor9.png"
+    FLOOR_TILE_1: "resources/floor1_4.png",
+    FLOOR_TILE_2: "resources/floor2_4.png",
+    FLOOR_TILE_3: "resources/floor3_4.png",
+    FLOOR_TILE_4: "resources/floor4_4.png",
+    FLOOR_TILE_5: "resources/floor5_4.png",
+    FLOOR_TILE_6: "resources/floor6_4.png",
+    FLOOR_TILE_7: "resources/floor7_4.png",
+    FLOOR_TILE_8: "resources/floor8_4.png",
+    FLOOR_TILE_9: "resources/floor9_4.png",
+
+    TILE_1: "resources/tile1.png",
+    TILE_2: "resources/tile2.png",
+    TILE_3: "resources/tile3.png",
+    TILE_4: "resources/tile4.png",
+    TILE_5: "resources/tile5.png",
+    TILE_6: "resources/tile6.png",
+    TILE_7: "resources/tile7.png",
+    TILE_8: "resources/tile8.png"
 });
 
 export class ImageLoader {

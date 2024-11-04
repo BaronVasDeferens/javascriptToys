@@ -1,4 +1,4 @@
-import { Wizard } from './entity.js';
+import { Mover, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -10,10 +10,24 @@ const context = canvas.getContext('2d');
 canvas.width = 640;
 canvas.height = 640;
 
-var backgroundImage = new Image();
+let backgroundImage = new Image();
 
-var playerWizard;
-var entities = [];
+let tileSize = 64;
+
+let playerWizard;
+let wizardMovePerTick = 4;
+
+let entities = [];
+let controlInput = null;
+var movers = [];
+
+
+const ControlInput = Object.freeze({
+    LEFT: 0,
+    RIGHT: 1,
+    UP: 2,
+    DOWN: 3
+});
 
 var setup = function () {
     // Set background to display "loading" text
@@ -36,7 +50,7 @@ var setup = function () {
 function initialize() {
     console.log("Initializing...");
 
-    playerWizard = new Wizard("wizard", 0,0,imageLoader.getImage(ImageAsset.WIZARD_1));
+    playerWizard = new Wizard("wizard", 0, 0, imageLoader.getImage(ImageAsset.WIZARD_2));
     entities.push(playerWizard);
 
 
@@ -53,6 +67,13 @@ function beginGame() {
 
 function updateGameState() {
 
+    movers = movers.filter(mover => {
+        return mover.isAlive;
+    });
+
+    movers.forEach(mover => {
+        mover.update();
+    });
 }
 
 function renderBackground(context) {
@@ -100,8 +121,7 @@ function drawScene() {
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(backgroundImage, 0, 0);
-
-    context.imageSmoothingEnabled = false;
+    //context.imageSmoothingEnabled = false;
 
     // Draw entities
     entities.forEach(entity => {
@@ -111,14 +131,71 @@ function drawScene() {
 }
 
 document.addEventListener('keydown', (e) => {
-    switch (e.key) {
-        case "w":
-            break;
-        case "a":
-            break;
-        case "s":
-            break;
-        case "s":
-            break;
+
+    if (controlInput == null) {
+        switch (e.key) {
+            case "w":
+                controlInput = ControlInput.UP
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y - tileSize,
+                        0,
+                        -wizardMovePerTick,
+                        () => {
+                            controlInput = null;
+                        }
+                    )
+                )
+                break;
+
+            case "s":
+                controlInput = ControlInput.DOWN
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y + tileSize,
+                        0,
+                        wizardMovePerTick,
+                        () => {
+                            controlInput = null;
+                        }
+                    )
+                )
+                break;
+            case "a":
+                controlInput = ControlInput.LEFT
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x - tileSize,
+                        playerWizard.y,
+                        -wizardMovePerTick,
+                        0,
+                        () => {
+                            controlInput = null;
+                        }
+                    )
+                )
+                break;
+            case "d":
+                controlInput = ControlInput.RIGHT
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x + tileSize,
+                        playerWizard.y,
+                        wizardMovePerTick,
+                        0,
+                        () => {
+                            controlInput = null;
+                        }
+                    )
+                )
+                break;
+        }
     }
+
 });

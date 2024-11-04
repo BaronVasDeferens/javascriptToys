@@ -30,3 +30,24 @@ export class Wizard extends Entity {
         this.image = image;
     }
 }
+
+export class Mover {
+    constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {
+        this.entity = entity;
+        this.destinationX = destinationX;
+        this.destinationY = destinationY;
+        this.deltaX = deltaX;
+        this.deltaY = deltaY;
+        this.callback = callback;
+
+        this.isAlive = true
+    }
+
+    update() {
+        this.entity.update(this.deltaX, this.deltaY);
+        if (this.entity.x == this.destinationX && this.entity.y == this.destinationY) {
+            this.isAlive = false;
+            this.callback();
+        }
+    }
+}

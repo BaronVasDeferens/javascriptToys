@@ -15,6 +15,7 @@ export class AssetLoader {
 export var ImageAsset = Object.freeze({
 
     WIZARD_1: "resources/tiles/64x64/tile_3807.png",
+    WIZARD_2: "resources/tiles/64x64/tile_3795.png",
 
     // Floors
     FLOOR_TILE_1: "resources/floor1_4.png",
@@ -76,7 +77,7 @@ export class ImageLoader {
     imageMap = new Map();
 
     loadImages(callback) {
-
+        console.log("Loading images...");
         let readinessCheck = new Map();
 
         for (const key in ImageAsset) {
@@ -84,12 +85,11 @@ export class ImageLoader {
             let img = new Image();
             this.imageMap.set(assetLocation, img);
             img.onload = function () {
-                console.log(`Image ${img.src} loaded`);
                 readinessCheck.set(img.src, true);
                 let values = Array.from(readinessCheck.values());
                 let isReady = values.every(v => v === true);
                 if (isReady == true) {
-                    console.log(`Image loading complete!`);
+                    console.log(`...image loading complete!`);
                     callback();
                 }
             }

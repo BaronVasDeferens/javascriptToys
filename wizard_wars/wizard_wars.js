@@ -81,18 +81,11 @@ function renderBackground(context) {
     let tilesSze = 64;
 
     // get random tiles
-    let tiles = [
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_1),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_2),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_3),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_4),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_5),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_6),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_7),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_8),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_9),
-        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_10)
-    ];
+    let tiles = [];
+
+    imageLoader.getTileSet("MAGIC_DARK").forEach( tile => {
+        tiles.push(imageLoader.getImage(tile));
+    });
 
 
     // Renders the background once and re-uses the image

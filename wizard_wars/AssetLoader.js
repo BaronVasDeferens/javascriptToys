@@ -17,25 +17,23 @@ export var ImageAsset = Object.freeze({
     WIZARD_1: "resources/tiles/64x64/tile_3807.png",
     WIZARD_2: "resources/tiles/64x64/tile_3795.png",
 
-    // Floors
-    FLOOR_TILE_1: "resources/floor1_4.png",
-    FLOOR_TILE_2: "resources/floor2_4.png",
-    FLOOR_TILE_3: "resources/floor3_4.png",
-    FLOOR_TILE_4: "resources/floor4_4.png",
-    FLOOR_TILE_5: "resources/floor5_4.png",
-    FLOOR_TILE_6: "resources/floor6_4.png",
-    FLOOR_TILE_7: "resources/floor7_4.png",
-    FLOOR_TILE_8: "resources/floor8_4.png",
-    FLOOR_TILE_9: "resources/floor9_4.png",
+    // Floor tiles
+    TILE_GRASSY_STONE_FLOOR_1: "resources/tile1.png",
+    TILE_GRASSY_STONE_FLOOR_2: "resources/tile2.png",
+    TILE_GRASSY_STONE_FLOOR_3: "resources/tile3.png",
+    TILE_GRASSY_STONE_FLOOR_4: "resources/tile4.png",
+    TILE_GRASSY_STONE_FLOOR_5: "resources/tile5.png",
+    TILE_GRASSY_STONE_FLOOR_6: "resources/tile6.png",
+    TILE_GRASSY_STONE_FLOOR_7: "resources/tile7.png",
+    TILE_GRASSY_STONE_FLOOR_8: "resources/tile8.png",
 
-    TILE_1: "resources/tile1.png",
-    TILE_2: "resources/tile2.png",
-    TILE_3: "resources/tile3.png",
-    TILE_4: "resources/tile4.png",
-    TILE_5: "resources/tile5.png",
-    TILE_6: "resources/tile6.png",
-    TILE_7: "resources/tile7.png",
-    TILE_8: "resources/tile8.png",
+
+    TILE_GREY_ROCK_1: "resources/tiles/64x64/tile_167.png",
+    TILE_GREY_ROCK_2: "resources/tiles/64x64/tile_169.png",
+    TILE_GREY_ROCK_3: "resources/tiles/64x64/tile_173.png",
+    TILE_GREY_ROCK_4: "resources/tiles/64x64/tile_175.png",
+    TILE_GREY_ROCK_5: "resources/tiles/64x64/tile_177.png",
+    TILE_GREY_ROCK_6: "resources/tiles/64x64/tile_179.png",
 
     TILE_FLESH_GROUND_1: "resources/tiles/64x64/tile_202.png",
     TILE_FLESH_GROUND_2: "resources/tiles/64x64/tile_203.png",
@@ -60,6 +58,17 @@ export var ImageAsset = Object.freeze({
     TILE_MAGIC_GROUND_11: "resources/tiles/64x64/tile_302.png",
     TILE_MAGIC_GROUND_12: "resources/tiles/64x64/tile_303.png",
 
+    TILE_MAGIC_DARK_GROUND_1: "resources/tiles/64x64/tile_186.png",
+    TILE_MAGIC_DARK_GROUND_2: "resources/tiles/64x64/tile_187.png",
+    TILE_MAGIC_DARK_GROUND_3: "resources/tiles/64x64/tile_188.png",
+    TILE_MAGIC_DARK_GROUND_4: "resources/tiles/64x64/tile_189.png",
+    TILE_MAGIC_DARK_GROUND_5: "resources/tiles/64x64/tile_190.png",
+    TILE_MAGIC_DARK_GROUND_6: "resources/tiles/64x64/tile_191.png",
+    TILE_MAGIC_DARK_GROUND_7: "resources/tiles/64x64/tile_192.png",
+    TILE_MAGIC_DARK_GROUND_8: "resources/tiles/64x64/tile_193.png",
+    TILE_MAGIC_DARK_GROUND_9: "resources/tiles/64x64/tile_194.png",
+    TILE_MAGIC_DARK_GROUND_10: "resources/tiles/64x64/tile_195.png",
+
     TILE_MARBLE_GROUND_1: "resources/tiles/64x64/tile_385.png",
     TILE_MARBLE_GROUND_2: "resources/tiles/64x64/tile_386.png",
     TILE_MARBLE_GROUND_3: "resources/tiles/64x64/tile_387.png",
@@ -74,7 +83,61 @@ export var ImageAsset = Object.freeze({
 
 export class ImageLoader {
 
+    tileSets = new Map();
     imageMap = new Map();
+
+    constructor() {
+        this.tileSets.set("STONE", [
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_1,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_2,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_3,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_4,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_5,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_6,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_7,
+            ImageAsset.TILE_GRASSY_STONE_FLOOR_8
+        ]);
+
+
+        this.tileSets.set("MARBLE", [
+            ImageAsset.TILE_MARBLE_GROUND_1,
+            ImageAsset.TILE_MARBLE_GROUND_2,
+            ImageAsset.TILE_MARBLE_GROUND_3,
+            ImageAsset.TILE_MARBLE_GROUND_4,
+            ImageAsset.TILE_MARBLE_GROUND_5,
+            ImageAsset.TILE_MARBLE_GROUND_6,
+            ImageAsset.TILE_MARBLE_GROUND_7,
+            ImageAsset.TILE_MARBLE_GROUND_8,
+            ImageAsset.TILE_MARBLE_GROUND_9,
+            ImageAsset.TILE_MARBLE_GROUND_10
+        ]);
+
+        this.tileSets.set("GREY_STONE", [
+            ImageAsset.TILE_GREY_ROCK_1,
+            ImageAsset.TILE_GREY_ROCK_2,
+            ImageAsset.TILE_GREY_ROCK_3,
+            ImageAsset.TILE_GREY_ROCK_4,
+            ImageAsset.TILE_GREY_ROCK_5,
+            ImageAsset.TILE_GREY_ROCK_6
+        ]);
+
+        this.tileSets.set("MAGIC_DARK", [
+            ImageAsset.TILE_MAGIC_DARK_GROUND_1,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_2,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_3,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_4,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_5,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_6,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_7,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_8,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_9,
+            ImageAsset.TILE_MAGIC_DARK_GROUND_10
+        ]);
+    }
+
+    getTileSet(name) {
+        return this.tileSets.get(name);
+    }
 
     loadImages(callback) {
         console.log("Loading images...");

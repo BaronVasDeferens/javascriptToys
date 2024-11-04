@@ -130,70 +130,84 @@ function drawScene() {
 
 }
 
+function checkInBounds(destinationX, destinationY) {
+    return (destinationX >= 0) && (destinationX <= canvas.width) && (destinationY >= 0) && (destinationY <= canvas.height);
+}
+
 document.addEventListener('keydown', (e) => {
 
     if (controlInput == null) {
         switch (e.key) {
             case "w":
-                controlInput = ControlInput.UP
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x,
-                        playerWizard.y - tileSize,
-                        0,
-                        -wizardMovePerTick,
-                        () => {
-                            controlInput = null;
-                        }
+                if (checkInBounds(playerWizard.x, playerWizard.y - tileSize)) {
+                    controlInput = ControlInput.UP
+                    movers.push(
+                        new Mover(
+                            playerWizard,
+                            playerWizard.x,
+                            playerWizard.y - tileSize,
+                            0,
+                            -wizardMovePerTick,
+                            () => {
+                                controlInput = null;
+                            }
+                        )
                     )
-                )
-                break;
+                }
 
+                break;
             case "s":
-                controlInput = ControlInput.DOWN
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x,
-                        playerWizard.y + tileSize,
-                        0,
-                        wizardMovePerTick,
-                        () => {
-                            controlInput = null;
-                        }
+                if (checkInBounds(playerWizard.x, playerWizard.y + tileSize)) {
+                    controlInput = ControlInput.DOWN
+                    movers.push(
+                        new Mover(
+                            playerWizard,
+                            playerWizard.x,
+                            playerWizard.y + tileSize,
+                            0,
+                            wizardMovePerTick,
+                            () => {
+                                controlInput = null;
+                            }
+                        )
                     )
-                )
+                }
+
                 break;
             case "a":
-                controlInput = ControlInput.LEFT
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x - tileSize,
-                        playerWizard.y,
-                        -wizardMovePerTick,
-                        0,
-                        () => {
-                            controlInput = null;
-                        }
+                if (checkInBounds(playerWizard.x - tileSize, playerWizard.y)) {
+                    controlInput = ControlInput.LEFT
+                    movers.push(
+                        new Mover(
+                            playerWizard,
+                            playerWizard.x - tileSize,
+                            playerWizard.y,
+                            -wizardMovePerTick,
+                            0,
+                            () => {
+                                controlInput = null;
+                            }
+                        )
                     )
-                )
+                }
+
                 break;
             case "d":
-                controlInput = ControlInput.RIGHT
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x + tileSize,
-                        playerWizard.y,
-                        wizardMovePerTick,
-                        0,
-                        () => {
-                            controlInput = null;
-                        }
+                if (checkInBounds(playerWizard.x + tileSize, playerWizard.y)) {
+                    controlInput = ControlInput.RIGHT
+                    movers.push(
+                        new Mover(
+                            playerWizard,
+                            playerWizard.x + tileSize,
+                            playerWizard.y,
+                            wizardMovePerTick,
+                            0,
+                            () => {
+                                controlInput = null;
+                            }
+                        )
                     )
-                )
+                }
                 break;
         }
     }

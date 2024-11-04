@@ -21,7 +21,6 @@ class Entity {
     render(context) {
         context.drawImage(this.image, this.x, this.y);
     }
-
 }
 
 export class Wizard extends Entity {

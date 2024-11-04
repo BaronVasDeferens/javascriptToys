@@ -14,6 +14,8 @@ export class AssetLoader {
 
 export var ImageAsset = Object.freeze({
 
+    WIZARD_1: "resources/tiles/64x64/tile_3807.png",
+
     // Floors
     FLOOR_TILE_1: "resources/floor1_4.png",
     FLOOR_TILE_2: "resources/floor2_4.png",
@@ -32,7 +34,41 @@ export var ImageAsset = Object.freeze({
     TILE_5: "resources/tile5.png",
     TILE_6: "resources/tile6.png",
     TILE_7: "resources/tile7.png",
-    TILE_8: "resources/tile8.png"
+    TILE_8: "resources/tile8.png",
+
+    TILE_FLESH_GROUND_1: "resources/tiles/64x64/tile_202.png",
+    TILE_FLESH_GROUND_2: "resources/tiles/64x64/tile_203.png",
+    TILE_FLESH_GROUND_3: "resources/tiles/64x64/tile_204.png",
+    TILE_FLESH_GROUND_4: "resources/tiles/64x64/tile_205.png",
+    TILE_FLESH_GROUND_5: "resources/tiles/64x64/tile_206.png",
+    TILE_FLESH_GROUND_6: "resources/tiles/64x64/tile_207.png",
+    TILE_FLESH_GROUND_7: "resources/tiles/64x64/tile_208.png",
+    TILE_FLESH_GROUND_8: "resources/tiles/64x64/tile_209.png",
+    TILE_FLESH_GROUND_9: "resources/tiles/64x64/tile_210.png",
+
+    TILE_MAGIC_GROUND_1: "resources/tiles/64x64/tile_292.png",
+    TILE_MAGIC_GROUND_2: "resources/tiles/64x64/tile_293.png",
+    TILE_MAGIC_GROUND_3: "resources/tiles/64x64/tile_294.png",
+    TILE_MAGIC_GROUND_4: "resources/tiles/64x64/tile_295.png",
+    TILE_MAGIC_GROUND_5: "resources/tiles/64x64/tile_296.png",
+    TILE_MAGIC_GROUND_6: "resources/tiles/64x64/tile_297.png",
+    TILE_MAGIC_GROUND_7: "resources/tiles/64x64/tile_298.png",
+    TILE_MAGIC_GROUND_8: "resources/tiles/64x64/tile_299.png",
+    TILE_MAGIC_GROUND_9: "resources/tiles/64x64/tile_300.png",
+    TILE_MAGIC_GROUND_10: "resources/tiles/64x64/tile_301.png",
+    TILE_MAGIC_GROUND_11: "resources/tiles/64x64/tile_302.png",
+    TILE_MAGIC_GROUND_12: "resources/tiles/64x64/tile_303.png",
+
+    TILE_MARBLE_GROUND_1: "resources/tiles/64x64/tile_385.png",
+    TILE_MARBLE_GROUND_2: "resources/tiles/64x64/tile_386.png",
+    TILE_MARBLE_GROUND_3: "resources/tiles/64x64/tile_387.png",
+    TILE_MARBLE_GROUND_4: "resources/tiles/64x64/tile_388.png",
+    TILE_MARBLE_GROUND_5: "resources/tiles/64x64/tile_389.png",
+    TILE_MARBLE_GROUND_6: "resources/tiles/64x64/tile_390.png",
+    TILE_MARBLE_GROUND_7: "resources/tiles/64x64/tile_391.png",
+    TILE_MARBLE_GROUND_8: "resources/tiles/64x64/tile_392.png",
+    TILE_MARBLE_GROUND_9: "resources/tiles/64x64/tile_393.png",
+    TILE_MARBLE_GROUND_10: "resources/tiles/64x64/tile_394.png"
 });
 
 export class ImageLoader {
@@ -51,7 +87,7 @@ export class ImageLoader {
                 console.log(`Image ${img.src} loaded`);
                 readinessCheck.set(img.src, true);
                 let values = Array.from(readinessCheck.values());
-                let isReady = values.every(v => v === true );
+                let isReady = values.every(v => v === true);
                 if (isReady == true) {
                     console.log(`Image loading complete!`);
                     callback();

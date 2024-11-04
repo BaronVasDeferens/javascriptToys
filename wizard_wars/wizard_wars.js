@@ -1,3 +1,4 @@
+import { Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -11,15 +12,18 @@ canvas.height = 640;
 
 var backgroundImage = new Image();
 
+var playerWizard;
+var entities = [];
+
 var setup = function () {
     // Set background to display "loading" text
-    context.fillStyle = "#FF0000";
+    context.fillStyle = "#000000";
     context.fillRect(0, 0, innerWidth, innerHeight);
     context.strokeStyle = "#000000";
-    context.fillStyle = "#000000";
+    context.fillStyle = "#FF0000";
     context.lineWidth = 2.0;
     context.font = "24px sans-serif";
-    context.fillText("LOADING", (innerWidth / 2) - 48, (innerHeight / 2));
+    context.fillText("LOADING", (canvas.width / 2) - 48, (canvas.height / 2));
 
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, () => {
@@ -31,7 +35,14 @@ var setup = function () {
 
 function initialize() {
     console.log("Initializing...");
+
+    playerWizard = new Wizard("wizard", 0,0,imageLoader.getImage(ImageAsset.WIZARD_1));
+    entities.push(playerWizard);
+
+
     renderBackground(context);
+
+
 }
 
 function beginGame() {
@@ -50,14 +61,17 @@ function renderBackground(context) {
 
     // get random tiles
     let tiles = [
-        imageLoader.getImage(ImageAsset.TILE_1),
-        imageLoader.getImage(ImageAsset.TILE_2),
-        imageLoader.getImage(ImageAsset.TILE_3),
-        imageLoader.getImage(ImageAsset.TILE_4),
-        imageLoader.getImage(ImageAsset.TILE_5),
-        imageLoader.getImage(ImageAsset.TILE_6),
-        imageLoader.getImage(ImageAsset.TILE_7),
-        imageLoader.getImage(ImageAsset.TILE_8)];
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_1),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_2),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_3),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_4),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_5),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_6),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_7),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_8),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_9),
+        imageLoader.getImage(ImageAsset.TILE_MARBLE_GROUND_10)
+    ];
 
 
     // Renders the background once and re-uses the image
@@ -90,5 +104,21 @@ function drawScene() {
     context.imageSmoothingEnabled = false;
 
     // Draw entities
+    entities.forEach(entity => {
+        entity.render(context);
+    });
 
 }
+
+document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+        case "w":
+            break;
+        case "a":
+            break;
+        case "s":
+            break;
+        case "s":
+            break;
+    }
+});

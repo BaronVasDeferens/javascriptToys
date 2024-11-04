@@ -131,7 +131,7 @@ function drawScene() {
 }
 
 function checkInBounds(destinationX, destinationY) {
-    return (destinationX >= 0) && (destinationX <= canvas.width) && (destinationY >= 0) && (destinationY <= canvas.height);
+    return (destinationX >= 0) && (destinationX < canvas.width) && (destinationY >= 0) && (destinationY < canvas.height);
 }
 
 document.addEventListener('keydown', (e) => {

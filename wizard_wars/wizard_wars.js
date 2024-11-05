@@ -1,4 +1,4 @@
-import { Mover, Wizard } from './entity.js';
+import { Monster, Mover, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -15,7 +15,9 @@ let backgroundImage = new Image();
 let tileSize = 64;
 
 let playerWizard;
-let wizardMovePerTick = 4;
+let wizardMovePerTick = 8;
+
+let monsterMovePerTick = 2;
 
 let entities = [];
 let controlInput = null;
@@ -53,6 +55,11 @@ function initialize() {
     playerWizard = new Wizard("wizard", 0, 0, imageLoader.getImage(ImageAsset.WIZARD_2));
     entities.push(playerWizard);
 
+    entities.push(new Monster("monster", 5 * tileSize, 1 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    entities.push(new Monster("monster", 5 * tileSize, 2 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    entities.push(new Monster("monster", 5 * tileSize, 3 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    entities.push(new Monster("monster", 5 * tileSize, 4 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    entities.push(new Monster("monster", 5 * tileSize, 5 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
 
     renderBackground(context);
 
@@ -67,9 +74,57 @@ function beginGame() {
 
 function updateGameState() {
 
+    // Clean out dead movers
     movers = movers.filter(mover => {
         return mover.isAlive;
     });
+
+    // Move the monsters
+    entities
+        .filter(entity => { return entity instanceof Monster })
+        .forEach(entity => {
+            if (entity.mover == null || entity.mover.isAlive == false) {
+                // chose a new destination
+                switch (randomIntInRange(0, 4)) {
+                    case 0:
+                        // move down
+                        var targetY = entity.y + tileSize;
+                        if (checkInBounds(entity.x, targetY)) {
+                            let mover = new Mover(entity, entity.x, targetY, 0, monsterMovePerTick, () => { })
+                            entity.setMover(mover);
+                            movers.push(mover);
+                        }
+                        break;
+                    case 1:
+                        // move up
+                        var targetY = entity.y - tileSize;
+                        if (checkInBounds(entity.x, targetY)) {
+                            let mover = new Mover(entity, entity.x, targetY, 0, -monsterMovePerTick, () => { })
+                            entity.setMover(mover);
+                            movers.push(mover);
+                        }
+                        break;
+                    case 2:
+                        // move left
+                        var targetX = entity.x - tileSize;
+                        if (checkInBounds(targetX, entity.y)) {
+                            let mover = new Mover(entity, targetX, entity.y, -monsterMovePerTick, 0, () => { })
+                            entity.setMover(mover);
+                            movers.push(mover);
+                        }
+                        break;
+                    case 3:
+                        // move right
+                        var targetX = entity.x + tileSize;
+                        if (checkInBounds(targetX, entity.y)) {
+                            let mover = new Mover(entity, targetX, entity.y, monsterMovePerTick, 0, () => { })
+                            entity.setMover(mover);
+                            movers.push(mover);
+                        }
+                        break;
+                }
+            }
+        })
 
     movers.forEach(mover => {
         mover.update();
@@ -83,7 +138,7 @@ function renderBackground(context) {
     // get random tiles
     let tiles = [];
 
-    imageLoader.getTileSet("MAGIC_DARK").forEach( tile => {
+    imageLoader.getTileSet("MAGIC_DARK").forEach(tile => {
         tiles.push(imageLoader.getImage(tile));
     });
 
@@ -124,7 +179,10 @@ function drawScene() {
 }
 
 function checkInBounds(destinationX, destinationY) {
-    return (destinationX >= 0) && (destinationX < canvas.width) && (destinationY >= 0) && (destinationY < canvas.height);
+    var inBounds = (destinationX >= 0) && (destinationX < canvas.width) && (destinationY >= 0) && (destinationY < canvas.height);
+    var disallowedTargets = movers.filter( mover => { mover.destinationX == destinationX && mover.destinationY == destinationY }).length;
+    console.log(`${inBounds} ${disallowedTargets == 0}`)
+    return inBounds // && disallowedTargets.length == 0;
 }
 
 document.addEventListener('keydown', (e) => {

@@ -30,6 +30,17 @@ export class Wizard extends Entity {
     }
 }
 
+export class Monster extends Entity {
+    constructor(id, x, y, image) {
+        super(id, x, y);
+        this.image = image;
+    }
+
+    setMover(mover) {
+        this.mover = mover;
+    }
+}
+
 export class Mover {
     constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {
         this.entity = entity;

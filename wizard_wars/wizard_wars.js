@@ -1,5 +1,5 @@
 import { Monster, Mover, Wizard } from './entity.js';
-import { AssetLoader, ImageLoader, ImageAsset, } from './AssetLoader.js';
+import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
@@ -10,9 +10,9 @@ const context = canvas.getContext('2d');
 canvas.width = 640;
 canvas.height = 640;
 
-let backgroundImage = new Image();
-
 let tileSize = 64;
+let tileCols = canvas.width / tileSize;
+let tileRows = canvas.height / tileSize;
 
 let playerWizard;
 let wizardMovePerTick = 8;
@@ -22,6 +22,8 @@ let monsterMovePerTick = 2;
 let entities = [];
 let controlInput = null;
 var movers = [];
+
+let backgroundImage = new Image();
 
 
 const ControlInput = Object.freeze({
@@ -55,15 +57,11 @@ function initialize() {
     playerWizard = new Wizard("wizard", 0, 0, imageLoader.getImage(ImageAsset.WIZARD_2));
     entities.push(playerWizard);
 
-    entities.push(new Monster("monster", 5 * tileSize, 1 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
-    entities.push(new Monster("monster", 5 * tileSize, 2 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
-    entities.push(new Monster("monster", 5 * tileSize, 3 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
-    entities.push(new Monster("monster", 5 * tileSize, 4 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
-    entities.push(new Monster("monster", 5 * tileSize, 5 * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    for (var i = 0; i < 10; i++) {
+        entities.push(new Monster(`monster_${i}`, 5 * tileSize, i * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    }
 
     renderBackground(context);
-
-
 }
 
 function beginGame() {
@@ -129,6 +127,8 @@ function updateGameState() {
     movers.forEach(mover => {
         mover.update();
     });
+
+    checkCollision(playerWizard, entities);
 }
 
 function renderBackground(context) {
@@ -180,15 +180,40 @@ function drawScene() {
 
 function checkInBounds(destinationX, destinationY) {
     var inBounds = (destinationX >= 0) && (destinationX < canvas.width) && (destinationY >= 0) && (destinationY < canvas.height);
-    var disallowedTargets = movers.filter( mover => { mover.destinationX == destinationX && mover.destinationY == destinationY }).length;
-    console.log(`${inBounds} ${disallowedTargets == 0}`)
+    var disallowedTargets = movers.filter(mover => { mover.destinationX == destinationX && mover.destinationY == destinationY }).length;
+    // console.log(`${inBounds} ${disallowedTargets == 0}`)
     return inBounds // && disallowedTargets.length == 0;
 }
 
-document.addEventListener('keydown', (e) => {
+function checkCollision(source, entities) {
+    var collisions = entities.map((entity) => {
+        if (source === entity) {
+            return false;
+        } else {
+            return isWithinCollisionDistance(source, entity, 32)
+        }
+    });
 
+    return collisions.includes(true);
+}
+
+function isWithinCollisionDistance(entityA, entityB, distance) {
+    var xDist = Math.abs(entityA.x - entityB.x);
+    var yDist = Math.abs(entityA.y - entityB.y);
+    // console.log(`${entityB.id}: ${xDist} ${yDist}`)
+
+    var collisionDetected = (xDist <= distance) && (yDist <= distance);
+
+    if (collisionDetected) {
+        console.log(`>>> ${entityA.id} COLLIDES WITH ${entityB.id} <<<`);
+    }
+    return collisionDetected;
+}
+
+document.addEventListener('keydown', (e) => {
     if (controlInput == null) {
         switch (e.key) {
+            case "ArrowUp":
             case "w":
                 if (checkInBounds(playerWizard.x, playerWizard.y - tileSize)) {
                     controlInput = ControlInput.UP
@@ -207,6 +232,7 @@ document.addEventListener('keydown', (e) => {
                 }
 
                 break;
+            case "ArrowDown":
             case "s":
                 if (checkInBounds(playerWizard.x, playerWizard.y + tileSize)) {
                     controlInput = ControlInput.DOWN
@@ -225,6 +251,7 @@ document.addEventListener('keydown', (e) => {
                 }
 
                 break;
+            case "ArrowLeft":
             case "a":
                 if (checkInBounds(playerWizard.x - tileSize, playerWizard.y)) {
                     controlInput = ControlInput.LEFT
@@ -243,6 +270,7 @@ document.addEventListener('keydown', (e) => {
                 }
 
                 break;
+            case "ArrowRight":
             case "d":
                 if (checkInBounds(playerWizard.x + tileSize, playerWizard.y)) {
                     controlInput = ControlInput.RIGHT

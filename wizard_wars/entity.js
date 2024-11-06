@@ -41,6 +41,17 @@ export class Monster extends Entity {
     }
 }
 
+
+export class Collectable extends Entity {
+    isCollected = false;
+
+    constructor(id, x, y, image) {
+        super(id, x, y);
+        this.image = image;
+    }
+}
+
+
 export class Mover {
     constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {
         this.entity = entity;

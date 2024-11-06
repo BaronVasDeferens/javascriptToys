@@ -1,4 +1,4 @@
-import { Monster, Mover, Wizard } from './entity.js';
+import { Collectable, Monster, Mover, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -22,6 +22,7 @@ let monsterMovePerTick = 2;
 let entities = [];
 let controlInput = null;
 var movers = [];
+var collectables = [];
 
 let backgroundImage = new Image();
 
@@ -45,20 +46,37 @@ var setup = function () {
 
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, () => {
-        initialize();
+        initializeGameState();
         console.log("Begin game!");
         beginGame();
     });
 }();
 
-function initialize() {
+function initializeGameState() {
     console.log("Initializing...");
 
+    // Clear out prior data
+    movers = [];
+    entities = [];
+    collectables = [];
+    controlInput = null;
+
+    // Set up player
     playerWizard = new Wizard("wizard", 0, 0, imageLoader.getImage(ImageAsset.WIZARD_2));
     entities.push(playerWizard);
 
+    // Add monsters
     for (var i = 0; i < 10; i++) {
         entities.push(new Monster(`monster_${i}`, 5 * tileSize, i * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
+    }
+
+    // Add collectables
+    var coinImages = imageLoader.getTilesetForName("GOLDSTACKS"); 
+    console.log(coinImages)
+    for (var i = 1; i < 10; i++) {
+        collectables.push(
+            new Collectable(`gold_${i}`, i * tileSize, i * tileSize, coinImages[randomIntInRange(0, coinImages.length)])
+        );
     }
 
     renderBackground(context);
@@ -83,7 +101,7 @@ function updateGameState() {
         .forEach(entity => {
             if (entity.mover == null || entity.mover.isAlive == false) {
                 // chose a new destination
-                switch (randomIntInRange(0, 4)) {
+                switch (randomIntInRange(0, 20)) {  // <-- decrease the second value to make the monsters' movement less "confident"
                     case 0:
                         // move down
                         var targetY = entity.y + tileSize;
@@ -128,32 +146,37 @@ function updateGameState() {
         mover.update();
     });
 
-    checkCollision(playerWizard, entities);
+    if (checkCollision(playerWizard, entities)) {
+        initializeGameState();
+    }
+
+    collectables.forEach(item => {
+        if (isWithinCollisionDistance(playerWizard, item, 0)) {
+            item.isCollected = true;
+        }
+    });
+
+    collectables = collectables.filter( item => item.isCollected == false );
+
 }
 
 function renderBackground(context) {
-
-    let tilesSze = 64;
-
-    // get random tiles
-    let tiles = [];
-
-    imageLoader.getTileSet("MAGIC_DARK").forEach(tile => {
-        tiles.push(imageLoader.getImage(tile));
-    });
-
-
     // Renders the background once and re-uses the image
     console.log("Rendering background...");
+
+    // Prepare the background
     context.fillStyle = "#b8bab9";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Acquire tiles
+    let tiles = imageLoader.getTilesetForName("MAGIC_DARK");
+
+    // Draw tiles onto the background image
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {
-            context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tilesSze, j * tilesSze);
+            context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tileSize, j * tileSize);
         }
     }
-
 
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
@@ -170,6 +193,11 @@ function drawScene() {
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(backgroundImage, 0, 0);
     //context.imageSmoothingEnabled = false;
+
+    // Draw collectables
+    collectables.forEach(item => {
+        item.render(context);
+    })
 
     // Draw entities
     entities.forEach(entity => {

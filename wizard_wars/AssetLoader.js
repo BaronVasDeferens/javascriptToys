@@ -19,6 +19,11 @@ export var ImageAsset = Object.freeze({
 
     MONSTER_1: "resources/tiles/64x64/tile_4127.png",
 
+    GOLD_COIN_1: "resources/tiles/64x64/tile_2601.png",
+    GOLD_COIN_STACK_1: "resources/tiles/64x64/tile_2602.png",
+    GOLD_COIN_STACK_2: "resources/tiles/64x64/tile_2603.png",
+    GOLD_COIN_STACK_3: "resources/tiles/64x64/tile_2604.png",
+
     // Floor tiles
     TILE_GRASSY_STONE_FLOOR_1: "resources/tile1.png",
     TILE_GRASSY_STONE_FLOOR_2: "resources/tile2.png",
@@ -135,10 +140,20 @@ export class ImageLoader {
             ImageAsset.TILE_MAGIC_DARK_GROUND_9,
             ImageAsset.TILE_MAGIC_DARK_GROUND_10
         ]);
+
+        this.tileSets.set("GOLDSTACKS", [
+            ImageAsset.GOLD_COIN_STACK_1,
+            ImageAsset.GOLD_COIN_STACK_2,
+            ImageAsset.GOLD_COIN_STACK_3
+        ]);
     }
 
-    getTileSet(name) {
+    getTileSetNames(name) {
         return this.tileSets.get(name);
+    }
+
+    getTilesetForName(name) {
+        return this.getTileSetNames(name).map(tile => this.getImage(tile));
     }
 
     loadImages(callback) {

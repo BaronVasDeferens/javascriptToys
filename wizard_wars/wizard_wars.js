@@ -88,6 +88,8 @@ function beginGame() {
     requestAnimationFrame(beginGame);
 }
 
+// --- START MAIN GAME LOOP ---
+
 function updateGameState() {
 
     // Clean out dead movers
@@ -157,34 +159,7 @@ function updateGameState() {
     });
 
     collectables = collectables.filter( item => item.isCollected == false );
-
 }
-
-function renderBackground(context) {
-    // Renders the background once and re-uses the image
-    console.log("Rendering background...");
-
-    // Prepare the background
-    context.fillStyle = "#b8bab9";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Acquire tiles
-    let tiles = imageLoader.getTilesetForName("MAGIC_DARK");
-
-    // Draw tiles onto the background image
-    for (var i = 0; i < 10; i++) {
-        for (var j = 0; j < 10; j++) {
-            context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tileSize, j * tileSize);
-        }
-    }
-
-    var updatedSrc = canvas.toDataURL();
-    backgroundImage.src = updatedSrc;
-}
-
-function randomIntInRange(min, max) {
-    return parseInt(Math.random() * max + min);
-};
 
 function drawScene() {
 
@@ -205,6 +180,33 @@ function drawScene() {
     });
 
 }
+
+// --- END MAIN GAME LOOP ---
+
+
+function renderBackground(context) {
+    // Renders the background once and re-uses the image
+    console.log("Rendering background...");
+
+    // Prepare the background
+    context.fillStyle = "#b8bab9";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw tiles onto the background image
+    let tiles = imageLoader.getTilesetForName("MAGIC_DARK");
+    for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < 10; j++) {
+            context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tileSize, j * tileSize);
+        }
+    }
+
+    var updatedSrc = canvas.toDataURL();
+    backgroundImage.src = updatedSrc;
+}
+
+function randomIntInRange(min, max) {
+    return parseInt(Math.random() * max + min);
+};
 
 function checkInBounds(destinationX, destinationY) {
     var inBounds = (destinationX >= 0) && (destinationX < canvas.width) && (destinationY >= 0) && (destinationY < canvas.height);
@@ -228,13 +230,12 @@ function checkCollision(source, entities) {
 function isWithinCollisionDistance(entityA, entityB, distance) {
     var xDist = Math.abs(entityA.x - entityB.x);
     var yDist = Math.abs(entityA.y - entityB.y);
-    // console.log(`${entityB.id}: ${xDist} ${yDist}`)
-
     var collisionDetected = (xDist <= distance) && (yDist <= distance);
 
-    if (collisionDetected) {
-        console.log(`>>> ${entityA.id} COLLIDES WITH ${entityB.id} <<<`);
-    }
+    // if (collisionDetected) {
+    //     console.log(`>>> ${entityA.id} COLLIDES WITH ${entityB.id} <<<`);
+    // }
+
     return collisionDetected;
 }
 

@@ -141,6 +141,18 @@ export class ImageLoader {
             ImageAsset.TILE_MAGIC_DARK_GROUND_10
         ]);
 
+        this.tileSets.set("FLESH_GROUND", [
+            ImageAsset.TILE_FLESH_GROUND_1,
+            ImageAsset.TILE_FLESH_GROUND_2,
+            ImageAsset.TILE_FLESH_GROUND_3,
+            ImageAsset.TILE_FLESH_GROUND_4,
+            ImageAsset.TILE_FLESH_GROUND_5,
+            ImageAsset.TILE_FLESH_GROUND_6,
+            ImageAsset.TILE_FLESH_GROUND_7,
+            ImageAsset.TILE_FLESH_GROUND_8,
+            ImageAsset.TILE_FLESH_GROUND_9
+        ]);
+
         this.tileSets.set("GOLDSTACKS", [
             ImageAsset.GOLD_COIN_STACK_1,
             ImageAsset.GOLD_COIN_STACK_2,

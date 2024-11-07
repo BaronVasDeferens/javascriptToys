@@ -8,11 +8,15 @@ const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
 canvas.width = 640;
-canvas.height = 640;
+canvas.height = 1000;
 
+// The square play area
+let mapWidth = 640
+let mapHeight = 640
 let tileSize = 64;
-let tileCols = canvas.width / tileSize;
-let tileRows = canvas.height / tileSize;
+
+let tileCols = mapWidth / tileSize;
+let tileRows = mapHeight / tileSize;
 
 let playerWizard;
 let wizardMovePerTick = 8;
@@ -27,13 +31,39 @@ var collectables = [];
 let backgroundImage = new Image();
 
 var delayValue = 0;
-let delayValueIncrement = 2
+let delayValueIncrement = 2;
+
+class Tile {
+    x;
+    y;
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
 
 const ControlInput = Object.freeze({
     LEFT: 0,
     RIGHT: 1,
     UP: 2,
     DOWN: 3
+});
+
+const GameState = Object.freeze({
+    INTRO: "Intro",
+    PLAYER_CHOOSE_CARD: "Choose Card",
+    PLAYER_EXECUTE_CARD: "Player executes action",
+    ENEMY_MOVE: "Enemies move...",
+    GAME_OVER: "GAME OVER"
+});
+
+var gameState = GameState.INTRO;
+
+const ActionCard = Object.freeze({
+    MOVE_UP: 1,
+    MOVE_DOWN: 2,
+    MOVE_LEFT: 3,
+    MOVE_RIGHT: 4
 });
 
 document.addEventListener('keydown', (e) => {
@@ -133,8 +163,7 @@ document.addEventListener('keydown', (e) => {
 var setup = function () {
     // Set background to display "loading" text
     context.fillStyle = "#000000";
-    context.fillRect(0, 0, innerWidth, innerHeight);
-    context.strokeStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
     context.fillStyle = "#FF0000";
     context.lineWidth = 2.0;
     context.font = "24px sans-serif";
@@ -143,13 +172,14 @@ var setup = function () {
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, () => {
         initializeGameState();
-        console.log("Begin game!");
         beginGame();
     });
 }();
 
 function initializeGameState() {
+
     console.log("Initializing...");
+    gameState = GameState.INTRO;
 
     // Clear out prior data
     movers = [];
@@ -158,19 +188,20 @@ function initializeGameState() {
     controlInput = null;
 
     // Set up player
-    playerWizard = new Wizard("wizard", 0, 0, imageLoader.getImage(ImageAsset.WIZARD_2));
+    var location = getSingleUnoccupiedGrid();
+    playerWizard = new Wizard("wizard", location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.WIZARD_2));
     entities.push(playerWizard);
 
     // Add monsters
-    for (var i = 0; i < 9; i++) {
-        var location = findUnoccupiedGrid();
+    for (var i = 0; i < 10; i++) {
+        var location = getSingleUnoccupiedGrid();
         entities.push(new Monster(`monster_${i}`, location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.MONSTER_1)));
     }
 
     // Add collectables
     var coinImages = imageLoader.getTilesetForName("GOLDSTACKS");
-    for (var i = 1; i < 10; i++) {
-        var location = findUnoccupiedGrid();
+    for (var i = 0; i < 10; i++) {
+        var location = getSingleUnoccupiedGrid();
         collectables.push(
             new Collectable(`gold_${i}`, location.x * tileSize, location.y * tileSize, coinImages[randomIntInRange(0, coinImages.length)])
         );
@@ -184,7 +215,7 @@ function renderBackground(context) {
     console.log("Rendering background...");
 
     // Prepare the background
-    context.fillStyle = "#b8bab9";
+    context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw tiles onto the background image
@@ -200,7 +231,6 @@ function renderBackground(context) {
 }
 
 async function beginGame() {
-
     await new Promise(resolve => setTimeout(resolve, delayValue));
     updateGameState();
     drawScene()
@@ -217,51 +247,54 @@ function updateGameState() {
     });
 
     // Move the monsters
-    entities
-        .filter(entity => { return entity instanceof Monster })
-        .forEach(entity => {
-            if (entity.mover == null || entity.mover.isAlive == false) {
-                // chose a new destination
-                switch (randomIntInRange(0, 4)) {  // <-- decrease the second value to make the monsters' movement less "confident"
-                    case 0:
-                        // move down
-                        var targetY = entity.y + tileSize;
-                        if (checkInBounds(entity.x, targetY)) {
-                            let mover = new Mover(entity, entity.x, targetY, 0, monsterMovePerTick, () => { })
-                            entity.setMover(mover);
-                            movers.push(mover);
-                        }
-                        break;
-                    case 1:
-                        // move up
-                        var targetY = entity.y - tileSize;
-                        if (checkInBounds(entity.x, targetY)) {
-                            let mover = new Mover(entity, entity.x, targetY, 0, -monsterMovePerTick, () => { })
-                            entity.setMover(mover);
-                            movers.push(mover);
-                        }
-                        break;
-                    case 2:
-                        // move left
-                        var targetX = entity.x - tileSize;
-                        if (checkInBounds(targetX, entity.y)) {
-                            let mover = new Mover(entity, targetX, entity.y, -monsterMovePerTick, 0, () => { })
-                            entity.setMover(mover);
-                            movers.push(mover);
-                        }
-                        break;
-                    case 3:
-                        // move right
-                        var targetX = entity.x + tileSize;
-                        if (checkInBounds(targetX, entity.y)) {
-                            let mover = new Mover(entity, targetX, entity.y, monsterMovePerTick, 0, () => { })
-                            entity.setMover(mover);
-                            movers.push(mover);
-                        }
-                        break;
+    if (gameState == GameState.ENEMY_MOVE) {
+        entities
+            .filter(entity => { return entity instanceof Monster })
+            .forEach(entity => {
+                if (entity.mover == null || entity.mover.isAlive == false) {
+                    // chose a new destination
+                    switch (randomIntInRange(0, 4)) {  // <-- decrease the second value to make the monsters' movement less "confident"
+                        case 0:
+                            // move down
+                            var targetY = entity.y + tileSize;
+                            if (checkInBounds(entity.x, targetY)) {
+                                let mover = new Mover(entity, entity.x, targetY, 0, monsterMovePerTick, () => { })
+                                entity.setMover(mover);
+                                movers.push(mover);
+                            }
+                            break;
+                        case 1:
+                            // move up
+                            var targetY = entity.y - tileSize;
+                            if (checkInBounds(entity.x, targetY)) {
+                                let mover = new Mover(entity, entity.x, targetY, 0, -monsterMovePerTick, () => { })
+                                entity.setMover(mover);
+                                movers.push(mover);
+                            }
+                            break;
+                        case 2:
+                            // move left
+                            var targetX = entity.x - tileSize;
+                            if (checkInBounds(targetX, entity.y)) {
+                                let mover = new Mover(entity, targetX, entity.y, -monsterMovePerTick, 0, () => { })
+                                entity.setMover(mover);
+                                movers.push(mover);
+                            }
+                            break;
+                        case 3:
+                            // move right
+                            var targetX = entity.x + tileSize;
+                            if (checkInBounds(targetX, entity.y)) {
+                                let mover = new Mover(entity, targetX, entity.y, monsterMovePerTick, 0, () => { })
+                                entity.setMover(mover);
+                                movers.push(mover);
+                            }
+                            break;
+                    }
                 }
-            }
-        })
+            })
+    }
+
 
     movers.forEach(mover => {
         mover.update();
@@ -286,8 +319,9 @@ function updateGameState() {
 function drawScene() {
 
     // Draw background
-    context.fillStyle = "#b8bab9";
+    context.fillStyle = "#FF0000";
     context.fillRect(0, 0, canvas.width, canvas.height);
+
     context.drawImage(backgroundImage, 0, 0);
     //context.imageSmoothingEnabled = false;
 
@@ -315,8 +349,8 @@ function randomIntInRange(min, max) {
 };
 
 function checkInBounds(destinationX, destinationY) {
-    var inBounds = (destinationX >= 0) && (destinationX < canvas.width) && (destinationY >= 0) && (destinationY < canvas.height);
-    return inBounds 
+    var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
+    return inBounds
 }
 
 function checkCollision(source, entities) {
@@ -335,52 +369,47 @@ function isWithinCollisionDistance(entityA, entityB, distance) {
     var xDist = Math.abs(entityA.x - entityB.x);
     var yDist = Math.abs(entityA.y - entityB.y);
     var collisionDetected = (xDist <= distance) && (yDist <= distance);
-
-    // if (collisionDetected) {
-    //     console.log(`>>> ${entityA.id} COLLIDES WITH ${entityB.id} <<<`);
-    // }
-
     return collisionDetected;
 }
 
 /**
  * @returns a single grid space (x,y) that contains no other entity 
  */
-function findUnoccupiedGrid() {
-    var allGrids = [];
+function getSingleUnoccupiedGrid() {
+    var allTiles = [];
     for (var cols = 0; cols < tileCols; cols++) {
         for (var rows = 0; rows < tileRows; rows++) {
-            allGrids.push( {x: cols, y: rows} );
+            allTiles.push(new Tile(cols, rows));
         }
     }
+;
+    var occupiedGrids = getAllOccupiedGrids().sort();
 
-    getOccupiedGrids().forEach( grid => {
-        var index = allGrids.indexOf(grid);
-        if (index != -1) {
-            allGrids.splice(index, 1);
-        }
+    occupiedGrids.forEach(occupied => {
+        console.log(`occupied: ${occupied.x} ${occupied.y}`);
+        allTiles = allTiles.filter(grid => { return JSON.stringify(grid) !== JSON.stringify(occupied) });
     });
 
-    return allGrids[randomIntInRange(0, allGrids.length)];
+    console.log(`----------B allGrids: ${allTiles.length} -----------`)
+    return allTiles[randomIntInRange(0, allTiles.length)];
 }
 
 /**
  * Returns the list of all grid points that have at least one entity (enemy, player, collectable) partially or wholly within them
  */
-function getOccupiedGrids() {
-    return entities.map(entity => {
-        return {
-            x: Math.floor(entity.x / tileSize),
-            y: Math.floor(entity.y / tileSize)
-        }
-    }).concat(
-        collectables.map(item => {
-            return {
-                x: item.x / tileSize,
-                y: item.y / tileSize
-            }
-        })
-    )
+function getAllOccupiedGrids() {
+    var occupiedGrids = [];
+
+    entities.forEach(entity => {
+        occupiedGrids.push(new Tile(Math.floor(entity.x / tileSize), Math.floor(entity.y / tileSize)))
+    });
+
+    collectables.forEach(item => {
+        occupiedGrids.push(new Tile(Math.floor(item.x / tileSize), Math.floor(item.y / tileSize)))
+    });
+
+    console.log(`** final occupied: ${occupiedGrids.length}`)
+    return occupiedGrids;
 }
 
 

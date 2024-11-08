@@ -264,9 +264,6 @@ async function beginGame() {
 // ------------ START MAIN GAME LOOP ------------
 
 function processCardAction(cardAction) {
-
-    console.log(cardAction)
-
     switch (cardAction) {
         case ActionCard.ACTION_CARD_UP:
             if (checkInBounds(playerWizard.x, playerWizard.y - tileSize)) {
@@ -531,11 +528,9 @@ function getSingleUnoccupiedGrid() {
     var occupiedGrids = getAllOccupiedGrids().sort();
 
     occupiedGrids.forEach(occupied => {
-        console.log(`occupied: ${occupied.x} ${occupied.y}`);
         allTiles = allTiles.filter(grid => { return JSON.stringify(grid) !== JSON.stringify(occupied) });
     });
 
-    console.log(`----------B allGrids: ${allTiles.length} -----------`)
     return allTiles[randomIntInRange(0, allTiles.length)];
 }
 
@@ -553,7 +548,6 @@ function getAllOccupiedGrids() {
         occupiedGrids.push(new Tile(Math.floor(item.x / tileSize), Math.floor(item.y / tileSize)))
     });
 
-    console.log(`** final occupied: ${occupiedGrids.length}`)
     return occupiedGrids;
 }
 

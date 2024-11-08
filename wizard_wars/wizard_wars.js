@@ -72,6 +72,7 @@ let actionCards = [
     ActionCard.ACTION_CARD_LEFT,
     ActionCard.ACTION_CARD_RIGHT
 ];
+
 var cardA;
 var cardB;
 
@@ -283,6 +284,7 @@ function processCardAction(cardAction) {
                         }
                     )
                 )
+                gameState = GameState.PLAYER_EXECUTE_CARD;
             }
             break;
         case ActionCard.ACTION_CARD_DOWN:
@@ -299,6 +301,7 @@ function processCardAction(cardAction) {
                         }
                     )
                 )
+                gameState = GameState.PLAYER_EXECUTE_CARD;
             }
             break;
         case ActionCard.ACTION_CARD_LEFT:
@@ -315,6 +318,7 @@ function processCardAction(cardAction) {
                         }
                     )
                 )
+                gameState = GameState.PLAYER_EXECUTE_CARD;
             }
             break;
         case ActionCard.ACTION_CARD_RIGHT:
@@ -331,11 +335,10 @@ function processCardAction(cardAction) {
                         }
                     )
                 )
+                gameState = GameState.PLAYER_EXECUTE_CARD;
             }
             break;
     }
-
-    gameState = GameState.PLAYER_EXECUTE_CARD;
 
 }
 
@@ -409,7 +412,7 @@ function updateGameState() {
                 }
             })
 
-            gameState = GameState.DRAW_CARDS;
+        gameState = GameState.DRAW_CARDS;
     }
 
 

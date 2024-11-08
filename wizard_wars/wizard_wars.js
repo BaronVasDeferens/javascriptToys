@@ -171,10 +171,16 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('mousedown', (e) => {
+
     if (gameState == GameState.PLAYER_CHOOSE_CARD) {
-        if (cardA.containsClick(e.x, e.y)) {
+
+        var rect = e.target.getBoundingClientRect();
+        var clickX = e.clientX - rect.left; //x position within the element.
+        var clickY = e.clientY - rect.top;  //y position within the element.
+
+        if (cardA.containsClick(clickX, clickY)) {
             processCardAction(cardA.action);
-        } else if (cardB.containsClick(e.x, e.y)) {
+        } else if (cardB.containsClick(clickX, clickY)) {
             processCardAction(cardB.action);
         }
     }

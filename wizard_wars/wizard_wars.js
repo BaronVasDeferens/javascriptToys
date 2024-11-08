@@ -1,4 +1,4 @@
-import { Collectable, Monster, Mover, Wizard } from './entity.js';
+import { Card, Collectable, Monster, Mover, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -51,20 +51,30 @@ const ControlInput = Object.freeze({
 
 const GameState = Object.freeze({
     INTRO: "Intro",
+    DRAW_CARDS: "Drawing cards...",
     PLAYER_CHOOSE_CARD: "Choose Card",
     PLAYER_EXECUTE_CARD: "Player executes action",
     ENEMY_MOVE: "Enemies move...",
     GAME_OVER: "GAME OVER"
 });
 
-var gameState = GameState.INTRO;
+var gameState = GameState.DRAW_CARDS;
 
 const ActionCard = Object.freeze({
-    MOVE_UP: 1,
-    MOVE_DOWN: 2,
-    MOVE_LEFT: 3,
-    MOVE_RIGHT: 4
+    ACTION_CARD_UP: "ACTION_CARD_UP",
+    ACTION_CARD_DOWN: "ACTION_CARD_DOWN",
+    ACTION_CARD_LEFT: "ACTION_CARD_LEFT",
+    ACTION_CARD_RIGHT: "ACTION_CARD_RIGHT"
 });
+let actionCards = [
+    ActionCard.ACTION_CARD_UP,
+    ActionCard.ACTION_CARD_DOWN,
+    ActionCard.ACTION_CARD_LEFT,
+    ActionCard.ACTION_CARD_RIGHT
+];
+var cardA;
+var cardB;
+
 
 document.addEventListener('keydown', (e) => {
     if (controlInput == null) {
@@ -160,6 +170,18 @@ document.addEventListener('keydown', (e) => {
 
 });
 
+document.addEventListener('mousedown', (e) => {
+    if (gameState == GameState.PLAYER_CHOOSE_CARD) {
+        if (cardA.containsClick(e.x, e.y)) {
+            console.log("player chose card A");
+            processCardAction(cardA.action);
+        } else if (cardB.containsClick(e.x, e.y)) {
+            console.log("player chose card B");
+            processCardAction(cardB.action);
+        }
+    }
+});
+
 var setup = function () {
     // Set background to display "loading" text
     context.fillStyle = "#000000";
@@ -179,13 +201,15 @@ var setup = function () {
 function initializeGameState() {
 
     console.log("Initializing...");
-    gameState = GameState.INTRO;
+    gameState = GameState.DRAW_CARDS;
 
     // Clear out prior data
     movers = [];
     entities = [];
     collectables = [];
     controlInput = null;
+    cardA = null;
+    cardB = null;
 
     // Set up player
     var location = getSingleUnoccupiedGrid();
@@ -239,12 +263,102 @@ async function beginGame() {
 
 // ------------ START MAIN GAME LOOP ------------
 
+function processCardAction(cardAction) {
+
+    console.log(cardAction)
+
+    switch (cardAction) {
+        case ActionCard.ACTION_CARD_UP:
+            if (checkInBounds(playerWizard.x, playerWizard.y - tileSize)) {
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y - tileSize,
+                        0,
+                        -wizardMovePerTick,
+                        () => {
+                            gameState = GameState.ENEMY_MOVE
+                        }
+                    )
+                )
+            }
+            break;
+        case ActionCard.ACTION_CARD_DOWN:
+            if (checkInBounds(playerWizard.x, playerWizard.y + tileSize)) {
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y + tileSize,
+                        0,
+                        wizardMovePerTick,
+                        () => {
+                            gameState = GameState.ENEMY_MOVE
+                        }
+                    )
+                )
+            }
+            break;
+        case ActionCard.ACTION_CARD_LEFT:
+            if (checkInBounds(playerWizard.x - tileSize, playerWizard.y)) {
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x - tileSize,
+                        playerWizard.y,
+                        -wizardMovePerTick,
+                        0,
+                        () => {
+                            gameState = GameState.ENEMY_MOVE
+                        }
+                    )
+                )
+            }
+            break;
+        case ActionCard.ACTION_CARD_RIGHT:
+            if (checkInBounds(playerWizard.x + tileSize, playerWizard.y)) {
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x + tileSize,
+                        playerWizard.y,
+                        wizardMovePerTick,
+                        0,
+                        () => {
+                            gameState = GameState.ENEMY_MOVE
+                        }
+                    )
+                )
+            }
+            break;
+    }
+
+    gameState = GameState.PLAYER_EXECUTE_CARD;
+
+}
+
 function updateGameState() {
 
     // Clean out dead movers
     movers = movers.filter(mover => {
         return mover.isAlive;
     });
+
+    if (gameState == GameState.DRAW_CARDS) {
+
+        shuffle(actionCards);
+        var action = actionCards[0];
+        cardA = new Card(10, 650, action, getImageForAction(action));
+        entities.push(cardA);
+
+        action = actionCards[1];
+        cardB = new Card(330, 650, action, getImageForAction(action));
+        entities.push(cardB);
+
+        gameState = GameState.PLAYER_CHOOSE_CARD;
+    }
+
 
     // Move the monsters
     if (gameState == GameState.ENEMY_MOVE) {
@@ -293,6 +407,8 @@ function updateGameState() {
                     }
                 }
             })
+
+            gameState = GameState.DRAW_CARDS;
     }
 
 
@@ -348,6 +464,35 @@ function randomIntInRange(min, max) {
     return parseInt(Math.random() * max + min);
 };
 
+function shuffle(array) {
+    let currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+
+        // Pick a remaining element...
+        let randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+}
+
+function getImageForAction(action) {
+    switch (action) {
+        case ActionCard.ACTION_CARD_UP:
+            return imageLoader.getImage(ImageAsset.ACTION_CARD_UP);
+        case ActionCard.ACTION_CARD_DOWN:
+            return imageLoader.getImage(ImageAsset.ACTION_CARD_DOWN);
+        case ActionCard.ACTION_CARD_LEFT:
+            return imageLoader.getImage(ImageAsset.ACTION_CARD_LEFT);
+        case ActionCard.ACTION_CARD_RIGHT:
+            return imageLoader.getImage(ImageAsset.ACTION_CARD_RIGHT);
+    }
+}
+
 function checkInBounds(destinationX, destinationY) {
     var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
     return inBounds
@@ -382,7 +527,7 @@ function getSingleUnoccupiedGrid() {
             allTiles.push(new Tile(cols, rows));
         }
     }
-;
+    ;
     var occupiedGrids = getAllOccupiedGrids().sort();
 
     occupiedGrids.forEach(occupied => {

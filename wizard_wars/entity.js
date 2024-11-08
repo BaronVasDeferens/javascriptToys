@@ -51,6 +51,24 @@ export class Collectable extends Entity {
     }
 }
 
+export class Card extends Entity {
+
+    width = 300;
+    height = 340;
+
+    constructor(x, y, action, image) {
+        super(action, x, y);
+        this.x = x;
+        this.y = y;
+        this.action = action;
+        this.image = image;
+    }
+
+    containsClick(clickX, clickY) {
+        return (clickX >= this.x && clickX <= this.x + this.width) && (clickY >= this.y && clickY <= this.y + this.height);
+    }
+}
+
 
 export class Mover {
     constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {

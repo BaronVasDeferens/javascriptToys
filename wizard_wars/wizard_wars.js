@@ -173,10 +173,8 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('mousedown', (e) => {
     if (gameState == GameState.PLAYER_CHOOSE_CARD) {
         if (cardA.containsClick(e.x, e.y)) {
-            console.log("player chose card A");
             processCardAction(cardA.action);
         } else if (cardB.containsClick(e.x, e.y)) {
-            console.log("player chose card B");
             processCardAction(cardB.action);
         }
     }

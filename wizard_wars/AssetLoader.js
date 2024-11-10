@@ -24,6 +24,13 @@ export var ImageAsset = Object.freeze({
     GOLD_COIN_STACK_2: "resources/tiles/64x64/tile_2603.png",
     GOLD_COIN_STACK_3: "resources/tiles/64x64/tile_2604.png",
 
+    OBSTACLE_PILLAR_1: "resources/tiles/64x64/tile_781.png",
+    OBSTACLE_PILLAR_2: "resources/tiles/64x64/tile_782.png",
+    OBSTACLE_PILLAR_3: "resources/tiles/64x64/tile_783.png",
+    OBSTACLE_PILLAR_4: "resources/tiles/64x64/tile_784.png",
+    OBSTACLE_PILLAR_5: "resources/tiles/64x64/tile_785.png",
+    OBSTACLE_PILLAR_6: "resources/tiles/64x64/tile_786.png",
+
     ACTION_CARD_UP: "resources/cards/card_up.png",
     ACTION_CARD_DOWN: "resources/cards/card_down.png",
     ACTION_CARD_LEFT: "resources/cards/card_left.png",
@@ -164,6 +171,15 @@ export class ImageLoader {
             ImageAsset.GOLD_COIN_STACK_2,
             ImageAsset.GOLD_COIN_STACK_3
         ]);
+
+        this.tileSets.set("PILLARS", [
+            ImageAsset.OBSTACLE_PILLAR_1,
+            ImageAsset.OBSTACLE_PILLAR_2,
+            ImageAsset.OBSTACLE_PILLAR_3,
+            ImageAsset.OBSTACLE_PILLAR_4,
+            ImageAsset.OBSTACLE_PILLAR_5,
+            ImageAsset.OBSTACLE_PILLAR_6
+        ]);
     }
 
     getTileSetNames(name) {
@@ -199,6 +215,27 @@ export class ImageLoader {
     getImage(imgAsset) {
         return this.imageMap.get(imgAsset);
     };
+
+    /** ------------ CONVENIENCE METHODS ------------ */
+    randomInt(max) {
+        return parseInt(Math.random() * max);
+    };
+
+    shuffle(array) {
+        let currentIndex = array.length;
+    
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
+    
+            // Pick a remaining element...
+            let randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+    
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+    }
 }
 
 

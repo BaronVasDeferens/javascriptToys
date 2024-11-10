@@ -1,4 +1,4 @@
-import { Card, Collectable, Monster, Mover, Wizard } from './entity.js';
+import { Card, Collectable, Monster, Mover, Obstacle, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -21,12 +21,14 @@ let tileRows = mapHeight / tileSize;
 let playerWizard;
 let wizardMovePerTick = 8;
 
+let numObstacles = 9;
 let monsterMovePerTick = 2;
 
 let entities = [];
 let controlInput = null;
 var movers = [];
 var collectables = [];
+var obstacles = [];
 
 let backgroundImage = new Image();
 
@@ -76,13 +78,14 @@ let actionCards = [
 var cardA;
 var cardB;
 
-
+/** ------- KEYBOARD INPUT -------- */
 document.addEventListener('keydown', (e) => {
     if (controlInput == null) {
         switch (e.key) {
             case "ArrowUp":
             case "w":
-                if (checkInBounds(playerWizard.x, playerWizard.y - tileSize)) {
+            case "W":
+                if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
                     controlInput = ControlInput.UP
                     movers.push(
                         new Mover(
@@ -100,7 +103,8 @@ document.addEventListener('keydown', (e) => {
                 break;
             case "ArrowDown":
             case "s":
-                if (checkInBounds(playerWizard.x, playerWizard.y + tileSize)) {
+            case "S":
+                if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
                     controlInput = ControlInput.DOWN
                     movers.push(
                         new Mover(
@@ -118,7 +122,8 @@ document.addEventListener('keydown', (e) => {
                 break;
             case "ArrowLeft":
             case "a":
-                if (checkInBounds(playerWizard.x - tileSize, playerWizard.y)) {
+            case "A":
+                if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
                     controlInput = ControlInput.LEFT
                     movers.push(
                         new Mover(
@@ -136,7 +141,8 @@ document.addEventListener('keydown', (e) => {
                 break;
             case "ArrowRight":
             case "d":
-                if (checkInBounds(playerWizard.x + tileSize, playerWizard.y)) {
+            case "D":
+                if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
                     controlInput = ControlInput.RIGHT
                     movers.push(
                         new Mover(
@@ -212,9 +218,19 @@ function initializeGameState() {
     movers = [];
     entities = [];
     collectables = [];
+    obstacles = [];
     controlInput = null;
     cardA = null;
     cardB = null;
+
+    // Set up some obstacles
+    var obstacleImages = imageLoader.getTilesetForName("PILLARS");
+    for (var i = 0; i < numObstacles; i++) {
+        var location = getSingleUnoccupiedGrid();
+        obstacles.push(
+            new Obstacle(`pillar_${i}`, location.x * tileSize, location.y * tileSize, obstacleImages[randomIntInRange(0, obstacleImages.length)])
+        );
+    }
 
     // Set up player
     var location = getSingleUnoccupiedGrid();
@@ -255,6 +271,8 @@ function renderBackground(context) {
         }
     }
 
+    obstacles.forEach(ob => { ob.render(context) });
+
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
 }
@@ -271,7 +289,7 @@ async function beginGame() {
 function processCardAction(cardAction) {
     switch (cardAction) {
         case ActionCard.ACTION_CARD_UP:
-            if (checkInBounds(playerWizard.x, playerWizard.y - tileSize)) {
+            if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
                 movers.push(
                     new Mover(
                         playerWizard,
@@ -288,7 +306,7 @@ function processCardAction(cardAction) {
             }
             break;
         case ActionCard.ACTION_CARD_DOWN:
-            if (checkInBounds(playerWizard.x, playerWizard.y + tileSize)) {
+            if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
                 movers.push(
                     new Mover(
                         playerWizard,
@@ -305,7 +323,7 @@ function processCardAction(cardAction) {
             }
             break;
         case ActionCard.ACTION_CARD_LEFT:
-            if (checkInBounds(playerWizard.x - tileSize, playerWizard.y)) {
+            if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
                 movers.push(
                     new Mover(
                         playerWizard,
@@ -322,7 +340,7 @@ function processCardAction(cardAction) {
             }
             break;
         case ActionCard.ACTION_CARD_RIGHT:
-            if (checkInBounds(playerWizard.x + tileSize, playerWizard.y)) {
+            if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
                 movers.push(
                     new Mover(
                         playerWizard,
@@ -375,7 +393,7 @@ function updateGameState() {
                         case 0:
                             // move down
                             var targetY = entity.y + tileSize;
-                            if (checkInBounds(entity.x, targetY)) {
+                            if (checkValidMove(entity.x, targetY)) {
                                 let mover = new Mover(entity, entity.x, targetY, 0, monsterMovePerTick, () => { })
                                 entity.setMover(mover);
                                 movers.push(mover);
@@ -384,7 +402,7 @@ function updateGameState() {
                         case 1:
                             // move up
                             var targetY = entity.y - tileSize;
-                            if (checkInBounds(entity.x, targetY)) {
+                            if (checkValidMove(entity.x, targetY)) {
                                 let mover = new Mover(entity, entity.x, targetY, 0, -monsterMovePerTick, () => { })
                                 entity.setMover(mover);
                                 movers.push(mover);
@@ -393,7 +411,7 @@ function updateGameState() {
                         case 2:
                             // move left
                             var targetX = entity.x - tileSize;
-                            if (checkInBounds(targetX, entity.y)) {
+                            if (checkValidMove(targetX, entity.y)) {
                                 let mover = new Mover(entity, targetX, entity.y, -monsterMovePerTick, 0, () => { })
                                 entity.setMover(mover);
                                 movers.push(mover);
@@ -402,7 +420,7 @@ function updateGameState() {
                         case 3:
                             // move right
                             var targetX = entity.x + tileSize;
-                            if (checkInBounds(targetX, entity.y)) {
+                            if (checkValidMove(targetX, entity.y)) {
                                 let mover = new Mover(entity, targetX, entity.y, monsterMovePerTick, 0, () => { })
                                 entity.setMover(mover);
                                 movers.push(mover);
@@ -421,7 +439,7 @@ function updateGameState() {
     });
 
     // Check for GAME OVER
-    if (checkCollision(playerWizard, entities)) {
+    if (checkFatalCollision(playerWizard, entities)) {
         initializeGameState();
     }
 
@@ -497,12 +515,24 @@ function getImageForAction(action) {
     }
 }
 
-function checkInBounds(destinationX, destinationY) {
-    var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
-    return inBounds
+function checkValidMove(destinationX, destinationY) {
+    return checkInBounds(destinationX, destinationY) && checkUnobstructed(destinationX, destinationY);
 }
 
-function checkCollision(source, entities) {
+function checkInBounds(destinationX, destinationY) {
+    var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
+    return inBounds;
+}
+
+function checkUnobstructed(destinationX, destinationY) {
+    var isObstructed = obstacles.map(obstacle => {
+        //console.log(`OBSTRUCTED ${obstacle.x} : ${(destinationX == obstacle.x) && (destinationY == obstacle.y)}`)
+        return (destinationX == obstacle.x) && (destinationY == obstacle.y)
+    });
+    return !isObstructed.includes(true);
+}
+
+function checkFatalCollision(source, entities) {
     var collisions = entities.map((entity) => {
         if (source === entity) {
             return false;
@@ -532,7 +562,7 @@ function getSingleUnoccupiedGrid() {
         }
     }
     ;
-    var occupiedGrids = getAllOccupiedGrids().sort();
+    var occupiedGrids = getAllOccupiedGrids();
 
     occupiedGrids.forEach(occupied => {
         allTiles = allTiles.filter(grid => { return JSON.stringify(grid) !== JSON.stringify(occupied) });
@@ -553,6 +583,10 @@ function getAllOccupiedGrids() {
 
     collectables.forEach(item => {
         occupiedGrids.push(new Tile(Math.floor(item.x / tileSize), Math.floor(item.y / tileSize)))
+    });
+
+    obstacles.forEach(obstacle => {
+        occupiedGrids.push(new Tile(Math.floor(obstacle.x / tileSize), Math.floor(obstacle.y / tileSize)))
     });
 
     return occupiedGrids;

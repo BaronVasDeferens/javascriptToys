@@ -24,7 +24,7 @@ let wizardMovePerTick = 8;
 let numObstacles = 5;
 let numCollectables = 5;
 
-let numMonstersBasic = 3;
+let numMonstersBasic = 4;
 let numMonstersScary = 1;
 let monsterMovePerTick = 4;
 
@@ -659,17 +659,19 @@ function getRandomMover(monster) {
     var potentialMoves = [];
     var targetX = 0;
     var targetY = 0;
+    var mover;
 
     // move down
     targetY = monster.y + tileSize;
     if (checkValidMove(monster.x, targetY)) {
-        let mover = new Mover(monster, monster.x, targetY, 0, monsterMovePerTick, () => { })
+        mover = new Mover(monster, monster.x, targetY, 0, monsterMovePerTick, () => { })
+        potentialMoves.push(mover);
     }
 
     // move up
     targetY = monster.y - tileSize;
     if (checkValidMove(monster.x, targetY)) {
-        let mover = new Mover(monster, monster.x, targetY, 0, -monsterMovePerTick, () => { })
+        mover = new Mover(monster, monster.x, targetY, 0, -monsterMovePerTick, () => { })
         potentialMoves.push(mover);
     }
 
@@ -677,17 +679,16 @@ function getRandomMover(monster) {
     // move left
     targetX = monster.x - tileSize;
     if (checkValidMove(targetX, monster.y)) {
-        let mover = new Mover(monster, targetX, monster.y, -monsterMovePerTick, 0, () => { })
+        mover = new Mover(monster, targetX, monster.y, -monsterMovePerTick, 0, () => { })
         potentialMoves.push(mover);
     }
 
     // move right
     targetX = monster.x + tileSize;
     if (checkValidMove(targetX, monster.y)) {
-        let mover = new Mover(monster, targetX, monster.y, monsterMovePerTick, 0, () => { })
+        mover = new Mover(monster, targetX, monster.y, monsterMovePerTick, 0, () => { })
         potentialMoves.push(mover);
     }
-
 
     shuffle(potentialMoves);
     return potentialMoves[0];

@@ -30,15 +30,23 @@ export class Wizard extends Entity {
     }
 }
 
+export var MonsterMovementBehavior = Object.freeze({
+    RANDOM: 1,
+    CHASE_PLAYER: 2
+});
+
 export class Monster extends Entity {
-    constructor(id, x, y, image) {
+    
+    constructor(id, x, y, behavior, image) {
         super(id, x, y);
+        this.behavior = behavior;
         this.image = image;
     }
 
     setMover(mover) {
         this.mover = mover;
     }
+
 }
 
 export class Obstacle extends Entity {

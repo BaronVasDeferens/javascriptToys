@@ -18,6 +18,7 @@ export var ImageAsset = Object.freeze({
     WIZARD_2: "resources/tiles/64x64/tile_3795.png",
 
     MONSTER_1: "resources/tiles/64x64/tile_4127.png",
+    MONSTER_2: "resources/tiles/64x64/tile_4165.png",
 
     GOLD_COIN_1: "resources/tiles/64x64/tile_2601.png",
     GOLD_COIN_STACK_1: "resources/tiles/64x64/tile_2602.png",

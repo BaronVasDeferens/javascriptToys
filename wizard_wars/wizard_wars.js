@@ -21,12 +21,12 @@ let tileRows = mapHeight / tileSize;
 let playerWizard;
 let wizardMovePerTick = 8;
 
-let numObstacles = 5;
+let numObstacles = 10;
 let numCollectables = 5;
 
 let numMonstersBasic = 4;
 let numMonstersScary = 1;
-let monsterMovePerTick = 4;
+let monsterMovePerTick = 8;
 
 let entities = [];
 let controlInput = null;
@@ -296,7 +296,7 @@ function renderBackground(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw tiles onto the background image
-    let tiles = imageLoader.getTilesetForName("FLESH_GROUND");
+    let tiles = imageLoader.getTilesetForName("MARBLE");
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {
             context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tileSize, j * tileSize);
@@ -431,10 +431,15 @@ function updateGameState() {
         gameState = GameState.ENEMY_MOVE_EXECUTE;
     }
 
-    var currentMover = movers[0];
-    if (currentMover != null) {
-        currentMover.update();
-    }
+    // var currentMover = movers[0];
+    // if (currentMover != null) {
+    //     currentMover.update();
+    // }
+
+    movers.forEach(mover => {
+        mover.update();
+    });
+
 
     if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
         if (movers.every(mover => { mover.isAlive == false })) {
@@ -442,9 +447,6 @@ function updateGameState() {
         }
     }
 
-    // movers.forEach(mover => {
-    //     mover.update();
-    // });
 
     // Check for GAME OVER
     if (checkFatalCollision(playerWizard, entities)) {

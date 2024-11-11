@@ -89,16 +89,16 @@ export var ImageAsset = Object.freeze({
     // TILE_MAGIC_DARK_GROUND_9: "resources/tiles/64x64/tile_194.png",
     // TILE_MAGIC_DARK_GROUND_10: "resources/tiles/64x64/tile_195.png",
 
-    // TILE_MARBLE_GROUND_1: "resources/tiles/64x64/tile_385.png",
-    // TILE_MARBLE_GROUND_2: "resources/tiles/64x64/tile_386.png",
-    // TILE_MARBLE_GROUND_3: "resources/tiles/64x64/tile_387.png",
-    // TILE_MARBLE_GROUND_4: "resources/tiles/64x64/tile_388.png",
-    // TILE_MARBLE_GROUND_5: "resources/tiles/64x64/tile_389.png",
-    // TILE_MARBLE_GROUND_6: "resources/tiles/64x64/tile_390.png",
-    // TILE_MARBLE_GROUND_7: "resources/tiles/64x64/tile_391.png",
-    // TILE_MARBLE_GROUND_8: "resources/tiles/64x64/tile_392.png",
-    // TILE_MARBLE_GROUND_9: "resources/tiles/64x64/tile_393.png",
-    // TILE_MARBLE_GROUND_10: "resources/tiles/64x64/tile_394.png"
+    TILE_MARBLE_GROUND_1: "resources/tiles/64x64/tile_385.png",
+    TILE_MARBLE_GROUND_2: "resources/tiles/64x64/tile_386.png",
+    TILE_MARBLE_GROUND_3: "resources/tiles/64x64/tile_387.png",
+    TILE_MARBLE_GROUND_4: "resources/tiles/64x64/tile_388.png",
+    TILE_MARBLE_GROUND_5: "resources/tiles/64x64/tile_389.png",
+    TILE_MARBLE_GROUND_6: "resources/tiles/64x64/tile_390.png",
+    TILE_MARBLE_GROUND_7: "resources/tiles/64x64/tile_391.png",
+    TILE_MARBLE_GROUND_8: "resources/tiles/64x64/tile_392.png",
+    TILE_MARBLE_GROUND_9: "resources/tiles/64x64/tile_393.png",
+    TILE_MARBLE_GROUND_10: "resources/tiles/64x64/tile_394.png"
 });
 
 export class ImageLoader {
@@ -120,18 +120,18 @@ export class ImageLoader {
         // ]);
 
 
-        // this.tileSets.set("MARBLE", [
-        //     ImageAsset.TILE_MARBLE_GROUND_1,
-        //     ImageAsset.TILE_MARBLE_GROUND_2,
-        //     ImageAsset.TILE_MARBLE_GROUND_3,
-        //     ImageAsset.TILE_MARBLE_GROUND_4,
-        //     ImageAsset.TILE_MARBLE_GROUND_5,
-        //     ImageAsset.TILE_MARBLE_GROUND_6,
-        //     ImageAsset.TILE_MARBLE_GROUND_7,
-        //     ImageAsset.TILE_MARBLE_GROUND_8,
-        //     ImageAsset.TILE_MARBLE_GROUND_9,
-        //     ImageAsset.TILE_MARBLE_GROUND_10
-        // ]);
+        this.tileSets.set("MARBLE", [
+            ImageAsset.TILE_MARBLE_GROUND_1,
+            ImageAsset.TILE_MARBLE_GROUND_2,
+            ImageAsset.TILE_MARBLE_GROUND_3,
+            ImageAsset.TILE_MARBLE_GROUND_4,
+            ImageAsset.TILE_MARBLE_GROUND_5,
+            ImageAsset.TILE_MARBLE_GROUND_6,
+            ImageAsset.TILE_MARBLE_GROUND_7,
+            ImageAsset.TILE_MARBLE_GROUND_8,
+            ImageAsset.TILE_MARBLE_GROUND_9,
+            ImageAsset.TILE_MARBLE_GROUND_10
+        ]);
 
         // this.tileSets.set("GREY_STONE", [
         //     ImageAsset.TILE_GREY_ROCK_1,

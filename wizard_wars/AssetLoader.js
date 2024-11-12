@@ -3,8 +3,8 @@
  */
 
 export class AssetLoader {
-    loadAssets(imageLoader, callback) {
-        imageLoader.loadImages(() => { callback(); });
+    loadAssets(imageLoader, soundLoader, callback) {
+        imageLoader.loadImages(() => { soundLoader.loadSounds(() => { callback() } ) });
     }
 }
 
@@ -271,9 +271,10 @@ export class ImageLoader {
  */
 
 export var SoundAsset = Object.freeze({
-
+    COIN_1: "resources/sounds/coin_1.wav",
+    COIN_2: "resources/sounds/coin_2.wav",
+    COIN_3: "resources/sounds/coin_3.wav"
 });
-
 
 export class SoundLoader {
 
@@ -287,7 +288,6 @@ export class SoundLoader {
             let snd = new Audio();
             this.soundMap.set(assetLocation, snd);
             snd.onloadeddata = function () {
-                console.log(`sound ${snd.src} loaded`);
                 readinessCheck.set(snd.src, true);
                 let values = Array.from(readinessCheck.values());
                 let isReady = values.every(v => v === true);

@@ -1,8 +1,9 @@
 import { Card, Collectable, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Wizard } from './entity.js';
-import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, } from './AssetLoader.js';
+import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
+const soundLoader = new SoundLoader();
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -19,16 +20,15 @@ let tileCols = mapWidth / tileSize;
 let tileRows = mapHeight / tileSize;
 
 let playerWizard;
+
 let wizardMovePerTick = 8;
+let monsterMovePerTick = 8;
 
 let numObstacles = 10;
 let numCollectables = 5;
 let numHazards = 10;
 let numMonstersBasic = 4;
 let numMonstersScary = 1;
-
-
-let monsterMovePerTick = 8;
 
 let entities = [];
 let controlInput = null;
@@ -38,6 +38,8 @@ var obstacles = [];
 var hazards = [];
 
 let backgroundImage = new Image();
+
+var coinSounds = [];
 
 var delayValue = 0;
 let delayValueIncrement = 2;
@@ -220,7 +222,11 @@ var setup = function () {
     context.fillText("LOADING", (canvas.width / 2) - 48, (canvas.height / 2));
 
     // Invoke AssetLoader and trigger callback upon completion...
-    assetLoader.loadAssets(imageLoader, () => {
+    assetLoader.loadAssets(imageLoader, soundLoader, () => {
+        coinSounds.push(soundLoader.getSound(SoundAsset.COIN_1));
+        coinSounds.push(soundLoader.getSound(SoundAsset.COIN_2));
+        coinSounds.push(soundLoader.getSound(SoundAsset.COIN_3));
+
         initializeGameState();
         beginGame();
     });
@@ -475,11 +481,14 @@ function updateGameState() {
     }
 
     // Consume the collectables
-    collectables.forEach(item => {
-        if (isWithinCollisionDistance(playerWizard, item, 0)) {
-            item.isCollected = true;
-        }
-    });
+    collectables
+        .filter(item => item.isCollected == false)
+        .forEach(item => {
+            if (isWithinCollisionDistance(playerWizard, item, 0)) {
+                item.isCollected = true;
+                playCoinSound();
+            }
+        });
 
     // Remove all acquired collectables
     collectables = collectables.filter(item => item.isCollected == false);
@@ -597,7 +606,7 @@ function getSingleUnoccupiedGrid() {
             allTiles.push(new Tile(cols, rows));
         }
     }
-    
+
     var occupiedGrids = getAllOccupiedGrids();
 
     occupiedGrids.forEach(occupied => {
@@ -708,6 +717,14 @@ function getRandomMover(monster) {
 
     shuffle(potentialMoves);
     return potentialMoves[0];
+}
+
+function playCoinSound() {
+    console.log("playing coin sound!")
+    //shuffle(coinSounds);
+    coinSounds[0].pause()
+    coinSounds[0].currentTime = 0;
+    coinSounds[0].play();
 }
 
 

@@ -56,6 +56,13 @@ export class Obstacle extends Entity {
     }
 }
 
+export class Hazard extends Entity {
+    constructor(id, x, y, image) {
+        super(id, x, y);
+        this.image = image;
+    }
+}
+
 
 export class Collectable extends Entity {
     isCollected = false;

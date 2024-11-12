@@ -32,6 +32,8 @@ export var ImageAsset = Object.freeze({
     OBSTACLE_PILLAR_5: "resources/tiles/64x64/tile_785.png",
     OBSTACLE_PILLAR_6: "resources/tiles/64x64/tile_786.png",
 
+    HAZARD_LAVA_1: "resources/tiles/64x64/tile_384.png",
+
     ACTION_CARD_UP: "resources/cards/card_up.png",
     ACTION_CARD_DOWN: "resources/cards/card_down.png",
     ACTION_CARD_LEFT: "resources/cards/card_left.png",

@@ -1,4 +1,4 @@
-import { Card, Collectable, Monster, MonsterMovementBehavior, Mover, Obstacle, Wizard } from './entity.js';
+import { Card, Collectable, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -26,6 +26,8 @@ let numCollectables = 5;
 
 let numMonstersBasic = 4;
 let numMonstersScary = 1;
+let numHazards = 5;
+
 let monsterMovePerTick = 8;
 
 let entities = [];
@@ -33,6 +35,7 @@ let controlInput = null;
 var movers = [];
 var collectables = [];
 var obstacles = [];
+var hazards = [];
 
 let backgroundImage = new Image();
 
@@ -233,6 +236,8 @@ function initializeGameState() {
     entities = [];
     collectables = [];
     obstacles = [];
+    hazards = [];
+
     controlInput = null;
     cardA = null;
     cardB = null;
@@ -252,6 +257,15 @@ function initializeGameState() {
             new Obstacle(
                 `pillar_${i}`, location.x * tileSize, location.y * tileSize, obstacleImages[randomIntInRange(0, obstacleImages.length)])
         );
+    }
+
+    // Add hazards
+    for (var i = 0; i < numHazards; i++) {
+        var location = getSingleUnoccupiedGrid();
+        hazards.push(
+            new Hazard(
+                `hazard_${i}`, location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.HAZARD_LAVA_1))
+        )
     }
 
     // Add BASIC monsters
@@ -304,6 +318,7 @@ function renderBackground(context) {
     }
 
     obstacles.forEach(ob => { ob.render(context) });
+    hazards.forEach(hazard => { hazard.render(context) });
 
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
@@ -450,6 +465,12 @@ function updateGameState() {
 
     // Check for GAME OVER
     if (checkFatalCollision(playerWizard, entities)) {
+        console.log("Wizard touched monster: GAME OVER");
+        initializeGameState();
+    }
+
+    if (checkFatalCollision(playerWizard, hazards)) {
+        console.log("Wizard touched hazard: GAME OVER");
         initializeGameState();
     }
 
@@ -576,7 +597,7 @@ function getSingleUnoccupiedGrid() {
             allTiles.push(new Tile(cols, rows));
         }
     }
-    ;
+    
     var occupiedGrids = getAllOccupiedGrids();
 
     occupiedGrids.forEach(occupied => {
@@ -593,16 +614,9 @@ function getSingleUnoccupiedGrid() {
 function getAllOccupiedGrids() {
     var occupiedGrids = [];
 
-    entities.forEach(entity => {
+    var allEntities = entities.concat(collectables).concat(obstacles).concat(hazards);
+    allEntities.forEach(entity => {
         occupiedGrids.push(new Tile(Math.floor(entity.x / tileSize), Math.floor(entity.y / tileSize)))
-    });
-
-    collectables.forEach(item => {
-        occupiedGrids.push(new Tile(Math.floor(item.x / tileSize), Math.floor(item.y / tileSize)))
-    });
-
-    obstacles.forEach(obstacle => {
-        occupiedGrids.push(new Tile(Math.floor(obstacle.x / tileSize), Math.floor(obstacle.y / tileSize)))
     });
 
     return occupiedGrids;

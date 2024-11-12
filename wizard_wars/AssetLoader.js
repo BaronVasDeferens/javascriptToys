@@ -57,15 +57,15 @@ export var ImageAsset = Object.freeze({
     // TILE_GREY_ROCK_5: "resources/tiles/64x64/tile_177.png",
     // TILE_GREY_ROCK_6: "resources/tiles/64x64/tile_179.png",
 
-    TILE_FLESH_GROUND_1: "resources/tiles/64x64/tile_202.png",
-    TILE_FLESH_GROUND_2: "resources/tiles/64x64/tile_203.png",
-    TILE_FLESH_GROUND_3: "resources/tiles/64x64/tile_204.png",
-    TILE_FLESH_GROUND_4: "resources/tiles/64x64/tile_205.png",
-    TILE_FLESH_GROUND_5: "resources/tiles/64x64/tile_206.png",
-    TILE_FLESH_GROUND_6: "resources/tiles/64x64/tile_207.png",
-    TILE_FLESH_GROUND_7: "resources/tiles/64x64/tile_208.png",
-    TILE_FLESH_GROUND_8: "resources/tiles/64x64/tile_209.png",
-    TILE_FLESH_GROUND_9: "resources/tiles/64x64/tile_210.png",
+    // TILE_FLESH_GROUND_1: "resources/tiles/64x64/tile_202.png",
+    // TILE_FLESH_GROUND_2: "resources/tiles/64x64/tile_203.png",
+    // TILE_FLESH_GROUND_3: "resources/tiles/64x64/tile_204.png",
+    // TILE_FLESH_GROUND_4: "resources/tiles/64x64/tile_205.png",
+    // TILE_FLESH_GROUND_5: "resources/tiles/64x64/tile_206.png",
+    // TILE_FLESH_GROUND_6: "resources/tiles/64x64/tile_207.png",
+    // TILE_FLESH_GROUND_7: "resources/tiles/64x64/tile_208.png",
+    // TILE_FLESH_GROUND_8: "resources/tiles/64x64/tile_209.png",
+    // TILE_FLESH_GROUND_9: "resources/tiles/64x64/tile_210.png",
 
     // TILE_MAGIC_GROUND_1: "resources/tiles/64x64/tile_292.png",
     // TILE_MAGIC_GROUND_2: "resources/tiles/64x64/tile_293.png",
@@ -100,7 +100,18 @@ export var ImageAsset = Object.freeze({
     TILE_MARBLE_GROUND_7: "resources/tiles/64x64/tile_391.png",
     TILE_MARBLE_GROUND_8: "resources/tiles/64x64/tile_392.png",
     TILE_MARBLE_GROUND_9: "resources/tiles/64x64/tile_393.png",
-    TILE_MARBLE_GROUND_10: "resources/tiles/64x64/tile_394.png"
+    TILE_MARBLE_GROUND_10: "resources/tiles/64x64/tile_394.png",
+
+    TILE_MARBLE_PINK_1: "resources/tiles/64x64/tile_577.png",
+    TILE_MARBLE_PINK_2: "resources/tiles/64x64/tile_578.png",
+    TILE_MARBLE_PINK_3: "resources/tiles/64x64/tile_579.png",
+    TILE_MARBLE_PINK_4: "resources/tiles/64x64/tile_580.png",
+    TILE_MARBLE_PINK_5: "resources/tiles/64x64/tile_581.png",
+    TILE_MARBLE_PINK_6: "resources/tiles/64x64/tile_582.png",
+    TILE_MARBLE_PINK_7: "resources/tiles/64x64/tile_583.png",
+    TILE_MARBLE_PINK_8: "resources/tiles/64x64/tile_584.png",
+    TILE_MARBLE_PINK_9: "resources/tiles/64x64/tile_585.png",
+    TILE_MARBLE_PINK_10: "resources/tiles/64x64/tile_586.png"
 });
 
 export class ImageLoader {
@@ -135,6 +146,19 @@ export class ImageLoader {
             ImageAsset.TILE_MARBLE_GROUND_10
         ]);
 
+        this.tileSets.set("MARBLE_PINK", [
+            ImageAsset.TILE_MARBLE_PINK_1,
+            ImageAsset.TILE_MARBLE_PINK_2,
+            ImageAsset.TILE_MARBLE_PINK_3,
+            ImageAsset.TILE_MARBLE_PINK_4,
+            ImageAsset.TILE_MARBLE_PINK_5,
+            ImageAsset.TILE_MARBLE_PINK_6,
+            ImageAsset.TILE_MARBLE_PINK_7,
+            ImageAsset.TILE_MARBLE_PINK_8,
+            ImageAsset.TILE_MARBLE_PINK_9,
+            ImageAsset.TILE_MARBLE_PINK_10
+        ]);
+
         // this.tileSets.set("GREY_STONE", [
         //     ImageAsset.TILE_GREY_ROCK_1,
         //     ImageAsset.TILE_GREY_ROCK_2,
@@ -157,17 +181,17 @@ export class ImageLoader {
         //     ImageAsset.TILE_MAGIC_DARK_GROUND_10
         // ]);
 
-        this.tileSets.set("FLESH_GROUND", [
-            ImageAsset.TILE_FLESH_GROUND_1,
-            ImageAsset.TILE_FLESH_GROUND_2,
-            ImageAsset.TILE_FLESH_GROUND_3,
-            ImageAsset.TILE_FLESH_GROUND_4,
-            ImageAsset.TILE_FLESH_GROUND_5,
-            ImageAsset.TILE_FLESH_GROUND_6,
-            ImageAsset.TILE_FLESH_GROUND_7,
-            ImageAsset.TILE_FLESH_GROUND_8,
-            ImageAsset.TILE_FLESH_GROUND_9
-        ]);
+        // this.tileSets.set("FLESH_GROUND", [
+        //     ImageAsset.TILE_FLESH_GROUND_1,
+        //     ImageAsset.TILE_FLESH_GROUND_2,
+        //     ImageAsset.TILE_FLESH_GROUND_3,
+        //     ImageAsset.TILE_FLESH_GROUND_4,
+        //     ImageAsset.TILE_FLESH_GROUND_5,
+        //     ImageAsset.TILE_FLESH_GROUND_6,
+        //     ImageAsset.TILE_FLESH_GROUND_7,
+        //     ImageAsset.TILE_FLESH_GROUND_8,
+        //     ImageAsset.TILE_FLESH_GROUND_9
+        // ]);
 
         this.tileSets.set("GOLDSTACKS", [
             ImageAsset.GOLD_COIN_STACK_1,
@@ -226,14 +250,14 @@ export class ImageLoader {
 
     shuffle(array) {
         let currentIndex = array.length;
-    
+
         // While there remain elements to shuffle...
         while (currentIndex != 0) {
-    
+
             // Pick a remaining element...
             let randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex--;
-    
+
             // And swap it with the current element.
             [array[currentIndex], array[randomIndex]] = [
                 array[randomIndex], array[currentIndex]];

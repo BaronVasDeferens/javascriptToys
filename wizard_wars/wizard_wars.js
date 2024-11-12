@@ -23,10 +23,10 @@ let wizardMovePerTick = 8;
 
 let numObstacles = 10;
 let numCollectables = 5;
-
+let numHazards = 10;
 let numMonstersBasic = 4;
 let numMonstersScary = 1;
-let numHazards = 5;
+
 
 let monsterMovePerTick = 8;
 
@@ -310,7 +310,7 @@ function renderBackground(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw tiles onto the background image
-    let tiles = imageLoader.getTilesetForName("MARBLE");
+    let tiles = imageLoader.getTilesetForName("MARBLE_PINK");
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {
             context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tileSize, j * tileSize);

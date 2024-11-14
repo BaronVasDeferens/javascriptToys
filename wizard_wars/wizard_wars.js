@@ -720,11 +720,11 @@ function getRandomMover(monster) {
 }
 
 function playCoinSound() {
-    console.log("playing coin sound!")
-    //shuffle(coinSounds);
-    coinSounds[0].pause()
-    coinSounds[0].currentTime = 0;
-    coinSounds[0].play();
+    console.log("playing coin sound!");
+    var sound = coinSounds[randomIntInRange(0, coinSounds.length)];
+    sound.pause();
+    sound.currentTime = 0;
+    sound.play();
 }
 
 

@@ -281,18 +281,20 @@ export class SoundLoader {
     soundMap = new Map();
 
     loadSounds(callback) {
+        console.log("Loading sounds...");
         let readinessCheck = new Map();
 
         for (const key in SoundAsset) {
             var assetLocation = SoundAsset[key];
             let snd = new Audio();
+            snd.preload = "auto";
             this.soundMap.set(assetLocation, snd);
             snd.onloadeddata = function () {
                 readinessCheck.set(snd.src, true);
                 let values = Array.from(readinessCheck.values());
                 let isReady = values.every(v => v === true);
                 if (isReady == true) {
-                    console.log(`Sound loading complete!`);
+                    console.log("...sound loading complete!");
                     callback();
                 }
             }

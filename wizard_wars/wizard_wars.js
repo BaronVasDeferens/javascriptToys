@@ -1,4 +1,4 @@
-import { Card, Collectable, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Wizard } from './entity.js';
+import { Card, Collectable, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -19,16 +19,18 @@ let tileSize = 64;
 let tileCols = mapWidth / tileSize;
 let tileRows = mapHeight / tileSize;
 
+var level = 1;
+
 let playerWizard;
 
 let wizardMovePerTick = 8;
 let monsterMovePerTick = 8;
 
-let numObstacles = 10;
-let numCollectables = 5;
-let numHazards = 10;
-let numMonstersBasic = 4;
-let numMonstersScary = 1;
+var numObstacles = 2 * level;
+var numCollectables = level + 1;
+var numHazards = level + 1;
+var numMonstersBasic = level;
+var numMonstersScary = 0;
 
 let entities = [];
 let controlInput = null;
@@ -36,6 +38,7 @@ var movers = [];
 var collectables = [];
 var obstacles = [];
 var hazards = [];
+var portal;
 
 let backgroundImage = new Image();
 
@@ -233,9 +236,23 @@ var setup = function () {
 }();
 
 function initializeGameState() {
-
     console.log("Initializing...");
+    level = 1;
     gameState = GameState.DRAW_CARDS;
+    createBoardForLevel(1);
+}
+
+function createBoardForLevel(newLevel) {
+    
+    console.log(`LEVEL ${newLevel}`);
+    
+    level = newLevel;
+
+    numObstacles = 2 * level;
+    numCollectables = level + 1;
+    numHazards = level + 1;
+    numMonstersBasic = level;
+    numMonstersScary = 0;
 
     // Clear out prior data
     movers = [];
@@ -243,6 +260,7 @@ function initializeGameState() {
     collectables = [];
     obstacles = [];
     hazards = [];
+    portal = null;
 
     controlInput = null;
     cardA = null;
@@ -294,7 +312,6 @@ function initializeGameState() {
         );
     }
 
-
     // Add collectables
     var coinImages = imageLoader.getTilesetForName("GOLDSTACKS");
     for (var i = 0; i < numCollectables; i++) {
@@ -304,7 +321,14 @@ function initializeGameState() {
         );
     }
 
+    // Add the exit
+    let portalLocation = getSingleUnoccupiedGrid();
+    console.log(portalLocation);
+    portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, imageLoader.getImage(ImageAsset.STAIRS_DOWN_1));
+
     renderBackground(context);
+
+    gameState = GameState.DRAW_CARDS;
 }
 
 function renderBackground(context) {
@@ -325,6 +349,7 @@ function renderBackground(context) {
 
     obstacles.forEach(ob => { ob.render(context) });
     hazards.forEach(hazard => { hazard.render(context) });
+    portal.render(context);
 
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
@@ -468,18 +493,6 @@ function updateGameState() {
         }
     }
 
-
-    // Check for GAME OVER
-    if (checkFatalCollision(playerWizard, entities)) {
-        console.log("Wizard touched monster: GAME OVER");
-        initializeGameState();
-    }
-
-    if (checkFatalCollision(playerWizard, hazards)) {
-        console.log("Wizard touched hazard: GAME OVER");
-        initializeGameState();
-    }
-
     // Consume the collectables
     collectables
         .filter(item => item.isCollected == false)
@@ -492,6 +505,17 @@ function updateGameState() {
 
     // Remove all acquired collectables
     collectables = collectables.filter(item => item.isCollected == false);
+
+    // Check for game over: HAZARDS and MONSTERS
+    if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
+        console.log("Wizard touched HAZARD: GAME OVER");
+        initializeGameState();
+    }
+
+    // Check for level descent
+    if (isWithinCollisionDistance(playerWizard, portal, 32)) {
+        createBoardForLevel(portal.toLevelNumber + 1);
+    }
 }
 
 function drawScene() {
@@ -562,11 +586,6 @@ function checkValidMove(destinationX, destinationY) {
 function checkInBounds(destinationX, destinationY) {
     var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
     return inBounds;
-}
-
-function checkDestination(destinationX, destinationY) {
-    var destinationOccupied = movers.map(mover => { return mover.destinationX == destinationX && mover.destinationY == destinationY });
-    return !destinationOccupied.includes(true);
 }
 
 function checkUnobstructed(destinationX, destinationY) {
@@ -720,7 +739,6 @@ function getRandomMover(monster) {
 }
 
 function playCoinSound() {
-    console.log("playing coin sound!");
     var sound = coinSounds[randomIntInRange(0, coinSounds.length)];
     sound.pause();
     sound.currentTime = 0;

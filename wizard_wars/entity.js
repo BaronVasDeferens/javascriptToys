@@ -63,6 +63,14 @@ export class Hazard extends Entity {
     }
 }
 
+export class Portal extends Entity {
+    constructor(toLevelNumber, x, y, image) {
+        super(`portal_${toLevelNumber}`, x, y);
+        this.toLevelNumber = toLevelNumber;
+        this.image = image;
+    }
+}
+
 
 export class Collectable extends Entity {
     isCollected = false;

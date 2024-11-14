@@ -20,6 +20,8 @@ let tileCols = mapWidth / tileSize;
 let tileRows = mapHeight / tileSize;
 
 var level = 1;
+var score = 0;
+var totalMoves = 0;
 
 let playerWizard;
 
@@ -108,6 +110,7 @@ document.addEventListener('keydown', (e) => {
                             0,
                             -wizardMovePerTick,
                             () => {
+                                totalMoves++;
                                 controlInput = null;
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
@@ -129,6 +132,7 @@ document.addEventListener('keydown', (e) => {
                             0,
                             wizardMovePerTick,
                             () => {
+                                totalMoves++;
                                 controlInput = null;
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
@@ -150,6 +154,7 @@ document.addEventListener('keydown', (e) => {
                             -wizardMovePerTick,
                             0,
                             () => {
+                                totalMoves++;
                                 controlInput = null;
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
@@ -171,6 +176,7 @@ document.addEventListener('keydown', (e) => {
                             wizardMovePerTick,
                             0,
                             () => {
+                                totalMoves++;
                                 controlInput = null;
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
@@ -238,21 +244,23 @@ var setup = function () {
 function initializeGameState() {
     console.log("Initializing...");
     level = 1;
+    score = 0;
     gameState = GameState.DRAW_CARDS;
-    createBoardForLevel(1);
+    createBoardForLevel(level);
 }
 
 function createBoardForLevel(newLevel) {
-    
+
     console.log(`LEVEL ${newLevel}`);
-    
+
     level = newLevel;
 
-    numObstacles = 2 * level;
+    numObstacles = 2 + Math.floor(level / 2);
+    numHazards = 2 + Math.floor(level / 2);
     numCollectables = level + 1;
-    numHazards = level + 1;
+
     numMonstersBasic = level;
-    numMonstersScary = 0;
+    numMonstersScary = (level + 2) - 5;
 
     // Clear out prior data
     movers = [];
@@ -323,7 +331,6 @@ function createBoardForLevel(newLevel) {
 
     // Add the exit
     let portalLocation = getSingleUnoccupiedGrid();
-    console.log(portalLocation);
     portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, imageLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
     renderBackground(context);
@@ -331,10 +338,10 @@ function createBoardForLevel(newLevel) {
     gameState = GameState.DRAW_CARDS;
 }
 
+/**
+ * Renders the background once and re-uses the image
+ */
 function renderBackground(context) {
-    // Renders the background once and re-uses the image
-    console.log("Rendering background...");
-
     // Prepare the background
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -477,11 +484,6 @@ function updateGameState() {
         gameState = GameState.ENEMY_MOVE_EXECUTE;
     }
 
-    // var currentMover = movers[0];
-    // if (currentMover != null) {
-    //     currentMover.update();
-    // }
-
     movers.forEach(mover => {
         mover.update();
     });
@@ -499,6 +501,7 @@ function updateGameState() {
         .forEach(item => {
             if (isWithinCollisionDistance(playerWizard, item, 0)) {
                 item.isCollected = true;
+                score += 100;
                 playCoinSound();
             }
         });
@@ -508,13 +511,12 @@ function updateGameState() {
 
     // Check for game over: HAZARDS and MONSTERS
     if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
-        console.log("Wizard touched HAZARD: GAME OVER");
-        initializeGameState();
+        gameOver();
     }
 
     // Check for level descent
     if (isWithinCollisionDistance(playerWizard, portal, 32)) {
-        createBoardForLevel(portal.toLevelNumber + 1);
+        createBoardForLevel(portal.toLevelNumber);
     }
 }
 
@@ -541,6 +543,17 @@ function drawScene() {
 
 // ------------ END MAIN GAME LOOP ------------
 
+function gameOver() {
+    let finalScore = Math.floor((score / totalMoves) * level);
+    console.log("----------------------------------------------------------")
+    console.log("Wizard was slain: GAME OVER");
+    console.log(`LEVEL ACHIEVED: ${level}`);
+    console.log(`TOTAL MOVES: ${totalMoves}`);
+    console.log(`TREASURE COLLECTED: ${score}`);
+    console.log(`FINAL SCORE: ${finalScore}`);
+    console.log("----------------------------------------------------------")
+    initializeGameState();
+}
 
 
 

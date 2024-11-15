@@ -1,3 +1,38 @@
+/**
+ * 
+ * WIZARD WARS
+ * or maybe MOUSE MAGE!
+ * 
+ * IDEAS
+ * 
+ *      title screen
+ *      death animation
+ *      high scores
+ *      stairs that lead back
+ *      enemies that DON'T fly
+ *      light music
+ *      torch flicker
+ *      
+ *      remove "random movement" cards; ADD spells
+ *      spell effect: freeze enemies (x turns)
+ *      spell effect: move exit (random)
+ *      spell effect: turn hazards into obstacles
+ *      spell effect: make smart monsters dumb
+ *      spell effect: push all monsters to edges
+ *      spell effect: pull all monsters to center
+ * 
+ *      ability to collect / use magic potions (VERY valuable)
+ *      potion effect: turn empty speces into gold (x turns)
+ *      potion effect: invincibility (x turns)
+ *      potion effect: move through obstacles(x turns)
+ * 
+ *      create spells/potions that REALLY alter the map, maybe even break the game 
+ * 
+ * 
+ */
+
+
+
 import { Card, Collectable, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
@@ -25,8 +60,8 @@ var totalMoves = 0;
 
 let playerWizard;
 
-let wizardMovePerTick = 8;
-let monsterMovePerTick = 8;
+let wizardMovePerTick = 16;
+let monsterMovePerTick = 16;
 
 var numObstacles = 2 * level;
 var numCollectables = level + 1;
@@ -244,6 +279,7 @@ var setup = function () {
 function initializeGameState() {
     console.log("Initializing...");
     level = 1;
+    totalMoves = 0;
     score = 0;
     gameState = GameState.DRAW_CARDS;
     createBoardForLevel(level);
@@ -256,11 +292,11 @@ function createBoardForLevel(newLevel) {
     level = newLevel;
 
     numObstacles = 2 + Math.floor(level / 2);
-    numHazards = 2 + Math.floor(level / 2);
+    numHazards = Math.floor(level / 3);
     numCollectables = level + 1;
 
     numMonstersBasic = level;
-    numMonstersScary = (level + 2) - 5;
+    numMonstersScary = Math.floor(level / 5);
 
     // Clear out prior data
     movers = [];

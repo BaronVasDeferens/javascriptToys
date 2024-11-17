@@ -113,17 +113,9 @@ const GameState = Object.freeze({
 var gameState = GameState.DRAW_CARDS;
 
 const ActionCard = Object.freeze({
-    ACTION_CARD_UP: "ACTION_CARD_UP",
-    ACTION_CARD_DOWN: "ACTION_CARD_DOWN",
-    ACTION_CARD_LEFT: "ACTION_CARD_LEFT",
-    ACTION_CARD_RIGHT: "ACTION_CARD_RIGHT"
+    SPELL_FREEZE: 1,
+    SPELL_RANDOMIZE: 2
 });
-let actionCards = [
-    ActionCard.ACTION_CARD_UP,
-    ActionCard.ACTION_CARD_DOWN,
-    ActionCard.ACTION_CARD_LEFT,
-    ActionCard.ACTION_CARD_RIGHT
-];
 
 var cardA;
 var cardB;
@@ -401,7 +393,7 @@ function renderBackground(context) {
 async function beginGame() {
     await new Promise(resolve => setTimeout(resolve, delayValue));
     updateGameState();
-    drawScene()
+    drawScene();
     requestAnimationFrame(beginGame);
 }
 
@@ -409,76 +401,13 @@ async function beginGame() {
 
 function processCardAction(cardAction) {
     switch (cardAction) {
-        case ActionCard.ACTION_CARD_UP:
-            if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x,
-                        playerWizard.y - tileSize,
-                        0,
-                        -wizardMovePerTick,
-                        () => {
-                            gameState = GameState.ENEMY_MOVE_PREPARE;
-                        }
-                    )
-                )
-                gameState = GameState.PLAYER_ACTION_EXECUTE;
-            }
+        case ActionCard.SPELL_FREEZE:
+            console.log("FREEZE!")
             break;
-        case ActionCard.ACTION_CARD_DOWN:
-            if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x,
-                        playerWizard.y + tileSize,
-                        0,
-                        wizardMovePerTick,
-                        () => {
-                            gameState = GameState.ENEMY_MOVE_PREPARE
-                        }
-                    )
-                )
-                gameState = GameState.PLAYER_ACTION_EXECUTE;
-            }
-            break;
-        case ActionCard.ACTION_CARD_LEFT:
-            if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x - tileSize,
-                        playerWizard.y,
-                        -wizardMovePerTick,
-                        0,
-                        () => {
-                            gameState = GameState.ENEMY_MOVE_PREPARE;
-                        }
-                    )
-                )
-                gameState = GameState.PLAYER_ACTION_EXECUTE;
-            }
-            break;
-        case ActionCard.ACTION_CARD_RIGHT:
-            if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x + tileSize,
-                        playerWizard.y,
-                        wizardMovePerTick,
-                        0,
-                        () => {
-                            gameState = GameState.ENEMY_MOVE_PREPARE;
-                        }
-                    )
-                )
-                gameState = GameState.PLAYER_ACTION_EXECUTE;
-            }
+        case ActionCard.SPELL_RANDOMIZE:
+            console.log("RANDOMIZE!")
             break;
     }
-
 }
 
 function updateGameState() {
@@ -490,13 +419,24 @@ function updateGameState() {
 
     if (gameState == GameState.DRAW_CARDS) {
 
-        shuffle(actionCards);
-        var action = actionCards[0];
-        cardA = new Card(10, 650, action, getImageForAction(action));
-        entities.push(cardA);
+        //entities = entities.filter(card => { !(card instanceof Card) });
 
-        action = actionCards[1];
-        cardB = new Card(330, 650, action, getImageForAction(action));
+        let positionOne = { x: 10, y: 650 };
+        let positionTwo = { x: 330, y: 650 };
+        let cards = [];
+        cards.push(new Card(0, 0, ActionCard.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+        cards.push(new Card(0, 0, ActionCard.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+        shuffle(cards);
+
+        cardA = cards[0];
+        cardA.x = positionOne.x;
+        cardA.y = positionOne.y;
+
+        cardB = cards[1];
+        cardB.x = positionTwo.x;
+        cardB.y = positionTwo.y;
+
+        entities.push(cardA);
         entities.push(cardB);
 
         gameState = GameState.PLAYER_ACTION_SELECT;
@@ -527,7 +467,7 @@ function updateGameState() {
 
     if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
         if (movers.every(mover => { mover.isAlive == false })) {
-            gameState = GameState.DRAW_CARDS;
+            gameState = GameState.PLAYER_ACTION_SELECT;
         }
     }
 
@@ -612,19 +552,6 @@ function shuffle(array) {
         // And swap it with the current element.
         [array[currentIndex], array[randomIndex]] = [
             array[randomIndex], array[currentIndex]];
-    }
-}
-
-function getImageForAction(action) {
-    switch (action) {
-        case ActionCard.ACTION_CARD_UP:
-            return imageLoader.getImage(ImageAsset.ACTION_CARD_UP);
-        case ActionCard.ACTION_CARD_DOWN:
-            return imageLoader.getImage(ImageAsset.ACTION_CARD_DOWN);
-        case ActionCard.ACTION_CARD_LEFT:
-            return imageLoader.getImage(ImageAsset.ACTION_CARD_LEFT);
-        case ActionCard.ACTION_CARD_RIGHT:
-            return imageLoader.getImage(ImageAsset.ACTION_CARD_RIGHT);
     }
 }
 

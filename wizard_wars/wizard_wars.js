@@ -437,7 +437,6 @@ function updateGameState() {
         let cards = [];
         cards.push(new Card(0, 0, ActionCard.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
         cards.push(new Card(0, 0, ActionCard.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
-        shuffle(cards);
 
         cardA = cards[0];
         cardA.x = positionOne.x;
@@ -456,10 +455,8 @@ function updateGameState() {
 
     // Monsters plot thier moves here
 
-    var hasFreeze = effects.map(ef => { return ef.effectType == ActionCard.SPELL_FREEZE }).includes(true);
-
     if (gameState == GameState.ENEMY_MOVE_PREPARE) {
-
+        var hasFreeze = effects.map(ef => { return ef.effectType == ActionCard.SPELL_FREEZE }).includes(true);
         if (!hasFreeze) {
             entities
                 .filter(entity => { return entity instanceof Monster })

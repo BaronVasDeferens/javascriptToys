@@ -86,6 +86,8 @@ export class Card extends Entity {
     width = 300;
     height = 340;
 
+    isExpended = false;
+
     constructor(x, y, action, image) {
         super(action, x, y);
         this.x = x;
@@ -96,6 +98,23 @@ export class Card extends Entity {
 
     containsClick(clickX, clickY) {
         return (clickX >= this.x && clickX <= this.x + this.width) && (clickY >= this.y && clickY <= this.y + this.height);
+    }
+}
+
+export class Effect {
+    
+    isAlive = true;
+    
+    constructor(effectType, cycles) {
+        this.effectType = effectType;
+        this.cycles = cycles;
+    }
+
+    update() {
+        this.cycles--;
+        if (this.cycles <= 0) {
+            this.isAlive = false;
+        }
     }
 }
 

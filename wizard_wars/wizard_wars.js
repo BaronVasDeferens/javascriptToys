@@ -33,7 +33,7 @@
 
 
 
-import { Card, Collectable, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, Wizard } from './entity.js';
+import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -75,6 +75,7 @@ var movers = [];
 var collectables = [];
 var obstacles = [];
 var hazards = [];
+var effects = [];
 var portal;
 
 let backgroundImage = new Image();
@@ -113,8 +114,8 @@ const GameState = Object.freeze({
 var gameState = GameState.DRAW_CARDS;
 
 const ActionCard = Object.freeze({
-    SPELL_FREEZE: 1,
-    SPELL_RANDOMIZE: 2
+    SPELL_FREEZE: "SPELL_FREEZE",
+    SPELL_RANDOMIZE: "SPELL_RANDOMIZE"
 });
 
 var cardA;
@@ -139,6 +140,7 @@ document.addEventListener('keydown', (e) => {
                             () => {
                                 totalMoves++;
                                 controlInput = null;
+                                updateEffects();
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
                         )
@@ -161,6 +163,7 @@ document.addEventListener('keydown', (e) => {
                             () => {
                                 totalMoves++;
                                 controlInput = null;
+                                updateEffects();
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
                         )
@@ -183,6 +186,7 @@ document.addEventListener('keydown', (e) => {
                             () => {
                                 totalMoves++;
                                 controlInput = null;
+                                updateEffects();
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
                         )
@@ -205,6 +209,7 @@ document.addEventListener('keydown', (e) => {
                             () => {
                                 totalMoves++;
                                 controlInput = null;
+                                updateEffects();
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
                         )
@@ -240,10 +245,12 @@ document.addEventListener('mousedown', (e) => {
         var clickX = e.clientX - rect.left; //x position within the element.
         var clickY = e.clientY - rect.top;  //y position within the element.
 
-        if (cardA.containsClick(clickX, clickY)) {
+        if (cardA.isAlive && cardA.containsClick(clickX, clickY)) {
             processCardAction(cardA.action);
-        } else if (cardB.containsClick(clickX, clickY)) {
+            cardA.isAlive = false;
+        } else if (cardB.isAlive && cardB.containsClick(clickX, clickY)) {
             processCardAction(cardB.action);
+            cardB.isAlive = false;
         }
     }
 });
@@ -296,6 +303,7 @@ function createBoardForLevel(newLevel) {
     collectables = [];
     obstacles = [];
     hazards = [];
+    effects = [];
     portal = null;
 
     controlInput = null;
@@ -402,15 +410,20 @@ async function beginGame() {
 function processCardAction(cardAction) {
     switch (cardAction) {
         case ActionCard.SPELL_FREEZE:
-            console.log("FREEZE!")
+            effects.push(new Effect(cardAction, 6));
             break;
         case ActionCard.SPELL_RANDOMIZE:
-            console.log("RANDOMIZE!")
+            console.log("RANDOMIZE!");
             break;
     }
 }
 
 function updateGameState() {
+
+    // Clean out dead entities
+    entities = entities.filter( ent => {
+        return ent.isAlive == true;
+    });
 
     // Clean out dead movers
     movers = movers.filter(mover => {
@@ -418,8 +431,6 @@ function updateGameState() {
     });
 
     if (gameState == GameState.DRAW_CARDS) {
-
-        //entities = entities.filter(card => { !(card instanceof Card) });
 
         let positionOne = { x: 10, y: 650 };
         let positionTwo = { x: 330, y: 650 };
@@ -444,19 +455,25 @@ function updateGameState() {
 
 
     // Monsters plot thier moves here
-    if (gameState == GameState.ENEMY_MOVE_PREPARE) {
-        entities
-            .filter(entity => { return entity instanceof Monster })
-            .forEach(entity => {
-                if (entity.mover == null || entity.mover.isAlive == false) {
-                    var mover = getMonsterMover(entity, playerWizard);
-                    if (mover != null) {
-                        entity.setMover(mover);
-                        movers.push(mover);
-                    }
-                }
 
-            })
+    var hasFreeze = effects.map(ef => { return ef.effectType == ActionCard.SPELL_FREEZE }).includes(true);
+
+    if (gameState == GameState.ENEMY_MOVE_PREPARE) {
+
+        if (!hasFreeze) {
+            entities
+                .filter(entity => { return entity instanceof Monster })
+                .forEach(entity => {
+                    if (entity.mover == null || entity.mover.isAlive == false) {
+                        var mover = getMonsterMover(entity, playerWizard);
+                        if (mover != null) {
+                            entity.setMover(mover);
+                            movers.push(mover);
+                        }
+                    }
+                })
+        }
+
         gameState = GameState.ENEMY_MOVE_EXECUTE;
     }
 
@@ -719,6 +736,11 @@ function playCoinSound() {
     sound.pause();
     sound.currentTime = 0;
     sound.play();
+}
+
+function updateEffects() {
+    effects.forEach( ef => { ef.update()});
+    effects = effects.filter (ef => { return ef.isAlive })
 }
 
 

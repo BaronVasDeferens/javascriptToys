@@ -65,7 +65,7 @@ var totalMoves = 0;
 let playerWizard;
 
 let wizardMovePerTick = 16;
-let monsterMovePerTick = 16;
+let monsterMovePerTick = 8;
 
 var numObstacles = 2 * level;
 var numCollectables = level + 1;
@@ -149,7 +149,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     )
-                    soundLoader.getSound(SoundAsset.MOVE_2).play();
+                    playStepSound();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -173,7 +173,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     )
-                    soundLoader.getSound(SoundAsset.MOVE_2).play();
+                    playStepSound();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -197,7 +197,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     );
-                    soundLoader.getSound(SoundAsset.MOVE_2).play();
+                    playStepSound();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -221,7 +221,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     )
-                    soundLoader.getSound(SoundAsset.MOVE_2).play();
+                    playStepSound();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -742,10 +742,18 @@ function getRandomMover(monster) {
     return potentialMoves[0];
 }
 
+function playStepSound() {
+    var stepSound = soundLoader.getSound(SoundAsset.MOVE_2);
+    stepSound.play();
+}
+
 function playCoinSound() {
     var sound = coinSounds[randomIntInRange(0, coinSounds.length)];
     sound.pause();
     sound.currentTime = 0;
+    var pbr = Math.abs(2.0 - Math.random());
+    console.log(pbr);
+    sound.playbackRate = pbr;
     sound.play();
 }
 

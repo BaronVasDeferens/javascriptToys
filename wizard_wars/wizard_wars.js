@@ -65,7 +65,7 @@ var totalMoves = 0;
 let playerWizard;
 
 let wizardMovePerTick = 16;
-let monsterMovePerTick = 8;
+let monsterMovePerTick = 16;
 
 var numObstacles = 2 * level;
 var numCollectables = level + 1;
@@ -81,6 +81,7 @@ var obstacles = [];
 var hazards = [];
 var effects = [];
 var portal;
+var bonusAwarded = false;
 
 let backgroundImage = new Image();
 
@@ -304,6 +305,7 @@ function createBoardForLevel(newLevel) {
 
     numMonstersBasic = level;
     numMonstersScary = Math.floor(level / 5);
+    numMonstersBasic = numMonstersBasic - numMonstersScary;
 
     // Clear out prior data
     movers = [];
@@ -313,6 +315,7 @@ function createBoardForLevel(newLevel) {
     hazards = [];
     effects = [];
     portal = null;
+    bonusAwarded = false;
 
     controlInput = null;
     cardA = null;
@@ -503,6 +506,17 @@ function updateGameState() {
                     playCoinSound();
                 }
             });
+
+        // Award BONUS for collecting everything
+        if (collectables.length == 0) {
+            if (bonusAwarded == false) {
+                playBonusSound();
+                var bonusValue = level * 100;
+                score += bonusValue;
+                console.log(`* BONUS ${bonusValue} PTS *`);
+            }
+            bonusAwarded = true;
+        }
 
         // Remove all acquired collectables
         collectables = collectables.filter(item => item.isCollected == false);
@@ -752,8 +766,13 @@ function playCoinSound() {
     sound.pause();
     sound.currentTime = 0;
     var pbr = Math.abs(2.0 - Math.random());
-    console.log(pbr);
     sound.playbackRate = pbr;
+    sound.play();
+}
+
+function playBonusSound() {
+    var sound = soundLoader.getSound(SoundAsset.BONUS);
+    sound.currentTime = 0;
     sound.play();
 }
 

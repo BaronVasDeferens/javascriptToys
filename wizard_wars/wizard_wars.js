@@ -406,8 +406,8 @@ function renderBackground(context) {
     backgroundImage.src = updatedSrc;
 }
 
-async function beginGame() {
-    await new Promise(resolve => setTimeout(resolve, delayValue));
+function beginGame() {
+    //await new Promise(resolve => setTimeout(resolve, delayValue));
     updateGameState();
     drawScene();
     requestAnimationFrame(beginGame);
@@ -428,105 +428,102 @@ function processCardAction(cardAction) {
 
 function updateGameState() {
 
-    // Clean out dead entities
-    entities = entities.filter( ent => {
-        return ent.isAlive == true;
-    });
+    if (gameState != GameState.GAME_OVER) {
 
-    // Clean out dead movers
-    movers = movers.filter(mover => {
-        return mover.isAlive;
-    });
-
-    if (gameState == GameState.DRAW_CARDS) {
-
-        let positionOne = { x: 10, y: 650 };
-        let positionTwo = { x: 330, y: 650 };
-        let cards = [];
-        cards.push(new Card(0, 0, ActionCard.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-        cards.push(new Card(0, 0, ActionCard.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
-
-        cardA = cards[0];
-        cardA.x = positionOne.x;
-        cardA.y = positionOne.y;
-
-        cardB = cards[1];
-        cardB.x = positionTwo.x;
-        cardB.y = positionTwo.y;
-
-        entities.push(cardA);
-        entities.push(cardB);
-
-        gameState = GameState.PLAYER_ACTION_SELECT;
-    }
-
-
-    // Monsters plot thier moves here
-
-    if (gameState == GameState.ENEMY_MOVE_PREPARE) {
-        var hasFreeze = effects.map(ef => { return ef.effectType == ActionCard.SPELL_FREEZE }).includes(true);
-        if (!hasFreeze) {
-            entities
-                .filter(entity => { return entity instanceof Monster })
-                .forEach(entity => {
-                    if (entity.mover == null || entity.mover.isAlive == false) {
-                        var mover = getMonsterMover(entity, playerWizard);
-                        if (mover != null) {
-                            entity.setMover(mover);
-                            movers.push(mover);
-                        }
-                    }
-                })
-        }
-
-        gameState = GameState.ENEMY_MOVE_EXECUTE;
-    }
-
-    movers.forEach(mover => {
-        mover.update();
-    });
-
-
-    if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
-        if (movers.every(mover => { mover.isAlive == false })) {
-            gameState = GameState.PLAYER_ACTION_SELECT;
-        }
-    }
-
-    // Consume the collectables
-    collectables
-        .filter(item => item.isCollected == false)
-        .forEach(item => {
-            if (isWithinCollisionDistance(playerWizard, item, 0)) {
-                item.isCollected = true;
-                score += 100;
-                playCoinSound();
-            }
+        // Clean out dead entities
+        entities = entities.filter(ent => {
+            return ent.isAlive == true;
         });
 
-    // Remove all acquired collectables
-    collectables = collectables.filter(item => item.isCollected == false);
+        // Clean out dead movers
+        movers = movers.filter(mover => {
+            return mover.isAlive;
+        });
 
-    // Check for GAME OVER: HAZARDS and MONSTERS
-    if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
-        gameOver();
-    }
+        if (gameState == GameState.DRAW_CARDS) {
 
-    // Check for level descent
-    if (isWithinCollisionDistance(playerWizard, portal, 32)) {
-        soundLoader.getSound(SoundAsset.DESCEND).play();
-        createBoardForLevel(portal.toLevelNumber);
+            let positionOne = { x: 10, y: 650 };
+            let positionTwo = { x: 330, y: 650 };
+            let cards = [];
+            cards.push(new Card(0, 0, ActionCard.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+            cards.push(new Card(0, 0, ActionCard.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+
+            cardA = cards[0];
+            cardA.x = positionOne.x;
+            cardA.y = positionOne.y;
+
+            cardB = cards[1];
+            cardB.x = positionTwo.x;
+            cardB.y = positionTwo.y;
+
+            entities.push(cardA);
+            entities.push(cardB);
+
+            gameState = GameState.PLAYER_ACTION_SELECT;
+        }
+
+        // Monsters plot thier moves here
+        if (gameState == GameState.ENEMY_MOVE_PREPARE) {
+            var hasFreeze = effects.map(ef => { return ef.effectType == ActionCard.SPELL_FREEZE }).includes(true);
+            if (!hasFreeze) {
+                entities
+                    .filter(entity => { return entity instanceof Monster })
+                    .forEach(entity => {
+                        if (entity.mover == null || entity.mover.isAlive == false) {
+                            var mover = getMonsterMover(entity, playerWizard);
+                            if (mover != null) {
+                                entity.setMover(mover);
+                                movers.push(mover);
+                            }
+                        }
+                    })
+            }
+
+            gameState = GameState.ENEMY_MOVE_EXECUTE;
+        }
+
+        movers.forEach(mover => {
+            mover.update();
+        });
+
+
+        if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
+            if (movers.every(mover => { mover.isAlive == false })) {
+                gameState = GameState.PLAYER_ACTION_SELECT;
+            }
+        }
+
+        // Consume the collectables
+        collectables
+            .filter(item => item.isCollected == false)
+            .forEach(item => {
+                if (isWithinCollisionDistance(playerWizard, item, 0)) {
+                    item.isCollected = true;
+                    score += 100;
+                    playCoinSound();
+                }
+            });
+
+        // Remove all acquired collectables
+        collectables = collectables.filter(item => item.isCollected == false);
+
+        // Check for GAME OVER: HAZARDS and MONSTERS
+        if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
+            gameOver();
+        }
+
+        // Check for level descent
+        if (isWithinCollisionDistance(playerWizard, portal, 32)) {
+            soundLoader.getSound(SoundAsset.DESCEND).play();
+            createBoardForLevel(portal.toLevelNumber);
+        }
     }
 }
 
 function drawScene() {
 
     // Draw background
-    context.fillStyle = "#FF0000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
     context.drawImage(backgroundImage, 0, 0);
-    //context.imageSmoothingEnabled = false;
 
     // Draw collectables
     collectables.forEach(item => {
@@ -543,19 +540,26 @@ function drawScene() {
 // ------------ END MAIN GAME LOOP ------------
 
 function gameOver() {
-    soundLoader.getSound(SoundAsset.PLAYER_DIES).play();
+
+    gameState = GameState.GAME_OVER;
+
+    var gameOverSound = soundLoader.getSound(SoundAsset.PLAYER_DIES);
+    gameOverSound.currentTime = 0;
+    gameOverSound.addEventListener("ended", (e) => {
+        initializeGameState();
+    });
+    gameOverSound.play();
+
+
     let finalScore = Math.floor((score / totalMoves) * level);
-    console.log("----------------------------------------------------------")
+    console.log("----------------------------------------------------------");
     console.log("Wizard was slain: GAME OVER");
     console.log(`LEVEL ACHIEVED: ${level}`);
     console.log(`TOTAL MOVES: ${totalMoves}`);
     console.log(`TREASURE COLLECTED: ${score}`);
     console.log(`FINAL SCORE: ${finalScore}`);
-    console.log("----------------------------------------------------------")
-    initializeGameState();
+    console.log("----------------------------------------------------------");
 }
-
-
 
 
 /* ------------ CONVENIENCE METHODS ------------ */
@@ -601,7 +605,7 @@ function checkFatalCollision(source, entities) {
         if (source === entity) {
             return false;
         } else {
-            return isWithinCollisionDistance(source, entity, 32)
+            return isWithinCollisionDistance(source, entity, 0)
         }
     });
 
@@ -746,8 +750,8 @@ function playCoinSound() {
 }
 
 function updateEffects() {
-    effects.forEach( ef => { ef.update()});
-    effects = effects.filter (ef => { return ef.isAlive })
+    effects.forEach(ef => { ef.update() });
+    effects = effects.filter(ef => { return ef.isAlive })
 }
 
 

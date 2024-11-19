@@ -11,8 +11,12 @@
  *      stairs that lead back
  *      enemies that DON'T fly
  *      light music
+ *      spell sounds
+ *      spell effects
  *      torch flicker
  *      
+ *      when a monster gets the wizard, zoom in on the wizard and slow down animation
+ * 
  *      remove "random movement" cards; ADD spells
  *      spell effect: freeze enemies (x turns)
  *      spell effect: move exit (random)
@@ -145,6 +149,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     )
+                    soundLoader.getSound(SoundAsset.MOVE_2).play();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -168,6 +173,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     )
+                    soundLoader.getSound(SoundAsset.MOVE_2).play();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -190,7 +196,8 @@ document.addEventListener('keydown', (e) => {
                                 gameState = GameState.ENEMY_MOVE_PREPARE;
                             }
                         )
-                    )
+                    );
+                    soundLoader.getSound(SoundAsset.MOVE_2).play();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -214,6 +221,7 @@ document.addEventListener('keydown', (e) => {
                             }
                         )
                     )
+                    soundLoader.getSound(SoundAsset.MOVE_2).play();
                     gameState = GameState.PLAYER_ACTION_EXECUTE;
                 }
                 break;
@@ -499,13 +507,14 @@ function updateGameState() {
     // Remove all acquired collectables
     collectables = collectables.filter(item => item.isCollected == false);
 
-    // Check for game over: HAZARDS and MONSTERS
+    // Check for GAME OVER: HAZARDS and MONSTERS
     if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
         gameOver();
     }
 
     // Check for level descent
     if (isWithinCollisionDistance(playerWizard, portal, 32)) {
+        soundLoader.getSound(SoundAsset.DESCEND).play();
         createBoardForLevel(portal.toLevelNumber);
     }
 }
@@ -534,6 +543,7 @@ function drawScene() {
 // ------------ END MAIN GAME LOOP ------------
 
 function gameOver() {
+    soundLoader.getSound(SoundAsset.PLAYER_DIES).play();
     let finalScore = Math.floor((score / totalMoves) * level);
     console.log("----------------------------------------------------------")
     console.log("Wizard was slain: GAME OVER");

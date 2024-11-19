@@ -273,12 +273,22 @@ export class ImageLoader {
 
 /**
  * ----------------------------- SOUNDS ---------------------------------
+ * 
+ * Lots of good sounds from this guy: https://freesound.org/people/cabled_mess/
+ * 
  */
 
 export var SoundAsset = Object.freeze({
     COIN_1: "resources/sounds/coin_1.wav",
     COIN_2: "resources/sounds/coin_2.wav",
-    COIN_3: "resources/sounds/coin_3.wav"
+    COIN_3: "resources/sounds/coin_3.wav",
+
+    PLAYER_DIES: "resources/sounds/player_dies.wav",
+
+    MOVE_1: "resources/sounds/move_1.wav",
+    MOVE_2: "resources/sounds/move_2.wav",
+
+    DESCEND: "resources/sounds/descend.wav"
 });
 
 export class SoundLoader {

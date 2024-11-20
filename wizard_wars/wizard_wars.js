@@ -37,7 +37,7 @@
 
 
 
-import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffect, Wizard } from './entity.js';
+import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectFreeze, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -422,7 +422,7 @@ function processCardAction(card) {
 
     switch (card.action) {
         case ActionCard.SPELL_FREEZE:
-            specialEffects.push(new SpecialEffect(mapWidth, mapHeight));
+            specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
             effects.push(new Effect(card.action, 6));
             break;
         case ActionCard.SPELL_RANDOMIZE:
@@ -441,16 +441,15 @@ function processCardAction(card) {
 }
 
 function updateGameState() {
-
-    if (gameState == GameState.CAST_SPELL_EFFECT) {
-
+    if (gameState == GameState.GAME_OVER) {
+        // skip
+    } else if (gameState == GameState.CAST_SPELL_EFFECT) {
         // Clean out dead entities
         entities = entities.filter(ent => {
             return ent.isAlive == true;
         });
 
-
-    } else if (gameState != GameState.GAME_OVER) {
+    } else {
 
         specialEffects = [];
 
@@ -582,11 +581,15 @@ function gameOver() {
 
     gameState = GameState.GAME_OVER;
 
+    specialEffects.push(
+        new SpecialEffectDeath(mapWidth, mapHeight, tileSize, playerWizard.x, playerWizard.y)
+    );
+
     var gameOverSound = soundLoader.getSound(SoundAsset.PLAYER_DIES);
     gameOverSound.currentTime = 0;
     gameOverSound.addEventListener("ended", (e) => {
         initializeGameState();
-    });
+    }, { once: true });
     gameOverSound.play();
 
 
@@ -599,7 +602,6 @@ function gameOver() {
     console.log(`FINAL SCORE: ${finalScore}`);
     console.log("----------------------------------------------------------");
 }
-
 
 /* ------------ CONVENIENCE METHODS ------------ */
 function randomIntInRange(min, max) {

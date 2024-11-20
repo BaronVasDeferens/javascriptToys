@@ -118,7 +118,7 @@ export class Effect {
     }
 }
 
-export class SpecialEffect {
+export class SpecialEffectFreeze {
 
     opacityLevel = 1.0;
 
@@ -140,6 +140,32 @@ export class SpecialEffect {
     }
 
 }
+export class SpecialEffectDeath {
+
+    opacityLevel = 0.0;
+
+    constructor(canvasWidth, canvasHeight, tileSize, playerX, playerY) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+        this.tileSize = tileSize;
+        this.playerX = playerX;
+        this.playerY = playerY;
+    }
+
+    render(context) {
+        if (this.opacityLevel < 1.0) {
+            this.opacityLevel = this.opacityLevel + 0.01;
+        } else {
+            this.opacityLevel = 1.0;
+        }
+        context.globalAlpha = this.opacityLevel;
+        context.fillStyle = "black";
+        context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        context.globalAlpha = 1.0;
+    }
+
+}
+
 
 
 export class Mover {

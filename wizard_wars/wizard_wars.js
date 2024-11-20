@@ -37,7 +37,7 @@
 
 
 
-import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, Wizard } from './entity.js';
+import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffect, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const assetLoader = new AssetLoader();
@@ -80,6 +80,7 @@ var collectables = [];
 var obstacles = [];
 var hazards = [];
 var effects = [];
+var specialEffects = [];
 var portal;
 var bonusAwarded = false;
 
@@ -113,6 +114,7 @@ const GameState = Object.freeze({
     PLAYER_ACTION_EXECUTE: "Player executes action",
     ENEMY_MOVE_PREPARE: "Enemies plan their moves...",
     ENEMY_MOVE_EXECUTE: "Enemies moving!",
+    CAST_SPELL_EFFECT: "Wizard casts a spell!",
     GAME_OVER: "GAME OVER"
 });
 
@@ -255,11 +257,9 @@ document.addEventListener('mousedown', (e) => {
         var clickY = e.clientY - rect.top;  //y position within the element.
 
         if (cardA.isAlive && cardA.containsClick(clickX, clickY)) {
-            processCardAction(cardA.action);
-            cardA.isAlive = false;
+            processCardAction(cardA);
         } else if (cardB.isAlive && cardB.containsClick(clickX, clickY)) {
-            processCardAction(cardB.action);
-            cardB.isAlive = false;
+            processCardAction(cardB);
         }
     }
 });
@@ -418,20 +418,41 @@ function beginGame() {
 
 // ------------ START MAIN GAME LOOP ------------
 
-function processCardAction(cardAction) {
-    switch (cardAction) {
+function processCardAction(card) {
+
+    switch (card.action) {
         case ActionCard.SPELL_FREEZE:
-            effects.push(new Effect(cardAction, 6));
+            specialEffects.push(new SpecialEffect(mapWidth, mapHeight));
+            effects.push(new Effect(card.action, 6));
             break;
         case ActionCard.SPELL_RANDOMIZE:
             console.log("RANDOMIZE!");
             break;
     }
+
+    card.isAlive = false;
+
+    gameState = GameState.CAST_SPELL_EFFECT;
+    let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
+    spellEffectSound.addEventListener("ended", (e) => {
+        gameState = GameState.PLAYER_ACTION_SELECT;
+    });
+    spellEffectSound.play();
 }
 
 function updateGameState() {
 
-    if (gameState != GameState.GAME_OVER) {
+    if (gameState == GameState.CAST_SPELL_EFFECT) {
+
+        // Clean out dead entities
+        entities = entities.filter(ent => {
+            return ent.isAlive == true;
+        });
+
+
+    } else if (gameState != GameState.GAME_OVER) {
+
+        specialEffects = [];
 
         // Clean out dead entities
         entities = entities.filter(ent => {
@@ -548,6 +569,10 @@ function drawScene() {
     entities.forEach(entity => {
         entity.render(context);
     });
+
+    specialEffects.forEach(spEf => {
+        spEf.render(context);
+    })
 
 }
 
@@ -758,6 +783,7 @@ function getRandomMover(monster) {
 
 function playStepSound() {
     var stepSound = soundLoader.getSound(SoundAsset.MOVE_2);
+    stepSound.currentTime = 0;
     stepSound.play();
 }
 

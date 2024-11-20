@@ -118,6 +118,29 @@ export class Effect {
     }
 }
 
+export class SpecialEffect {
+
+    opacityLevel = 1.0;
+
+    constructor(canvasWidth, canvasHeight) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight
+    }
+
+    render(context) {
+        context.fillStyle = "blue";
+        if (this.opacityLevel > 0) {
+            this.opacityLevel = this.opacityLevel - 0.01;
+        } else {
+            this.opacityLevel = 0;
+        }
+        context.globalAlpha = this.opacityLevel;
+        context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        context.globalAlpha = 1.0;
+    }
+
+}
+
 
 export class Mover {
     constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {

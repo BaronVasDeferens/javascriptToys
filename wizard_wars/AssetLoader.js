@@ -4,7 +4,7 @@
 
 export class AssetLoader {
     loadAssets(imageLoader, soundLoader, callback) {
-        imageLoader.loadImages(() => { soundLoader.loadSounds(() => { callback() } ) });
+        imageLoader.loadImages(() => { soundLoader.loadSounds(() => { callback() }) });
     }
 }
 
@@ -33,6 +33,7 @@ export var ImageAsset = Object.freeze({
     OBSTACLE_PILLAR_6: "resources/tiles/64x64/tile_786.png",
 
     HAZARD_LAVA_1: "resources/tiles/64x64/tile_384.png",
+    HAZARD_PIT_1: "resources/tiles/64x64/tile_827.png",
 
     STAIRS_DOWN_1: "resources/tiles/64x64/tile_676.png",
 
@@ -59,7 +60,21 @@ export var ImageAsset = Object.freeze({
     TILE_MARBLE_PINK_7: "resources/tiles/64x64/tile_583.png",
     TILE_MARBLE_PINK_8: "resources/tiles/64x64/tile_584.png",
     TILE_MARBLE_PINK_9: "resources/tiles/64x64/tile_585.png",
-    TILE_MARBLE_PINK_10: "resources/tiles/64x64/tile_586.png"
+    TILE_MARBLE_PINK_10: "resources/tiles/64x64/tile_586.png",
+
+    TILE_SKULLS_1: "resources/tiles/64x64/tile_562.png",
+    TILE_SKULLS_2: "resources/tiles/64x64/tile_564.png",
+    TILE_SKULLS_3: "resources/tiles/64x64/tile_566.png",
+    TILE_SKULLS_4: "resources/tiles/64x64/tile_568.png",
+
+    TILE_RED_MOON_1: "resources/tiles/64x64/tile_570.png",
+    TILE_RED_MOON_2: "resources/tiles/64x64/tile_571.png",
+    TILE_RED_MOON_3: "resources/tiles/64x64/tile_572.png",
+    TILE_RED_MOON_4: "resources/tiles/64x64/tile_573.png",
+    TILE_RED_MOON_5: "resources/tiles/64x64/tile_574.png",
+    TILE_RED_MOON_6: "resources/tiles/64x64/tile_575.png",
+    TILE_RED_MOON_7: "resources/tiles/64x64/tile_575.png"
+
 });
 
 export class ImageLoader {
@@ -93,6 +108,23 @@ export class ImageLoader {
             ImageAsset.TILE_MARBLE_PINK_8,
             ImageAsset.TILE_MARBLE_PINK_9,
             ImageAsset.TILE_MARBLE_PINK_10
+        ]);
+
+        this.tileSets.set("SKULLS", [
+            ImageAsset.TILE_SKULLS_1,
+            ImageAsset.TILE_SKULLS_2,
+            ImageAsset.TILE_SKULLS_3,
+            ImageAsset.TILE_SKULLS_4
+        ]);
+
+        this.tileSets.set("RED_MOON", [
+            ImageAsset.TILE_RED_MOON_1,
+            ImageAsset.TILE_RED_MOON_2,
+            ImageAsset.TILE_RED_MOON_3,
+            ImageAsset.TILE_RED_MOON_4,
+            ImageAsset.TILE_RED_MOON_5,
+            ImageAsset.TILE_RED_MOON_6,
+            ImageAsset.TILE_RED_MOON_7
         ]);
 
         this.tileSets.set("GOLDSTACKS", [

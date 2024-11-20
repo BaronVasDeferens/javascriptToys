@@ -253,8 +253,8 @@ document.addEventListener('mousedown', (e) => {
     if (gameState == GameState.PLAYER_ACTION_SELECT) {
 
         var rect = e.target.getBoundingClientRect();
-        var clickX = e.clientX - rect.left; //x position within the element.
-        var clickY = e.clientY - rect.top;  //y position within the element.
+        var clickX = e.clientX - rect.left; //x position within the HTML element.
+        var clickY = e.clientY - rect.top;  //y position within the HTML element.
 
         if (cardA.isAlive && cardA.containsClick(clickX, clickY)) {
             processCardAction(cardA);
@@ -343,7 +343,7 @@ function createBoardForLevel(newLevel) {
         var location = getSingleUnoccupiedGrid();
         hazards.push(
             new Hazard(
-                `hazard_${i}`, location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.HAZARD_LAVA_1))
+                `hazard_${i}`, location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.HAZARD_PIT_1))
         )
     }
 
@@ -394,7 +394,20 @@ function renderBackground(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw tiles onto the background image
-    let tiles = imageLoader.getTilesetForName("MARBLE_PINK");
+    var tiles;
+    switch (level) {
+        case 1:
+            tiles = imageLoader.getTilesetForName("MARBLE_PINK");
+            break;
+        case 2:
+            tiles = imageLoader.getTilesetForName("MARBLE");
+            break;
+        default:
+            tiles = imageLoader.getTilesetForName("SKULLS");
+            break;
+    }
+
+
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {
             context.drawImage(tiles[randomIntInRange(0, tiles.length)], i * tileSize, j * tileSize);

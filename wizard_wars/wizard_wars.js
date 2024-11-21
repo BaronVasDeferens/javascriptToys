@@ -64,8 +64,8 @@ var totalMoves = 0;
 
 let playerWizard;
 
-let wizardMovePerTick = 16;
-let monsterMovePerTick = 16;
+let wizardMovePerTick = 4;
+let monsterMovePerTick = 4;
 
 var numObstacles = 2 * level;
 var numCollectables = level + 1;
@@ -449,7 +449,7 @@ function processCardAction(card) {
     let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
     spellEffectSound.addEventListener("ended", (e) => {
         gameState = GameState.PLAYER_ACTION_SELECT;
-    });
+    }, {once: true});
     spellEffectSound.play();
 }
 

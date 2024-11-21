@@ -36,7 +36,7 @@ export var MonsterMovementBehavior = Object.freeze({
 });
 
 export class Monster extends Entity {
-    
+
     constructor(id, x, y, behavior, image) {
         super(id, x, y);
         this.behavior = behavior;
@@ -102,9 +102,9 @@ export class Card extends Entity {
 }
 
 export class Effect {
-    
+
     isAlive = true;
-    
+
     constructor(effectType, cycles) {
         this.effectType = effectType;
         this.cycles = cycles;
@@ -128,15 +128,14 @@ export class SpecialEffectFreeze {
     }
 
     render(context) {
-        context.fillStyle = "blue";
-        if (this.opacityLevel > 0) {
+
+        if (this.opacityLevel > 0.01) {
             this.opacityLevel = this.opacityLevel - 0.01;
-        } else {
-            this.opacityLevel = 0;
+            context.globalAlpha = this.opacityLevel;
+            context.fillStyle = "blue";
+            context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+            context.globalAlpha = 1.0;
         }
-        context.globalAlpha = this.opacityLevel;
-        context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-        context.globalAlpha = 1.0;
     }
 
 }

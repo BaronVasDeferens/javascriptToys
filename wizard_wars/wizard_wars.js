@@ -64,8 +64,8 @@ var totalMoves = 0;
 
 let playerWizard;
 
-let wizardMovePerTick = 4;
-let monsterMovePerTick = 4;
+let wizardMovePerTick = 16;
+let monsterMovePerTick = 16;
 
 var numObstacles = 2 * level;
 var numCollectables = level + 1;

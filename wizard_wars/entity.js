@@ -145,9 +145,6 @@ export class SpecialEffectDescend {
     radiusChnagePerTick = 4;
 
     constructor(canvasWidth, canvasHeight, portalX, portalY, tileSize) {
-        // this.canvasWidth = canvasWidth;
-        // this.canvasHeight = canvasHeight;
-
         this.keyholeX = portalX + (tileSize / 2);
         this.keyholeY = portalY + (tileSize / 2);
         this.keyholeRadius = Math.max(canvasWidth, canvasHeight);
@@ -156,7 +153,6 @@ export class SpecialEffectDescend {
     }
 
     render(context) {
-        console.log("rendering descend effect...");
         context.save();
         context.globalCompositeOperation = "destination-in"; // This makes the keyhole transparent
         context.beginPath();
@@ -166,7 +162,9 @@ export class SpecialEffectDescend {
 
         // Shrink the keyhole radius
         if ((this.keyholeRadius - this.radiusChnagePerTick) > this.minRadius) {
-            this.keyholeRadius -= this.radiusChnagePerTick;  // Shrink by 1 pixel each frame
+            this.keyholeRadius -= this.radiusChnagePerTick; 
+        } else {
+            this.radiusChnagePerTick = 1;
         }
     }
 

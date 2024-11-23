@@ -574,14 +574,11 @@ function updateGameState() {
         // Remove all acquired collectables
         collectables = collectables.filter(item => item.isCollected == false);
 
-        // Check for GAME OVER: HAZARDS and MONSTERS
+        // Check for GAME OVER: HAZARDS and MONSTERS...
         if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
             gameOver();
-        }
-
-        // Check for level descent
-        if (isWithinCollisionDistance(playerWizard, portal, 0)) {
-
+        } else if (isWithinCollisionDistance(playerWizard, portal, 0)) {
+            // ...or LEVEL DESCENT
             changeGameState(GameState.CAST_SPELL_EFFECT);
             let descendSound = soundLoader.getSound(SoundAsset.DESCEND);
             descendSound.addEventListener("ended", (e) => {

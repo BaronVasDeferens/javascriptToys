@@ -66,8 +66,9 @@ var totalMoves = 0;
 
 let playerWizard;
 
-let wizardMovePerTick = 16;
-let monsterMovePerTick = 16;
+var wizardMovePerTick = 4;
+var monsterMovePerTick = 4;
+var moveAdjustment = 2;
 
 var numObstacles = 2 * level;
 var numCollectables = level + 1;
@@ -90,8 +91,7 @@ let backgroundImage = new Image();
 
 var coinSounds = [];
 
-var delayValue = 0;
-let delayValueIncrement = 2;
+
 
 class Tile {
     x;
@@ -234,20 +234,38 @@ document.addEventListener('keydown', (e) => {
                 initializeGameState();
                 break;
             case "-":
-                delayValue += delayValueIncrement;
-                console.log(`Slowing down...${delayValue}`);
+                decreaseEntityMovementSpeeds();
                 break;
             case "+":
-                delayValue -= delayValueIncrement;
-                if (delayValue <= 0) {
-                    delayValue = 0;
-                }
-                console.log(`Speeding up...${delayValue}`);
+                increaseEntityMovementSpeeds();
                 break;
         }
     }
 
 });
+
+function increaseEntityMovementSpeeds() {
+    if ((wizardMovePerTick * moveAdjustment) <= tileSize) {
+        wizardMovePerTick *= moveAdjustment;
+    }
+
+    if ((monsterMovePerTick * moveAdjustment) <= tileSize) {
+        monsterMovePerTick *= moveAdjustment;
+    }
+
+    console.log(`Increasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
+}
+
+function decreaseEntityMovementSpeeds() {
+    if ((wizardMovePerTick / moveAdjustment) >= moveAdjustment) {
+        wizardMovePerTick /= moveAdjustment;
+    }
+
+    if ((monsterMovePerTick / moveAdjustment) >= moveAdjustment) {
+        monsterMovePerTick /= moveAdjustment;
+    }
+    console.log(`Decreasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
+}
 
 /**--------- MOUSE INPUT -----------*/
 document.addEventListener('mousedown', (e) => {

@@ -124,7 +124,7 @@ export class SpecialEffectFreeze {
 
     constructor(canvasWidth, canvasHeight) {
         this.canvasWidth = canvasWidth;
-        this.canvasHeight = canvasHeight
+        this.canvasHeight = canvasHeight;
     }
 
     render(context) {
@@ -139,6 +139,40 @@ export class SpecialEffectFreeze {
     }
 
 }
+
+export class SpecialEffectDescend {
+
+    radiusChnagePerTick = 4;
+
+    constructor(canvasWidth, canvasHeight, portalX, portalY, tileSize) {
+        // this.canvasWidth = canvasWidth;
+        // this.canvasHeight = canvasHeight;
+
+        this.keyholeX = portalX + (tileSize / 2);
+        this.keyholeY = portalY + (tileSize / 2);
+        this.keyholeRadius = Math.max(canvasWidth, canvasHeight);
+        this.minRadius = 0;
+        this.maxRadius = Math.max(canvasWidth, canvasHeight);
+    }
+
+    render(context) {
+        console.log("rendering descend effect...");
+        context.save();
+        context.globalCompositeOperation = "destination-in"; // This makes the keyhole transparent
+        context.beginPath();
+        context.arc(this.keyholeX, this.keyholeY, this.keyholeRadius, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        // Shrink the keyhole radius
+        if ((this.keyholeRadius - this.radiusChnagePerTick) > this.minRadius) {
+            this.keyholeRadius -= this.radiusChnagePerTick;  // Shrink by 1 pixel each frame
+        }
+    }
+
+}
+
+
 export class SpecialEffectDeath {
 
     opacityLevel = 0.0;

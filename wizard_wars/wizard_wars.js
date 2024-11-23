@@ -37,8 +37,10 @@
 
 
 
-import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectFreeze, Wizard } from './entity.js';
+import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
+
+const debugOutput = false;
 
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
@@ -148,12 +150,12 @@ document.addEventListener('keydown', (e) => {
                                 totalMoves++;
                                 controlInput = null;
                                 updateEffects();
-                                gameState = GameState.ENEMY_MOVE_PREPARE;
+                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
                             }
                         )
                     )
                     playStepSound();
-                    gameState = GameState.PLAYER_ACTION_EXECUTE;
+                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
                 }
                 break;
             case "ArrowDown":
@@ -172,12 +174,12 @@ document.addEventListener('keydown', (e) => {
                                 totalMoves++;
                                 controlInput = null;
                                 updateEffects();
-                                gameState = GameState.ENEMY_MOVE_PREPARE;
+                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
                             }
                         )
                     )
                     playStepSound();
-                    gameState = GameState.PLAYER_ACTION_EXECUTE;
+                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
                 }
                 break;
             case "ArrowLeft":
@@ -196,12 +198,12 @@ document.addEventListener('keydown', (e) => {
                                 totalMoves++;
                                 controlInput = null;
                                 updateEffects();
-                                gameState = GameState.ENEMY_MOVE_PREPARE;
+                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
                             }
                         )
                     );
                     playStepSound();
-                    gameState = GameState.PLAYER_ACTION_EXECUTE;
+                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
                 }
                 break;
             case "ArrowRight":
@@ -220,12 +222,12 @@ document.addEventListener('keydown', (e) => {
                                 totalMoves++;
                                 controlInput = null;
                                 updateEffects();
-                                gameState = GameState.ENEMY_MOVE_PREPARE;
+                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
                             }
                         )
                     )
                     playStepSound();
-                    gameState = GameState.PLAYER_ACTION_EXECUTE;
+                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
                 }
                 break;
             case "Escape":
@@ -289,7 +291,7 @@ function initializeGameState() {
     level = 1;
     totalMoves = 0;
     score = 0;
-    gameState = GameState.DRAW_CARDS;
+    changeGameState(GameState.DRAW_CARDS);
     createBoardForLevel(level);
 }
 
@@ -382,7 +384,7 @@ function createBoardForLevel(newLevel) {
 
     renderBackground(context);
 
-    gameState = GameState.DRAW_CARDS;
+    changeGameState(GameState.DRAW_CARDS);
 }
 
 /**
@@ -445,11 +447,11 @@ function processCardAction(card) {
 
     card.isAlive = false;
 
-    gameState = GameState.CAST_SPELL_EFFECT;
+    changeGameState(GameState.CAST_SPELL_EFFECT);
     let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
     spellEffectSound.addEventListener("ended", (e) => {
-        gameState = GameState.PLAYER_ACTION_SELECT;
-    }, {once: true});
+        changeGameState(GameState.PLAYER_ACTION_SELECT);
+    }, { once: true });
     spellEffectSound.play();
 }
 
@@ -495,7 +497,7 @@ function updateGameState() {
             entities.push(cardA);
             entities.push(cardB);
 
-            gameState = GameState.PLAYER_ACTION_SELECT;
+            changeGameState(GameState.PLAYER_ACTION_SELECT);
         }
 
         // Monsters plot thier moves here
@@ -515,7 +517,7 @@ function updateGameState() {
                     })
             }
 
-            gameState = GameState.ENEMY_MOVE_EXECUTE;
+            changeGameState(GameState.ENEMY_MOVE_EXECUTE);
         }
 
         movers.forEach(mover => {
@@ -525,7 +527,7 @@ function updateGameState() {
 
         if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
             if (movers.every(mover => { mover.isAlive == false })) {
-                gameState = GameState.PLAYER_ACTION_SELECT;
+                changeGameState(GameState.PLAYER_ACTION_SELECT);
             }
         }
 
@@ -560,10 +562,26 @@ function updateGameState() {
         }
 
         // Check for level descent
-        if (isWithinCollisionDistance(playerWizard, portal, 32)) {
-            soundLoader.getSound(SoundAsset.DESCEND).play();
-            createBoardForLevel(portal.toLevelNumber);
+        if (isWithinCollisionDistance(playerWizard, portal, 0)) {
+
+            changeGameState(GameState.CAST_SPELL_EFFECT);
+            let descendSound = soundLoader.getSound(SoundAsset.DESCEND);
+            descendSound.addEventListener("ended", (e) => {
+                createBoardForLevel(portal.toLevelNumber);
+            }, { once: true });
+            descendSound.play();
+
+            specialEffects.push(
+                new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize)
+            );
         }
+    }
+}
+
+function changeGameState(newState) {
+    gameState = newState;
+    if (debugOutput) {
+        console.log(`gameState: ${gameState}`);
     }
 }
 
@@ -592,10 +610,10 @@ function drawScene() {
 
 function gameOver() {
 
-    gameState = GameState.GAME_OVER;
+    changeGameState(GameState.GAME_OVER);
 
     specialEffects.push(
-        new SpecialEffectDeath(mapWidth, mapHeight, tileSize, playerWizard.x, playerWizard.y)
+        new SpecialEffectDeath(canvas.width, canvas.height, tileSize, playerWizard.x, playerWizard.y)
     );
 
     var gameOverSound = soundLoader.getSound(SoundAsset.PLAYER_DIES);

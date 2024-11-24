@@ -165,46 +165,21 @@ document.addEventListener('keydown', (e) => {
                 break;
         }
     }
-
 });
-
-function increaseEntityMovementSpeeds() {
-    if ((wizardMovePerTick * moveAdjustment) <= tileSize) {
-        wizardMovePerTick *= moveAdjustment;
-    }
-
-    if ((monsterMovePerTick * moveAdjustment) <= tileSize) {
-        monsterMovePerTick *= moveAdjustment;
-    }
-
-    console.log(`Increasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
-}
-
-function decreaseEntityMovementSpeeds() {
-    if ((wizardMovePerTick / moveAdjustment) >= moveAdjustment) {
-        wizardMovePerTick /= moveAdjustment;
-    }
-
-    if ((monsterMovePerTick / moveAdjustment) >= moveAdjustment) {
-        monsterMovePerTick /= moveAdjustment;
-    }
-    console.log(`Decreasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
-}
 
 /**--------- MOUSE INPUT -----------*/
 document.addEventListener('mousedown', (e) => {
 
-    if (gameState == GameState.PLAYER_ACTION_SELECT) {
+    if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
 
         var rect = e.target.getBoundingClientRect();
         var clickX = e.clientX - rect.left; //x position within the HTML element.
         var clickY = e.clientY - rect.top;  //y position within the HTML element.
 
-
-        // Check for SPELL CLICK
-        if (cardA.isAlive && cardA.containsClick(clickX, clickY)) {
+        // Check for SPELL CLICKED
+        if (cardA.containsClick(clickX, clickY)) {
             processCardAction(cardA);
-        } else if (cardB.isAlive && cardB.containsClick(clickX, clickY)) {
+        } else if (cardB.containsClick(clickX, clickY)) {
             processCardAction(cardB);
         } else {
             // Check for ADJACENT TILE CLICKED (MOVE)
@@ -217,6 +192,11 @@ document.addEventListener('mousedown', (e) => {
     }
 });
 
+/**
+ * Dtermines whether a grid of the map is directly adjacent to the wizard.
+ * @param {*} target an object with x and y properties, each a multiple of 64 
+ * @returns the direction relative to the wizard, or null if not adjacent
+ */
 function checkAdjacent(target) {
     if (target.x == playerWizard.x) {
         if (target.y == playerWizard.y - tileSize) {
@@ -239,6 +219,10 @@ function checkAdjacent(target) {
     }
 }
 
+/**
+ * Moves the wizard in the indicated direction, if able.
+ * @param {*} direction : InputControl
+ */
 function moveIfAble(direction) {
     switch (direction) {
         case ControlInput.UP:
@@ -332,6 +316,29 @@ function moveIfAble(direction) {
         default:
             break;
     }
+}
+
+function increaseEntityMovementSpeeds() {
+    if ((wizardMovePerTick * moveAdjustment) <= tileSize) {
+        wizardMovePerTick *= moveAdjustment;
+    }
+
+    if ((monsterMovePerTick * moveAdjustment) <= tileSize) {
+        monsterMovePerTick *= moveAdjustment;
+    }
+
+    console.log(`Increasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
+}
+
+function decreaseEntityMovementSpeeds() {
+    if ((wizardMovePerTick / moveAdjustment) >= moveAdjustment) {
+        wizardMovePerTick /= moveAdjustment;
+    }
+
+    if ((monsterMovePerTick / moveAdjustment) >= moveAdjustment) {
+        monsterMovePerTick /= moveAdjustment;
+    }
+    console.log(`Decreasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
 }
 
 var setup = function () {
@@ -493,7 +500,6 @@ function renderBackground(context) {
 }
 
 function beginGame() {
-    //await new Promise(resolve => setTimeout(resolve, delayValue));
     updateGameState();
     drawScene();
     requestAnimationFrame(beginGame);
@@ -503,6 +509,9 @@ function beginGame() {
 
 function processCardAction(card) {
 
+    if (card == null || card.isAlive == false) {
+        return;
+    }
     switch (card.action) {
         case ActionCard.SPELL_FREEZE:
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));

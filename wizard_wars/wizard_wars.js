@@ -1,7 +1,7 @@
 /**
  * 
  * WIZARD WARS
- * or maybe MOUSE MAGE!
+ * or WAGE MAGE
  * 
  * IDEAS
  * 
@@ -14,7 +14,12 @@
  *      spell sounds
  *      spell effects
  *      torch flicker
+ *      better bonus sound
  *      
+ *      enemy that REPLICATES instead of moves
+ * 
+ *      "stock" levels (like the 1st level -- outdoor field of ruins / columns / statues)
+ * 
  *      when a monster gets the wizard, zoom in on the wizard and slow down animation
  * 
  *      remove "random movement" cards; ADD spells
@@ -37,7 +42,7 @@
 
 
 
-import { Card, Collectable, Effect, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, Wizard } from './entity.js';
+import { Card, Collectable, EffectTimer, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -193,7 +198,7 @@ document.addEventListener('mousedown', (e) => {
 });
 
 /**
- * Dtermines whether a grid of the map is directly adjacent to the wizard.
+ * Determines whether a grid of the map is directly adjacent to the wizard.
  * @param {*} target an object with x and y properties, each a multiple of 64 
  * @returns the direction relative to the wizard, or null if not adjacent
  */
@@ -515,15 +520,20 @@ function processCardAction(card) {
     switch (card.action) {
         case ActionCard.SPELL_FREEZE:
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
-            effects.push(new Effect(card.action, 6));
+            effects.push(new EffectTimer(card.action, 6));
             break;
         case ActionCard.SPELL_RANDOMIZE:
-            console.log("RANDOMIZE!");
+            var swappables = entities.filter(ent => {
+                if (ent instanceof Card == false) {
+                    return ent;
+                }
+            }).concat(obstacles).concat(hazards).concat(collectables).concat(portal);
+            specialEffects.push(new SpecialEffectRandomize(mapWidth, mapHeight, swappables));
+            renderBackground(context);
             break;
     }
 
     card.isAlive = false;
-
     changeGameState(GameState.CAST_SPELL_EFFECT);
     let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
     spellEffectSound.addEventListener("ended", (e) => {

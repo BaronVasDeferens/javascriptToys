@@ -1,3 +1,4 @@
+
 class Entity {
 
     id = "";
@@ -101,7 +102,12 @@ export class Card extends Entity {
     }
 }
 
-export class Effect {
+/**
+ * Effect Timer
+ * Used in the "bind/freeze" spell effect. Let's the game engine know that the monsters
+ * should not move for a period of time.
+ */
+export class EffectTimer {
 
     isAlive = true;
 
@@ -170,6 +176,43 @@ export class SpecialEffectDescend {
 
 }
 
+export class SpecialEffectRandomize {
+
+    opacityLevel = 0.0;
+
+    constructor(canvasWidth, canvasHeight, entities) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+
+        // Create a list of positions 
+        let positions = entities.map( entity => {
+            console.log(entity)
+            return {
+                x: entity.x,
+                y: entity.y
+            }
+        }).reverse();
+
+        // Starting from the end of the position list, assign a new position to every entity 
+        for (var pos = 0; pos < entities.length; pos++) {
+            entities[pos].x = positions[pos].x;
+            entities[pos].y = positions[pos].y;
+        }
+    }
+
+    render(context) {
+        if (this.opacityLevel < 1.0) {
+            this.opacityLevel = this.opacityLevel + 0.01;
+        } else {
+            this.opacityLevel = 1.0;
+        }
+
+        context.globalAlpha = this.opacityLevel;
+        context.fillStyle = "red";
+        context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+        context.globalAlpha = 1.0;
+    }
+}
 
 export class SpecialEffectDeath {
 

@@ -162,7 +162,7 @@ export class SpecialEffectDescend {
 
         // Shrink the keyhole radius
         if ((this.keyholeRadius - this.radiusChnagePerTick) > this.minRadius) {
-            this.keyholeRadius -= this.radiusChnagePerTick; 
+            this.keyholeRadius -= this.radiusChnagePerTick;
         } else {
             this.radiusChnagePerTick = 1;
         }
@@ -175,12 +175,11 @@ export class SpecialEffectDeath {
 
     opacityLevel = 0.0;
 
-    constructor(canvasWidth, canvasHeight, tileSize, playerX, playerY) {
+    constructor(canvasWidth, canvasHeight, player, killer) {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
-        this.tileSize = tileSize;
-        this.playerX = playerX;
-        this.playerY = playerY;
+        this.player = player;
+        this.killer = killer;
     }
 
     render(context) {
@@ -189,10 +188,18 @@ export class SpecialEffectDeath {
         } else {
             this.opacityLevel = 1.0;
         }
+
         context.globalAlpha = this.opacityLevel;
         context.fillStyle = "black";
         context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
         context.globalAlpha = 1.0;
+
+        if (this.killer instanceof Hazard) {
+            this.killer.render(context);
+        } else {
+            this.player.render(context);
+            this.killer.render(context);
+        }
     }
 
 }

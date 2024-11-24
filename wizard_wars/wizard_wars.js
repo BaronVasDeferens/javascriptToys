@@ -205,7 +205,7 @@ function checkAdjacent(target) {
             return ControlInput.DOWN;
         } else {
             return null;
-        } 
+        }
     } else if (target.y == playerWizard.y) {
         if ((target.x == playerWizard.x - tileSize)) {
             return ControlInput.LEFT;
@@ -633,9 +633,11 @@ function updateGameState() {
         // Remove all acquired collectables
         collectables = collectables.filter(item => item.isCollected == false);
 
-        // Check for GAME OVER: HAZARDS and MONSTERS...
-        if (checkFatalCollision(playerWizard, hazards.concat(entities))) {
-            gameOver();
+
+        let fatalEntity = getFatalEntity(playerWizard, hazards.concat(entities));
+        if (fatalEntity.length > 0) {
+            // Check for GAME OVER: HAZARDS and MONSTERS...
+            gameOver(fatalEntity[0]);
         } else if (isWithinCollisionDistance(playerWizard, portal, 0)) {
             // ...or LEVEL DESCENT
             changeGameState(GameState.CAST_SPELL_EFFECT);
@@ -682,12 +684,12 @@ function drawScene() {
 
 // ------------ END MAIN GAME LOOP ------------
 
-function gameOver() {
+function gameOver(fatalEntity) {
 
     changeGameState(GameState.GAME_OVER);
 
     specialEffects.push(
-        new SpecialEffectDeath(canvas.width, canvas.height, tileSize, playerWizard.x, playerWizard.y)
+        new SpecialEffectDeath(canvas.width, canvas.height, playerWizard, fatalEntity)
     );
 
     var gameOverSound = soundLoader.getSound(SoundAsset.PLAYER_DIES);
@@ -744,6 +746,18 @@ function checkUnobstructed(destinationX, destinationY) {
         return (destinationX == obstacle.x) && (destinationY == obstacle.y)
     });
     return !isObstructed.includes(true);
+}
+
+function getFatalEntity(source, potentials) {
+    var fatalEntities = potentials.map((entity) => {
+        if (source !== entity && isWithinCollisionDistance(source, entity, 0)) {
+            return entity;
+        };
+    });
+
+    console.log(`fatal entites: ${fatalEntities}`);
+
+    return fatalEntities.filter(it => { return (it != null) });
 }
 
 function checkFatalCollision(source, entities) {

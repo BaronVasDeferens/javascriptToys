@@ -137,98 +137,22 @@ document.addEventListener('keydown', (e) => {
             case "ArrowUp":
             case "w":
             case "W":
-                if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
-                    controlInput = ControlInput.UP
-                    movers.push(
-                        new Mover(
-                            playerWizard,
-                            playerWizard.x,
-                            playerWizard.y - tileSize,
-                            0,
-                            -wizardMovePerTick,
-                            () => {
-                                totalMoves++;
-                                controlInput = null;
-                                updateEffects();
-                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                            }
-                        )
-                    )
-                    playStepSound();
-                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-                }
+                moveIfAble(ControlInput.UP);
                 break;
             case "ArrowDown":
             case "s":
             case "S":
-                if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
-                    controlInput = ControlInput.DOWN
-                    movers.push(
-                        new Mover(
-                            playerWizard,
-                            playerWizard.x,
-                            playerWizard.y + tileSize,
-                            0,
-                            wizardMovePerTick,
-                            () => {
-                                totalMoves++;
-                                controlInput = null;
-                                updateEffects();
-                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                            }
-                        )
-                    )
-                    playStepSound();
-                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-                }
+                moveIfAble(ControlInput.DOWN);
                 break;
             case "ArrowLeft":
             case "a":
             case "A":
-                if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
-                    controlInput = ControlInput.LEFT
-                    movers.push(
-                        new Mover(
-                            playerWizard,
-                            playerWizard.x - tileSize,
-                            playerWizard.y,
-                            -wizardMovePerTick,
-                            0,
-                            () => {
-                                totalMoves++;
-                                controlInput = null;
-                                updateEffects();
-                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                            }
-                        )
-                    );
-                    playStepSound();
-                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-                }
+                moveIfAble(ControlInput.LEFT);
                 break;
             case "ArrowRight":
             case "d":
             case "D":
-                if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
-                    controlInput = ControlInput.RIGHT
-                    movers.push(
-                        new Mover(
-                            playerWizard,
-                            playerWizard.x + tileSize,
-                            playerWizard.y,
-                            wizardMovePerTick,
-                            0,
-                            () => {
-                                totalMoves++;
-                                controlInput = null;
-                                updateEffects();
-                                changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                            }
-                        )
-                    )
-                    playStepSound();
-                    changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-                }
+                moveIfAble(ControlInput.RIGHT);
                 break;
             case "Escape":
                 initializeGameState();
@@ -276,13 +200,139 @@ document.addEventListener('mousedown', (e) => {
         var clickX = e.clientX - rect.left; //x position within the HTML element.
         var clickY = e.clientY - rect.top;  //y position within the HTML element.
 
+
+        // Check for SPELL CLICK
         if (cardA.isAlive && cardA.containsClick(clickX, clickY)) {
             processCardAction(cardA);
         } else if (cardB.isAlive && cardB.containsClick(clickX, clickY)) {
             processCardAction(cardB);
+        } else {
+            // Check for ADJACENT TILE CLICKED (MOVE)
+            let clickedTile = {
+                x: Math.floor((clickX / tileSize) % tileSize) * tileSize,
+                y: Math.floor((clickY / tileSize) % tileSize) * tileSize
+            };
+            moveIfAble(checkAdjacent(clickedTile))
         }
     }
 });
+
+function checkAdjacent(target) {
+    if (target.x == playerWizard.x) {
+        if (target.y == playerWizard.y - tileSize) {
+            return ControlInput.UP;
+        } else if (target.y == playerWizard.y + tileSize) {
+            return ControlInput.DOWN;
+        } else {
+            return null;
+        } 
+    } else if (target.y == playerWizard.y) {
+        if ((target.x == playerWizard.x - tileSize)) {
+            return ControlInput.LEFT;
+        } else if (target.x == playerWizard.x + tileSize) {
+            return ControlInput.RIGHT;
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+}
+
+function moveIfAble(direction) {
+    switch (direction) {
+        case ControlInput.UP:
+            if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
+                controlInput = ControlInput.UP
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y - tileSize,
+                        0,
+                        -wizardMovePerTick,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                )
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        case ControlInput.DOWN:
+            if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
+                controlInput = ControlInput.DOWN
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y + tileSize,
+                        0,
+                        wizardMovePerTick,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                )
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        case ControlInput.LEFT:
+            if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
+                controlInput = ControlInput.LEFT
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x - tileSize,
+                        playerWizard.y,
+                        -wizardMovePerTick,
+                        0,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                );
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        case ControlInput.RIGHT:
+            if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
+                controlInput = ControlInput.RIGHT
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x + tileSize,
+                        playerWizard.y,
+                        wizardMovePerTick,
+                        0,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                )
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        default:
+            break;
+    }
+}
 
 var setup = function () {
     // Set background to display "loading" text

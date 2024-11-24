@@ -633,7 +633,7 @@ function updateGameState() {
         // Remove all acquired collectables
         collectables = collectables.filter(item => item.isCollected == false);
 
-
+        // Check for player / entity collisions / level descents
         let fatalEntity = getFatalEntity(playerWizard, hazards.concat(entities));
         if (fatalEntity.length > 0) {
             // Check for GAME OVER: HAZARDS and MONSTERS...
@@ -754,8 +754,6 @@ function getFatalEntity(source, potentials) {
             return entity;
         };
     });
-
-    console.log(`fatal entites: ${fatalEntities}`);
 
     return fatalEntities.filter(it => { return (it != null) });
 }

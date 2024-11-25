@@ -11,8 +11,12 @@
  *          background music
  *          torch flicker
  * 
+ *      CONTROLS
+ *          better controls for mobile-- D-pad?
+ *          numeric keys trigger spells
+ * 
  *      LEVELS
- *          understand the "fun" concentration of obstacles, enemies, hazards, gold
+ *          understand the optimal "fun" mix of obstacles, enemies, hazards, gold
  *          "stock" level (like the 1st level -- outdoor field of ruins / columns / statues)
  *          bonus / safe room / campfire
  *          
@@ -449,14 +453,29 @@ function createBoardForLevel(newLevel) {
         entities.push(monster);
     }
 
+
     // Add SCARY monsters
-    for (var i = 0; i < numMonstersScary; i++) {
-        var location = getSingleUnoccupiedGrid();
-        entities.push(
-            new Monster(
-                `monster_chaser_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_1)
-            )
-        );
+    let chance = Math.floor(Math.random() * 10);
+    if (chance > 7) {
+        // Add replicating blob
+        for (var i = 0; i < numMonstersScary; i++) {
+            var location = getSingleUnoccupiedGrid();
+            let monster = new Monster(
+                `monster_blob_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1)
+            );
+            monster.replicationsRemaining = 1;
+            entities.push(monster);
+        }
+    } else {
+        // Add seeking wasp
+        for (var i = 0; i < numMonstersScary; i++) {
+            var location = getSingleUnoccupiedGrid();
+            entities.push(
+                new Monster(
+                    `monster_chaser_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_1)
+                )
+            );
+        }
     }
 
     // Add collectables

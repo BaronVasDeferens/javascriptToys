@@ -155,11 +155,10 @@ export class SpecialEffectFreeze {
 
 export class SpecialEffectDescend {
 
-    radiusChnagePerTick = 4;
-
-    constructor(canvasWidth, canvasHeight, portalX, portalY, tileSize) {
+    constructor(canvasWidth, canvasHeight, portalX, portalY, tileSize, changesPerTick) {
         this.keyholeX = portalX + (tileSize / 2);
         this.keyholeY = portalY + (tileSize / 2);
+        this.radiusChangePerTick = changesPerTick;
         this.keyholeRadius = Math.max(canvasWidth, canvasHeight);
         this.minRadius = 0;
         this.maxRadius = Math.max(canvasWidth, canvasHeight);
@@ -174,10 +173,10 @@ export class SpecialEffectDescend {
         context.restore();
 
         // Shrink the keyhole radius
-        if ((this.keyholeRadius - this.radiusChnagePerTick) > this.minRadius) {
-            this.keyholeRadius -= this.radiusChnagePerTick;
+        if ((this.keyholeRadius - this.radiusChangePerTick) > this.minRadius) {
+            this.keyholeRadius -= this.radiusChangePerTick;
         } else {
-            this.radiusChnagePerTick = 1;
+            this.radiusChangePerTick = 1;
         }
     }
 

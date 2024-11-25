@@ -455,20 +455,19 @@ function createBoardForLevel(newLevel) {
 
 
     // Add SCARY monsters
-    let chance = Math.floor(Math.random() * 10);
-    if (chance > 7) {
-        // Add replicating blob
-        for (var i = 0; i < numMonstersScary; i++) {
+    for (var i = 0; i < numMonstersScary; i++) {
+        let chance = Math.floor(Math.random() * 10);
+        if (chance > 6) {
+            // Add replicating blob
             var location = getSingleUnoccupiedGrid();
             let monster = new Monster(
                 `monster_blob_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1)
             );
             monster.replicationsRemaining = 1;
             entities.push(monster);
-        }
-    } else {
-        // Add seeking wasp
-        for (var i = 0; i < numMonstersScary; i++) {
+
+        } else {
+            // Add seeking wasp
             var location = getSingleUnoccupiedGrid();
             entities.push(
                 new Monster(
@@ -708,7 +707,7 @@ function updateGameState() {
             descendSound.play();
 
             specialEffects.push(
-                new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize)
+                new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize, wizardMovePerTick)
             );
         }
     }

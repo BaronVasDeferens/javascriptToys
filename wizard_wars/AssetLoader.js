@@ -17,8 +17,14 @@ export var ImageAsset = Object.freeze({
     WIZARD_1: "resources/tiles/64x64/tile_3807.png",
     WIZARD_2: "resources/tiles/64x64/tile_3795.png",
 
-    MONSTER_1: "resources/tiles/64x64/tile_4127.png",
-    MONSTER_2: "resources/tiles/64x64/tile_4165.png",
+    MONSTER_WASP_1: "resources/tiles/64x64/tile_4127.png",
+    MONSTER_WASP_2: "resources/tiles/64x64/tile_4165.png",
+
+    MONSTER_RAT_1: "resources/tiles/64x64/tile_4089.png",
+
+    MONSTER_BLOB_1: "resources/tiles/64x64/tile_4175.png",
+
+    MONSTER_EYE_1: "resources/tiles/64x64/tile_4336.png",
 
     GOLD_COIN_1: "resources/tiles/64x64/tile_2601.png",
     GOLD_COIN_STACK_1: "resources/tiles/64x64/tile_2602.png",

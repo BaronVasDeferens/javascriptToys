@@ -33,11 +33,16 @@ export class Wizard extends Entity {
 
 export var MonsterMovementBehavior = Object.freeze({
     RANDOM: 1,
-    CHASE_PLAYER: 2
+    CHASE_PLAYER: 2,
+    REPLICATE: 3
 });
 
 export class Monster extends Entity {
 
+    isLethal = true;                // When true, the monster kills the wizard if they occupy the same space
+    isBlocking = false;             // When true, the wizard cannot occupy the same space.
+    replicationsRemaining = 0;      // When the behavior is replicating, this is the number of mx number of times it may replicate
+    
     constructor(id, x, y, behavior, image) {
         super(id, x, y);
         this.behavior = behavior;
@@ -51,6 +56,7 @@ export class Monster extends Entity {
 }
 
 export class Obstacle extends Entity {
+    isLethal = false;
     constructor(id, x, y, image) {
         super(id, x, y);
         this.image = image;
@@ -58,6 +64,7 @@ export class Obstacle extends Entity {
 }
 
 export class Hazard extends Entity {
+    isLethal = true;
     constructor(id, x, y, image) {
         super(id, x, y);
         this.image = image;
@@ -186,7 +193,6 @@ export class SpecialEffectRandomize {
 
         // Create a list of positions 
         let positions = entities.map( entity => {
-            console.log(entity)
             return {
                 x: entity.x,
                 y: entity.y

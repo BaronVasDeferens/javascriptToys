@@ -5,39 +5,47 @@
  * 
  * IDEAS
  * 
- *      title screen
- *      death animation
- *      high scores
- *      stairs that lead back
- *      enemies that DON'T fly
- *      light music
- *      spell sounds
- *      spell effects
- *      torch flicker
- *      better bonus sound
+ *      ASTHETIC
+ *          title screen
+ *          8-bit font
+ *          background music
+ *          torch flicker
+ * 
+ *      LEVELS
+ *          understand the "fun" concentration of obstacles, enemies, hazards, gold
+ *          "stock" level (like the 1st level -- outdoor field of ruins / columns / statues)
+ *          bonus / safe room / campfire
+ *          
+ *      COLLECATBLES
+ *          some gold is worth more than others
+ *          rare chests that contain juicy stuff
+ *          potions that do stuff that spells don't
+ * 
+ *      ENEMIES
+ *          some enemies can't pass through hazards (can't fly) (easier)
+ *          some enemies can't stack (occupy same space) (easier)
+ * 
+ *      SPELLS
+ *          spell: turn hazards into obstacles?
+ *          spell: make smart monsters dumb?
+ *          spell: push all monsters to edges?
+ *          spell: pull all monsters to center?
+ *          spell: make hazards lethal to all creatures
  *      
- *      enemy that REPLICATES instead of moves
+ *      POTIONS
+ *          appear randomly; walking over one puts it in the "spell area"
+ *          potion: turn empty speces into gold (x turns)
+ *          potion: invincibility (x turns)
+ *          potion: move through obstacles(x turns)
  * 
- *      "stock" levels (like the 1st level -- outdoor field of ruins / columns / statues)
- * 
- *      when a monster gets the wizard, zoom in on the wizard and slow down animation
- * 
- *      remove "random movement" cards; ADD spells
- *      spell effect: freeze enemies (x turns)
- *      spell effect: move exit (random)
- *      spell effect: turn hazards into obstacles
- *      spell effect: make smart monsters dumb
- *      spell effect: push all monsters to edges
- *      spell effect: pull all monsters to center
- * 
- *      ability to collect / use magic potions (VERY valuable)
- *      potion effect: turn empty speces into gold (x turns)
- *      potion effect: invincibility (x turns)
- *      potion effect: move through obstacles(x turns)
- * 
- *      create spells/potions that REALLY alter the map, maybe even break the game 
- * 
- * 
+ *      SCORING
+ *          score display on level descent
+ *          online score board
+ *          better "bonus" sound
+ *          bonus for collecting everything
+ *          bonus for casting NO spells?
+ *          bonus for casting ALL spells?
+ *          bonus/subtraction for some spells but no others?
  */
 
 
@@ -192,7 +200,7 @@ document.addEventListener('mousedown', (e) => {
                 x: Math.floor((clickX / tileSize) % tileSize) * tileSize,
                 y: Math.floor((clickY / tileSize) % tileSize) * tileSize
             };
-            moveIfAble(checkAdjacent(clickedTile))
+            moveIfAble(checkAdjacentToWizard(clickedTile))
         }
     }
 });
@@ -202,7 +210,7 @@ document.addEventListener('mousedown', (e) => {
  * @param {*} target an object with x and y properties, each a multiple of 64 
  * @returns the direction relative to the wizard, or null if not adjacent
  */
-function checkAdjacent(target) {
+function checkAdjacentToWizard(target) {
     if (target.x == playerWizard.x) {
         if (target.y == playerWizard.y - tileSize) {
             return ControlInput.UP;
@@ -223,6 +231,8 @@ function checkAdjacent(target) {
         return null;
     }
 }
+
+
 
 /**
  * Moves the wizard in the indicated direction, if able.
@@ -432,11 +442,11 @@ function createBoardForLevel(newLevel) {
     // Add BASIC monsters
     for (var i = 0; i < numMonstersBasic; i++) {
         var location = getSingleUnoccupiedGrid();
-        entities.push(
-            new Monster(
-                `monster_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_2)
-            )
+        let monster = new Monster(
+            `monster_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_WASP_2)
         );
+        monster.replicationsRemaining = 2;
+        entities.push(monster);
     }
 
     // Add SCARY monsters
@@ -444,7 +454,7 @@ function createBoardForLevel(newLevel) {
         var location = getSingleUnoccupiedGrid();
         entities.push(
             new Monster(
-                `monster_chaser_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_1)
+                `monster_chaser_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_1)
             )
         );
     }
@@ -594,13 +604,34 @@ function updateGameState() {
                 entities
                     .filter(entity => { return entity instanceof Monster })
                     .forEach(entity => {
-                        if (entity.mover == null || entity.mover.isAlive == false) {
-                            var mover = getMonsterMover(entity, playerWizard);
-                            if (mover != null) {
-                                entity.setMover(mover);
-                                movers.push(mover);
-                            }
+                        switch (entity.behavior) {
+                            case MonsterMovementBehavior.CHASE_PLAYER:
+                            case MonsterMovementBehavior.RANDOM:
+                                if (entity.mover == null || entity.mover.isAlive == false) {
+                                    var mover = getMonsterMover(entity, playerWizard);
+                                    if (mover != null) {
+                                        entity.setMover(mover);
+                                        movers.push(mover);
+                                    }
+                                }
+                                break;
+                            case MonsterMovementBehavior.REPLICATE:
+                                if (entity.replicationsRemaining > 0) {
+                                    let freeSpaces = getUnoccupiedAdjacencies(entity);
+                                    if (freeSpaces.length > 0) {
+                                        let freeSpace = freeSpaces[0];
+                                        let newMonster = new Monster("monsterSpawn", entity.x, entity.y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1));
+                                        let mover = getMonsterMover(newMonster, freeSpace)
+                                        newMonster.setMover(mover);
+                                        newMonster.replicationsRemaining = 1;
+                                        entity.replicationsRemaining -= 1;
+                                        entities.push(newMonster);
+                                        movers.push(mover);
+                                    }
+                                }
+                                break;
                         }
+
                     })
             }
 
@@ -760,7 +791,7 @@ function checkUnobstructed(destinationX, destinationY) {
 
 function getFatalEntity(source, potentials) {
     var fatalEntities = potentials.map((entity) => {
-        if (source !== entity && isWithinCollisionDistance(source, entity, 0)) {
+        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0))) {
             return entity;
         };
     });
@@ -822,12 +853,42 @@ function getAllOccupiedGrids() {
     return occupiedGrids;
 }
 
+function getUnoccupiedAdjacencies(entity) {
+    var adjacnencies = [];
+
+    adjacnencies.push({ x: entity.x, y: (entity.y - tileSize) }); // up
+    adjacnencies.push({ x: entity.x, y: (entity.y + tileSize) }); // down
+    adjacnencies.push({ x: (entity.x - tileSize), y: entity.y }); // left
+    adjacnencies.push({ x: (entity.x + tileSize), y: entity.y }); // right
+
+    // Remove any that are outside the boundaries of the map
+    adjacnencies = adjacnencies.filter(adj => {
+        return (adj.x >= 0 && adj.x < mapWidth && adj.y >= 0 && adj.y < mapHeight);
+    });
+
+    var occupiedGrids = getAllOccupiedGrids().concat(portal);
+
+    occupiedGrids
+        .map(occupied => {
+            if (occupied instanceof Portal) {
+                return { x: occupied.x, y: occupied.y };     // FIXME: Portal object isn't pre-multiplied
+            } else {
+                return { x: occupied.x * tileSize, y: occupied.y * tileSize };
+            }
+        }).forEach(occupied => {
+            adjacnencies = adjacnencies.filter(grid => { return JSON.stringify(grid) !== JSON.stringify(occupied) });
+        });
+
+    shuffle(adjacnencies);
+    return adjacnencies;
+}
+
 function getMonsterMover(monster, target) {
     switch (monster.behavior) {
         case MonsterMovementBehavior.CHASE_PLAYER:
+        case MonsterMovementBehavior.REPLICATE:
             return getMoverToTarget(monster, target);
         case MonsterMovementBehavior.RANDOM:
-        default:
             return getRandomMover(monster);
     }
 }

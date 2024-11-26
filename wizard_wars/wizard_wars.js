@@ -50,6 +50,14 @@
  *          bonus for casting NO spells?
  *          bonus for casting ALL spells?
  *          bonus/subtraction for some spells but no others?
+ * 
+ *      HIGH SCORES
+ *          final level reached
+ *          number of moves (lower the better)
+ *          gold collected
+ *          spells cast
+ *          potions acquired
+ *          potions consumed
  */
 
 

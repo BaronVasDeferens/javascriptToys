@@ -1,4 +1,8 @@
 
+// --------------------
+// ----- ENTITIES -----
+// --------------------
+
 class Entity {
 
     id = "";
@@ -42,7 +46,7 @@ export class Monster extends Entity {
     isLethal = true;                // When true, the monster kills the wizard if they occupy the same space
     isBlocking = false;             // When true, the wizard cannot occupy the same space.
     replicationsRemaining = 0;      // When the behavior is replicating, this is the number of mx number of times it may replicate
-    
+
     constructor(id, x, y, behavior, image) {
         super(id, x, y);
         this.behavior = behavior;
@@ -109,18 +113,26 @@ export class Card extends Entity {
     }
 }
 
+
+class EffectTimer {
+    constructor(effectType, cycles){
+        this.effectType = effectType;
+        this.cycles = cycles;
+    }
+}
+
+
 /**
- * Effect Timer
+ * Effect Timer: Freeze
  * Used in the "bind/freeze" spell effect. Let's the game engine know that the monsters
  * should not move for a period of time.
  */
-export class EffectTimer {
+export class EffectTimerFreeze extends EffectTimer {
 
     isAlive = true;
 
     constructor(effectType, cycles) {
-        this.effectType = effectType;
-        this.cycles = cycles;
+        super(effectType, cycles);
     }
 
     update() {
@@ -129,7 +141,21 @@ export class EffectTimer {
             this.isAlive = false;
         }
     }
+
+    render(context, entities, tileSize) {
+        entities.forEach(ent => {
+            context.globalAlpha = 0.1 * this.cycles;
+            context.fillStyle = "blue";
+            context.fillRect(ent.x, ent.y, tileSize, tileSize);
+        });
+
+        context.globalAlpha = 1.0;
+    }
 }
+
+// ---------------------------
+// ----- SPECIAL EFFECTS -----
+// ---------------------------
 
 export class SpecialEffectFreeze {
 
@@ -141,7 +167,6 @@ export class SpecialEffectFreeze {
     }
 
     render(context) {
-
         if (this.opacityLevel > 0.01) {
             this.opacityLevel = this.opacityLevel - 0.01;
             context.globalAlpha = this.opacityLevel;
@@ -150,7 +175,6 @@ export class SpecialEffectFreeze {
             context.globalAlpha = 1.0;
         }
     }
-
 }
 
 export class SpecialEffectDescend {
@@ -179,7 +203,6 @@ export class SpecialEffectDescend {
             this.radiusChangePerTick = 1;
         }
     }
-
 }
 
 export class SpecialEffectRandomize {
@@ -191,7 +214,7 @@ export class SpecialEffectRandomize {
         this.canvasHeight = canvasHeight;
 
         // Create a list of positions 
-        let positions = entities.map( entity => {
+        let positions = entities.map(entity => {
             return {
                 x: entity.x,
                 y: entity.y
@@ -249,10 +272,10 @@ export class SpecialEffectDeath {
             this.killer.render(context);
         }
     }
-
 }
-
-
+// -----------------------
+// -------- MOVER --------
+// -----------------------
 
 export class Mover {
     constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {

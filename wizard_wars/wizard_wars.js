@@ -62,7 +62,7 @@
 
 
 
-import { Card, Collectable, EffectTimer, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, Wizard } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -178,6 +178,12 @@ document.addEventListener('keydown', (e) => {
             case "d":
             case "D":
                 moveIfAble(ControlInput.RIGHT);
+                break;
+            case "o":
+            case "O":
+                // DEBUG ONLY
+                console.log(`DEBUG: creating new level ${level + 5}...`);
+                createBoardForLevel(level + 5);
                 break;
             case "Escape":
                 initializeGameState();
@@ -556,7 +562,7 @@ function processCardAction(card) {
     switch (card.action) {
         case ActionCard.SPELL_FREEZE:
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
-            effects.push(new EffectTimer(card.action, 6));
+            effects.push(new EffectTimerFreeze(card.action, 6));
             break;
         case ActionCard.SPELL_RANDOMIZE:
             var swappables = entities.filter(ent => {
@@ -564,6 +570,7 @@ function processCardAction(card) {
                     return ent;
                 }
             }).concat(obstacles).concat(hazards).concat(collectables).concat(portal);
+            shuffle(swappables);
             specialEffects.push(new SpecialEffectRandomize(mapWidth, mapHeight, swappables));
             renderBackground(context);
             break;
@@ -745,7 +752,17 @@ function drawScene() {
 
     specialEffects.forEach(spEf => {
         spEf.render(context);
-    })
+    });
+
+    effects.forEach(effect => {
+        if (effect instanceof EffectTimerFreeze) {
+            effect.render(
+                context,
+                entities.filter(ent => { return ent instanceof Monster }),
+                tileSize
+            );
+        }
+    });
 
 }
 

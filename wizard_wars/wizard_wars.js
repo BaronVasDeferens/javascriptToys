@@ -547,8 +547,8 @@ function renderBackground(context) {
 }
 
 function beginGame() {
-    updateGameState();
-    drawScene();
+    update();
+    render();
     requestAnimationFrame(beginGame);
 }
 
@@ -585,7 +585,7 @@ function processCardAction(card) {
     spellEffectSound.play();
 }
 
-function updateGameState() {
+function update() {
     if (gameState == GameState.GAME_OVER) {
         // skip
     } else if (gameState == GameState.CAST_SPELL_EFFECT) {
@@ -714,6 +714,7 @@ function updateGameState() {
             gameOver(fatalEntity[0]);
         } else if (isWithinCollisionDistance(playerWizard, portal, 0)) {
             // ...or LEVEL DESCENT
+            effects = [];
             changeGameState(GameState.CAST_SPELL_EFFECT);
             let descendSound = soundLoader.getSound(SoundAsset.DESCEND);
             descendSound.addEventListener("ended", (e) => {
@@ -728,14 +729,7 @@ function updateGameState() {
     }
 }
 
-function changeGameState(newState) {
-    gameState = newState;
-    if (debugOutput) {
-        console.log(`gameState: ${gameState}`);
-    }
-}
-
-function drawScene() {
+function render() {
 
     // Draw background
     context.drawImage(backgroundImage, 0, 0);
@@ -768,10 +762,17 @@ function drawScene() {
 
 // ------------ END MAIN GAME LOOP ------------
 
+function changeGameState(newState) {
+    gameState = newState;
+    if (debugOutput) {
+        console.log(`gameState: ${gameState}`);
+    }
+}
+
 function gameOver(fatalEntity) {
 
     changeGameState(GameState.GAME_OVER);
-
+    effects = [];
     specialEffects.push(
         new SpecialEffectDeath(canvas.width, canvas.height, playerWizard, fatalEntity)
     );
@@ -793,6 +794,8 @@ function gameOver(fatalEntity) {
     console.log(`FINAL SCORE: ${finalScore}`);
     console.log("----------------------------------------------------------");
 }
+
+
 
 /* ------------ CONVENIENCE METHODS ------------ */
 function randomIntInRange(min, max) {

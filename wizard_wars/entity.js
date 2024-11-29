@@ -28,6 +28,13 @@ class Entity {
     }
 }
 
+export class StaticEntity extends Entity {
+    constructor(id,x,y,image) {
+        super(id,x,y);
+        this.image = image;
+    }
+}
+
 export class Wizard extends Entity {
     constructor(id, x, y, image) {
         super(id, x, y);

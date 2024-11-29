@@ -5,6 +5,10 @@
  * 
  * IDEAS
  * 
+ *      TECHNICAL
+ *          load and use custom font
+ * 
+ * 
  *      ASTHETIC
  *          title screen
  *          8-bit font
@@ -12,6 +16,7 @@
  *          torch flicker
  * 
  *      CONTROLS
+ *          smaller spell cards
  *          better controls for mobile-- D-pad?
  *          numeric keys trigger spells
  * 
@@ -62,7 +67,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, Wizard } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, StaticEntity, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -115,7 +120,7 @@ var bonusAwarded = false;
 let backgroundImage = new Image();
 
 var coinSounds = [];
-
+var backgroundMusicPlayer;
 
 
 class Tile {
@@ -128,6 +133,8 @@ class Tile {
 }
 
 const GameState = Object.freeze({
+    LOAD_START: "Preloading...",
+    LOAD_COMPLETE: "...load complete!",
     INTRO: "Intro",
     DRAW_CARDS: "Drawing cards...",
     PLAYER_ACTION_SELECT: "Player choosing action...",
@@ -138,7 +145,7 @@ const GameState = Object.freeze({
     GAME_OVER: "GAME OVER"
 });
 
-var gameState = GameState.DRAW_CARDS;
+var gameState = GameState.LOAD_START;
 
 const SpellAction = Object.freeze({
     SPELL_FREEZE: "SPELL_FREEZE",
@@ -157,7 +164,18 @@ const ControlInput = Object.freeze({
 
 /** ------- KEYBOARD INPUT -------- */
 document.addEventListener('keydown', (e) => {
-    if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
+
+    if (gameState == GameState.LOAD_COMPLETE) {
+
+        backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
+        backgroundMusicPlayer.loop = true;
+        backgroundMusicPlayer.play();
+
+        initializeGameState();
+    } else if (gameState == GameState.INTRO) {
+        changeGameState(GameState.DRAW_CARDS);
+        createBoardForLevel(level);
+    } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
         switch (e.key) {
             case "ArrowUp":
             case "w":
@@ -185,6 +203,14 @@ document.addEventListener('keydown', (e) => {
                 console.log(`DEBUG: creating new level ${level + 5}...`);
                 createBoardForLevel(level + 5);
                 break;
+            case "m":
+            case "M":
+                if (backgroundMusicPlayer.paused == true) {
+                    backgroundMusicPlayer.play();
+                } else {
+                    backgroundMusicPlayer.pause();
+                }
+                break;
             case "Escape":
                 initializeGameState();
                 break;
@@ -201,7 +227,17 @@ document.addEventListener('keydown', (e) => {
 /**--------- MOUSE INPUT -----------*/
 document.addEventListener('mousedown', (e) => {
 
-    if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
+    if (gameState == GameState.LOAD_COMPLETE) {
+
+        backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
+        backgroundMusicPlayer.loop = true;
+        backgroundMusicPlayer.play();
+
+        initializeGameState();
+    } else if (gameState == GameState.INTRO) {
+        changeGameState(GameState.DRAW_CARDS);
+        createBoardForLevel(level);
+    } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
 
         var rect = e.target.getBoundingClientRect();
         var clickX = e.clientX - rect.left; //x position within the HTML element.
@@ -375,32 +411,42 @@ function decreaseEntityMovementSpeeds() {
 }
 
 var setup = function () {
-    // Set background to display "loading" text
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "#FF0000";
-    context.lineWidth = 2.0;
-    context.font = "24px sans-serif";
-    context.fillText("LOADING", (canvas.width / 2) - 48, (canvas.height / 2));
+
+    changeGameState(GameState.LOAD_START);
 
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, soundLoader, () => {
+
+        // Set up the frequently-used audio resources...
         coinSounds.push(soundLoader.getSound(SoundAsset.COIN_1));
         coinSounds.push(soundLoader.getSound(SoundAsset.COIN_2));
         coinSounds.push(soundLoader.getSound(SoundAsset.COIN_3));
 
-        initializeGameState();
+        // ...and begin the primary loop
+        changeGameState(GameState.LOAD_COMPLETE);
         beginGame();
     });
+
 }();
 
 function initializeGameState() {
+
     console.log("Initializing...");
+    changeGameState(GameState.INTRO);
+
     level = 1;
     totalMoves = 0;
     score = 0;
-    changeGameState(GameState.DRAW_CARDS);
-    createBoardForLevel(level);
+    entities = [];
+
+    let introImage = imageLoader.getImage(ImageAsset.GRAPHIC_TITLE_CARD);
+    let introEntity = new StaticEntity(
+        "intro",
+        (mapWidth - introImage.width) / 2,
+        (mapHeight - introImage.height) / 2,
+        introImage
+    );
+    entities.push(introEntity);
 }
 
 function createBoardForLevel(newLevel) {
@@ -586,7 +632,13 @@ function processCardAction(card) {
 }
 
 function update() {
-    if (gameState == GameState.GAME_OVER) {
+    if (gameState == GameState.INTRO) {
+        // skip
+    } else if (gameState == GameState.LOAD_START) {
+        // skip
+    } else if (gameState == GameState.LOAD_COMPLETE) {
+        // skip
+    } else if (gameState == GameState.GAME_OVER) {
         // skip
     } else if (gameState == GameState.CAST_SPELL_EFFECT) {
         // Clean out dead entities
@@ -730,33 +782,57 @@ function update() {
 }
 
 function render() {
+    if (gameState == GameState.LOAD_START) {
+        // Set background to display "loading" text
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#FF0000";
+        context.lineWidth = 2.0;
+        context.font = "24px sans-serif";
+        context.fillText("LOADING", (canvas.width / 2) - 48, (canvas.height / 2));
+    } else if (gameState == GameState.LOAD_COMPLETE) {
+        // Set background to display "loading" text
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#FF0000";
+        context.lineWidth = 2.0;
+        context.font = "24px sans-serif";
+        context.fillText("PRESS TO CONTINUE", (canvas.width / 2) - 48, (canvas.height / 2));
+    } else if (gameState == GameState.INTRO) {
+        context.clearRect(0, 0, mapWidth, mapHeight);
+        entities.forEach(entity => {
+            entity.render(context);
+        });
+    } else {
+        // Draw background
+        context.drawImage(backgroundImage, 0, 0);
 
-    // Draw background
-    context.drawImage(backgroundImage, 0, 0);
+        // Draw collectables
+        collectables.forEach(item => {
+            item.render(context);
+        })
 
-    // Draw collectables
-    collectables.forEach(item => {
-        item.render(context);
-    })
+        // Draw entities
+        entities.forEach(entity => {
+            entity.render(context);
+        });
 
-    // Draw entities
-    entities.forEach(entity => {
-        entity.render(context);
-    });
+        specialEffects.forEach(spEf => {
+            spEf.render(context);
+        });
 
-    specialEffects.forEach(spEf => {
-        spEf.render(context);
-    });
+        effects.forEach(effect => {
+            if (effect instanceof EffectTimerFreeze) {
+                effect.render(
+                    context,
+                    entities.filter(ent => { return ent instanceof Monster }),
+                    tileSize
+                );
+            }
+        });
+    }
 
-    effects.forEach(effect => {
-        if (effect instanceof EffectTimerFreeze) {
-            effect.render(
-                context,
-                entities.filter(ent => { return ent instanceof Monster }),
-                tileSize
-            );
-        }
-    });
+
 
 }
 

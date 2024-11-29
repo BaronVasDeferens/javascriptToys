@@ -43,6 +43,8 @@ export var ImageAsset = Object.freeze({
 
     STAIRS_DOWN_1: "resources/tiles/64x64/tile_676.png",
 
+    GRAPHIC_TITLE_CARD: "resources/cards/graphic_title_card.png",
+
     CARD_SPELL_FREEZE: "resources/cards/spell_freeze.png",
     CARD_SPELL_RANDOMIZE: "resources/cards/spell_randomize.png",
 

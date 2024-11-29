@@ -127,13 +127,6 @@ class Tile {
     }
 }
 
-const ControlInput = Object.freeze({
-    LEFT: 0,
-    RIGHT: 1,
-    UP: 2,
-    DOWN: 3
-});
-
 const GameState = Object.freeze({
     INTRO: "Intro",
     DRAW_CARDS: "Drawing cards...",
@@ -147,13 +140,20 @@ const GameState = Object.freeze({
 
 var gameState = GameState.DRAW_CARDS;
 
-const ActionCard = Object.freeze({
+const SpellAction = Object.freeze({
     SPELL_FREEZE: "SPELL_FREEZE",
     SPELL_RANDOMIZE: "SPELL_RANDOMIZE"
 });
 
 var cardA;
 var cardB;
+
+const ControlInput = Object.freeze({
+    LEFT: 0,
+    RIGHT: 1,
+    UP: 2,
+    DOWN: 3
+});
 
 /** ------- KEYBOARD INPUT -------- */
 document.addEventListener('keydown', (e) => {
@@ -560,11 +560,11 @@ function processCardAction(card) {
         return;
     }
     switch (card.action) {
-        case ActionCard.SPELL_FREEZE:
+        case SpellAction.SPELL_FREEZE:
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
             effects.push(new EffectTimerFreeze(card.action, 6));
             break;
-        case ActionCard.SPELL_RANDOMIZE:
+        case SpellAction.SPELL_RANDOMIZE:
             var swappables = entities.filter(ent => {
                 if (ent instanceof Card == false) {
                     return ent;
@@ -613,8 +613,8 @@ function update() {
             let positionOne = { x: 10, y: 650 };
             let positionTwo = { x: 330, y: 650 };
             let cards = [];
-            cards.push(new Card(0, 0, ActionCard.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-            cards.push(new Card(0, 0, ActionCard.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+            cards.push(new Card(0, 0, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+            cards.push(new Card(0, 0, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
 
             cardA = cards[0];
             cardA.x = positionOne.x;
@@ -632,7 +632,7 @@ function update() {
 
         // Monsters plot thier moves here
         if (gameState == GameState.ENEMY_MOVE_PREPARE) {
-            var hasFreeze = effects.map(ef => { return ef.effectType == ActionCard.SPELL_FREEZE }).includes(true);
+            var hasFreeze = effects.map(ef => { return ef.effectType == SpellAction.SPELL_FREEZE }).includes(true);
             if (!hasFreeze) {
                 entities
                     .filter(entity => { return entity instanceof Monster })

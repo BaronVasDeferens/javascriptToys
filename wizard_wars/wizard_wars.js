@@ -70,7 +70,7 @@
 import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, StaticEntity, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
-const debugOutput = false;
+const debugOutput = true;
 
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
@@ -114,6 +114,7 @@ var obstacles = [];
 var hazards = [];
 var effects = [];
 var specialEffects = [];
+var cards = [];
 var portal;
 var bonusAwarded = false;
 
@@ -228,11 +229,9 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('mousedown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-
         backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
         backgroundMusicPlayer.loop = true;
         backgroundMusicPlayer.play();
-
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -244,18 +243,19 @@ document.addEventListener('mousedown', (e) => {
         var clickY = e.clientY - rect.top;  //y position within the HTML element.
 
         // Check for SPELL CLICKED
-        if (cardA.containsClick(clickX, clickY)) {
-            processCardAction(cardA);
-        } else if (cardB.containsClick(clickX, clickY)) {
-            processCardAction(cardB);
-        } else {
-            // Check for ADJACENT TILE CLICKED (MOVE)
-            let clickedTile = {
-                x: Math.floor((clickX / tileSize) % tileSize) * tileSize,
-                y: Math.floor((clickY / tileSize) % tileSize) * tileSize
-            };
-            moveIfAble(checkAdjacentToWizard(clickedTile))
-        }
+        cards.forEach(card => {
+            if (card.containsClick(clickX, clickY)) {
+                processCardAction(card);
+            }
+        });
+
+
+        // Check for ADJACENT TILE CLICKED (MOVE)
+        let clickedTile = {
+            x: Math.floor((clickX / tileSize) % tileSize) * tileSize,
+            y: Math.floor((clickY / tileSize) % tileSize) * tileSize
+        };
+        moveIfAble(checkAdjacentToWizard(clickedTile))
     }
 });
 
@@ -324,12 +324,11 @@ function createBoardForLevel(newLevel) {
     obstacles = [];
     hazards = [];
     effects = [];
+    cards = [];
     portal = null;
     bonusAwarded = false;
 
     controlInput = null;
-    cardA = null;
-    cardB = null;
 
     // Add player
     var location = getSingleUnoccupiedGrid();
@@ -404,9 +403,12 @@ function createBoardForLevel(newLevel) {
     let portalLocation = getSingleUnoccupiedGrid();
     portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, imageLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
+    cards.push(new Card(0, 650, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+    cards.push(new Card(340, 650, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+
     renderBackground(context);
 
-    changeGameState(GameState.LEVEL_START);
+    changeGameState(GameState.PLAYER_ACTION_SELECT);
 }
 
 /**
@@ -455,9 +457,6 @@ function beginGame() {
 
 function processCardAction(card) {
 
-    if (card == null || card.isAlive == false) {
-        return;
-    }
     switch (card.action) {
         case SpellAction.SPELL_FREEZE:
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
@@ -492,7 +491,12 @@ function processCardAction(card) {
             break;
     }
 
-    card.isAlive = false;
+    // Remove the card
+    let index = cards.indexOf(card);
+    if (index != -1) {
+        cards.splice(index, 1);
+    }
+
     changeGameState(GameState.CAST_SPELL_EFFECT);
     let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
     spellEffectSound.addEventListener("ended", (e) => {
@@ -511,11 +515,7 @@ function update() {
     } else if (gameState == GameState.GAME_OVER) {
         // skip
     } else if (gameState == GameState.CAST_SPELL_EFFECT) {
-        // Clean out dead entities
-        entities = entities.filter(ent => {
-            return ent.isAlive == true;
-        });
-
+        // skip
     } else {
 
         specialEffects = [];
@@ -529,17 +529,6 @@ function update() {
         movers = movers.filter(mover => {
             return mover.isAlive;
         });
-
-        if (gameState == GameState.LEVEL_START) {
-
-            cardA = new Card(0, 650, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE));
-            cardB = new Card(340, 650, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE));
-
-            entities.push(cardA);
-            entities.push(cardB);
-
-            changeGameState(GameState.PLAYER_ACTION_SELECT);
-        }
 
         // Monsters plot thier moves here
         if (gameState == GameState.ENEMY_MOVE_PREPARE) {
@@ -666,10 +655,14 @@ function render() {
         // Draw background
         context.drawImage(backgroundImage, 0, 0);
 
+        cards.forEach(card => {
+            card.render(context);
+        });
+
         // Draw collectables
         collectables.forEach(item => {
             item.render(context);
-        })
+        });
 
         // Draw entities
         entities.forEach(entity => {

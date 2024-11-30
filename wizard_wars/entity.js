@@ -214,38 +214,31 @@ export class SpecialEffectDescend {
 
 export class SpecialEffectRandomize {
 
-    opacityLevel = 0.0;
+    triggered = false;
+    opacityLevel = 1.0;
 
-    constructor(canvasWidth, canvasHeight, entities) {
+    constructor(canvasWidth, canvasHeight, func) {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
-
-        // Create a list of positions 
-        let positions = entities.map(entity => {
-            return {
-                x: entity.x,
-                y: entity.y
-            }
-        }).reverse();
-
-        // Starting from the end of the position list, assign a new position to every entity 
-        for (var pos = 0; pos < entities.length; pos++) {
-            entities[pos].x = positions[pos].x;
-            entities[pos].y = positions[pos].y;
-        }
+        this.func = func;
     }
 
     render(context) {
-        if (this.opacityLevel < 1.0) {
-            this.opacityLevel = this.opacityLevel + 0.01;
-        } else {
-            this.opacityLevel = 1.0;
+        if (this.opacityLevel > 0.01) {
+            this.opacityLevel = this.opacityLevel - 0.01;
+
+            context.globalAlpha = this.opacityLevel;
+            context.fillStyle = "red";
+            context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+            context.globalAlpha = 1.0;
         }
 
-        context.globalAlpha = this.opacityLevel;
-        context.fillStyle = "red";
-        context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-        context.globalAlpha = 1.0;
+
+
+        if (this.triggered == false) {
+            this.func();
+            this.triggered = true;
+        }
     }
 }
 

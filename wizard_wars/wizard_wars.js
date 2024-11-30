@@ -280,6 +280,9 @@ var setup = function () {
 
 }();
 
+
+// ------------ START MAIN GAME LOOP ------------
+
 function initializeGameState() {
 
     console.log("Initializing...");
@@ -449,7 +452,6 @@ function beginGame() {
     requestAnimationFrame(beginGame);
 }
 
-// ------------ START MAIN GAME LOOP ------------
 
 function processCardAction(card) {
 
@@ -468,8 +470,25 @@ function processCardAction(card) {
                 }
             }).concat(obstacles).concat(hazards).concat(collectables).concat(portal);
             shuffle(swappables);
-            specialEffects.push(new SpecialEffectRandomize(mapWidth, mapHeight, swappables));
-            renderBackground(context);
+
+            specialEffects.push(new SpecialEffectRandomize(mapWidth, mapHeight, () => {
+                // Create a list of positions 
+                let positions = swappables.map(entity => {
+                    return {
+                        x: entity.x,
+                        y: entity.y
+                    }
+                }).reverse();
+
+                // Starting from the end of the position list, assign a new position to every entity 
+                for (var pos = 0; pos < swappables.length; pos++) {
+                    swappables[pos].x = positions[pos].x;
+                    swappables[pos].y = positions[pos].y;
+                }
+
+                renderBackground(context);
+            }));
+
             break;
     }
 

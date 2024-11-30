@@ -136,7 +136,7 @@ const GameState = Object.freeze({
     LOAD_START: "Preloading...",
     LOAD_COMPLETE: "...load complete!",
     INTRO: "Intro",
-    DRAW_CARDS: "Drawing cards...",
+    LEVEL_START: "Starting level...",
     PLAYER_ACTION_SELECT: "Player choosing action...",
     PLAYER_ACTION_EXECUTE: "Player executes action",
     ENEMY_MOVE_PREPARE: "Enemies plan their moves...",
@@ -173,7 +173,7 @@ document.addEventListener('keydown', (e) => {
 
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
-        changeGameState(GameState.DRAW_CARDS);
+        changeGameState(GameState.LEVEL_START);
         createBoardForLevel(level);
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
         switch (e.key) {
@@ -235,7 +235,7 @@ document.addEventListener('mousedown', (e) => {
 
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
-        changeGameState(GameState.DRAW_CARDS);
+        changeGameState(GameState.LEVEL_START);
         createBoardForLevel(level);
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
 
@@ -259,156 +259,7 @@ document.addEventListener('mousedown', (e) => {
     }
 });
 
-/**
- * Determines whether a grid of the map is directly adjacent to the wizard.
- * @param {*} target an object with x and y properties, each a multiple of 64 
- * @returns the direction relative to the wizard, or null if not adjacent
- */
-function checkAdjacentToWizard(target) {
-    if (target.x == playerWizard.x) {
-        if (target.y == playerWizard.y - tileSize) {
-            return ControlInput.UP;
-        } else if (target.y == playerWizard.y + tileSize) {
-            return ControlInput.DOWN;
-        } else {
-            return null;
-        }
-    } else if (target.y == playerWizard.y) {
-        if ((target.x == playerWizard.x - tileSize)) {
-            return ControlInput.LEFT;
-        } else if (target.x == playerWizard.x + tileSize) {
-            return ControlInput.RIGHT;
-        } else {
-            return null;
-        }
-    } else {
-        return null;
-    }
-}
 
-
-
-/**
- * Moves the wizard in the indicated direction, if able.
- * @param {*} direction : InputControl
- */
-function moveIfAble(direction) {
-    switch (direction) {
-        case ControlInput.UP:
-            if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
-                controlInput = ControlInput.UP
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x,
-                        playerWizard.y - tileSize,
-                        0,
-                        -wizardMovePerTick,
-                        () => {
-                            totalMoves++;
-                            controlInput = null;
-                            updateEffects();
-                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                        }
-                    )
-                )
-                playStepSound();
-                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-            }
-            break;
-        case ControlInput.DOWN:
-            if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
-                controlInput = ControlInput.DOWN
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x,
-                        playerWizard.y + tileSize,
-                        0,
-                        wizardMovePerTick,
-                        () => {
-                            totalMoves++;
-                            controlInput = null;
-                            updateEffects();
-                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                        }
-                    )
-                )
-                playStepSound();
-                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-            }
-            break;
-        case ControlInput.LEFT:
-            if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
-                controlInput = ControlInput.LEFT
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x - tileSize,
-                        playerWizard.y,
-                        -wizardMovePerTick,
-                        0,
-                        () => {
-                            totalMoves++;
-                            controlInput = null;
-                            updateEffects();
-                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                        }
-                    )
-                );
-                playStepSound();
-                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-            }
-            break;
-        case ControlInput.RIGHT:
-            if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
-                controlInput = ControlInput.RIGHT
-                movers.push(
-                    new Mover(
-                        playerWizard,
-                        playerWizard.x + tileSize,
-                        playerWizard.y,
-                        wizardMovePerTick,
-                        0,
-                        () => {
-                            totalMoves++;
-                            controlInput = null;
-                            updateEffects();
-                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
-                        }
-                    )
-                )
-                playStepSound();
-                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
-            }
-            break;
-        default:
-            break;
-    }
-}
-
-function increaseEntityMovementSpeeds() {
-    if ((wizardMovePerTick * moveAdjustment) <= tileSize) {
-        wizardMovePerTick *= moveAdjustment;
-    }
-
-    if ((monsterMovePerTick * moveAdjustment) <= tileSize) {
-        monsterMovePerTick *= moveAdjustment;
-    }
-
-    console.log(`Increasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
-}
-
-function decreaseEntityMovementSpeeds() {
-    if ((wizardMovePerTick / moveAdjustment) >= moveAdjustment) {
-        wizardMovePerTick /= moveAdjustment;
-    }
-
-    if ((monsterMovePerTick / moveAdjustment) >= moveAdjustment) {
-        monsterMovePerTick /= moveAdjustment;
-    }
-    console.log(`Decreasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
-}
 
 var setup = function () {
 
@@ -552,7 +403,7 @@ function createBoardForLevel(newLevel) {
 
     renderBackground(context);
 
-    changeGameState(GameState.DRAW_CARDS);
+    changeGameState(GameState.LEVEL_START);
 }
 
 /**
@@ -660,7 +511,7 @@ function update() {
             return mover.isAlive;
         });
 
-        if (gameState == GameState.DRAW_CARDS) {
+        if (gameState == GameState.LEVEL_START) {
 
             cardA = new Card(0, 650, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE));
             cardB = new Card(340, 650, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE));
@@ -834,6 +685,155 @@ function changeGameState(newState) {
     }
 }
 
+/**
+ * Determines whether a grid of the map is directly adjacent to the wizard.
+ * @param {*} target an object with x and y properties, each a multiple of 64 
+ * @returns the direction relative to the wizard, or null if not adjacent
+ */
+function checkAdjacentToWizard(target) {
+    if (target.x == playerWizard.x) {
+        if (target.y == playerWizard.y - tileSize) {
+            return ControlInput.UP;
+        } else if (target.y == playerWizard.y + tileSize) {
+            return ControlInput.DOWN;
+        } else {
+            return null;
+        }
+    } else if (target.y == playerWizard.y) {
+        if ((target.x == playerWizard.x - tileSize)) {
+            return ControlInput.LEFT;
+        } else if (target.x == playerWizard.x + tileSize) {
+            return ControlInput.RIGHT;
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+}
+
+/**
+ * Moves the wizard in the indicated direction, if able.
+ * @param {*} direction : InputControl
+ */
+function moveIfAble(direction) {
+    switch (direction) {
+        case ControlInput.UP:
+            if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
+                controlInput = ControlInput.UP
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y - tileSize,
+                        0,
+                        -wizardMovePerTick,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                )
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        case ControlInput.DOWN:
+            if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
+                controlInput = ControlInput.DOWN
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x,
+                        playerWizard.y + tileSize,
+                        0,
+                        wizardMovePerTick,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                )
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        case ControlInput.LEFT:
+            if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
+                controlInput = ControlInput.LEFT
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x - tileSize,
+                        playerWizard.y,
+                        -wizardMovePerTick,
+                        0,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                );
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        case ControlInput.RIGHT:
+            if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
+                controlInput = ControlInput.RIGHT
+                movers.push(
+                    new Mover(
+                        playerWizard,
+                        playerWizard.x + tileSize,
+                        playerWizard.y,
+                        wizardMovePerTick,
+                        0,
+                        () => {
+                            totalMoves++;
+                            controlInput = null;
+                            updateEffects();
+                            changeGameState(GameState.ENEMY_MOVE_PREPARE);
+                        }
+                    )
+                )
+                playStepSound();
+                changeGameState(GameState.PLAYER_ACTION_EXECUTE);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+function increaseEntityMovementSpeeds() {
+    if ((wizardMovePerTick * moveAdjustment) <= tileSize) {
+        wizardMovePerTick *= moveAdjustment;
+    }
+
+    if ((monsterMovePerTick * moveAdjustment) <= tileSize) {
+        monsterMovePerTick *= moveAdjustment;
+    }
+
+    console.log(`Increasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
+}
+
+function decreaseEntityMovementSpeeds() {
+    if ((wizardMovePerTick / moveAdjustment) >= moveAdjustment) {
+        wizardMovePerTick /= moveAdjustment;
+    }
+
+    if ((monsterMovePerTick / moveAdjustment) >= moveAdjustment) {
+        monsterMovePerTick /= moveAdjustment;
+    }
+    console.log(`Decreasing movement speeds wizard: ${wizardMovePerTick} monsters: ${monsterMovePerTick}`);
+}
+
 function gameOver(fatalEntity) {
 
     changeGameState(GameState.GAME_OVER);
@@ -858,29 +858,6 @@ function gameOver(fatalEntity) {
     console.log(`TREASURE COLLECTED: ${score}`);
     console.log(`FINAL SCORE: ${finalScore}`);
     console.log("----------------------------------------------------------");
-}
-
-
-
-/* ------------ CONVENIENCE METHODS ------------ */
-function randomIntInRange(min, max) {
-    return parseInt(Math.random() * max + min);
-};
-
-function shuffle(array) {
-    let currentIndex = array.length;
-
-    // While there remain elements to shuffle...
-    while (currentIndex != 0) {
-
-        // Pick a remaining element...
-        let randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
-    }
 }
 
 function checkValidMove(destinationX, destinationY) {
@@ -1106,6 +1083,27 @@ function playBonusSound() {
 function updateEffects() {
     effects.forEach(ef => { ef.update() });
     effects = effects.filter(ef => { return ef.isAlive })
+}
+
+/* ------------ CONVENIENCE METHODS ------------ */
+function randomIntInRange(min, max) {
+    return parseInt(Math.random() * max + min);
+};
+
+function shuffle(array) {
+    let currentIndex = array.length;
+
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+
+        // Pick a remaining element...
+        let randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
 }
 
 

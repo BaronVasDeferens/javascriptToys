@@ -96,8 +96,8 @@ var totalMoves = 0;
 
 let playerWizard;
 
-var wizardMovePerTick = 4;
-var monsterMovePerTick = 4;
+var wizardMovePerTick = 8;
+var monsterMovePerTick = 8;
 var moveAdjustment = 2;
 
 var numObstacles = 2 * level;
@@ -239,7 +239,7 @@ document.addEventListener('mousedown', (e) => {
         createBoardForLevel(level);
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
 
-        var rect = e.target.getBoundingClientRect();
+        var rect = document.getElementById("canvas").getBoundingClientRect();
         var clickX = e.clientX - rect.left; //x position within the HTML element.
         var clickY = e.clientY - rect.top;  //y position within the HTML element.
 
@@ -662,19 +662,8 @@ function update() {
 
         if (gameState == GameState.DRAW_CARDS) {
 
-            let positionOne = { x: 10, y: 650 };
-            let positionTwo = { x: 330, y: 650 };
-            let cards = [];
-            cards.push(new Card(0, 0, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-            cards.push(new Card(0, 0, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
-
-            cardA = cards[0];
-            cardA.x = positionOne.x;
-            cardA.y = positionOne.y;
-
-            cardB = cards[1];
-            cardB.x = positionTwo.x;
-            cardB.y = positionTwo.y;
+            cardA = new Card(0, 650, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE));
+            cardB = new Card(340, 650, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE));
 
             entities.push(cardA);
             entities.push(cardB);

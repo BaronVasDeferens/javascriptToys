@@ -28,7 +28,7 @@ class Entity {
     }
 }
 
-export class StaticEntity extends Entity {
+export class ImageDisplayEntity extends Entity {
     constructor(id,x,y,image) {
         super(id,x,y);
         this.image = image;

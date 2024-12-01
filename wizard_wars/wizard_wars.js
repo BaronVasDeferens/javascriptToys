@@ -67,10 +67,10 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, StaticEntity, Wizard } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
-const debugOutput = true;
+const debugOutput = false;
 
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
@@ -294,7 +294,7 @@ function initializeGameState() {
     entities = [];
 
     let introImage = imageLoader.getImage(ImageAsset.GRAPHIC_TITLE_CARD);
-    let introEntity = new StaticEntity(
+    let introEntity = new ImageDisplayEntity(
         "intro",
         (mapWidth - introImage.width) / 2,
         (mapHeight - introImage.height) / 2,
@@ -366,7 +366,6 @@ function createBoardForLevel(newLevel) {
         entities.push(monster);
     }
 
-
     // Add SCARY monsters
     for (var i = 0; i < numMonstersScary; i++) {
         let chance = Math.floor(Math.random() * 10);
@@ -403,6 +402,7 @@ function createBoardForLevel(newLevel) {
     let portalLocation = getSingleUnoccupiedGrid();
     portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, imageLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
+    // Add cards
     cards.push(new Card(0, 650, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
     cards.push(new Card(340, 650, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
 
@@ -492,10 +492,7 @@ function processCardAction(card) {
     }
 
     // Remove the card
-    let index = cards.indexOf(card);
-    if (index != -1) {
-        cards.splice(index, 1);
-    }
+    removeElement(card, cards);
 
     changeGameState(GameState.CAST_SPELL_EFFECT);
     let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
@@ -1115,6 +1112,13 @@ function shuffle(array) {
         // And swap it with the current element.
         [array[currentIndex], array[randomIndex]] = [
             array[randomIndex], array[currentIndex]];
+    }
+}
+
+function removeElement(element, array) {
+    let index = array.indexOf(element);
+    if (index != -1) {
+        array.splice(index, 1);
     }
 }
 

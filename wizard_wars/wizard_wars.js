@@ -8,7 +8,6 @@
  *      TECHNICAL
  *          load and use custom font
  * 
- * 
  *      ASTHETIC
  *          title screen
  *          8-bit font
@@ -166,11 +165,7 @@ const ControlInput = Object.freeze({
 document.addEventListener('keydown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-
-        backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
-        backgroundMusicPlayer.loop = true;
-        backgroundMusicPlayer.play();
-
+        playBackgroundMusic();
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -231,9 +226,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('mousedown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-        backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
-        backgroundMusicPlayer.loop = true;
-        backgroundMusicPlayer.play();
+        playBackgroundMusic();
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -263,9 +256,12 @@ document.addEventListener('mousedown', (e) => {
 });
 
 
-
-var setup = function () {
-
+/**
+ * SETUP
+ * AN IFFE (Immediately Invoked Expression Function) that runs ONCE
+ */
+(() => {
+    console.log("Setting up...");
     changeGameState(GameState.LOAD_START);
 
     // Invoke AssetLoader and trigger callback upon completion...
@@ -281,7 +277,7 @@ var setup = function () {
         beginGame();
     });
 
-}();
+})();
 
 
 // ------------ START MAIN GAME LOOP ------------
@@ -295,6 +291,7 @@ function initializeGameState() {
     totalMoves = 0;
     score = 0;
     entities = [];
+    cards = [];
 
     let introImage = imageLoader.getImage(ImageAsset.GRAPHIC_TITLE_CARD);
     let introEntity = new ImageDisplayEntity(
@@ -516,7 +513,7 @@ function update() {
         // skip
     } else if (gameState == GameState.CAST_SPELL_EFFECT) {
         // skip
-    } else if(gameState == GameState.SHOW_SCORE) {
+    } else if (gameState == GameState.SHOW_SCORE) {
         // skip
     } else {
 
@@ -649,7 +646,7 @@ function render() {
         context.font = "24px sans-serif";
         context.fillText("PRESS TO CONTINUE", (canvas.width / 2) - 48, (canvas.height / 2));
     } else if (gameState == GameState.INTRO) {
-        context.clearRect(0, 0, mapWidth, mapHeight);
+        context.clearRect(0, 0, canvas.width, canvas.height);
         entities.forEach(entity => {
             entity.render(context);
         });
@@ -1103,6 +1100,14 @@ function playBonusSound() {
     var sound = soundLoader.getSound(SoundAsset.BONUS);
     sound.currentTime = 0;
     sound.play();
+}
+
+function playBackgroundMusic() {
+    if (backgroundMusicPlayer == null) {
+        backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
+        backgroundMusicPlayer.loop = true;
+        backgroundMusicPlayer.play();
+    }
 }
 
 function updateEffects() {

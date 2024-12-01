@@ -67,7 +67,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -94,7 +94,7 @@ var level = 1;
 var score = 0;
 var totalMoves = 0;
 
-let playerWizard;
+var playerWizard;
 
 var wizardMovePerTick = 8;
 var monsterMovePerTick = 8;
@@ -106,8 +106,8 @@ var numHazards = level + 1;
 var numMonstersBasic = level;
 var numMonstersScary = 0;
 
-let entities = [];
-let controlInput = null;
+var entities = [];
+var controlInput = null;
 var movers = [];
 var collectables = [];
 var obstacles = [];
@@ -118,7 +118,7 @@ var cards = [];
 var portal;
 var bonusAwarded = false;
 
-let backgroundImage = new Image();
+var backgroundImage = new Image();
 
 var coinSounds = [];
 var backgroundMusicPlayer;
@@ -143,7 +143,8 @@ const GameState = Object.freeze({
     ENEMY_MOVE_PREPARE: "Enemies plan their moves...",
     ENEMY_MOVE_EXECUTE: "Enemies moving!",
     CAST_SPELL_EFFECT: "Wizard casts a spell!",
-    GAME_OVER: "GAME OVER"
+    GAME_OVER: "GAME OVER",
+    SHOW_SCORE: "Showing score..."
 });
 
 var gameState = GameState.LOAD_START;
@@ -153,8 +154,6 @@ const SpellAction = Object.freeze({
     SPELL_RANDOMIZE: "SPELL_RANDOMIZE"
 });
 
-var cardA;
-var cardB;
 
 const ControlInput = Object.freeze({
     LEFT: 0,
@@ -176,6 +175,8 @@ document.addEventListener('keydown', (e) => {
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
         createBoardForLevel(level);
+    } else if (gameState == GameState.SHOW_SCORE) {
+        initializeGameState();
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
         switch (e.key) {
             case "ArrowUp":
@@ -201,8 +202,9 @@ document.addEventListener('keydown', (e) => {
             case "o":
             case "O":
                 // DEBUG ONLY
-                console.log(`DEBUG: creating new level ${level + 5}...`);
-                createBoardForLevel(level + 5);
+                let levelIncrease = 4;
+                console.log(`DEBUG: creating new level ${level + levelIncrease}...`);
+                createBoardForLevel(level + levelIncrease);
                 break;
             case "m":
             case "M":
@@ -236,6 +238,8 @@ document.addEventListener('mousedown', (e) => {
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
         createBoardForLevel(level);
+    } else if (gameState == GameState.SHOW_SCORE) {
+        initializeGameState();
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
 
         var rect = document.getElementById("canvas").getBoundingClientRect();
@@ -248,7 +252,6 @@ document.addEventListener('mousedown', (e) => {
                 processCardAction(card);
             }
         });
-
 
         // Check for ADJACENT TILE CLICKED (MOVE)
         let clickedTile = {
@@ -513,6 +516,8 @@ function update() {
         // skip
     } else if (gameState == GameState.CAST_SPELL_EFFECT) {
         // skip
+    } else if(gameState == GameState.SHOW_SCORE) {
+        // skip
     } else {
 
         specialEffects = [];
@@ -681,8 +686,6 @@ function render() {
         });
     }
 
-
-
 }
 
 // ------------ END MAIN GAME LOOP ------------
@@ -845,6 +848,16 @@ function decreaseEntityMovementSpeeds() {
 
 function gameOver(fatalEntity) {
 
+    let finalScore = Math.floor((score / totalMoves) * level);
+    console.log("----------------------------------------------------------");
+    console.log("Wizard was slain: GAME OVER");
+    console.log(`LEVEL ACHIEVED: ${level}`);
+    console.log(`TOTAL MOVES: ${totalMoves}`);
+    console.log(`TREASURE COLLECTED: ${score}`);
+    console.log(`FINAL SCORE: ${finalScore}`);
+    console.log("----------------------------------------------------------");
+
+
     changeGameState(GameState.GAME_OVER);
     effects = [];
     specialEffects.push(
@@ -854,19 +867,22 @@ function gameOver(fatalEntity) {
     var gameOverSound = soundLoader.getSound(SoundAsset.PLAYER_DIES);
     gameOverSound.currentTime = 0;
     gameOverSound.addEventListener("ended", (e) => {
-        initializeGameState();
+        changeGameState(GameState.SHOW_SCORE);
+        specialEffects.push(
+            new SpecialEffectScoreDisplay(
+                mapWidth / 4,
+                mapHeight / 4,
+                totalMoves,
+                score,
+                finalScore
+            )
+        )
+        //initializeGameState();
     }, { once: true });
     gameOverSound.play();
 
 
-    let finalScore = Math.floor((score / totalMoves) * level);
-    console.log("----------------------------------------------------------");
-    console.log("Wizard was slain: GAME OVER");
-    console.log(`LEVEL ACHIEVED: ${level}`);
-    console.log(`TOTAL MOVES: ${totalMoves}`);
-    console.log(`TREASURE COLLECTED: ${score}`);
-    console.log(`FINAL SCORE: ${finalScore}`);
-    console.log("----------------------------------------------------------");
+
 }
 
 function checkValidMove(destinationX, destinationY) {

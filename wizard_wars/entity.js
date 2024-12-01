@@ -29,8 +29,8 @@ class Entity {
 }
 
 export class ImageDisplayEntity extends Entity {
-    constructor(id,x,y,image) {
-        super(id,x,y);
+    constructor(id, x, y, image) {
+        super(id, x, y);
         this.image = image;
     }
 }
@@ -122,7 +122,7 @@ export class Card extends Entity {
 
 
 class EffectTimer {
-    constructor(effectType, cycles){
+    constructor(effectType, cycles) {
         this.effectType = effectType;
         this.cycles = cycles;
     }
@@ -273,6 +273,30 @@ export class SpecialEffectDeath {
         }
     }
 }
+
+export class SpecialEffectScoreDisplay {
+    constructor(x, y, moves, treasureTotal, finalScore) {
+        this.x = x;
+        this.y = y;
+        this.moves = moves;
+        this.treasureTotal = treasureTotal;
+        this.finalScore = finalScore;
+    }
+
+    render(context) {
+        context.fillStyle = "#FF0000";
+        context.fillRect(this.x, this.y, 300, 300);
+        context.fillStyle = "#FFFFFF";
+        context.fillText("MOVES", this.x + 100, this.y + 25);
+        context.fillText(this.moves, this.x + 125, this.y + 50);
+        context.fillText("TREASURE", this.x + 80, this.y + 75);
+        context.fillText(this.treasureTotal, this.x + 125, this.y + 100);
+        context.fillText("SCORE", this.x + 100, this.y + 125);
+        context.fillText(this.finalScore, this.x + 125, this.y + 150);
+    }
+}
+
+
 // -----------------------
 // -------- MOVER --------
 // -----------------------

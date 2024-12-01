@@ -51,6 +51,7 @@
  *          score display on level descent
  *          online score board
  *          better "bonus" sound
+ *          bonus for certain monsters on the board
  *          bonus for collecting everything
  *          bonus for casting NO spells?
  *          bonus for casting ALL spells?
@@ -67,7 +68,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -360,33 +361,47 @@ function createBoardForLevel(newLevel) {
     // Add BASIC monsters
     for (var i = 0; i < numMonstersBasic; i++) {
         var location = getSingleUnoccupiedGrid();
-        let monster = new Monster(
-            `monster_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_WASP_2)
-        );
-        monster.replicationsRemaining = 2;
+        let monster = createMonster(MonsterType.RAT, location.x * tileSize, location.y * tileSize);
         entities.push(monster);
     }
 
     // Add SCARY monsters
     for (var i = 0; i < numMonstersScary; i++) {
         let chance = Math.floor(Math.random() * 10);
-        if (chance > 6) {
-            // Add replicating blob
-            var location = getSingleUnoccupiedGrid();
-            let monster = new Monster(
-                `monster_blob_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1)
-            );
-            monster.replicationsRemaining = 1;
-            entities.push(monster);
 
-        } else {
-            // Add seeking wasp
-            var location = getSingleUnoccupiedGrid();
-            entities.push(
-                new Monster(
-                    `monster_chaser_${i}`, location.x * tileSize, location.y * tileSize, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_1)
-                )
-            );
+        switch (chance) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                // Add seeking wasp
+                var location = getSingleUnoccupiedGrid();
+                entities.push(
+                    createMonster(MonsterType.WASP_CHASER, location.x * tileSize, location.y * tileSize)
+                );
+                break;
+            case 4:
+            case 5:
+            case 6:
+                // Add replicating blob
+                var location = getSingleUnoccupiedGrid();
+                var monster = createMonster(MonsterType.BLOB, location.x * tileSize, location.y * tileSize);
+                monster.replicationsRemaining = 1;
+                entities.push(monster);
+                break;
+            case 7:
+            case 8:
+                // Add ghost (basic)
+                var location = getSingleUnoccupiedGrid();
+                var monster = createMonster(MonsterType.GHOST_BASIC, location.x * tileSize, location.y * tileSize);
+                entities.push(monster);
+                break;
+            case 9:
+                // Add ghost (chaser)
+                var location = getSingleUnoccupiedGrid();
+                var monster = createMonster(MonsterType.GHOST_CHASER, location.x * tileSize, location.y * tileSize);
+                entities.push(monster);
+                break;
         }
     }
 
@@ -884,12 +899,13 @@ function gameOver(fatalEntity) {
 
 function checkIsValidMove(entity, destinationX, destinationY) {
     var inBounds = checkInBounds(destinationX, destinationY);
-    
+
     if (entity instanceof Monster) {
         var illegalSpaces = [];
+
         if (entity.isBlockedByHazard) {
             illegalSpaces = illegalSpaces.concat(hazards);
-        } 
+        }
 
         if (entity.isBlockedByObstacle) {
             illegalSpaces = illegalSpaces.concat(obstacles)
@@ -911,7 +927,7 @@ function checkIsValidMove(entity, destinationX, destinationY) {
 
     } else {
         var isUnobstruced = checkUnobstructed(destinationX, destinationY);
-        return isUnobstruced && inBounds; 
+        return isUnobstruced && inBounds;
     }
 }
 
@@ -1110,6 +1126,72 @@ function getRandomMover(monster) {
     shuffle(potentialMoves);
     return potentialMoves[0];
 }
+
+function createMonster(type, x, y) {
+    var monster;
+    switch (type) {
+        case MonsterType.RAT:
+            monster = new Monster(
+                "rat", x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_RAT_1)
+            );
+            monster.isBlockedByHazard = true;
+            monster.isBlockedByObstacle = true;
+            monster.isBlockedByCollectable = true;
+            monster.isBlockedByPortal = true;
+            return monster;
+        case MonsterType.WASP_BASIC:
+            monster = Monster(
+                `wasp`, x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
+            );
+            monster.isBlockedByHazard = false;
+            monster.isBlockedByObstacle = true;
+            monster.isBlockedByCollectable = true;
+            monster.isBlockedByPortal = true;
+            return monster;
+        case MonsterType.WASP_CHASER:
+            monster = new Monster(
+                `wasp_chaser`, x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_RED)
+            );
+            monster.isBlockedByHazard = false;
+            monster.isBlockedByObstacle = true;
+            monster.isBlockedByCollectable = true;
+            monster.isBlockedByPortal = true;
+            return monster;
+        case MonsterType.BLOB:
+            monster = new Monster(
+                `blob`, x, y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1)
+            );
+            monster.isBlockedByHazard = true;
+            monster.isBlockedByObstacle = true;
+            monster.isBlockedByCollectable = true;
+            monster.isBlockedByPortal = true;
+            return monster;
+        case MonsterType.GHOST_BASIC:
+            monster = new Monster(
+                `ghost`, x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_GHOST_1)
+            );
+            monster.isBlockedByHazard = false;
+            monster.isBlockedByObstacle = false;
+            monster.isBlockedByCollectable = false;
+            monster.isBlockedByPortal = false;
+            return monster;
+        case MonsterType.GHOST_CHASER:
+            monster = new Monster(
+                `ghost`, x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_GHOST_2)
+            );
+            monster.isBlockedByHazard = false;
+            monster.isBlockedByObstacle = false;
+            monster.isBlockedByCollectable = false;
+            monster.isBlockedByPortal = false;
+            return monster;
+    }
+
+}
+
+
+/**
+ * ------- SOUNDS --------
+ */
 
 function playStepSound() {
     var stepSound = soundLoader.getSound(SoundAsset.MOVE_2);

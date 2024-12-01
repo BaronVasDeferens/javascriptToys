@@ -42,6 +42,17 @@ export class Wizard extends Entity {
     }
 }
 
+
+export var MonsterType = Object.freeze({
+    RAT: 0,
+    WASP_BASIC: 1,
+    WASP_CHASER: 2,
+    BLOB: 3,
+    GHOST_BASIC: 4,
+    GHOST_CHASER: 5
+});
+
+
 export var MonsterMovementBehavior = Object.freeze({
     RANDOM: 1,
     CHASE_PLAYER: 2,
@@ -53,7 +64,7 @@ export class Monster extends Entity {
 
     isLethal = true;                // When true, the monster kills the wizard if they occupy the same space
     isBlocking = false;             // When true, the wizard cannot occupy the same space.
-    
+
     isBlockedByHazard = true;      // When true, the monster cannot occupy the same space as a HAZARD.
     isBlockedByObstacle = true;     // When true, the monster cannot occupy the same space as an OBSTACLE
     isBlockedByCollectable = true;  // When true, the monster cannot occupy the same space as a COLLECATBLE
@@ -70,7 +81,6 @@ export class Monster extends Entity {
     setMover(mover) {
         this.mover = mover;
     }
-
 }
 
 export class Obstacle extends Entity {

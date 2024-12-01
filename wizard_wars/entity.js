@@ -48,10 +48,17 @@ export var MonsterMovementBehavior = Object.freeze({
     REPLICATE: 3
 });
 
+
 export class Monster extends Entity {
 
     isLethal = true;                // When true, the monster kills the wizard if they occupy the same space
     isBlocking = false;             // When true, the wizard cannot occupy the same space.
+    
+    isBlockedByHazard = true;      // When true, the monster cannot occupy the same space as a HAZARD.
+    isBlockedByObstacle = true;     // When true, the monster cannot occupy the same space as an OBSTACLE
+    isBlockedByCollectable = true;  // When true, the monster cannot occupy the same space as a COLLECATBLE
+    isBlockedByPortal = true;       // When true, the monster cannot occupy the same space as a PORTAL.
+
     replicationsRemaining = 0;      // When the behavior is replicating, this is the number of mx number of times it may replicate
 
     constructor(id, x, y, behavior, image) {

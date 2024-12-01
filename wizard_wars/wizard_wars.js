@@ -32,6 +32,7 @@
  *      ENEMIES
  *          some enemies can't pass through hazards (can't fly) (easier)
  *          some enemies can't stack (occupy same space) (easier)
+ *          some enemies can pass through obstacles (ghost)
  * 
  *      SPELLS
  *          spell: turn hazards into obstacles?
@@ -728,7 +729,7 @@ function checkAdjacentToWizard(target) {
 function moveIfAble(direction) {
     switch (direction) {
         case ControlInput.UP:
-            if (checkValidMove(playerWizard.x, playerWizard.y - tileSize)) {
+            if (checkIsValidMove(playerWizard, playerWizard.x, playerWizard.y - tileSize)) {
                 controlInput = ControlInput.UP
                 movers.push(
                     new Mover(
@@ -750,7 +751,7 @@ function moveIfAble(direction) {
             }
             break;
         case ControlInput.DOWN:
-            if (checkValidMove(playerWizard.x, playerWizard.y + tileSize)) {
+            if (checkIsValidMove(playerWizard, playerWizard.x, playerWizard.y + tileSize)) {
                 controlInput = ControlInput.DOWN
                 movers.push(
                     new Mover(
@@ -772,7 +773,7 @@ function moveIfAble(direction) {
             }
             break;
         case ControlInput.LEFT:
-            if (checkValidMove(playerWizard.x - tileSize, playerWizard.y)) {
+            if (checkIsValidMove(playerWizard, playerWizard.x - tileSize, playerWizard.y)) {
                 controlInput = ControlInput.LEFT
                 movers.push(
                     new Mover(
@@ -794,7 +795,7 @@ function moveIfAble(direction) {
             }
             break;
         case ControlInput.RIGHT:
-            if (checkValidMove(playerWizard.x + tileSize, playerWizard.y)) {
+            if (checkIsValidMove(playerWizard, playerWizard.x + tileSize, playerWizard.y)) {
                 controlInput = ControlInput.RIGHT
                 movers.push(
                     new Mover(
@@ -874,7 +875,6 @@ function gameOver(fatalEntity) {
                 finalScore
             )
         )
-        //initializeGameState();
     }, { once: true });
     gameOverSound.play();
 
@@ -882,9 +882,39 @@ function gameOver(fatalEntity) {
 
 }
 
-function checkValidMove(destinationX, destinationY) {
-    return checkInBounds(destinationX, destinationY) && checkUnobstructed(destinationX, destinationY) // && checkDestination(destinationX, destinationY);
+function checkIsValidMove(entity, destinationX, destinationY) {
+    var inBounds = checkInBounds(destinationX, destinationY);
+    
+    if (entity instanceof Monster) {
+        var illegalSpaces = [];
+        if (entity.isBlockedByHazard) {
+            illegalSpaces = illegalSpaces.concat(hazards);
+        } 
+
+        if (entity.isBlockedByObstacle) {
+            illegalSpaces = illegalSpaces.concat(obstacles)
+        }
+
+        if (entity.isBlockedByCollectable) {
+            illegalSpaces = illegalSpaces.concat(collectables);
+        }
+
+        if (entity.isBlockedByPortal) {
+            illegalSpaces = illegalSpaces.concat(portal);
+        }
+
+        var isClear = illegalSpaces.map(grid => {
+            return (destinationX == grid.x) && (destinationY == grid.y)
+        });
+
+        return !isClear.includes(true) && inBounds;
+
+    } else {
+        var isUnobstruced = checkUnobstructed(destinationX, destinationY);
+        return isUnobstruced && inBounds; 
+    }
 }
+
 
 function checkInBounds(destinationX, destinationY) {
     var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
@@ -1018,7 +1048,7 @@ function getMoverToTarget(monster, target) {
         deltaX = monsterMovePerTick
     }
 
-    if (checkValidMove(destinationX, monster.y) && deltaX != 0) {
+    if (checkIsValidMove(monster, destinationX, monster.y) && deltaX != 0) {
         potentialMovers.push(new Mover(monster, destinationX, monster.y, deltaX, 0, () => { }));
     }
 
@@ -1033,7 +1063,7 @@ function getMoverToTarget(monster, target) {
         deltaY = monsterMovePerTick
     }
 
-    if (checkValidMove(monster.x, destinationY) && deltaY != 0) {
+    if (checkIsValidMove(monster, monster.x, destinationY) && deltaY != 0) {
         potentialMovers.push(new Mover(monster, monster.x, destinationY, 0, deltaY, () => { }));
     }
 
@@ -1050,14 +1080,14 @@ function getRandomMover(monster) {
 
     // move down
     targetY = monster.y + tileSize;
-    if (checkValidMove(monster.x, targetY)) {
+    if (checkIsValidMove(monster, monster.x, targetY)) {
         mover = new Mover(monster, monster.x, targetY, 0, monsterMovePerTick, () => { })
         potentialMoves.push(mover);
     }
 
     // move up
     targetY = monster.y - tileSize;
-    if (checkValidMove(monster.x, targetY)) {
+    if (checkIsValidMove(monster, monster.x, targetY)) {
         mover = new Mover(monster, monster.x, targetY, 0, -monsterMovePerTick, () => { })
         potentialMoves.push(mover);
     }
@@ -1065,14 +1095,14 @@ function getRandomMover(monster) {
 
     // move left
     targetX = monster.x - tileSize;
-    if (checkValidMove(targetX, monster.y)) {
+    if (checkIsValidMove(monster, targetX, monster.y)) {
         mover = new Mover(monster, targetX, monster.y, -monsterMovePerTick, 0, () => { })
         potentialMoves.push(mover);
     }
 
     // move right
     targetX = monster.x + tileSize;
-    if (checkValidMove(targetX, monster.y)) {
+    if (checkIsValidMove(monster, targetX, monster.y)) {
         mover = new Mover(monster, targetX, monster.y, monsterMovePerTick, 0, () => { })
         potentialMoves.push(mover);
     }

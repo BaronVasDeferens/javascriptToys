@@ -35,11 +35,14 @@
  *          some enemies can pass through obstacles (ghost)
  * 
  *      SPELLS
+ *          spell: become immune to monster death for N moves (monsters semi-transparent)
  *          spell: turn hazards into obstacles?
  *          spell: make smart monsters dumb?
  *          spell: push all monsters to edges?
  *          spell: pull all monsters to center?
  *          spell: make hazards lethal to all creatures
+ *          SPELLS REPLENISH AT DIFFERENT RATES
+ *          
  *      
  *      POTIONS
  *          appear randomly; walking over one puts it in the "spell area"

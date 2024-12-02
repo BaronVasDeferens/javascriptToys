@@ -429,8 +429,10 @@ function createBoardForLevel(newLevel) {
     portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, imageLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
     // Add cards
-    cards.push(new Card(0, 650, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-    cards.push(new Card(340, 650, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+    let imageSize = 96;
+    let gap = 16;
+    cards.push(new Card(0, 640 + gap, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+    cards.push(new Card(imageSize + gap, 640 + gap, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
 
     renderBackground(context);
 

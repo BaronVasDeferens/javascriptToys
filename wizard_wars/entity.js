@@ -120,8 +120,8 @@ export class Collectable extends Entity {
 
 export class Card extends Entity {
 
-    width = 300;
-    height = 340;
+    width = 96;
+    height = 96;
 
     isExpended = false;
 

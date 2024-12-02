@@ -44,12 +44,13 @@ export class Wizard extends Entity {
 
 
 export var MonsterType = Object.freeze({
-    RAT: 0,
-    WASP_BASIC: 1,
-    WASP_CHASER: 2,
-    BLOB: 3,
-    GHOST_BASIC: 4,
-    GHOST_CHASER: 5
+    RAT_BASIC: "RAT",
+    RAT_MAN: "RAT_MAN",
+    WASP_BASIC: "WASP_BASIC",
+    WASP_CHASER: "WASP_CHASER",
+    BLOB: "BLOB",
+    GHOST_BASIC: "GHOST_BASIC",
+    GHOST_CHASER: "GHOST_CHASER"
 });
 
 

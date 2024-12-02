@@ -365,6 +365,13 @@ function createBoardForLevel(newLevel) {
         entities.push(monster);
     }
 
+    if (level % 3 == 0) {
+        var location = getSingleUnoccupiedGrid();
+        entities.push(
+            createMonster(MonsterType.RAT_MAN, location.x * tileSize, location.y * tileSize)
+        );
+    }
+
     // Add SCARY monsters
     for (var i = 0; i < numMonstersScary; i++) {
         let chance = Math.floor(Math.random() * 10);
@@ -1132,13 +1139,24 @@ function createMonster(type, x, y) {
     switch (type) {
         case MonsterType.RAT:
             monster = new Monster(
-                "rat", x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_RAT_1)
+                "rat", x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
             );
             monster.isBlockedByHazard = true;
             monster.isBlockedByObstacle = true;
             monster.isBlockedByCollectable = true;
             monster.isBlockedByPortal = true;
             return monster;
+
+        case MonsterType.RAT_MAN:
+            monster = new Monster(
+                "rat_man", x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_RAT_MAN)
+            );
+            monster.isBlockedByHazard = true;
+            monster.isBlockedByObstacle = true;
+            monster.isBlockedByCollectable = true;
+            monster.isBlockedByPortal = true;
+            return monster;
+
         case MonsterType.WASP_BASIC:
             monster = Monster(
                 `wasp`, x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
@@ -1148,6 +1166,7 @@ function createMonster(type, x, y) {
             monster.isBlockedByCollectable = true;
             monster.isBlockedByPortal = true;
             return monster;
+
         case MonsterType.WASP_CHASER:
             monster = new Monster(
                 `wasp_chaser`, x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_RED)
@@ -1157,6 +1176,7 @@ function createMonster(type, x, y) {
             monster.isBlockedByCollectable = true;
             monster.isBlockedByPortal = true;
             return monster;
+
         case MonsterType.BLOB:
             monster = new Monster(
                 `blob`, x, y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1)
@@ -1166,6 +1186,7 @@ function createMonster(type, x, y) {
             monster.isBlockedByCollectable = true;
             monster.isBlockedByPortal = true;
             return monster;
+
         case MonsterType.GHOST_BASIC:
             monster = new Monster(
                 `ghost`, x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_GHOST_1)
@@ -1175,6 +1196,7 @@ function createMonster(type, x, y) {
             monster.isBlockedByCollectable = false;
             monster.isBlockedByPortal = false;
             return monster;
+
         case MonsterType.GHOST_CHASER:
             monster = new Monster(
                 `ghost`, x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_GHOST_2)

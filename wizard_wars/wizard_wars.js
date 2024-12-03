@@ -53,6 +53,7 @@
  *          online score board
  *          better "bonus" sound
  *          bonus for certain monsters on the board
+ *          bonus for number of blobs on board
  *          bonus for collecting everything
  *          bonus for casting NO spells?
  *          bonus for casting ALL spells?

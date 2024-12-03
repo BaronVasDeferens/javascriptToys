@@ -75,7 +75,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity } from './entity.js';
 import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -123,6 +123,7 @@ var hazards = [];
 var effects = [];
 var specialEffects = [];
 var cards = [];
+var temporaryEntities = [];
 var portal;
 var bonusAwarded = false;
 
@@ -308,7 +309,8 @@ function initializeGameState() {
         "intro",
         (mapWidth - introImage.width) / 2,
         (mapHeight - introImage.height) / 2,
-        introImage
+        introImage,
+        1.0
     );
     entities.push(introEntity);
 }
@@ -335,6 +337,7 @@ function createBoardForLevel(newLevel) {
     hazards = [];
     effects = [];
     cards = [];
+    temporaryEntities = [];
     portal = null;
     bonusAwarded = false;
 
@@ -438,6 +441,8 @@ function createBoardForLevel(newLevel) {
     let gap = 16;
     cards.push(new Card(0, 640 + gap, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
     cards.push(new Card(imageSize + gap, 640 + gap, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+    cards.push(new Card(imageSize + gap + imageSize + gap, 640 + gap, SpellAction.SPELL_PRECOGNITION, imageLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
+
 
     renderBackground(context);
 
@@ -487,15 +492,16 @@ function beginGame() {
     requestAnimationFrame(beginGame);
 }
 
-
 function processCardAction(card) {
 
     switch (card.action) {
+
         case SpellAction.SPELL_FREEZE:
             // FREEZE locks all monsters into their current positions for N turns
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
             effects.push(new EffectTimerFreeze(card.action, 6));
             break;
+
         case SpellAction.SPELL_RANDOMIZE:
             // RANDOMIZE swaps the positions of all entities. CAUTION: entities can stack, so wizard may swap into a space that is already occupied!
             var swappables = entities.filter(ent => {
@@ -523,7 +529,80 @@ function processCardAction(card) {
                 renderBackground(context);
             }));
             break;
+
+        case SpellAction.SPELL_PRECOGNITION:
+
+            var monsters = entities.filter(ent => { return ent instanceof Monster })
+            monsters.forEach(entity => {
+
+                switch (entity.behavior) {
+                    case MonsterMovementBehavior.CHASE_PLAYER:
+                    case MonsterMovementBehavior.RANDOM:
+                        if (entity.mover == null || entity.mover.isAlive == false) {
+                            var mover = getMonsterMover(entity, playerWizard);
+                            if (mover != null) {
+                                entity.setMover(mover);
+                                movers.push(mover);
+                            }
+                        }
+                        break;
+
+                    case MonsterMovementBehavior.REPLICATE:
+                        if (entity.replicationsRemaining > 0) {
+                            let freeSpaces = getUnoccupiedAdjacencies(entity);
+                            if (freeSpaces.length > 0) {
+                                let freeSpace = freeSpaces[0];
+                                let newMonster = new Monster("monsterSpawn", entity.x, entity.y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1));
+                                let mover = getMonsterMover(newMonster, freeSpace)
+                                newMonster.setMover(mover);
+                                newMonster.replicationsRemaining = 1;
+                                entity.replicationsRemaining -= 1;
+                                entities.push(newMonster);
+                                movers.push(mover);
+                            }
+                        }
+                        break;
+                }
+            });
+
+            entities.filter(ent => { return ent instanceof Monster })
+                .filter(monster => { return monster.mover != null })
+                .forEach(entity => {
+                    // push some temporary entities for the "ghost" monsters
+
+                    var dX = 0;
+                    var dY = 0;
+                    switch (entity.mover.direction) {
+                        case ControlInput.UP:
+                            dY = -tileSize;
+                            break;
+                        case ControlInput.DOWN:
+                            dY = tileSize;
+                            break;
+                        case ControlInput.LEFT:
+                            dX = -tileSize;
+                            break;
+                        case ControlInput.RIGHT:
+                            dX = tileSize;
+                            break;
+                    }
+
+                    temporaryEntities.push(
+                        new TemporaryEntity(
+                            entity.x + dX,
+                            entity.y + dY,
+                            entity.image,
+                            0.5,
+                            GameState.ENEMY_MOVE_EXECUTE)
+                    );
+                });
+
+            specialEffects.push(
+                new SpecialEffectPrecognition(mapWidth, mapHeight)
+            );
+            break;
     }
+
 
     // Remove the card
     removeElement(card, cards);
@@ -537,6 +616,12 @@ function processCardAction(card) {
 }
 
 function update() {
+
+    temporaryEntities = temporaryEntities.filter(ent => {
+        return ent.expiresOnGameState != gameState
+    });
+
+
     if (gameState == GameState.INTRO) {
         // skip
     } else if (gameState == GameState.LOAD_START) {
@@ -546,7 +631,7 @@ function update() {
     } else if (gameState == GameState.GAME_OVER) {
         // skip
     } else if (gameState == GameState.CAST_SPELL_EFFECT) {
-        // skip
+
     } else if (gameState == GameState.SHOW_SCORE) {
         // skip
     } else {
@@ -569,6 +654,7 @@ function update() {
             if (!hasFreeze) {
                 entities
                     .filter(entity => { return entity instanceof Monster })
+                    .filter(entity => { return entity.mover == null || entity.mover.isAlive == false })
                     .forEach(entity => {
                         switch (entity.behavior) {
                             case MonsterMovementBehavior.CHASE_PLAYER:
@@ -605,7 +691,15 @@ function update() {
         }
 
         movers.forEach(mover => {
-            mover.update();
+            if (gameState == GameState.PLAYER_ACTION_EXECUTE) {
+                if (mover.entity instanceof Wizard) {
+                    mover.update();
+                }
+            } else if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
+                if (mover.entity instanceof Monster) {
+                    mover.update();
+                }
+            }
         });
 
 
@@ -701,6 +795,10 @@ function render() {
         entities.forEach(entity => {
             entity.render(context);
         });
+
+        temporaryEntities.forEach(temp => {
+            temp.render(context);
+        })
 
         specialEffects.forEach(spEf => {
             spEf.render(context);
@@ -1102,7 +1200,20 @@ function getMoverToTarget(monster, target) {
     }
 
     shuffle(potentialMovers);
-    return potentialMovers[0];
+    var selectedMover = potentialMovers[0];
+    if (selectedMover != null) {
+        if (selectedMover.deltaX < 0) {
+            selectedMover.direction = ControlInput.LEFT;
+        } else if (selectedMover > 0) {
+            selectedMover.direction = ControlInput.RIGHT;
+        } else if (selectedMover.deltaY < 0) {
+            selectedMover.direction = ControlInput.UP;
+        } else if (selectedMover.deltaY > 0) {
+            selectedMover.direction = ControlInput.DOWN;
+        }
+    }
+
+    return selectedMover;
 }
 
 function getRandomMover(monster) {
@@ -1115,14 +1226,16 @@ function getRandomMover(monster) {
     // move down
     targetY = monster.y + tileSize;
     if (checkIsValidMove(monster, monster.x, targetY)) {
-        mover = new Mover(monster, monster.x, targetY, 0, monsterMovePerTick, () => { })
+        mover = new Mover(monster, monster.x, targetY, 0, monsterMovePerTick, () => { });
+        mover.direction = ControlInput.DOWN;
         potentialMoves.push(mover);
     }
 
     // move up
     targetY = monster.y - tileSize;
     if (checkIsValidMove(monster, monster.x, targetY)) {
-        mover = new Mover(monster, monster.x, targetY, 0, -monsterMovePerTick, () => { })
+        mover = new Mover(monster, monster.x, targetY, 0, -monsterMovePerTick, () => { });
+        mover.direction = ControlInput.UP;
         potentialMoves.push(mover);
     }
 
@@ -1130,14 +1243,16 @@ function getRandomMover(monster) {
     // move left
     targetX = monster.x - tileSize;
     if (checkIsValidMove(monster, targetX, monster.y)) {
-        mover = new Mover(monster, targetX, monster.y, -monsterMovePerTick, 0, () => { })
+        mover = new Mover(monster, targetX, monster.y, -monsterMovePerTick, 0, () => { });
+        mover.direction = ControlInput.LEFT;
         potentialMoves.push(mover);
     }
 
     // move right
     targetX = monster.x + tileSize;
     if (checkIsValidMove(monster, targetX, monster.y)) {
-        mover = new Mover(monster, targetX, monster.y, monsterMovePerTick, 0, () => { })
+        mover = new Mover(monster, targetX, monster.y, monsterMovePerTick, 0, () => { });
+        mover.direction = ControlInput.RIGHT;
         potentialMoves.push(mover);
     }
 

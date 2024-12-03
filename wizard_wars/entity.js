@@ -1,4 +1,11 @@
 
+const ControlInput = Object.freeze({
+    LEFT: 0,
+    RIGHT: 1,
+    UP: 2,
+    DOWN: 3
+});
+
 // --------------------
 // ----- ENTITIES -----
 // --------------------
@@ -29,9 +36,16 @@ class Entity {
 }
 
 export class ImageDisplayEntity extends Entity {
-    constructor(id, x, y, image) {
+    constructor(id, x, y, image, alpha) {
         super(id, x, y);
+        this.alpha = alpha;
         this.image = image;
+    }
+
+    render(context) {
+        context.globalAlpha = this.alpha;
+        context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 1.0;
     }
 }
 
@@ -137,6 +151,25 @@ export class Card extends Entity {
         return (clickX >= this.x && clickX <= this.x + this.width) && (clickY >= this.y && clickY <= this.y + this.height);
     }
 }
+
+
+export class TemporaryEntity {
+
+    constructor(x, y, image, alpha, expiresOnGameState) {
+        this.x = x;
+        this.y = y;
+        this.image = image;
+        this.alpha = alpha;
+        this.expiresOnGameState = expiresOnGameState;
+    }
+
+    render(context) {
+        context.globalAlpha = this.alpha;
+        context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 1.0;
+    }
+}
+
 
 
 class EffectTimer {
@@ -251,11 +284,31 @@ export class SpecialEffectRandomize {
             context.globalAlpha = 1.0;
         }
 
-
-
         if (this.triggered == false) {
             this.func();
             this.triggered = true;
+        }
+    }
+}
+
+export class SpecialEffectPrecognition {
+
+    opacityLevel = 1.0;
+
+    constructor(width, height) {
+        this.canvasWidth = width;
+        this.canvasHeight = height;
+    }
+
+    render(context) {
+
+        if (this.opacityLevel > 0.01) {
+            this.opacityLevel = this.opacityLevel - 0.01;
+
+            context.globalAlpha = this.opacityLevel;
+            context.fillStyle = "white";
+            context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+            context.globalAlpha = 1.0;
         }
     }
 }
@@ -293,6 +346,7 @@ export class SpecialEffectDeath {
 }
 
 export class SpecialEffectScoreDisplay {
+
     constructor(x, y, moves, treasureTotal, finalScore) {
         this.x = x;
         this.y = y;
@@ -320,6 +374,9 @@ export class SpecialEffectScoreDisplay {
 // -----------------------
 
 export class Mover {
+
+    direction = null;
+
     constructor(entity, destinationX, destinationY, deltaX, deltaY, callback) {
         this.entity = entity;
         this.destinationX = destinationX;

@@ -35,15 +35,16 @@
  *          some enemies can pass through obstacles (ghost)
  * 
  *      SPELLS
+ *          spell: show the monster's NEXT move!! (precognition)
  *          spell: become immune to monster death for N moves (monsters semi-transparent)
  *          spell: turn hazards into obstacles?
  *          spell: make smart monsters dumb?
  *          spell: push all monsters to edges?
  *          spell: pull all monsters to center?
  *          spell: make hazards lethal to all creatures
+ *          spell: drop boulders (kill monsters, block tiles)
  *          SPELLS REPLENISH AT DIFFERENT RATES
  *          
- *      
  *      POTIONS
  *          appear randomly; walking over one puts it in the "spell area"
  *          potion: turn empty speces into gold (x turns)
@@ -51,14 +52,17 @@
  *          potion: move through obstacles(x turns)
  * 
  *      SCORING
- *          score display on level descent
+ *          score display
  *          online score board
  *          better "bonus" sound
  *          bonus for certain monsters on the board
  *          bonus for collecting everything
  *          bonus for casting NO spells?
  *          bonus for casting ALL spells?
- *          bonus/subtraction for some spells but no others?
+ *          bonus/subtraction for some spells but not others?
+ *          DEBT: start off with 50,000 of debt
+ *          DEBT: debt decreases every time you complete 10 levels (making it ("out")
+ *          DEBT: debt INCREASES when you die
  * 
  *      HIGH SCORES
  *          final level reached
@@ -155,7 +159,8 @@ var gameState = GameState.LOAD_START;
 
 const SpellAction = Object.freeze({
     SPELL_FREEZE: "SPELL_FREEZE",
-    SPELL_RANDOMIZE: "SPELL_RANDOMIZE"
+    SPELL_RANDOMIZE: "SPELL_RANDOMIZE",
+    SPELL_PRECOGNITION: "SPELL_PRECOGNITION"
 });
 
 
@@ -487,10 +492,12 @@ function processCardAction(card) {
 
     switch (card.action) {
         case SpellAction.SPELL_FREEZE:
+            // FREEZE locks all monsters into their current positions for N turns
             specialEffects.push(new SpecialEffectFreeze(mapWidth, mapHeight));
             effects.push(new EffectTimerFreeze(card.action, 6));
             break;
         case SpellAction.SPELL_RANDOMIZE:
+            // RANDOMIZE swaps the positions of all entities. CAUTION: entities can stack, so wizard may swap into a space that is already occupied!
             var swappables = entities.filter(ent => {
                 if (ent instanceof Card == false) {
                     return ent;
@@ -515,7 +522,6 @@ function processCardAction(card) {
 
                 renderBackground(context);
             }));
-
             break;
     }
 

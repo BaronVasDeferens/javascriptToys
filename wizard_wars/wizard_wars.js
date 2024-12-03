@@ -15,7 +15,7 @@
  *          torch flicker
  * 
  *      CONTROLS
- *          smaller spell cards
+ *          should you be able to SKIP a move?
  *          better controls for mobile-- D-pad?
  *          numeric keys trigger spells
  * 
@@ -30,12 +30,9 @@
  *          potions that do stuff that spells don't
  * 
  *      ENEMIES
- *          some enemies can't pass through hazards (can't fly) (easier)
  *          some enemies can't stack (occupy same space) (easier)
- *          some enemies can pass through obstacles (ghost)
  * 
  *      SPELLS
- *          spell: show the monster's NEXT move!! (precognition)
  *          spell: become immune to monster death for N moves (monsters semi-transparent)
  *          spell: turn hazards into obstacles?
  *          spell: make smart monsters dumb?

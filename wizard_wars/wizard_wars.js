@@ -74,6 +74,7 @@
  * 
  *      BUGS BUGS BUGS
  *          casting PRECOG then FREEZE (or vice versa) lets monster move even if frozen
+ *          precog doesn't always work with blobs
  */
 
 

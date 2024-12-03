@@ -71,6 +71,9 @@
  *          spells cast
  *          potions acquired
  *          potions consumed
+ * 
+ *      BUGS BUGS BUGS
+ *          casting PRECOG then FREEZE (or vice versa) lets monster move even if frozen
  */
 
 
@@ -504,6 +507,17 @@ function processCardAction(card) {
 
         case SpellAction.SPELL_RANDOMIZE:
             // RANDOMIZE swaps the positions of all entities. CAUTION: entities can stack, so wizard may swap into a space that is already occupied!
+
+            // Begin by removing any "precog" movers
+            temporaryEntities = [];
+            movers = [];
+            entities
+                .filter(ent => {
+                    return ent instanceof Monster
+                }).forEach(ent => {
+                    ent.setMover(null);
+                });
+
             var swappables = entities.filter(ent => {
                 if (ent instanceof Card == false) {
                     return ent;
@@ -648,9 +662,10 @@ function update() {
             return mover.isAlive;
         });
 
+        var hasFreeze = effects.map(ef => { return ef.effectType == SpellAction.SPELL_FREEZE }).includes(true);
+
         // Monsters plot thier moves here
         if (gameState == GameState.ENEMY_MOVE_PREPARE) {
-            var hasFreeze = effects.map(ef => { return ef.effectType == SpellAction.SPELL_FREEZE }).includes(true);
             if (!hasFreeze) {
                 entities
                     .filter(entity => { return entity instanceof Monster })

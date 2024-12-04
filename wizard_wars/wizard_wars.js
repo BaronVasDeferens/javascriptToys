@@ -71,7 +71,6 @@
  *          potions consumed
  * 
  *      BUGS BUGS BUGS
- *          casting PRECOG then FREEZE (or vice versa) lets monster move even if frozen
  *          precog doesn't always work with blobs
  */
 
@@ -614,10 +613,7 @@ function processCardAction(card) {
             break;
     }
 
-
-    // Remove the card
     removeElement(card, cards);
-
     changeGameState(GameState.CAST_SPELL_EFFECT);
     let spellEffectSound = assetLoader.getSound(SoundAsset.SPELL_THUNDER_1);
     spellEffectSound.addEventListener("ended", (e) => {
@@ -669,6 +665,7 @@ function update() {
                     .filter(entity => { return entity.mover == null || entity.mover.isAlive == false })
                     .forEach(entity => {
                         switch (entity.behavior) {
+
                             case MonsterMovementBehavior.CHASE_PLAYER:
                             case MonsterMovementBehavior.RANDOM:
                                 if (entity.mover == null || entity.mover.isAlive == false) {
@@ -679,6 +676,7 @@ function update() {
                                     }
                                 }
                                 break;
+
                             case MonsterMovementBehavior.REPLICATE:
                                 if (entity.replicationsRemaining > 0) {
                                     let freeSpaces = getUnoccupiedAdjacencies(entity);
@@ -697,9 +695,13 @@ function update() {
                         }
 
                     })
+
+
+                changeGameState(GameState.ENEMY_MOVE_EXECUTE);
+            } else {
+                changeGameState(GameState.PLAYER_ACTION_SELECT);
             }
 
-            changeGameState(GameState.ENEMY_MOVE_EXECUTE);
         }
 
         movers.forEach(mover => {
@@ -708,7 +710,7 @@ function update() {
                     mover.update();
                 }
             } else if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
-                if (mover.entity instanceof Monster) {
+                if (mover.entity instanceof Monster && !hasFreeze) {
                     mover.update();
                 }
             }

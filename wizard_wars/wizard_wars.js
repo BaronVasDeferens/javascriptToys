@@ -78,13 +78,11 @@
 
 
 import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity } from './entity.js';
-import { AssetLoader, ImageLoader, ImageAsset, SoundAsset, SoundLoader } from './AssetLoader.js';
+import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
 
 const debugOutput = false;
 
 const assetLoader = new AssetLoader();
-const imageLoader = new ImageLoader();
-const soundLoader = new SoundLoader();
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -278,12 +276,12 @@ document.addEventListener('mousedown', (e) => {
     changeGameState(GameState.LOAD_START);
 
     // Invoke AssetLoader and trigger callback upon completion...
-    assetLoader.loadAssets(imageLoader, soundLoader, () => {
+    assetLoader.loadAssets(() => {
 
         // Set up the frequently-used audio resources...
-        coinSounds.push(soundLoader.getSound(SoundAsset.COIN_1));
-        coinSounds.push(soundLoader.getSound(SoundAsset.COIN_2));
-        coinSounds.push(soundLoader.getSound(SoundAsset.COIN_3));
+        coinSounds.push(assetLoader.getSound(SoundAsset.COIN_1));
+        coinSounds.push(assetLoader.getSound(SoundAsset.COIN_2));
+        coinSounds.push(assetLoader.getSound(SoundAsset.COIN_3));
 
         // ...and begin the primary loop
         changeGameState(GameState.LOAD_COMPLETE);
@@ -306,7 +304,7 @@ function initializeGameState() {
     entities = [];
     cards = [];
 
-    let introImage = imageLoader.getImage(ImageAsset.GRAPHIC_TITLE_CARD);
+    let introImage = assetLoader.getImage(ImageAsset.GRAPHIC_TITLE_CARD);
     let introEntity = new ImageDisplayEntity(
         "intro",
         (mapWidth - introImage.width) / 2,
@@ -348,12 +346,12 @@ function createBoardForLevel(newLevel) {
     // Add player
     var location = getSingleUnoccupiedGrid();
     playerWizard = new Wizard(
-        "wizard", location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.WIZARD_2)
+        "wizard", location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.WIZARD_2)
     );
     entities.push(playerWizard);
 
     // Add obstacles
-    var obstacleImages = imageLoader.getTilesetForName("PILLARS");
+    var obstacleImages = assetLoader.getTilesetForName("PILLARS");
     for (var i = 0; i < numObstacles; i++) {
         var location = getSingleUnoccupiedGrid();
         obstacles.push(
@@ -367,7 +365,7 @@ function createBoardForLevel(newLevel) {
         var location = getSingleUnoccupiedGrid();
         hazards.push(
             new Hazard(
-                `hazard_${i}`, location.x * tileSize, location.y * tileSize, imageLoader.getImage(ImageAsset.HAZARD_PIT_1))
+                `hazard_${i}`, location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.HAZARD_PIT_1))
         )
     }
 
@@ -426,7 +424,7 @@ function createBoardForLevel(newLevel) {
     }
 
     // Add collectables
-    var coinImages = imageLoader.getTilesetForName("GOLDSTACKS");
+    var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
     for (var i = 0; i < numCollectables; i++) {
         var location = getSingleUnoccupiedGrid();
         collectables.push(
@@ -436,14 +434,14 @@ function createBoardForLevel(newLevel) {
 
     // Add the exit
     let portalLocation = getSingleUnoccupiedGrid();
-    portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, imageLoader.getImage(ImageAsset.STAIRS_DOWN_1));
+    portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
     // Add cards
     let imageSize = 96;
     let gap = 16;
-    cards.push(new Card(0, 640 + gap, SpellAction.SPELL_FREEZE, imageLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-    cards.push(new Card(imageSize + gap, 640 + gap, SpellAction.SPELL_RANDOMIZE, imageLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
-    cards.push(new Card(imageSize + gap + imageSize + gap, 640 + gap, SpellAction.SPELL_PRECOGNITION, imageLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
+    cards.push(new Card(0, 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+    cards.push(new Card(imageSize + gap, 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+    cards.push(new Card(imageSize + gap + imageSize + gap, 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
 
 
     renderBackground(context);
@@ -463,13 +461,13 @@ function renderBackground(context) {
     var tiles;
     switch (level) {
         case 1:
-            tiles = imageLoader.getTilesetForName("MARBLE_PINK");
+            tiles = assetLoader.getTilesetForName("MARBLE_PINK");
             break;
         case 2:
-            tiles = imageLoader.getTilesetForName("MARBLE");
+            tiles = assetLoader.getTilesetForName("MARBLE");
             break;
         default:
-            tiles = imageLoader.getTilesetForName("SKULLS");
+            tiles = assetLoader.getTilesetForName("SKULLS");
             break;
     }
 
@@ -565,7 +563,7 @@ function processCardAction(card) {
                             let freeSpaces = getUnoccupiedAdjacencies(entity);
                             if (freeSpaces.length > 0) {
                                 let freeSpace = freeSpaces[0];
-                                let newMonster = new Monster("monsterSpawn", entity.x, entity.y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1));
+                                let newMonster = new Monster("monsterSpawn", entity.x, entity.y, MonsterMovementBehavior.REPLICATE, assetLoader.getImage(ImageAsset.MONSTER_BLOB_1));
                                 let mover = getMonsterMover(newMonster, freeSpace)
                                 newMonster.setMover(mover);
                                 newMonster.replicationsRemaining = 1;
@@ -621,7 +619,7 @@ function processCardAction(card) {
     removeElement(card, cards);
 
     changeGameState(GameState.CAST_SPELL_EFFECT);
-    let spellEffectSound = soundLoader.getSound(SoundAsset.SPELL_THUNDER_1);
+    let spellEffectSound = assetLoader.getSound(SoundAsset.SPELL_THUNDER_1);
     spellEffectSound.addEventListener("ended", (e) => {
         changeGameState(GameState.PLAYER_ACTION_SELECT);
     }, { once: true });
@@ -686,7 +684,7 @@ function update() {
                                     let freeSpaces = getUnoccupiedAdjacencies(entity);
                                     if (freeSpaces.length > 0) {
                                         let freeSpace = freeSpaces[0];
-                                        let newMonster = new Monster("monsterSpawn", entity.x, entity.y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1));
+                                        let newMonster = new Monster("monsterSpawn", entity.x, entity.y, MonsterMovementBehavior.REPLICATE, assetLoader.getImage(ImageAsset.MONSTER_BLOB_1));
                                         let mover = getMonsterMover(newMonster, freeSpace)
                                         newMonster.setMover(mover);
                                         newMonster.replicationsRemaining = 1;
@@ -757,7 +755,7 @@ function update() {
             // ...or LEVEL DESCENT
             effects = [];
             changeGameState(GameState.CAST_SPELL_EFFECT);
-            let descendSound = soundLoader.getSound(SoundAsset.DESCEND);
+            let descendSound = assetLoader.getSound(SoundAsset.DESCEND);
             descendSound.addEventListener("ended", (e) => {
                 createBoardForLevel(portal.toLevelNumber);
             }, { once: true });
@@ -1007,7 +1005,7 @@ function gameOver(fatalEntity) {
         new SpecialEffectDeath(canvas.width, canvas.height, playerWizard, fatalEntity)
     );
 
-    var gameOverSound = soundLoader.getSound(SoundAsset.PLAYER_DIES);
+    var gameOverSound = assetLoader.getSound(SoundAsset.PLAYER_DIES);
     gameOverSound.currentTime = 0;
     gameOverSound.addEventListener("ended", (e) => {
         changeGameState(GameState.SHOW_SCORE);
@@ -1279,7 +1277,7 @@ function createMonster(type, x, y) {
     switch (type) {
         case MonsterType.RAT:
             monster = new Monster(
-                "rat", x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
+                "rat", x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
             );
             monster.isBlockedByHazard = true;
             monster.isBlockedByObstacle = true;
@@ -1289,7 +1287,7 @@ function createMonster(type, x, y) {
 
         case MonsterType.RAT_MAN:
             monster = new Monster(
-                "rat_man", x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_RAT_MAN)
+                "rat_man", x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_RAT_MAN)
             );
             monster.isBlockedByHazard = true;
             monster.isBlockedByObstacle = true;
@@ -1299,7 +1297,7 @@ function createMonster(type, x, y) {
 
         case MonsterType.WASP_BASIC:
             monster = Monster(
-                `wasp`, x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
+                `wasp`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
             );
             monster.isBlockedByHazard = false;
             monster.isBlockedByObstacle = true;
@@ -1309,7 +1307,7 @@ function createMonster(type, x, y) {
 
         case MonsterType.WASP_CHASER:
             monster = new Monster(
-                `wasp_chaser`, x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_WASP_RED)
+                `wasp_chaser`, x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_WASP_RED)
             );
             monster.isBlockedByHazard = false;
             monster.isBlockedByObstacle = true;
@@ -1319,7 +1317,7 @@ function createMonster(type, x, y) {
 
         case MonsterType.BLOB:
             monster = new Monster(
-                `blob`, x, y, MonsterMovementBehavior.REPLICATE, imageLoader.getImage(ImageAsset.MONSTER_BLOB_1)
+                `blob`, x, y, MonsterMovementBehavior.REPLICATE, assetLoader.getImage(ImageAsset.MONSTER_BLOB_1)
             );
             monster.isBlockedByHazard = true;
             monster.isBlockedByObstacle = true;
@@ -1329,7 +1327,7 @@ function createMonster(type, x, y) {
 
         case MonsterType.GHOST_BASIC:
             monster = new Monster(
-                `ghost`, x, y, MonsterMovementBehavior.RANDOM, imageLoader.getImage(ImageAsset.MONSTER_GHOST_1)
+                `ghost`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_GHOST_1)
             );
             monster.isBlockedByHazard = false;
             monster.isBlockedByObstacle = false;
@@ -1339,7 +1337,7 @@ function createMonster(type, x, y) {
 
         case MonsterType.GHOST_CHASER:
             monster = new Monster(
-                `ghost`, x, y, MonsterMovementBehavior.CHASE_PLAYER, imageLoader.getImage(ImageAsset.MONSTER_GHOST_2)
+                `ghost`, x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_GHOST_2)
             );
             monster.isBlockedByHazard = false;
             monster.isBlockedByObstacle = false;
@@ -1356,7 +1354,7 @@ function createMonster(type, x, y) {
  */
 
 function playStepSound() {
-    var stepSound = soundLoader.getSound(SoundAsset.MOVE_2);
+    var stepSound = assetLoader.getSound(SoundAsset.MOVE_2);
     stepSound.currentTime = 0;
     stepSound.play();
 }
@@ -1371,14 +1369,14 @@ function playCoinSound() {
 }
 
 function playBonusSound() {
-    var sound = soundLoader.getSound(SoundAsset.BONUS);
+    var sound = assetLoader.getSound(SoundAsset.BONUS);
     sound.currentTime = 0;
     sound.play();
 }
 
 function playBackgroundMusic() {
     if (backgroundMusicPlayer == null) {
-        backgroundMusicPlayer = soundLoader.getSound(SoundAsset.BGM);
+        backgroundMusicPlayer = assetLoader.getSound(SoundAsset.BGM);
         backgroundMusicPlayer.loop = true;
         backgroundMusicPlayer.play();
     }

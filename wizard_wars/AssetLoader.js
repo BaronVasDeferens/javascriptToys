@@ -3,8 +3,30 @@
  */
 
 export class AssetLoader {
-    loadAssets(imageLoader, soundLoader, callback) {
-        imageLoader.loadImages(() => { soundLoader.loadSounds(() => { callback() }) });
+
+    soundLoader = new SoundLoader();
+    imageLoader = new ImageLoader();
+
+    constructor() {
+        console.log("AssetLoader created...");
+    }
+
+    loadAssets(callback) {
+        this.soundLoader.loadSounds(() => {
+            this.imageLoader.loadImages(() => { callback(); });
+        });
+    }
+
+    getSound(asset) {
+        return this.soundLoader.getSound(asset);
+    }
+
+    getImage(asset) {
+        return this.imageLoader.getImage(asset);
+    }
+
+    getTilesetForName(asset) {
+        return this.imageLoader.getTilesetForName(asset);
     }
 }
 
@@ -165,6 +187,7 @@ export class ImageLoader {
     }
 
     loadImages(callback) {
+
         console.log("Loading images...");
         let readinessCheck = new Map();
 
@@ -175,7 +198,7 @@ export class ImageLoader {
             img.onload = function () {
                 readinessCheck.set(img.src, true);
                 let values = Array.from(readinessCheck.values());
-                let isReady = values.every(v => v === true);
+                let isReady = values.every(v => { return v === true });
                 if (isReady == true) {
                     console.log(`...image loading complete!`);
                     callback();
@@ -243,6 +266,7 @@ export class SoundLoader {
     soundMap = new Map();
 
     loadSounds(callback) {
+
         console.log("Loading sounds...");
         let readinessCheck = new Map();
 
@@ -254,7 +278,7 @@ export class SoundLoader {
             snd.onloadeddata = function () {
                 readinessCheck.set(snd.src, true);
                 let values = Array.from(readinessCheck.values());
-                let isReady = values.every(v => v === true);
+                let isReady = values.every(v => { return v === true });
                 if (isReady == true) {
                     console.log("...sound loading complete!");
                     callback();

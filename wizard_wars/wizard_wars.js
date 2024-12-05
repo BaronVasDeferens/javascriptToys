@@ -25,11 +25,12 @@
  *          bonus / safe room / campfire
  *          
  *      COLLECATBLES
- *          some gold is worth more than others
+ *          some gold stacks are worth more than others
  *          rare chests that contain juicy stuff
  *          potions that do stuff that spells don't
  * 
  *      ENEMIES
+ *          enemy type that guards stairs or collectables
  *          some enemies can't stack (occupy same space) (easier)
  * 
  *      SPELLS

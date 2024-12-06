@@ -313,6 +313,8 @@ function initializeGameState() {
         1.0
     );
     entities.push(introEntity);
+
+    backgroundMusicPlayer.playbackRate = 1.0;
 }
 
 function createBoardForLevel(newLevel) {
@@ -1003,6 +1005,7 @@ function gameOver(fatalEntity) {
 
 
     changeGameState(GameState.GAME_OVER);
+    backgroundMusicPlayer.playbackRate = 0.5;
     effects = [];
     specialEffects.push(
         new SpecialEffectDeath(canvas.width, canvas.height, playerWizard, fatalEntity)

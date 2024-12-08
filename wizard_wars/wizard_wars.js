@@ -130,8 +130,13 @@ var bonusAwarded = false;
 var backgroundImage = new Image();
 
 var coinSounds = [];
-var backgroundMusicPlayer;
 
+var backgroundMusicPlayer = null;
+
+var audioConfig = {
+    efxEnabled: true,
+    bgmEnabled: true
+}
 
 class Tile {
     x;
@@ -176,7 +181,7 @@ const ControlInput = Object.freeze({
 document.addEventListener('keydown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-        playBackgroundMusic();
+        updateAudio();
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -214,11 +219,9 @@ document.addEventListener('keydown', (e) => {
                 break;
             case "m":
             case "M":
-                if (backgroundMusicPlayer.paused == true) {
-                    backgroundMusicPlayer.play();
-                } else {
-                    backgroundMusicPlayer.pause();
-                }
+                audioConfig.bgmEnabled = !audioConfig.bgmEnabled;
+                audioConfig.efxEnabled = !audioConfig.efxEnabled;
+                updateAudio();
                 break;
             case "Escape":
                 initializeGameState();
@@ -237,7 +240,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('mousedown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-        playBackgroundMusic();
+        updateAudio();
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -263,6 +266,15 @@ document.addEventListener('mousedown', (e) => {
             y: Math.floor((clickY / tileSize) % tileSize) * tileSize
         };
         moveIfAble(checkAdjacentToWizard(clickedTile))
+    }
+});
+
+/** --- PAUSE AUDIO when switching tabs (as one should) ---*/
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        backgroundMusicPlayer.pause();
+    } else {
+        updateAudio();
     }
 });
 
@@ -1380,11 +1392,22 @@ function playBonusSound() {
     sound.play();
 }
 
-function playBackgroundMusic() {
+function updateAudio() {
+
     if (backgroundMusicPlayer == null) {
         backgroundMusicPlayer = assetLoader.getSound(SoundAsset.BGM);
         backgroundMusicPlayer.loop = true;
-        backgroundMusicPlayer.play();
+        backgroundMusicPlayer.pause();
+    }
+
+    if (audioConfig.bgmEnabled) {
+        if (backgroundMusicPlayer.paused == true) {
+            backgroundMusicPlayer.play();
+        } else {
+            backgroundMusicPlayer.pause();
+        }
+    } else {
+        backgroundMusicPlayer.pause();
     }
 }
 

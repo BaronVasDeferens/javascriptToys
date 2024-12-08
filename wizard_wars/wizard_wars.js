@@ -138,15 +138,6 @@ var audioConfig = {
     bgmEnabled: true
 }
 
-class Tile {
-    x;
-    y;
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
-
 const GameState = Object.freeze({
     LOAD_START: "Preloading...",
     LOAD_COMPLETE: "...load complete!",
@@ -1127,7 +1118,7 @@ function getSingleUnoccupiedGrid() {
     var allTiles = [];
     for (var cols = 0; cols < tileCols; cols++) {
         for (var rows = 0; rows < tileRows; rows++) {
-            allTiles.push(new Tile(cols, rows));
+            allTiles.push({ x: cols, y: rows });
         }
     }
 
@@ -1149,7 +1140,7 @@ function getAllOccupiedGrids() {
 
     var allEntities = entities.concat(collectables).concat(obstacles).concat(hazards);
     allEntities.forEach(entity => {
-        occupiedGrids.push(new Tile(Math.floor(entity.x / tileSize), Math.floor(entity.y / tileSize)))
+        occupiedGrids.push({ x: Math.floor(entity.x / tileSize), y: Math.floor(entity.y / tileSize) })
     });
 
     return occupiedGrids;

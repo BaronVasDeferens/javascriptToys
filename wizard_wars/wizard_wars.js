@@ -1387,11 +1387,7 @@ function createMonster(type, x, y) {
 
 }
 
-
-/**
- * ------- SOUNDS --------
- */
-
+/** --- SOUNDS --- */
 function playStepSound() {
     var stepSound = assetLoader.getSound(SoundAsset.MOVE_2);
     stepSound.currentTime = 0;
@@ -1437,7 +1433,7 @@ function updateEffects() {
     effects = effects.filter(ef => { return ef.isAlive })
 }
 
-/* ------------ CONVENIENCE METHODS ------------ */
+/* --- CONVENIENCE METHODS --- */
 function randomIntInRange(min, max) {
     return parseInt(Math.random() * max + min);
 };
@@ -1465,6 +1461,8 @@ function removeElement(element, array) {
     }
 }
 
+
+/** --- STATISTICS and DATA STORAGE --- */
 function storageAvailable(type) {
     let storage;
     try {

@@ -1,65 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consistent Rendering Loop</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #282c34;
-    }
-  </style>
-</head>
-<body>
-
-<canvas id="canvas"></canvas>
-
-<script>
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-
-  // Set canvas size to fill the entire window
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  // Variables for object animation
-  let objectX = canvas.width / 2;
-  let objectY = canvas.height / 2;
-  const objectRadius = 50;
-
-  // Variable to track the time between frames
-  let lastTime = 0;
-
-  // Game loop function
-  function renderLoop(timestamp) {
-    // Calculate deltaTime (time elapsed since the last frame)
-    const deltaTime = (timestamp - lastTime) / 1000;  // Convert from ms to seconds
-    lastTime = timestamp;
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Update object position (move object at a consistent speed)
-    const speed = 100;  // Pixels per second
-    objectX += speed * deltaTime;
-
-    // Draw a simple moving circle
-    ctx.beginPath();
-    ctx.arc(objectX, objectY, objectRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "tomato";
-    ctx.fill();
-    ctx.closePath();
-
-    // Request the next frame
-    requestAnimationFrame(renderLoop);
-  }
-
-  // Start the rendering loop
-  requestAnimationFrame(renderLoop);
-</script>
-
-</body>
-</html>
+<div style="position: relative; width: 300px; height: 200px; background-color: lightblue;">
+  <div style="position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; background-color: red;">
+    Element 1
+  </div>
+  <div style="position: absolute; top: 80px; left: 80px; width: 100px; height: 100px; background-color: green;">
+    Element 2
+  </div>
+</div>

@@ -99,8 +99,20 @@ let tileCols = mapWidth / tileSize;
 let tileRows = mapHeight / tileSize;
 
 var level = 1;
-var score = 0;
-var totalMoves = 0;
+var goldCollected = 0;
+var movesThisLevel = 0;
+
+/** --- STATSTICS --- */
+const statisticVersion = 1;
+const costPerAttempt = 1000;        // The amount added to your debt every time a new game is started.
+var debtTotal = -50000;             // Current debt
+var attemptsLifetime = 0;           // Total number of games played
+var highScoreLifetime = 0;          // Highest score achieved across every game
+var movesLifetime = 0;              // Total number of moves made across every game
+var spellsCastLifetime = 0;         // Total number of spells cast across every game
+var furthestLevelAchieved = 1;
+var goldGatheredLifetime = 0;       // Total amount of gold gathered (but not necessarily banked)
+var goldBankedLifetime = 0;         // Total amount of gold that was banked by reaching a checkpoint
 
 var playerWizard;
 
@@ -277,6 +289,7 @@ document.addEventListener('visibilitychange', () => {
 (() => {
     console.log("Setting up...");
     changeGameState(GameState.LOAD_START);
+    loadStatistics();
 
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(() => {
@@ -302,8 +315,8 @@ function initializeGameState() {
     changeGameState(GameState.INTRO);
 
     level = 1;
-    totalMoves = 0;
-    score = 0;
+    movesThisLevel = 0;
+    goldCollected = 0;
     entities = [];
     cards = [];
 
@@ -323,6 +336,19 @@ function initializeGameState() {
 function createBoardForLevel(newLevel) {
 
     console.log(`LEVEL ${newLevel}`);
+
+    // Handle statistics
+    if (newLevel == 1) {
+        attemptsLifetime++;
+        debtTotal -= costPerAttempt;
+    } else {
+        if (newLevel > furthestLevelAchieved) {
+            furthestLevelAchieved = newLevel;
+        }
+    }
+
+    updateStatistics();
+
 
     level = newLevel;
 
@@ -447,7 +473,6 @@ function createBoardForLevel(newLevel) {
     cards.push(new Card(0, 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
     cards.push(new Card(imageSize + gap, 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
     cards.push(new Card(imageSize + gap + imageSize + gap, 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
-
 
     renderBackground(context);
 
@@ -619,6 +644,7 @@ function processCardAction(card) {
             break;
     }
 
+    spellsCastLifetime++;
     removeElement(card, cards);
     changeGameState(GameState.CAST_SPELL_EFFECT);
     let spellEffectSound = assetLoader.getSound(SoundAsset.SPELL_THUNDER_1);
@@ -735,7 +761,8 @@ function update() {
             .forEach(item => {
                 if (isWithinCollisionDistance(playerWizard, item, 0)) {
                     item.isCollected = true;
-                    score += 100;
+                    goldCollected += 100;
+                    goldGatheredLifetime += 100;
                     playCoinSound();
                 }
             });
@@ -745,7 +772,8 @@ function update() {
             if (bonusAwarded == false) {
                 playBonusSound();
                 var bonusValue = level * 100;
-                score += bonusValue;
+                goldCollected += bonusValue;
+                goldGatheredLifetime += bonusValue;
                 console.log(`* BONUS ${bonusValue} PTS *`);
             }
             bonusAwarded = true;
@@ -841,6 +869,7 @@ function render() {
 
 function changeGameState(newState) {
     gameState = newState;
+    updateStatistics();
     if (debugOutput) {
         console.log(`gameState: ${gameState}`);
     }
@@ -890,7 +919,8 @@ function moveIfAble(direction) {
                         0,
                         -wizardMovePerTick,
                         () => {
-                            totalMoves++;
+                            movesThisLevel++;
+                            movesLifetime++;
                             controlInput = null;
                             updateEffects();
                             changeGameState(GameState.ENEMY_MOVE_PREPARE);
@@ -912,7 +942,8 @@ function moveIfAble(direction) {
                         0,
                         wizardMovePerTick,
                         () => {
-                            totalMoves++;
+                            movesThisLevel++;
+                            movesLifetime++;
                             controlInput = null;
                             updateEffects();
                             changeGameState(GameState.ENEMY_MOVE_PREPARE);
@@ -934,7 +965,8 @@ function moveIfAble(direction) {
                         -wizardMovePerTick,
                         0,
                         () => {
-                            totalMoves++;
+                            movesThisLevel++;
+                            movesLifetime++;
                             controlInput = null;
                             updateEffects();
                             changeGameState(GameState.ENEMY_MOVE_PREPARE);
@@ -956,7 +988,8 @@ function moveIfAble(direction) {
                         wizardMovePerTick,
                         0,
                         () => {
-                            totalMoves++;
+                            movesThisLevel++;
+                            movesLifetime++;
                             controlInput = null;
                             updateEffects();
                             changeGameState(GameState.ENEMY_MOVE_PREPARE);
@@ -997,16 +1030,16 @@ function decreaseEntityMovementSpeeds() {
 
 function gameOver(fatalEntity) {
 
-    let finalScore = Math.floor((score / totalMoves) * level);
+    let finalScore = Math.floor((goldCollected / movesThisLevel) * level);
     console.log("----------------------------------------------------------");
     console.log("Wizard was slain: GAME OVER");
     console.log(`LEVEL ACHIEVED: ${level}`);
-    console.log(`TOTAL MOVES: ${totalMoves}`);
-    console.log(`TREASURE COLLECTED: ${score}`);
+    console.log(`TOTAL MOVES: ${movesThisLevel}`);
+    console.log(`TREASURE COLLECTED: ${goldCollected}`);
     console.log(`FINAL SCORE: ${finalScore}`);
     console.log("----------------------------------------------------------");
 
-
+    updateStatistics();
     changeGameState(GameState.GAME_OVER);
     backgroundMusicPlayer.playbackRate = 0.5;
     effects = [];
@@ -1022,16 +1055,13 @@ function gameOver(fatalEntity) {
             new SpecialEffectScoreDisplay(
                 mapWidth / 4,
                 mapHeight / 4,
-                totalMoves,
-                score,
+                movesThisLevel,
+                goldCollected,
                 finalScore
             )
         )
     }, { once: true });
     gameOverSound.play();
-
-
-
 }
 
 function checkIsValidMove(entity, destinationX, destinationY) {
@@ -1434,5 +1464,62 @@ function removeElement(element, array) {
         array.splice(index, 1);
     }
 }
+
+function storageAvailable(type) {
+    let storage;
+    try {
+        storage = window[type];
+        const x = "__storage_test__";
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    } catch (e) {
+        return (
+            e instanceof DOMException &&
+            e.name === "QuotaExceededError" &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            storage &&
+            storage.length !== 0
+        );
+    }
+}
+
+function loadStatistics() {
+
+    if (storageAvailable("localStorage")) {
+
+        // check for prior population: debtTotal
+        if (!localStorage.getItem("statisticVersion")) {
+            updateStatistics();
+        } else {
+            debtTotal = Number(localStorage.getItem("debtTotal"));
+            attemptsLifetime = Number(localStorage.getItem("attemptsLifetime"));
+            highScoreLifetime = Number(localStorage.getItem("highScoreLifetime"));
+            movesLifetime = Number(localStorage.getItem("movesLifetime"));
+            spellsCastLifetime = Number(localStorage.getItem("spellsCastLifetime"));
+            furthestLevelAchieved = Number(localStorage.getItem("furthestLevelAchieved"));
+            goldGatheredLifetime = Number(localStorage.getItem("goldGatheredLifetime"));
+            goldBankedLifetime = Number(localStorage.getItem("goldBankedLifetime"));
+        }
+    } else {
+        console.log("Your scores and statistics will not be saved across sessions. TOO BAD")
+    }
+}
+
+function updateStatistics() {
+
+    if (storageAvailable("localStorage")) {
+        localStorage.setItem("statisticVersion", statisticVersion);
+        localStorage.setItem("debtTotal", debtTotal);
+        localStorage.setItem("attemptsLifetime", attemptsLifetime);
+        localStorage.setItem("highScoreLifetime", highScoreLifetime);
+        localStorage.setItem("movesLifetime", movesLifetime);
+        localStorage.setItem("spellsCastLifetime", spellsCastLifetime);
+        localStorage.setItem("furthestLevelAchieved", furthestLevelAchieved);
+        localStorage.setItem("goldGatheredLifetime", goldGatheredLifetime);
+        localStorage.setItem("goldBankedLifetime", goldBankedLifetime);
+    }
+}
+
 
 

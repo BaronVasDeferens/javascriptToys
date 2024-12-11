@@ -16,11 +16,35 @@
         margin-right: auto;
         display: block;
     }
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
 </style>
 
 <body>
+    <div id="parent">
+        <div id="playArea">
+            <canvas id="canvas"></canvas>
 
-    <canvas></canvas>
+            <div id="scoreDisplay" style="
+                display: none;
+                position: absolute; 
+                top: 25%; left: 50%; 
+                transform: translate(-50%, -50%); 
+                width: 100px; 
+                height: 100px;
+                background-color: red;
+                text-align: center;">
+                <ul>
+                    <li>one</li>
+                    <li>two</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="./wizard_wars.js"></script>
 </body>

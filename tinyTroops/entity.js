@@ -1,4 +1,4 @@
-import * as SoundModule from './SoundModule.js';
+import { ImageAsset, SoundAsset } from './AssetLoader.js';
 
 class Entity {
 
@@ -31,19 +31,21 @@ export class GridSquare {
 
     x = 0;
     y = 0;
-    size = 50;
+    size = 64;
     color = "#a8a8a8";
 
     isOccupied = false;
     isObstructed = false;
 
-    constructor(x, y, size, color) {
+
+    constructor(x, y, size, color, imageModule) {
         this.x = x;
         this.y = y;
         this.size = size;
-        if (color != undefined) {
-            this.color = color;
-        }
+        this.color = color;
+        this.imageObstructed = imageModule.getImage(ImageAsset.FLOOR_OBSTRUCTION_1);      // THIS IS WASTEFUL! LOLOL
+        this.imageClear = imageModule.getImage(ImageAsset.FLOOR_TILE);
+
     }
 
     setColor(color) {
@@ -77,20 +79,34 @@ export class GridSquare {
     }
 
     render(context) {
-
         if (this.isObstructed) {
-            context.fillStyle = "#000000";
-            context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
+            context.drawImage(this.imageObstructed, this.x * this.size, this.y * this.size);
         } else {
-            context.strokeStyle = this.color;
-            context.lineWidth = 1.0;
-            context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
-            // Circle in the center
-            // context.beginPath();
-            // let center = this.getCenter();
-            // context.ellipse(center.x, center.y, 5, 5, 2 * Math.PI, 2 * Math.PI, false);
-            // context.stroke();
+            context.drawImage(this.imageClear, this.x * this.size, this.y * this.size);
         }
+    }
+}
+
+export class GridMap {
+    
+    rows = 10;
+    columns = 20;
+    soldiers = [];
+    blobs = [];
+    gridSquares = [];
+
+    constructor(gridSquares) {
+        this.gridSquares = gridSquares;
+    }
+
+    getGridSquare(col, row) {
+        return this.gridSquares.filter( (sq) => {
+            if (sq.x == col && sq.y == row) {
+                return true;
+            } else {
+                return false;
+            }
+        })[0];
     }
 }
 
@@ -134,6 +150,7 @@ export class LittleDot {
     x = 0;
     y = 0;
     color = "#FFFF00";
+    isFilled = true;
 
     constructor(x, y) {
         this.x = x;
@@ -149,6 +166,10 @@ export class LittleDot {
         context.beginPath();
         context.ellipse(this.x, this.y, 2, 2, 2 * Math.PI, 2 * Math.PI, false);
         context.stroke();
+
+        if (this.isFilled) {
+            context.fill();
+        }
     }
 
 }
@@ -246,20 +267,46 @@ export class TextLabel {
 
     render(context) {
         context.strokeStyle = this.color;
-        context.fillStyle = "#000000";
+        context.fillStyle = this.color;
         context.lineWidth = 2.0;
         context.font = "24px sans-serif";
-        context.strokeText(this.text, this.startX, this.startY);
+        context.fillText(this.text, this.startX, this.startY);
     }
 }
+
+export class Weapon {
+
+    name = "";
+    rangeCostMap = {
+        1: 1,
+    };
+
+    constructor(name, rangeCostMap) {
+        this.name = name;
+        this.rangeCostMap = rangeCostMap;
+    }
+
+    getApCostForRange(range) {
+        return this.rangeCostMap[range];
+    }
+
+}
+
 /**
  * SOLDIER
  */
 export class Soldier extends Entity {
 
-    image = new Image();
     imageWidth = 50;
     imageHeight = 50;
+
+    weapon = new Weapon("SMG", {
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5
+    });
 
     currentFrameIndex = 0;
     maxFrameIndex = 3;
@@ -268,11 +315,15 @@ export class Soldier extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y) {
+    constructor(id, x, y, imageLoader) {
         super(id, x, y);
-        this.image.src = "resources/guys_strip_2.png";
+        this.image = imageLoader.getImage(ImageAsset.SOLDIER_STRIP);
     }
 
+
+    getApCostForRange(range) {
+        return this.weapon.getApCostForRange(range);
+    }
 
     // Returns the coordinates of this entity if the click was within this image's bounds;
     isClicked(event) {
@@ -319,6 +370,10 @@ export class Soldier extends Entity {
     }
 }
 
+/**
+ * HELPLESS
+ */
+
 export class Helpless extends Entity {
 
     image = new Image();
@@ -340,6 +395,9 @@ export class Helpless extends Entity {
     }
 }
 
+/**
+ * BLOB
+ */
 export class Blob extends Entity {
 
     imageAlive = new Image();
@@ -356,10 +414,9 @@ export class Blob extends Entity {
 
     movementDrivers = new Array();
 
-    constructor(id, x, y) {
+    constructor(id, x, y, imageLoader) {
         super(id, x, y);
-        this.imageAlive.src = "resources/blob_strip_2.png";
-        this.imageDead.src = "resources/blob_dead_1.png";
+        this.imageAlive = imageLoader.getImage(ImageAsset.BLOB_STRIP);
     }
 
     /**
@@ -427,11 +484,133 @@ export class Blob extends Entity {
 
 }
 
-export class CustomDriver {
+
+export class EffectTile {
+
+    x = 0;
+    y = 0;
+    isAlive = true;
+
+    constructor(x, y, onEntityEntered) {
+        this.x = x;
+        this.y = y;
+        this.onEntityEntered = onEntityEntered;
+    }
+
+    isClicked(event) {
+
+    }
+
+    applyEffect(entity) {
+
+    }
+}
+
+export class BonusActionPointTile extends EffectTile {
+    value = 0;
+    color = "#0000FF";
+
+    textLabel = null;
+
+    constructor(value, x, y, gridSquareSize, onEntityEntered) {
+        super(x, y, onEntityEntered);
+        this.value = value;
+        this.gridSquareSize = gridSquareSize;
+
+        this.textLabel = new TextLabel(x * this.gridSquareSize + (this.gridSquareSize / 4), (y * this.gridSquareSize) + (this.gridSquareSize * 0.65), this.value, this.color);
+    }
+
+    update() {
+
+    }
+
+    isClicked(event) {
+        return false;
+    }
+
+    render(context) {
+        context.fillStyle = "#00FF00";
+        this.textLabel.render(context);
+    }
+
+    applyEffect(entity) {
+        this.onEntityEntered(entity);
+        this.isAlive = false;
+    }
+}
+
+export class FireEffectTile extends EffectTile {
+
+    animationframes = [];
+    ticksCurrent = 0;
+    ticksMax = 5;
+    frameCurrent = 0;
+    frameMax = 3;
+    tileImageSize = 50;
+
+    isAlive = true;
+
+    constructor(x, y, gridsquareSize, imageLoader, onEntityEntered) {
+        super(x, y, onEntityEntered);
+        this.gridSquareSize = gridsquareSize;
+        this.image = imageLoader.getImage(ImageAsset.FIRE);
+        this.offset = (this.gridSquareSize / 2) - (this.tileImageSize / 2);
+    }
+
+    isClicked(event) {
+        return false;
+    }
+
+    update() {
+        this.ticksCurrent++;
+        if (this.ticksCurrent >= this.ticksMax) {
+            this.ticksCurrent = 0;
+            this.frameCurrent = Math.floor(Math.random() * this.frameMax);
+            // this.frameCurrent++;
+            // if (this.frameCurrent > this.frameMax) {
+            //     this.frameCurrent = 0;
+            // }
+        }
+    }
+
+    render(context) {
+        context.save();
+        context.translate(this.x * this.gridSquareSize + this.offset, this.y * this.gridSquareSize + this.offset);
+        context.drawImage(this.image, this.frameCurrent * this.tileImageSize, 0, this.tileImageSize, this.tileImageSize, 0, 0, this.tileImageSize, this.tileImageSize);
+        context.restore();
+    }
+
+    applyEffect(entity) {
+        this.onEntityEntered(entity);
+        this.alive = false;
+    }
+
+}
+
+/* ---------------------------- DRIVERS ------------------------------------- */
+
+// A "blocking" animation will block all other game operations until it is finished.
+export class BlockingDriver {
+
+    update() {
+
+    }
+
+    render(context) {
+
+    }
+
+    onDestroy() {
+
+    }
+}
+
+export class CustomDriver extends BlockingDriver {
 
     lamda = null;
 
     constructor(lamda) {
+        super();
         this.lamda = lamda;
     }
 
@@ -442,6 +621,10 @@ export class CustomDriver {
     isDone() {
         return true;
     }
+
+    onDestroy() {
+
+    }
 }
 
 export var CombatResolutionState = Object.freeze({
@@ -450,85 +633,96 @@ export var CombatResolutionState = Object.freeze({
     KILL: "KILL"
 });
 
-export class CombatResolutionDriver {
+export class CombatResolutionDriver extends BlockingDriver {
 
-    soundOne = null;
-    soundTwo = null;
-
-    onComplete = null;
-
-    image1 = new Image();
-    image2 = new Image();
-    image3 = new Image();
-
+    // left/rightvimages are 200x200
+    // result images are 400x400
 
     ticks = 0;
-    tickMax1 = 60;
-    tickMax2 = 120;
-    tickMax3 = 180;
+    tickMax1 = 0;
+    tickMax2 = 30;
+    tickMax3 = 60;
 
-    tickMax = 330;
+    tickMax = 90;
 
     /**
      * {
      *      aggressor: entity,
      *      defender: entity,
      *      result: CombatResolution [KILL, STUN, NO_EFFECT]
-     *      
      * }
      * 
      */
 
-    constructor(combatResult, onComplete) {
-
+    constructor(columns, rows, gridSquareSize, attacker, defender, combatResult, imageLoader, soundLoader, onComplete) {
+        super();
+        this.x = (columns * gridSquareSize) / 2;
+        this.y = (rows * gridSquareSize) / 2;
+        this.attacker = attacker;
+        this.defender = defender;
+        this.combatResult = combatResult;
         this.onComplete = onComplete;
 
-        if (combatResult.attacker instanceof Soldier) {
-            this.image1.src = "resources/soldier_focus_smg_1.png";
-            this.image2.src = "resources/soldier_firing_smg_1.png";
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.SMG_1); //new Audio("resources/smg.wav");
+        this.isLive = true;
+
+        if (this.attacker instanceof Soldier) {
+            this.imageLeft = imageLoader.getImage(ImageAsset.SOLDIER_FIRING);
+            this.imageRightA = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
+            this.soundOne = soundLoader.getSound(SoundAsset.SMG_1);
         } else {
-            this.image1.src = "resources/soldier_death_panel_1.png";
-            this.image2.src = "resources/soldier_death_panel_2.png";
-            this.soundOne = SoundModule.getSound(SoundModule.SFX.BLOB_WHIP); //new Audio("resources/blob_whip.wav");
+            this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
+            this.soundOne = soundLoader.getSound(SoundAsset.BLOB_WHIP);
         }
 
-        if (combatResult.defender instanceof Blob) {
+        if (this.defender instanceof Blob) {
             switch (combatResult.result) {
                 case CombatResolutionState.KILL:
-                    let imgArray = ["resources/panel_3_blob_death.png",
-                    "resources/blob_dead_2.png",
-                    "resources/blob_dead_3.png"];
-                    this.shuffleArray(imgArray);
-                    this.image3.src = imgArray[0];
-                    this.soundTwo = SoundModule.getSound(SoundModule.SFX.BLOB_SMG_DEATH); // new Audio("resources/blob_hit_smg.wav");
+                    this.imageRightB = imageLoader.getImage(ImageAsset.BLOB_DYING);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_BLOB_DEATH);
+                    this.soundTwo = soundLoader.getSound(SoundAsset.BLOB_SMG_DEATH);
                     break;
                 default:
-                    this.image3.src = "resources/blob_survives_1.png";
+                    this.imageRightB = imageLoader.getImage(ImageAsset.BLOB_SURVIVES);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_MISS);
+                    this.soundTwo = soundLoader.getSound(SoundAsset.RICOCHET_1);
                     break;
             }
         } else {
-            this.image3.src = "resources/soldier_death_panel_3.png";
-        }
-    }
-
-    shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            this.imageLeft = imageLoader.getImage(ImageAsset.BLOB_ATTACKING);
+            switch (combatResult.result) {
+                case CombatResolutionState.KILL:
+                    this.imageRightB = imageLoader.getImage(ImageAsset.SOLDIER_DYING);
+                    this.imageCenter = imageLoader.getImage(ImageAsset.RESULT_SOLDIER_DEATH);
+                    this.soundTwo = soundLoader.getSound(SoundAsset.SOLDIER_SCREAM);
+                    break;
+                default:
+                    // this.imageRight.src = "resources/blob_survives_1.png";
+                    // this.imageCenter.src = "resources/result_miss.png"
+                    break;
+            }
         }
     }
 
     update() {
         this.ticks++;
 
-        if (this.ticks == this.tickMax2) {
-            //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
+        // FIXME: experimental hack
+        if (this.defender.isAlive == false) {
+            this.isLive = false;
+        }
+
+        if (this.isLive == false) {
+            return;
+        }
+        if (this.ticks == 1) {
+            this.soundOne.pause();
+            this.soundOne.currentTime = 0;
             this.soundOne.play();
-        } else if (this.ticks == this.tickMax3 && this.soundTwo != null) {
+        }
+        else if (this.ticks == this.tickMax2 && this.soundTwo != undefined) {
+            this.soundTwo.pause();
+            this.soundTwo.currentTime = 0;
             this.soundTwo.play();
-        } else if (this.ticks == this.tickMax) {
-            this.onComplete();
         }
     }
 
@@ -538,42 +732,70 @@ export class CombatResolutionDriver {
 
     render(context) {
 
-        // images are 200x200
+        if (this.isLive == false) {
+            return;
+        }
+
+        let gapSize = 25;
+        var image1X = this.x - 300;
+        var image1Y = this.y - 100;
 
         if (this.ticks >= this.tickMax1) {
-            context.drawImage(this.image1, 100, 100);
+            context.drawImage(this.imageLeft, image1X, image1Y);
+            if (this.imageRightA != undefined) {
+                let image2X = image1X + 400;
+                let image2Y = image1Y;
+                context.drawImage(this.imageRightA, image2X, image2Y);
+            }
+
         }
 
         if (this.ticks >= this.tickMax2) {
-            context.drawImage(this.image2, 350, 100);
+            let image2X = image1X + 400;
+            let image2Y = image1Y;
+            context.drawImage(this.imageRightB, image2X, image2Y);
         }
 
         if (this.ticks >= this.tickMax3) {
-            context.drawImage(this.image3, 100, 350);
+            let image3X = image1X + 100;
+            let image3Y = image1Y - 100;
+            context.drawImage(this.imageCenter, image3X, image3Y);
         }
+    }
+
+    onDestroy() {
+        this.onComplete();
     }
 }
 
-export class MovementAnimationDriver {
+export class MovementAnimationDriver extends BlockingDriver {
 
     deltaX = 0;
     deltaY = 0;
 
-    sound = null;
-
     currentTick = 0;
-    maxTicks = 2;
+    maxTicks = 1;
 
     currentStep = 0;
     maxSteps = 20;
 
-    entity = null;
-    destination = null;
 
-    constructor(entity, origin, destination, sound) {
+    constructor(entity, origin, destination, soundLoader) {
+        super();
         this.entity = entity;
+        this.origin = origin;
         this.destination = destination;
-        this.sound = SoundModule.getSound(sound);
+
+        if (entity instanceof Soldier) {
+            this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
+        } else {
+            // Random blob sound
+            if (Math.random() > 0.5) {
+                this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_1);
+            } else {
+                this.sound = soundLoader.getSound(SoundAsset.BLOB_MOVE_2);
+            }
+        }
 
         let destinationPos = destination.getOnScreenPos();
         let originScreenPos = origin.getOnScreenPos();
@@ -583,9 +805,16 @@ export class MovementAnimationDriver {
     }
 
     update() {
+        if (this.isDone() == true) {
+            this.origin.isOccupied = false;
+            this.entity.setGridSquare(this.destination);
+            return;
+        }
 
         if (this.currentStep == 0 && this.currentTick == 0) {
             this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
+            this.sound.pause();
+            this.sound.currentTime = 0;
             this.sound.play();
         }
 
@@ -599,20 +828,22 @@ export class MovementAnimationDriver {
     }
 
     isDone() {
-        return this.currentStep >= this.maxSteps;
+        return (this.currentStep >= this.maxSteps) || this.entity.isAlive == false;
+    }
+
+    onDestroy() {
+        this.entity.setGridSquare(this.destination);
     }
 
 }
 
-export class DeathAnimationDriver {
-
-    image = new Image();
+export class DeathAnimationDriver extends BlockingDriver {
 
     imageWidth = 50;
     imageHeight = 50;
 
     currentTick = 0;
-    ticksPerFrame = 15;
+    ticksPerFrame = 5;
 
     currentFrame = 0;
     maxFrame = 7;
@@ -620,8 +851,13 @@ export class DeathAnimationDriver {
     x = 0;
     y = 0;
 
-    constructor(gridSquare) {
-        this.image.src = "resources/blob_death_strip.png";
+    constructor(gridSquare, entity, imageLoader) {
+        super();
+        if (entity instanceof Soldier) {
+            this.image = imageLoader.getImage(ImageAsset.SOLDIER_DEATH_STRIP);
+        } else {
+            this.image = imageLoader.getImage(ImageAsset.BLOB_DEATH_STRIP);
+        }
         this.x = gridSquare.x;
         this.y = gridSquare.y;
     }
@@ -637,7 +873,7 @@ export class DeathAnimationDriver {
     render(context) {
         context.save();
         context.translate(this.x, this.y);
-        context.drawImage(this.image, 50 * this.currentFrame, 0, 50, 50, -(this.imageWidth / 2), - (this.imageHeight / 2), 50, 50);
+        context.drawImage(this.image, 50 * this.currentFrame, 0, 50, 50, -(this.imageWidth / 2), -(this.imageHeight / 2), 50, 50);
         context.restore();
     }
 
@@ -645,8 +881,103 @@ export class DeathAnimationDriver {
         return (this.currentFrame >= this.maxFrame);
     }
 
+    onDestroy() {
+
+    }
+
 }
 
+export class TurnStartAnimationLeftToRight extends BlockingDriver {
+
+    ticksCurrent = 0;
+
+    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
+        super();
+
+        this.screenWidth = columns * gridSquareSize;
+        this.screenHeight = rows * gridSquareSize;
+
+        this.image = imageLoader.getImage(assetId);
+        this.startX = 0 - this.image.width;
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
+
+        this.x = this.startX;
+        this.y = this.startY;
+        this.onComplete = onComplete;
+    }
+
+    update() {
+        if (!this.isDone()) {
+            this.ticksCurrent++;
+            this.x = this.startX + (200 * (Math.log(this.ticksCurrent)));
+        }
+    }
+
+    render(context) {
+        context.globalAlpha = 0.25;
+        context.fillStyle = "#0000FF";
+        context.fillRect(0, 0, this.screenWidth, this.screenHeight);
+        context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+    isDone() {
+        return this.x >= this.endX;
+    }
+
+    onDestroy() {
+        this.onComplete();
+    }
+
+}
+
+export class TurnStartAnimationRightToLeft extends BlockingDriver {
+
+    ticksCurrent = 0;
+
+    constructor(columns, rows, gridSquareSize, imageLoader, assetId, onComplete) {
+        super();
+
+        this.screenWidth = columns * gridSquareSize;
+        this.screenHeight = rows * gridSquareSize;
+
+        this.image = imageLoader.getImage(assetId);
+        this.startX = (columns * gridSquareSize);
+        this.startY = ((rows * gridSquareSize) / 2) - (this.image.height / 2);
+        this.endX = ((columns * gridSquareSize) / 2) - (this.image.width / 2);
+        this.endY = this.startY;
+
+        this.x = this.startX;
+        this.y = this.startY;
+        this.onComplete = onComplete;
+    }
+
+    update() {
+        if (!this.isDone()) {
+            this.ticksCurrent++;
+            this.x = this.startX - (200 * (Math.log(this.ticksCurrent)));
+        }
+    }
+
+    render(context) {
+        context.globalAlpha = 0.25;
+        context.fillStyle = "#FF0000";
+        context.fillRect(0, 0, this.screenWidth, this.screenHeight);
+        context.globalAlpha = 1.0;
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+    isDone() {
+        return this.x <= this.endX;
+    }
+
+    onDestroy() {
+        this.onComplete();
+    }
+
+}
 
 /**
  * Intro animation
@@ -655,34 +986,105 @@ export class DeathAnimationDriver {
  */
 export class IntroAnimation {
 
-    introImage = new Image();
-
-    canvasWidth = 0;
-    canvasHeight = 0;
     x = 0;
     y = 0;
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.introImage.src = "resources/logo.png";
+    constructor(columns, rows, gridSquareSize, imageModule, soundModule) {
+        this.columns = columns;
+        this.rows = rows;
+        this.gridSquareSize = gridSquareSize;
+        this.introImage = imageModule.getImage(ImageAsset.INTRO);
+        this.x = ((columns / 2) * gridSquareSize) - (this.introImage.width / 2);
+        this.y = ((rows / 2) * gridSquareSize) - (this.introImage.height / 2);
     }
 
     render(context) {
-
-        context.drawImage(this.introImage, this.x, this.y);
+        // context.fillStyle = "#000000";
+        // for (var i = 0; i < 200; i++) {
+        //     let startX = this.randomRange(this.x - 30, this.x + this.introImage.width + 30);
+        //     let startY = this.randomRange(this.y - 30, 400);
+        //     let sizeX = (Math.random() * 50) + 30;
+        //     let sizeY = (Math.random() * 50) + 30;
+        //     context.fillRect(startX, startY, sizeX, sizeY);
+        // }
 
         context.fillStyle = "#000000";
-        for (var i = 0; i < 100; i++) {
-            let startX = this.randomRange(this.x, this.introImage.width - 50);
-            let startY = this.randomRange(this.y, this.introImage.height - 50);
-            let sizeX = Math.random() * 50;
-            let sizeY = Math.random() * 50;
-            context.fillRect(startX, startY, sizeX, sizeY);
-        }
+        context.globalAlpha = 0.50;
+        context.fillRect(0, 0, this.columns * this.gridSquareSize, this.rows * this.gridSquareSize);
+        context.globalAlpha = 1.0;
+        context.drawImage(this.introImage, this.x, this.y);
     }
 
     randomRange(min, max) {
         return Math.floor(Math.random() * max) + min;
     }
 }
+
+export class VictoryAnimation {
+
+    x = 0;
+    y = 0;
+
+    images = new Array();
+
+    constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
+
+        this.images.push(imageLoader.getImage(ImageAsset.VICTORY_1));
+
+        this.x = ((columns / 2) * gridSsquareSize) - (this.images[0].width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.images[0].height / 2);
+        //this.audio = soundLoader.getSound(SoundAsset.VICTORY_1);
+        //this.audio.pause();
+        //this.audio.currentTime = 0;
+        //this.audio.play();
+    }
+
+    render(context) {
+        context.drawImage(this.images[0], this.x, this.y);
+    }
+
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    onDestroy() {
+        //this.audio.pause();
+    }
+}
+
+export class DefeatAnimation {
+
+    x = 0;
+    y = 0;
+
+    images = new Array();
+
+    constructor(columns, rows, gridSsquareSize, imageLoader, soundLoader) {
+
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_1));
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_2));
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_3));
+        this.images.push(imageLoader.getImage(ImageAsset.DEFEAT_4));
+
+        this.x = ((columns / 2) * gridSsquareSize) - (this.images[0].width / 2);
+        this.y = ((rows / 2) * gridSsquareSize) - (this.images[0].height / 2);
+        this.audio = soundLoader.getSound(SoundAsset.INTRO);
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.audio.play();
+    }
+
+    render(context) {
+        let index = this.getRandomInt(this.images.length);
+        context.drawImage(this.images[index], this.x, this.y);
+    }
+
+    getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    onDestroy() {
+        this.audio.pause();
+    }
+}
+

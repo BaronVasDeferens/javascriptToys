@@ -33,6 +33,10 @@
  *          enemy type that guards stairs or collectables
  *          some enemies can't stack (occupy same space) (easier)
  * 
+ *      ENVIRONMENT
+ *          traps?
+ *          tiles that fall away after moving over them N times
+ * 
  *      SPELLS
  *          spell: become immune to monster death for N moves (monsters semi-transparent)
  *          spell: turn hazards into obstacles?
@@ -44,6 +48,7 @@
  *          SPELLS REPLENISH AT DIFFERENT RATES
  *          
  *      POTIONS
+ *          potions should be REALLY GOOD spells that can be used ONCE
  *          appear randomly; walking over one puts it in the "spell area"
  *          potion: turn empty speces into gold (x turns)
  *          potion: invincibility (x turns)
@@ -60,7 +65,7 @@
  *          bonus for casting ALL spells?
  *          bonus/subtraction for some spells but not others?
  *          DEBT: start off with 50,000 of debt
- *          DEBT: debt decreases every time you complete 10 levels (making it ("out")
+ *          DEBT: debt decreases every time you complete 10 levels (making it "out")
  *          DEBT: debt INCREASES when you die
  * 
  *      HIGH SCORES

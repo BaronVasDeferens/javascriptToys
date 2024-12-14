@@ -190,6 +190,7 @@ document.addEventListener('keydown', (e) => {
         changeGameState(GameState.LEVEL_START);
         createBoardForLevel(level);
     } else if (gameState == GameState.SHOW_SCORE) {
+        hideScore();
         initializeGameState();
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
         switch (e.key) {
@@ -249,6 +250,7 @@ document.addEventListener('mousedown', (e) => {
         changeGameState(GameState.LEVEL_START);
         createBoardForLevel(level);
     } else if (gameState == GameState.SHOW_SCORE) {
+        hideScore();
         initializeGameState();
     } else if (gameState == GameState.PLAYER_ACTION_SELECT && controlInput == null) {
 
@@ -869,7 +871,7 @@ function render() {
 
 function changeGameState(newState) {
     gameState = newState;
-    updateStatistics();
+    // updateStatistics();
     if (debugOutput) {
         console.log(`gameState: ${gameState}`);
     }
@@ -1051,17 +1053,23 @@ function gameOver(fatalEntity) {
     gameOverSound.currentTime = 0;
     gameOverSound.addEventListener("ended", (e) => {
         changeGameState(GameState.SHOW_SCORE);
-        specialEffects.push(
-            new SpecialEffectScoreDisplay(
-                mapWidth / 4,
-                mapHeight / 4,
-                movesThisLevel,
-                goldCollected,
-                finalScore
-            )
-        )
+        showScore();
     }, { once: true });
     gameOverSound.play();
+}
+
+function showScore() {
+    let scoreDisplay = document.getElementById("scoreDisplay");
+    document.getElementById("level").textContent = `LEVEL: ${level}`;
+    document.getElementById("gold").textContent = `GOLD COLLECTED: ${goldCollected}`;
+    document.getElementById("moves").textContent = `MOVES: ${movesThisLevel}`;
+    document.getElementById("debt").textContent = `${debtTotal} GOLD`;
+    scoreDisplay.style["display"] = "block";
+}
+
+function hideScore() {
+    let scoreDisplay = document.getElementById("scoreDisplay");
+    scoreDisplay.style["display"] = "none";
 }
 
 function checkIsValidMove(entity, destinationX, destinationY) {
@@ -1483,11 +1491,10 @@ function storageAvailable(type) {
 }
 
 function loadStatistics() {
-
+    console.log("Loading stats...");
     if (storageAvailable("localStorage")) {
-
-        // check for prior population: debtTotal
-        if (!localStorage.getItem("statisticVersion")) {
+        // check for prior population
+        if (Number(localStorage.getItem("statisticVersion")) != statisticVersion) {
             updateStatistics();
         } else {
             debtTotal = Number(localStorage.getItem("debtTotal"));
@@ -1499,6 +1506,17 @@ function loadStatistics() {
             goldGatheredLifetime = Number(localStorage.getItem("goldGatheredLifetime"));
             goldBankedLifetime = Number(localStorage.getItem("goldBankedLifetime"));
         }
+
+        console.log(`debtTotal: ${debtTotal}`);
+        console.log(`attemptsLifetime: ${attemptsLifetime}`);
+        console.log(`highScoreLifetime: ${highScoreLifetime}`);
+        console.log(`movesLifetime: ${movesLifetime}`);
+        console.log(`spellsCastLifetime: ${spellsCastLifetime}`);
+        console.log(`furthestLevelAchieved: ${furthestLevelAchieved}`);
+        console.log(`goldGatheredLifetime: ${goldGatheredLifetime}`);
+        console.log(`goldBankedLifetime: ${goldBankedLifetime}`);
+
+
     } else {
         console.log("Your scores and statistics will not be saved across sessions. TOO BAD")
     }

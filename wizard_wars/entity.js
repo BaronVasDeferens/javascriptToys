@@ -50,9 +50,24 @@ export class ImageDisplayEntity extends Entity {
 }
 
 export class Wizard extends Entity {
+
+    isPhasedOut = false;
+
     constructor(id, x, y, image) {
         super(id, x, y);
         this.image = image;
+    }
+
+    render(context) {
+        if (this.isPhasedOut) {
+            var offset = Math.floor(Math.random() * 3) + 1;
+            context.globalAlpha = 0.25;
+            context.drawImage(this.image, this.x + offset, this.y);
+            context.drawImage(this.image, this.x - offset, this.y);
+            context.globalAlpha = 1.0;
+        } else {
+            super.render(context);
+        }
     }
 }
 
@@ -182,7 +197,7 @@ class EffectTimer {
 
 /**
  * Effect Timer: Freeze
- * Used in the "bind/freeze" spell effect. Let's the game engine know that the monsters
+ * Used in the "bind/freeze" spell effect. Lets the game engine know that the monsters
  * should not move for a period of time.
  */
 export class EffectTimerFreeze extends EffectTimer {
@@ -208,6 +223,29 @@ export class EffectTimerFreeze extends EffectTimer {
         });
 
         context.globalAlpha = 1.0;
+    }
+}
+
+/**
+ * Effect Timer: Phase
+ * Used in the phase" spell effect. Lets the game engine know that the
+ * wizard is out-of-phase.
+ */
+export class EffectTimerPhase extends EffectTimer {
+
+    isAlive = true;
+
+    constructor(effectType, cycles, wizard) {
+        super(effectType, cycles);
+        this.wizard = wizard;
+    }
+
+    update() {
+        this.cycles--;
+        if (this.cycles <= 0) {
+            this.isAlive = false;
+            this.wizard.isPhasedOut = false;
+        }
     }
 }
 
@@ -307,6 +345,26 @@ export class SpecialEffectPrecognition {
 
             context.globalAlpha = this.opacityLevel;
             context.fillStyle = "white";
+            context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+            context.globalAlpha = 1.0;
+        }
+    }
+}
+
+export class SpecialEffectPhase {
+
+    opacityLevel = 1.0;
+
+    constructor(canvasWidth, canvasHeight) {
+        this.canvasWidth = canvasWidth;
+        this.canvasHeight = canvasHeight;
+    }
+
+    render(context) {
+        if (this.opacityLevel > 0.01) {
+            this.opacityLevel = this.opacityLevel - 0.01;
+            context.globalAlpha = this.opacityLevel;
+            context.fillStyle = "green";
             context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
             context.globalAlpha = 1.0;
         }

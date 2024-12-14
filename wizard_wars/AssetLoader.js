@@ -74,6 +74,7 @@ export var ImageAsset = Object.freeze({
     CARD_SPELL_FREEZE: "resources/cards/96x96/spell_freeze.png",
     CARD_SPELL_RANDOMIZE: "resources/cards/96x96/spell_randomize.png",
     CARD_SPELL_PRECOGNITION: "resources/cards/96x96/spell_precognition.png",
+    CARD_SPELL_PHASE: "resources/cards/96x96/spell_phase.png",
 
     TILE_MARBLE_GROUND_1: "resources/tiles/64x64/tile_385.png",
     TILE_MARBLE_GROUND_2: "resources/tiles/64x64/tile_386.png",

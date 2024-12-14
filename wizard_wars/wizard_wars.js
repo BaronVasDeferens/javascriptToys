@@ -82,7 +82,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase } from './entity.js';
 import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -174,7 +174,8 @@ var gameState = GameState.LOAD_START;
 const SpellAction = Object.freeze({
     SPELL_FREEZE: "SPELL_FREEZE",
     SPELL_RANDOMIZE: "SPELL_RANDOMIZE",
-    SPELL_PRECOGNITION: "SPELL_PRECOGNITION"
+    SPELL_PRECOGNITION: "SPELL_PRECOGNITION",
+    SPELL_PHASE: "SPELL_PHASE"
 });
 
 
@@ -477,9 +478,11 @@ function createBoardForLevel(newLevel) {
     // Add cards
     let imageSize = 96;
     let gap = 16;
-    cards.push(new Card(0, 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-    cards.push(new Card(imageSize + gap, 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
-    cards.push(new Card(imageSize + gap + imageSize + gap, 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
+    cards.push(new Card(0 * (imageSize + gap), 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
+    cards.push(new Card(1 * (imageSize + gap), 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
+    cards.push(new Card(2 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
+    cards.push(new Card(3 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PHASE, assetLoader.getImage(ImageAsset.CARD_SPELL_PHASE)));
+
 
     renderBackground(context);
 
@@ -649,6 +652,12 @@ function processCardAction(card) {
                 new SpecialEffectPrecognition(mapWidth, mapHeight)
             );
             break;
+
+        case SpellAction.SPELL_PHASE:
+            specialEffects.push(new SpecialEffectPhase(mapWidth, mapHeight));
+            playerWizard.isPhasedOut = true;
+            effects.push(new EffectTimerPhase(card.action, 2, playerWizard));
+            break;
     }
 
     spellsCastLifetime++;
@@ -764,7 +773,7 @@ function update() {
 
         // Consume the collectables
         collectables
-            .filter(item => item.isCollected == false)
+            .filter(item => item.isCollected == false && playerWizard.isPhasedOut == false)
             .forEach(item => {
                 if (isWithinCollisionDistance(playerWizard, item, 0)) {
                     item.isCollected = true;
@@ -1106,7 +1115,7 @@ function checkIsValidMove(entity, destinationX, destinationY) {
         return !isClear.includes(true) && inBounds;
 
     } else {
-        var isUnobstruced = checkUnobstructed(destinationX, destinationY);
+        var isUnobstruced = checkUnobstructed(destinationX, destinationY) || playerWizard.isPhasedOut;
         return isUnobstruced && inBounds;
     }
 }
@@ -1119,7 +1128,6 @@ function checkInBounds(destinationX, destinationY) {
 
 function checkUnobstructed(destinationX, destinationY) {
     var isObstructed = obstacles.map(obstacle => {
-        //console.log(`OBSTRUCTED ${obstacle.x} : ${(destinationX == obstacle.x) && (destinationY == obstacle.y)}`)
         return (destinationX == obstacle.x) && (destinationY == obstacle.y)
     });
     return !isObstructed.includes(true);
@@ -1127,7 +1135,7 @@ function checkUnobstructed(destinationX, destinationY) {
 
 function getFatalEntity(source, potentials) {
     var fatalEntities = potentials.map((entity) => {
-        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0))) {
+        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0)) && !playerWizard.isPhasedOut ) {
             return entity;
         };
     });

@@ -1520,18 +1520,19 @@ function loadStatistics() {
             goldBankedLifetime = Number(localStorage.getItem("goldBankedLifetime"));
         }
 
-        console.log(`debtTotal: ${debtTotal}`);
-        console.log(`attemptsLifetime: ${attemptsLifetime}`);
-        console.log(`highScoreLifetime: ${highScoreLifetime}`);
-        console.log(`movesLifetime: ${movesLifetime}`);
-        console.log(`spellsCastLifetime: ${spellsCastLifetime}`);
-        console.log(`furthestLevelAchieved: ${furthestLevelAchieved}`);
-        console.log(`goldGatheredLifetime: ${goldGatheredLifetime}`);
-        console.log(`goldBankedLifetime: ${goldBankedLifetime}`);
-
+        if (debugOutput) {
+            console.log(`debtTotal: ${debtTotal}`);
+            console.log(`attemptsLifetime: ${attemptsLifetime}`);
+            console.log(`highScoreLifetime: ${highScoreLifetime}`);
+            console.log(`movesLifetime: ${movesLifetime}`);
+            console.log(`spellsCastLifetime: ${spellsCastLifetime}`);
+            console.log(`furthestLevelAchieved: ${furthestLevelAchieved}`);
+            console.log(`goldGatheredLifetime: ${goldGatheredLifetime}`);
+            console.log(`goldBankedLifetime: ${goldBankedLifetime}`);
+        }
 
     } else {
-        console.log("Your scores and statistics will not be saved across sessions. TOO BAD")
+        console.log("Thy scores and statistics shall not be saved across sessions. A pity!");
     }
 }
 

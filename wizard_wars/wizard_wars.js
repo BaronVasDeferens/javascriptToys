@@ -5,6 +5,12 @@
  * 
  * IDEAS
  * 
+ *      UNSORTED
+ *          puzzle: a treasure chest in the center of four columns or pits
+ *          puzzle: the EXIT in the center of four pits means you MUST use phase spell to leave
+ *          a treasure that RUNS AWAY FROM YOU means you MUST freeze it
+ *          an EVIL WIZARD is summoned after you cast a certain number of spells
+ * 
  *      TECHNICAL
  *          load and use custom font
  * 
@@ -25,6 +31,7 @@
  *          bonus / safe room / campfire
  *          
  *      COLLECATBLES
+ *          items that FADE with each move
  *          some gold stacks are worth more than others
  *          rare chests that contain juicy stuff
  *          potions that do stuff that spells don't

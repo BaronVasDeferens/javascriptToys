@@ -179,6 +179,35 @@ export class ImageLoader {
         ]);
     }
 
+    loadImages(callback) {
+
+        var loadedImages = 0;
+        let totalImages = Object.keys(ImageAsset).length;
+
+        console.log(`Loading ${totalImages} images...`);
+
+        for (const key in ImageAsset) {
+
+            var assetLocation = ImageAsset[key];
+            let img = new Image();
+            this.imageMap.set(assetLocation, img);
+            
+            img.onload = function () {
+                loadedImages++;
+                if (loadedImages == totalImages) {
+                    console.log(`...images loaded!`);
+                    callback();
+                }
+            }
+
+            img.src = assetLocation;        // <-- this triggers the load
+        };
+    }
+
+    getImage(imgAsset) {
+        return this.imageMap.get(imgAsset);
+    };
+
     getTileSetNames(name) {
         return this.tileSets.get(name);
     }
@@ -186,33 +215,6 @@ export class ImageLoader {
     getTilesetForName(name) {
         return this.getTileSetNames(name).map(tile => this.getImage(tile));
     }
-
-    loadImages(callback) {
-
-        console.log("Loading images...");
-        let readinessCheck = new Map();
-
-        for (const key in ImageAsset) {
-            var assetLocation = ImageAsset[key];
-            let img = new Image();
-            this.imageMap.set(assetLocation, img);
-            img.onload = function () {
-                readinessCheck.set(img.src, true);
-                let values = Array.from(readinessCheck.values());
-                let isReady = values.every(v => { return v === true });
-                if (isReady == true) {
-                    console.log(`...image loading complete!`);
-                    callback();
-                }
-            }
-            img.src = assetLocation;
-            readinessCheck.set(img.src, false);
-        };
-    }
-
-    getImage(imgAsset) {
-        return this.imageMap.get(imgAsset);
-    };
 
     /** ------------ CONVENIENCE METHODS ------------ */
     randomInt(max) {
@@ -268,25 +270,26 @@ export class SoundLoader {
 
     loadSounds(callback) {
 
-        console.log("Loading sounds...");
-        let readinessCheck = new Map();
+        let soundsTotal = Object.keys(SoundAsset).length;
+        var soundsLoaded = 0;
+
+        console.log(`Loading ${soundsTotal} sounds...`);
 
         for (const key in SoundAsset) {
             var assetLocation = SoundAsset[key];
             let snd = new Audio();
             snd.preload = "auto";
             this.soundMap.set(assetLocation, snd);
+
             snd.onloadeddata = function () {
-                readinessCheck.set(snd.src, true);
-                let values = Array.from(readinessCheck.values());
-                let isReady = values.every(v => { return v === true });
-                if (isReady == true) {
-                    console.log("...sound loading complete!");
+                soundsLoaded++;
+                if (soundsLoaded == soundsTotal) {
+                    console.log("...sounds loaded!");
                     callback();
                 }
             }
-            snd.src = assetLocation;
-            readinessCheck.set(snd.src, false);
+
+            snd.src = assetLocation;            // <-- triggers the sound load
         };
     }
 

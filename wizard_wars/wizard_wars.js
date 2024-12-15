@@ -105,7 +105,7 @@ let tileRows = mapHeight / tileSize;
 
 var level = 1;
 var goldCollected = 0;
-var movesThisLevel = 0;
+var movesThisRun = 0;
 
 /** --- STATSTICS --- */
 const statisticVersion = 1;
@@ -293,6 +293,7 @@ document.addEventListener('visibilitychange', () => {
 /**
  * SETUP
  * AN IFFE (Immediately Invoked Expression Function) that runs ONCE
+ * Should this be window.onload? /shrug
  */
 (() => {
     console.log("Setting up...");
@@ -323,7 +324,7 @@ function initializeGameState() {
     changeGameState(GameState.INTRO);
 
     level = 1;
-    movesThisLevel = 0;
+    movesThisRun = 0;
     goldCollected = 0;
     entities = [];
     cards = [];
@@ -935,7 +936,7 @@ function moveIfAble(direction) {
                         0,
                         -wizardMovePerTick,
                         () => {
-                            movesThisLevel++;
+                            movesThisRun++;
                             movesLifetime++;
                             controlInput = null;
                             updateEffects();
@@ -958,7 +959,7 @@ function moveIfAble(direction) {
                         0,
                         wizardMovePerTick,
                         () => {
-                            movesThisLevel++;
+                            movesThisRun++;
                             movesLifetime++;
                             controlInput = null;
                             updateEffects();
@@ -981,7 +982,7 @@ function moveIfAble(direction) {
                         -wizardMovePerTick,
                         0,
                         () => {
-                            movesThisLevel++;
+                            movesThisRun++;
                             movesLifetime++;
                             controlInput = null;
                             updateEffects();
@@ -1004,7 +1005,7 @@ function moveIfAble(direction) {
                         wizardMovePerTick,
                         0,
                         () => {
-                            movesThisLevel++;
+                            movesThisRun++;
                             movesLifetime++;
                             controlInput = null;
                             updateEffects();
@@ -1046,11 +1047,11 @@ function decreaseEntityMovementSpeeds() {
 
 function gameOver(fatalEntity) {
 
-    let finalScore = Math.floor((goldCollected / movesThisLevel) * level);
+    let finalScore = Math.floor((goldCollected / movesThisRun) * level);
     console.log("----------------------------------------------------------");
     console.log("Wizard was slain: GAME OVER");
     console.log(`LEVEL ACHIEVED: ${level}`);
-    console.log(`TOTAL MOVES: ${movesThisLevel}`);
+    console.log(`TOTAL MOVES: ${movesThisRun}`);
     console.log(`TREASURE COLLECTED: ${goldCollected}`);
     console.log(`FINAL SCORE: ${finalScore}`);
     console.log("----------------------------------------------------------");
@@ -1076,7 +1077,7 @@ function showScore() {
     let scoreDisplay = document.getElementById("scoreDisplay");
     document.getElementById("level").textContent = `LEVEL: ${level}`;
     document.getElementById("gold").textContent = `GOLD COLLECTED: ${goldCollected}`;
-    document.getElementById("moves").textContent = `MOVES: ${movesThisLevel}`;
+    document.getElementById("moves").textContent = `MOVES: ${movesThisRun}`;
     document.getElementById("debt").textContent = `${debtTotal} GOLD`;
     scoreDisplay.style["display"] = "block";
 }

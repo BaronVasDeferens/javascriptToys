@@ -231,8 +231,7 @@ document.addEventListener('keydown', (e) => {
             case "o":
             case "O":
                 // DEBUG ONLY
-                let levelIncrease = 4;
-                console.log(`DEBUG: creating new level ${level + levelIncrease}...`);
+                let levelIncrease = 1;
                 createBoardForLevel(level + levelIncrease);
                 break;
             case "m":
@@ -377,8 +376,6 @@ function createBoardForLevel(newLevel) {
     numMonstersScary = Math.floor(level / 3);
     numMonstersBasic = numMonstersBasic - numMonstersScary;
 
-
-    console.log(level % 3)
     if (level % 3 == 0) {
         numCollectableMonsters = 1;
     } else {
@@ -485,7 +482,7 @@ function createBoardForLevel(newLevel) {
             new CollectableMonster(
                 location.x * tileSize,
                 location.y * tileSize,
-                assetLoader.getImage(ImageAsset.TREASURE_LAMP)
+                assetLoader.getImage(ImageAsset.TREASURE_RING)
             )
         );
     }

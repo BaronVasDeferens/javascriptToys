@@ -827,7 +827,7 @@ function update() {
         // Check for COLLECTABLE MONSTER
         entities.filter((ent) => { return ent instanceof CollectableMonster }).forEach((mon) => {
             if (isWithinCollisionDistance(playerWizard, mon, 0)) {
-                // Play special sound!
+                assetLoader.getSound(SoundAsset.SUCCESS).play();
                 mon.isAlive = false;
                 goldCollected += 1000;
                 goldBankedLifetime += 1000;

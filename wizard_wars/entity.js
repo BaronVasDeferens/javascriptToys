@@ -86,7 +86,8 @@ export var MonsterType = Object.freeze({
 export var MonsterMovementBehavior = Object.freeze({
     RANDOM: 1,
     CHASE_PLAYER: 2,
-    REPLICATE: 3
+    REPLICATE: 3,
+    FLEE_PLAYER: 4
 });
 
 
@@ -111,6 +112,18 @@ export class Monster extends Entity {
     setMover(mover) {
         this.mover = mover;
     }
+}
+
+export class CollectableMonster extends Monster {
+    
+    isLethal = false;
+    behavior = MonsterMovementBehavior.FLEE_PLAYER;
+
+    constructor(x, y, image) {
+        super(`lamp`, x, y);
+        this.image = image;
+    }
+
 }
 
 export class Obstacle extends Entity {
@@ -185,7 +198,7 @@ export class TemporaryEntity {
     }
 }
 
-
+/** EFFECT TIMERS */
 
 class EffectTimer {
     constructor(effectType, cycles) {

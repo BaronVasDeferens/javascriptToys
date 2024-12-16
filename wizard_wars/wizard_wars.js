@@ -8,7 +8,7 @@
  *      UNSORTED
  *          puzzle: a treasure chest in the center of four columns or pits
  *          puzzle: the EXIT in the center of four pits means you MUST use phase spell to leave
- *          a treasure that RUNS AWAY FROM YOU means you MUST freeze it
+ *          [X] a treasure that RUNS AWAY FROM YOU means you MUST freeze it
  *          an EVIL WIZARD is summoned after you cast a certain number of spells
  * 
  *      TECHNICAL
@@ -17,7 +17,7 @@
  *      ASTHETIC
  *          title screen
  *          8-bit font
- *          background music
+ *          [X] background music
  *          torch flicker
  * 
  *      CONTROLS
@@ -45,7 +45,7 @@
  *          tiles that fall away after moving over them N times
  * 
  *      SPELLS
- *          spell: become immune to monster death for N moves (monsters semi-transparent)
+ *          [X] spell: become immune to monster death for N moves (monsters semi-transparent)
  *          spell: turn hazards into obstacles?
  *          spell: make smart monsters dumb?
  *          spell: push all monsters to edges?
@@ -59,7 +59,7 @@
  *          appear randomly; walking over one puts it in the "spell area"
  *          potion: turn empty speces into gold (x turns)
  *          potion: invincibility (x turns)
- *          potion: move through obstacles(x turns)
+ *          potion: move through obstacles (x turns)
  * 
  *      SCORING
  *          score display
@@ -89,7 +89,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster } from './entity.js';
 import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
 
 const debugOutput = false;
@@ -137,6 +137,7 @@ var numCollectables = level + 1;
 var numHazards = level + 1;
 var numMonstersBasic = level;
 var numMonstersScary = 0;
+var numCollectableMonsters = 0;
 
 var entities = [];
 var controlInput = null;
@@ -373,8 +374,16 @@ function createBoardForLevel(newLevel) {
     numCollectables = level + 1;
 
     numMonstersBasic = level;
-    numMonstersScary = Math.floor(level / 5);
+    numMonstersScary = Math.floor(level / 3);
     numMonstersBasic = numMonstersBasic - numMonstersScary;
+
+
+    console.log(level % 3)
+    if (level % 3 == 0) {
+        numCollectableMonsters = 1;
+    } else {
+        numCollectableMonsters = 0;
+    }
 
     // Clear out prior data
     movers = [];
@@ -423,29 +432,28 @@ function createBoardForLevel(newLevel) {
         entities.push(monster);
     }
 
-    if (level % 3 == 0) {
-        var location = getSingleUnoccupiedGrid();
-        entities.push(
-            createMonster(MonsterType.RAT_MAN, location.x * tileSize, location.y * tileSize)
-        );
-    }
 
     // Add SCARY monsters
     for (var i = 0; i < numMonstersScary; i++) {
+        var location = getSingleUnoccupiedGrid();
         let chance = Math.floor(Math.random() * 10);
 
         switch (chance) {
             case 0:
             case 1:
             case 2:
+                entities.push(
+                    createMonster(MonsterType.RAT_MAN, location.x * tileSize, location.y * tileSize)
+                );
+                break;
             case 3:
+            case 4:
                 // Add seeking wasp
                 var location = getSingleUnoccupiedGrid();
                 entities.push(
                     createMonster(MonsterType.WASP_CHASER, location.x * tileSize, location.y * tileSize)
                 );
                 break;
-            case 4:
             case 5:
             case 6:
                 // Add replicating blob
@@ -470,7 +478,19 @@ function createBoardForLevel(newLevel) {
         }
     }
 
-    // Add collectables
+    // Add COLLECTABLE monster
+    for (var i = 1; i <= numCollectableMonsters; i++) {
+        var location = getSingleUnoccupiedGrid();
+        entities.push(
+            new CollectableMonster(
+                location.x * tileSize,
+                location.y * tileSize,
+                assetLoader.getImage(ImageAsset.TREASURE_LAMP)
+            )
+        );
+    }
+
+    // Add static collectables
     var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
     for (var i = 0; i < numCollectables; i++) {
         var location = getSingleUnoccupiedGrid();
@@ -490,7 +510,6 @@ function createBoardForLevel(newLevel) {
     cards.push(new Card(1 * (imageSize + gap), 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
     cards.push(new Card(2 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
     cards.push(new Card(3 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PHASE, assetLoader.getImage(ImageAsset.CARD_SPELL_PHASE)));
-
 
     renderBackground(context);
 
@@ -724,6 +743,7 @@ function update() {
 
                             case MonsterMovementBehavior.CHASE_PLAYER:
                             case MonsterMovementBehavior.RANDOM:
+                            case MonsterMovementBehavior.FLEE_PLAYER:
                                 if (entity.mover == null || entity.mover.isAlive == false) {
                                     var mover = getMonsterMover(entity, playerWizard);
                                     if (mover != null) {
@@ -805,6 +825,17 @@ function update() {
 
         // Remove all acquired collectables
         collectables = collectables.filter(item => item.isCollected == false);
+
+
+        // Check for COLLECTABLE MONSTER
+        entities.filter((ent) => { return ent instanceof CollectableMonster }).forEach((mon) => {
+            if (isWithinCollisionDistance(playerWizard, mon, 0)) {
+                // Play special sound!
+                mon.isAlive = false;
+                goldCollected += 1000;
+                goldBankedLifetime += 1000;
+            }
+        });
 
         // Check for player / entity collisions / level descents
         let fatalEntity = getFatalEntity(playerWizard, hazards.concat(entities));
@@ -1143,7 +1174,7 @@ function checkUnobstructed(destinationX, destinationY) {
 
 function getFatalEntity(source, potentials) {
     var fatalEntities = potentials.map((entity) => {
-        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0)) && !playerWizard.isPhasedOut ) {
+        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0)) && !playerWizard.isPhasedOut) {
             return entity;
         };
     });
@@ -1242,6 +1273,8 @@ function getMonsterMover(monster, target) {
             return getMoverToTarget(monster, target);
         case MonsterMovementBehavior.RANDOM:
             return getRandomMover(monster);
+        case MonsterMovementBehavior.FLEE_PLAYER:
+            return getMoverFromTarget(monster, target);
     }
 }
 
@@ -1284,7 +1317,7 @@ function getMoverToTarget(monster, target) {
     if (selectedMover != null) {
         if (selectedMover.deltaX < 0) {
             selectedMover.direction = ControlInput.LEFT;
-        } else if (selectedMover > 0) {
+        } else if (selectedMover.deltaX > 0) {
             selectedMover.direction = ControlInput.RIGHT;
         } else if (selectedMover.deltaY < 0) {
             selectedMover.direction = ControlInput.UP;
@@ -1294,6 +1327,56 @@ function getMoverToTarget(monster, target) {
     }
 
     return selectedMover;
+}
+
+/**
+ * Returns a (nullable) mover which is guaranteed to MOVE AWAY from the target entity
+ */
+function getMoverFromTarget(monster, target) {
+
+    var distance = (Math.abs(monster.x - target.x) / tileSize) + (Math.abs(monster.y - target.y) / tileSize);
+    if (distance > 5) {
+        return null;
+    }
+
+    var mover = null;
+
+    var potentialDestinations = getUnoccupiedAdjacencies(monster)
+        .filter((adj) => {
+            return checkIsValidMove(monster, adj.x, adj.y)
+        }).sort((a, b) => {
+            if (Math.abs(target.x - a.x) + Math.abs(target.y - a.y) < Math.abs(target.x - b.x) + Math.abs(target.y - b.y)) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+
+    var potentialDestination = potentialDestinations[0];
+
+    if (potentialDestination != null) {
+
+        var deltaX = 0;
+        var deltaY = 0;
+
+        if (potentialDestination.x != monster.x) {
+            if (potentialDestination.x > monster.x) {
+                deltaX = monsterMovePerTick;
+            } else if (potentialDestination.x < monster.x) {
+                deltaX = -monsterMovePerTick;
+            }
+        } else if (potentialDestination.y != monster.y) {
+            if (potentialDestination.y > monster.y) {
+                deltaY = monsterMovePerTick;
+            } else if (potentialDestination.y < monster.y) {
+                deltaY = -monsterMovePerTick;
+            }
+        }
+
+        mover = new Mover(monster, potentialDestination.x, potentialDestination.y, deltaX, deltaY, () => { });
+    }
+
+    return mover;
 }
 
 function getRandomMover(monster) {

@@ -57,6 +57,9 @@ export var ImageAsset = Object.freeze({
     GOLD_COIN_STACK_2: "resources/tiles/64x64/tile_2603.png",
     GOLD_COIN_STACK_3: "resources/tiles/64x64/tile_2604.png",
 
+    TREASURE_LAMP: "resources/tiles/64x64/tile_2616.png",
+    TREASURE_RING: "resources/tiles/64x64/tile_2733.png",
+
     OBSTACLE_PILLAR_1: "resources/tiles/64x64/tile_781.png",
     OBSTACLE_PILLAR_2: "resources/tiles/64x64/tile_782.png",
     OBSTACLE_PILLAR_3: "resources/tiles/64x64/tile_783.png",

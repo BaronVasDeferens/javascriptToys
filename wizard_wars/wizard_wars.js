@@ -91,6 +91,7 @@
 
 import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster } from './entity.js';
 import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
+import { Level, Level_0 } from './level.js';
 
 const debugOutput = false;
 
@@ -109,6 +110,10 @@ let tileSize = 64;
 
 let tileCols = mapWidth / tileSize;
 let tileRows = mapHeight / tileSize;
+
+
+var levelZero = new Level_0();
+
 
 var level = 1;
 var goldCollected = 0;
@@ -149,7 +154,7 @@ var effects = [];
 var specialEffects = [];
 var cards = [];
 var temporaryEntities = [];
-var portal;
+var portal = null;
 var bonusAwarded = false;
 
 var backgroundImage = new Image();
@@ -304,6 +309,8 @@ document.addEventListener('visibilitychange', () => {
  */
 (() => {
     console.log("Setting up...");
+
+
     changeGameState(GameState.LOAD_START);
     loadStatistics();
 
@@ -315,10 +322,14 @@ document.addEventListener('visibilitychange', () => {
         coinSounds.push(assetLoader.getSound(SoundAsset.COIN_2));
         coinSounds.push(assetLoader.getSound(SoundAsset.COIN_3));
 
+        levelZero.initialize(assetLoader);
+
         // ...and begin the primary loop
         changeGameState(GameState.LOAD_COMPLETE);
         beginGame();
     });
+
+
 
 })();
 
@@ -366,139 +377,148 @@ function createBoardForLevel(newLevel) {
     updateStatistics();
 
 
-    level = newLevel;
 
-    numObstacles = 2 + Math.floor(level / 2);
-    numHazards = Math.floor(level / 3);
-    numCollectables = level + 1;
+    playerWizard = levelZero.playerWizard;
+    portal = levelZero.portal;
+    entities = levelZero.entities;
+    obstacles = levelZero.obstacles;
 
-    numMonstersBasic = level;
-    numMonstersScary = Math.floor(level / 3);
-    numMonstersBasic = numMonstersBasic - numMonstersScary;
+    level = levelZero.levelNumber;
 
-    if (level % 3 == 0) {
-        numCollectableMonsters = 1;
-    } else {
-        numCollectableMonsters = 0;
-    }
+    numCollectables = levelZero.numCollectables;
+    numCollectableMonsters = levelZero.numCollectableMonsters;
+
+    // numObstacles = 2 + Math.floor(level / 2);
+    // numHazards = Math.floor(level / 3);
+    // numCollectables = level + 1;
+
+    // numMonstersBasic = level;
+    // numMonstersScary = Math.floor(level / 3);
+    // numMonstersBasic = numMonstersBasic - numMonstersScary;
+
+    // if (level % 3 == 0) {
+    //     numCollectableMonsters = 1;
+    // } else {
+    //     numCollectableMonsters = 0;
+    // }
 
     // Clear out prior data
     movers = [];
-    entities = [];
-    collectables = [];
-    obstacles = [];
-    hazards = [];
-    effects = [];
+    // entities = [];
+    // collectables = [];
+    // obstacles = [];
+    // hazards = [];
+    // effects = [];
     cards = [];
     temporaryEntities = [];
-    portal = null;
+
     bonusAwarded = false;
 
     controlInput = null;
 
-    // Add player
-    var location = getSingleUnoccupiedGrid();
-    playerWizard = new Wizard(
-        "wizard", location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.WIZARD_2)
-    );
-    entities.push(playerWizard);
+    // // Add player
+    // var location = getSingleUnoccupiedGrid();
+    // playerWizard = new Wizard(
+    //     "wizard", location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.WIZARD_2)
+    // );
+    // entities.push(playerWizard);
 
-    // Add obstacles
-    var obstacleImages = assetLoader.getTilesetForName("PILLARS");
-    for (var i = 0; i < numObstacles; i++) {
-        var location = getSingleUnoccupiedGrid();
-        obstacles.push(
-            new Obstacle(
-                `pillar_${i}`, location.x * tileSize, location.y * tileSize, obstacleImages[randomIntInRange(0, obstacleImages.length)])
-        );
-    }
+    // // Add obstacles
+    // var obstacleImages = assetLoader.getTilesetForName("PILLARS");
+    // for (var i = 0; i < numObstacles; i++) {
+    //     var location = getSingleUnoccupiedGrid();
+    //     obstacles.push(
+    //         new Obstacle(
+    //             `pillar_${i}`, location.x * tileSize, location.y * tileSize, obstacleImages[randomIntInRange(0, obstacleImages.length)])
+    //     );
+    // }
 
-    // Add hazards
-    for (var i = 0; i < numHazards; i++) {
-        var location = getSingleUnoccupiedGrid();
-        hazards.push(
-            new Hazard(
-                `hazard_${i}`, location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.HAZARD_PIT_1))
-        )
-    }
+    // // Add hazards
+    // for (var i = 0; i < numHazards; i++) {
+    //     var location = getSingleUnoccupiedGrid();
+    //     hazards.push(
+    //         new Hazard(
+    //             `hazard_${i}`, location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.HAZARD_PIT_1))
+    //     )
+    // }
 
-    // Add BASIC monsters
-    for (var i = 0; i < numMonstersBasic; i++) {
-        var location = getSingleUnoccupiedGrid();
-        let monster = createMonster(MonsterType.RAT, location.x * tileSize, location.y * tileSize);
-        entities.push(monster);
-    }
+    // // Add BASIC monsters
+    // for (var i = 0; i < numMonstersBasic; i++) {
+    //     var location = getSingleUnoccupiedGrid();
+    //     let monster = createMonster(MonsterType.RAT, location.x * tileSize, location.y * tileSize);
+    //     entities.push(monster);
+    // }
 
 
-    // Add SCARY monsters
-    for (var i = 0; i < numMonstersScary; i++) {
-        var location = getSingleUnoccupiedGrid();
-        let chance = Math.floor(Math.random() * 10);
+    // // Add SCARY monsters
+    // for (var i = 0; i < numMonstersScary; i++) {
+    //     var location = getSingleUnoccupiedGrid();
+    //     let chance = Math.floor(Math.random() * 10);
 
-        switch (chance) {
-            case 0:
-            case 1:
-            case 2:
-                entities.push(
-                    createMonster(MonsterType.RAT_MAN, location.x * tileSize, location.y * tileSize)
-                );
-                break;
-            case 3:
-            case 4:
-                // Add seeking wasp
-                var location = getSingleUnoccupiedGrid();
-                entities.push(
-                    createMonster(MonsterType.WASP_CHASER, location.x * tileSize, location.y * tileSize)
-                );
-                break;
-            case 5:
-            case 6:
-                // Add replicating blob
-                var location = getSingleUnoccupiedGrid();
-                var monster = createMonster(MonsterType.BLOB, location.x * tileSize, location.y * tileSize);
-                monster.replicationsRemaining = 1;
-                entities.push(monster);
-                break;
-            case 7:
-            case 8:
-                // Add ghost (basic)
-                var location = getSingleUnoccupiedGrid();
-                var monster = createMonster(MonsterType.GHOST_BASIC, location.x * tileSize, location.y * tileSize);
-                entities.push(monster);
-                break;
-            case 9:
-                // Add ghost (chaser)
-                var location = getSingleUnoccupiedGrid();
-                var monster = createMonster(MonsterType.GHOST_CHASER, location.x * tileSize, location.y * tileSize);
-                entities.push(monster);
-                break;
-        }
-    }
+    //     switch (chance) {
+    //         case 0:
+    //         case 1:
+    //         case 2:
+    //             entities.push(
+    //                 createMonster(MonsterType.RAT_MAN, location.x * tileSize, location.y * tileSize)
+    //             );
+    //             break;
+    //         case 3:
+    //         case 4:
+    //             // Add seeking wasp
+    //             var location = getSingleUnoccupiedGrid();
+    //             entities.push(
+    //                 createMonster(MonsterType.WASP_CHASER, location.x * tileSize, location.y * tileSize)
+    //             );
+    //             break;
+    //         case 5:
+    //         case 6:
+    //             // Add replicating blob
+    //             var location = getSingleUnoccupiedGrid();
+    //             var monster = createMonster(MonsterType.BLOB, location.x * tileSize, location.y * tileSize);
+    //             monster.replicationsRemaining = 1;
+    //             entities.push(monster);
+    //             break;
+    //         case 7:
+    //         case 8:
+    //             // Add ghost (basic)
+    //             var location = getSingleUnoccupiedGrid();
+    //             var monster = createMonster(MonsterType.GHOST_BASIC, location.x * tileSize, location.y * tileSize);
+    //             entities.push(monster);
+    //             break;
+    //         case 9:
+    //             // Add ghost (chaser)
+    //             var location = getSingleUnoccupiedGrid();
+    //             var monster = createMonster(MonsterType.GHOST_CHASER, location.x * tileSize, location.y * tileSize);
+    //             entities.push(monster);
+    //             break;
+    //     }
+    // }
 
-    // Add COLLECTABLE monster
-    for (var i = 1; i <= numCollectableMonsters; i++) {
-        var location = getSingleUnoccupiedGrid();
-        entities.push(
-            new CollectableMonster(
-                location.x * tileSize,
-                location.y * tileSize,
-                assetLoader.getImage(ImageAsset.TREASURE_RING)
-            )
-        );
-    }
+    // // Add COLLECTABLE monster
+    // for (var i = 1; i <= numCollectableMonsters; i++) {
+    //     var location = getSingleUnoccupiedGrid();
+    //     entities.push(
+    //         new CollectableMonster(
+    //             location.x * tileSize,
+    //             location.y * tileSize,
+    //             assetLoader.getImage(ImageAsset.TREASURE_RING)
+    //         )
+    //     );
+    // }
 
-    // Add static collectables
-    var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
-    for (var i = 0; i < numCollectables; i++) {
-        var location = getSingleUnoccupiedGrid();
-        collectables.push(
-            new Collectable(`gold_${i}`, location.x * tileSize, location.y * tileSize, coinImages[randomIntInRange(0, coinImages.length)])
-        );
-    }
+    // // Add static collectables
+    // var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
+    // for (var i = 0; i < numCollectables; i++) {
+    //     var location = getSingleUnoccupiedGrid();
+    //     collectables.push(
+    //         new Collectable(`gold_${i}`, location.x * tileSize, location.y * tileSize, coinImages[randomIntInRange(0, coinImages.length)])
+    //     );
+    // }
 
-    // Add the exit
-    let portalLocation = getSingleUnoccupiedGrid();
-    portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1));
+    // // Add the exit
+    // let portalLocation = getSingleUnoccupiedGrid();
+    // portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
     // Add cards
     let imageSize = 96;
@@ -522,19 +542,7 @@ function renderBackground(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw tiles onto the background image
-    var tiles;
-    switch (level) {
-        case 1:
-            tiles = assetLoader.getTilesetForName("MARBLE_PINK");
-            break;
-        case 2:
-            tiles = assetLoader.getTilesetForName("MARBLE");
-            break;
-        default:
-            tiles = assetLoader.getTilesetForName("SKULLS");
-            break;
-    }
-
+    var tiles = assetLoader.getTilesetForName(levelZero.floorTileSetName);
 
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {

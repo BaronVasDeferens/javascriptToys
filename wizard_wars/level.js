@@ -38,7 +38,7 @@ export class Level {
     hazards = [];
 
     numRandomObstacles = 0;
-    numHazards = 0;
+    numRandomHazards = 0;
     numMonstersBasic = 0;
     numMonstersScary = 0;
     numCollectables = 0;
@@ -60,39 +60,52 @@ export class Level {
         this.portal = new Portal(this.levelNumber + 1, portalDefinition.x * this.tileSize, portalDefinition.y * this.tileSize, assetLoader.getImage(portalDefinition.image));
 
         // Obstacles
-        var obstacleSet = this.tiles.filter((t) => { return t.type == TileType.OBSTACLE });
         var obstacleImages = assetLoader.getTilesetForName(this.obstacleTileSetName);
-
-        console.log(obstacleImages.length)
-
+        var obstacleSet = this.tiles.filter((t) => { return t.type == TileType.OBSTACLE });
         obstacleSet.forEach((obs) => {
+            var obstacleImage;
+            if (obs.image != null) {
+                obstacleImage = assetLoader.getImage(obs.image);
+            } else {
+                obstacleImage = obstacleImages[this.randomIntInRange(0, obstacleImages.length)];
+            }
             this.obstacles.push(
-                new Obstacle(`obstacle_${obs.x}_${obs.y}`, obs.x * this.tileSize, obs.y * this.tileSize, obstacleImages[this.randomIntInRange(0, obstacleImages.length)])
+                new Obstacle(`obstacle_${obs.x}_${obs.y}`, obs.x * this.tileSize, obs.y * this.tileSize, obstacleImage)
             );
         });
 
-        // if (obstacleSet.length == 0 && this.numRandomObstacles > 0) {
-        //     for (var i = 0; i < this.numRandomObstacles; i++) {
-        //         var location = this.getSingleUnoccupiedGrid();
-        //         this.obstacles.push(
-        //             new Obstacle(
-        //                 `obstacle_${i}`, location.x * this.tileSize, location.y * this.tileSize, obstacleImages[this.randomIntInRange(0, obstacleImages.length)])
-        //         );
-        //     }
-        // } else {
-            
-        // }
+        if (this.numRandomObstacles > 0) {
+            for (var i = 0; i < this.numRandomObstacles; i++) {
+                var location = this.getSingleUnoccupiedGrid();
+                this.obstacles.push(
+                    new Obstacle(
+                        `obstacle_${i}`, location.x * this.tileSize, location.y * this.tileSize, obstacleImages[this.randomIntInRange(0, obstacleImages.length)])
+                );
+            }
+        }
 
+        // Hazards
+        var hazardImages = assetLoader.getTilesetForName(this.hazardTileSetName);
+        var hazardSet = this.tiles.filter((t) => { return t.type == TileType.HAZARD });
+        hazardSet.forEach((haz) => {
+            var hazardImage;
+            if (haz.image != null) {
+                hazardImage = assetLoader.getImage(haz.image);
+            } else {
+                hazardImage = hazardImages[this.randomIntInRange(0, hazardImages.length)];
+            }
 
-
-        // Add hazards
-        // for (var i = 0; i < numHazards; i++) {
-        //     var location = getSingleUnoccupiedGrid();
-        //     hazards.push(
-        //         new Hazard(
-        //             `hazard_${i}`, location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.HAZARD_PIT_1))
-        //     )
-        // }
+            this.hazards.push(
+                new Hazard(`hazrad_${haz.x}_${haz.y}`, haz.x * this.tileSize, haz.y * this.tileSize, hazardImage)
+            );
+        });
+        for (var i = 0; i < this.numRandomHazards; i++) {
+            var location = this.getSingleUnoccupiedGrid();
+            this.hazards.push(
+                new Hazard(
+                    `hazard_${i}`, location.x * this.tileSize, location.y * this.tileSize, hazardImages[this.randomIntInRange(0, hazardImages.length)])
+            )
+        }
     }
 
     getSingleUnoccupiedGrid() {
@@ -103,13 +116,13 @@ export class Level {
             }
         }
 
-        var occupiedGrids = getAllOccupiedGrids();
+        var occupiedGrids = this.getAllOccupiedGrids();
 
         occupiedGrids.forEach(occupied => {
             allTiles = allTiles.filter(grid => { return JSON.stringify(grid) !== JSON.stringify(occupied) });
         });
 
-        shuffle(allTiles);
+        this.shuffle(allTiles);
         return allTiles[0];
     }
 
@@ -151,6 +164,9 @@ export class Level_0 extends Level {
 
     levelNumber = 0;
 
+    numRandomObstacles = 2;
+    numRandomHazards = 2;
+
     tiles = [
 
         {
@@ -171,15 +187,23 @@ export class Level_0 extends Level {
             x: 4,
             y: 5,
             type: TileType.OBSTACLE,
-            image: null
+            image: null,
         },
 
         {
             x: 6,
             y: 5,
             type: TileType.OBSTACLE,
-            image: null
+            image: null,
         },
+
+        {
+            x: 5,
+            y: 6,
+            type: TileType.HAZARD,
+            image: null,
+        }
+
     ];
 
     constructor(assetLoader) {

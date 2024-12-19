@@ -180,6 +180,10 @@ export class ImageLoader {
             ImageAsset.OBSTACLE_PILLAR_5,
             ImageAsset.OBSTACLE_PILLAR_6
         ]);
+
+        this.tileSets.set("PITS", [
+            ImageAsset.HAZARD_PIT_1
+        ]);
     }
 
     loadImages(callback) {

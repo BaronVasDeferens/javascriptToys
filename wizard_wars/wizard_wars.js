@@ -10,6 +10,10 @@
  *          puzzle: the EXIT in the center of four pits means you MUST use phase spell to leave
  *          [X] a treasure that RUNS AWAY FROM YOU means you MUST freeze it
  *          an EVIL WIZARD is summoned after you cast a certain number of spells
+ *          obstacles that are invisible but are reveal through magic (scrye?)
+ *          multiple portals
+ *              after reaching level 10 or higher, a new portal becomes available at the level 0 start
+ *              the second portal goes to a much harder version of the game
  * 
  *      TECHNICAL
  *          load and use custom font
@@ -362,6 +366,9 @@ function initializeGameState() {
 
 function createBoardForLevel(newLevel) {
 
+    levelZero = new Level_0();
+    levelZero.initialize(assetLoader);
+
     console.log(`LEVEL ${newLevel}`);
 
     // Handle statistics
@@ -382,6 +389,7 @@ function createBoardForLevel(newLevel) {
     portal = levelZero.portal;
     entities = levelZero.entities;
     obstacles = levelZero.obstacles;
+    hazards = levelZero.hazards;
 
     level = levelZero.levelNumber;
 

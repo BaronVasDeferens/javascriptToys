@@ -8,24 +8,26 @@ export const EntityType = Object.freeze({
     OBSTACLE: 2,
     HAZARD: 3,
     MONSTER: 4,
-    COLLECTABLE: 5
+    COLLECTABLE: 5,
+    COLLECT_MONSTER_RING: 6
 });
 
 export const LevelType = Object.freeze({
-    MEADOW: 0,
+    SURFACE: 0,
     DUNGEON: 1,
     HAVEN: 2
 })
 
 export class Level {
 
+    levelNumber = 0;
+
     numRows = 10;
     numCols = 10;
     tileSize = 64;
 
-    levelNumber = 0;
-    levelType = LevelType.MEADOW;
-    floorTileSetName = "MARBLE_PINK";
+    levelType = LevelType.SURFACE;
+    floorTileSetName = "SKULLS";
     obstacleTileSetName = "PILLARS";
     hazardTileSetName = "PITS";
 
@@ -43,15 +45,34 @@ export class Level {
 
     numMonstersBasic = 0;
     numMonstersScary = 0;
-    numCollectableMonsters = 0;
+    numMonstersCollectable = 0;
 
     tiles = [];
 
     constructor(levelNumber) {
-        this.levelNumber = levelNumber
+        this.levelNumber = levelNumber;
     }
 
     initialize(assetLoader) {
+
+        // FIXME: this may NOT be the best test for whether to populate the dungeon....
+        if (this.tiles.length == 0) {
+
+            this.numObstaclesRandom = 4 + (Math.floor(this.levelNumber / 2));
+            this.numHazardsRandom = 2 + (Math.floor(this.levelNumber / 3));
+            this.numCollectablesRandom = this.levelNumber + 3;
+
+            // Default monster population
+            this.numMonstersScary = Math.floor(this.levelNumber / 3);
+            this.numMonstersBasic = 1 + this.levelNumber - this.numMonstersScary;
+
+            if (this.levelNumber % 3 == 0) {
+                this.numMonstersCollectable = 1;
+            } else {
+                this.numMonstersCollectable = 0;
+            }
+        }
+
 
         // All of the pre-defined entities shall be placed FIRST, followed by the randomly-placed
         // entities; we want to avoid accidentally placing a random entity in a tile where one
@@ -67,7 +88,7 @@ export class Level {
         } else {
             var location = this.getSingleUnoccupiedGrid();
             this.playerWizard = new Wizard(
-                "wizard", location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.WIZARD_1)
+                "wizard", location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.WIZARD_2)
             );
         }
 
@@ -129,6 +150,19 @@ export class Level {
         }).forEach((monster) => {
             this.entities.push(
                 this.createMonster(monster.class, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader)
+            );
+        });
+
+        // Monster : Collectable Ring (defined)
+        this.tiles.filter((t) => {
+            return t.type == EntityType.COLLECT_MONSTER_RING
+        }).forEach((ring) => {
+            this.entities.push(
+                new CollectableMonster(
+                    ring.x * this.tileSize,
+                    ring.y * this.tileSize,
+                    assetLoader.getImage(ImageAsset.TREASURE_RING)
+                )
             );
         });
 
@@ -214,6 +248,18 @@ export class Level {
                     break;
             }
         }
+
+        // Monster: Collectable Ring (random)
+        for (var i = 0; i < this.numMonstersCollectable; i++) {
+            location = this.getSingleUnoccupiedGrid();
+            this.entities.push(
+                new CollectableMonster(
+                    location.x * this.tileSize,
+                    location.y * this.tileSize,
+                    assetLoader.getImage(ImageAsset.TREASURE_RING)
+                )
+            );
+        }
     }
 
     getSingleUnoccupiedGrid() {
@@ -238,7 +284,7 @@ export class Level {
         var occupiedGrids = [];
 
         var allEntities = this.entities.concat(this.collectables).concat(this.obstacles).concat(this.hazards).concat(this.portal);
-        allEntities.forEach((entity) => {
+        allEntities.filter((ent) => { return ent != null }).forEach((entity) => {
             occupiedGrids.push(
                 {
                     x: Math.floor(entity.x / this.tileSize),
@@ -348,86 +394,116 @@ export class Level {
 
 }
 
-export class Level_0 extends Level {
+export class LevelManager {
 
-    levelNumber = 0;
+    levels = new Map();
 
-    numObstaclesRandom = 2;
-    numHazardsRandom = 2;
-    numCollectablesRandom = 9;
+    constructor() {
+        // Level ZERO
+        this.levels.set(0,
+            {
+                floorTileSetName: "MARBLE_PINK",
+                numCollectablesRandom: 2,
+                numMonstersBasic: 1,
+                tiles: [
+                    {
+                        x: 5,
+                        y: 5,
+                        type: EntityType.PLAYER_START,
+                        image: ImageAsset.WIZARD_2
+                    },
 
-    numMonstersBasic = 1;
-    numMonstersScary = 0;
-    numCollectableMonsters = 0;
+                    {
+                        x: 5,
+                        y: 9,
+                        type: EntityType.STAIRS_DOWN,
+                        image: ImageAsset.STAIRS_DOWN_1
+                    },
 
-    tiles = [
+                    {
+                        x: 3,
+                        y: 1,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 5,
-            y: 3,
-            type: EntityType.PLAYER_START,
-            image: ImageAsset.WIZARD_2
-        },
+                    {
+                        x: 3,
+                        y: 3,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 5,
-            y: 5,
-            type: EntityType.STAIRS_DOWN,
-            image: ImageAsset.STAIRS_DOWN_1
-        },
+                    {
+                        x: 3,
+                        y: 5,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 4,
-            y: 5,
-            type: EntityType.OBSTACLE,
-            image: null,
-        },
+                    {
+                        x: 3,
+                        y: 7,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 6,
-            y: 5,
-            type: EntityType.OBSTACLE,
-            image: null,
-        },
+                    {
+                        x: 3,
+                        y: 9,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 5,
-            y: 6,
-            type: EntityType.HAZARD,
-            image: null,
-        },
 
-        {
-            x: 1,
-            y: 1,
-            type: EntityType.COLLECTABLE,
-            image: null
-        },
+                    {
+                        x: 7,
+                        y: 1,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
+                    {
+                        x: 7,
+                        y: 3,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 9,
-            y: 9,
-            type: EntityType.MONSTER,
-            class: MonsterType.GHOST_CHASER,
-            image: null
-        },
+                    {
+                        x: 7,
+                        y: 5,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-        {
-            x: 0,
-            y: 9,
-            type: EntityType.MONSTER,
-            class: MonsterType.GHOST_CHASER,
-            image: null
-        }
+                    {
+                        x: 7,
+                        y: 7,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
 
-    ];
+                    {
+                        x: 7,
+                        y: 9,
+                        type: EntityType.OBSTACLE,
+                        image: null,
+                    },
+                ]
+            });
 
-    constructor(assetLoader) {
-        super(assetLoader);
+        // Level SIX
     }
 
-}
-
-export class LevelManager {
+    getLevel(levelNumber) {
+        var levelDetails = this.levels.get(levelNumber);
+        if (levelDetails != null) {
+            var level = new Level(levelNumber);
+            level = Object.assign(level, levelDetails);
+            return level;
+        } else {
+            return new Level(levelNumber);
+        }
+    }
 
 }

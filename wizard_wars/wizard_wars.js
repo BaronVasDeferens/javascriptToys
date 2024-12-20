@@ -6,8 +6,14 @@
  * IDEAS
  * 
  *      UNSORTED
+ * 
+ *          !! an invisible chest that only appears when you cast precog;
+ *              + doesn't move, or
+ *              + moves randomly (LOL)
+ * 
  *          level (HARD): LOTS of gold, a few obstacles/hazrads, and two chaser ghosts!
  *              + the portal only appears when all gold is collected!
+ * 
  *          puzzle: a treasure chest in the center of four columns or pits
  *          puzzle: the EXIT in the center of four pits means you MUST use phase spell to leave
  *          [X] a treasure that RUNS AWAY FROM YOU means you MUST freeze it
@@ -16,7 +22,7 @@
  *          multiple portals
  *              + after reaching level 10 or higher, a new portal becomes available at the level 0 start
  *              + the second portal goes to a much harder version of the game
- *              + the magical portal shimmers
+ *              + the magical portals shimmer
  * 
  *      TECHNICAL
  *          load and use custom font
@@ -43,9 +49,7 @@
  *          some gold stacks are worth more than others
  *          rare chests that contain juicy stuff
  *          potions that do stuff that spells don't
- *          !! an invisible chest that only appears when you cast precog;
- *              + doesn't move, or
- *              + moves randomly (LOL)
+
  * 
  *      ENEMIES
  *          enemy type that guards stairs or collectables
@@ -102,7 +106,7 @@
 
 import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster } from './entity.js';
 import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
-import { Level, Level_0 } from './level.js';
+import { Level, LevelManager } from './level.js';
 
 const debugOutput = false;
 
@@ -122,11 +126,10 @@ let tileSize = 64;
 let tileCols = mapWidth / tileSize;
 let tileRows = mapHeight / tileSize;
 
+const levelManager = new LevelManager();
+var levelNumber = 0;
+var levelCurrent = null;
 
-var levelZero = new Level_0();
-
-
-var level = 1;
 var goldCollected = 0;
 var movesThisRun = 0;
 
@@ -147,13 +150,6 @@ var playerWizard;
 var wizardMovePerTick = 8;
 var monsterMovePerTick = 8;
 var moveAdjustment = 2;
-
-var numObstacles = 2 * level;
-var numCollectables = level + 1;
-var numHazards = level + 1;
-var numMonstersBasic = level;
-var numMonstersScary = 0;
-var numCollectableMonsters = 0;
 
 var entities = [];
 var controlInput = null;
@@ -218,7 +214,8 @@ document.addEventListener('keydown', (e) => {
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
-        createBoardForLevel(level);
+        levelNumber = 0;
+        createBoardForLevel(levelNumber);
     } else if (gameState == GameState.SHOW_SCORE) {
         hideScore();
         initializeGameState();
@@ -248,7 +245,7 @@ document.addEventListener('keydown', (e) => {
             case "O":
                 // DEBUG ONLY
                 let levelIncrease = 1;
-                createBoardForLevel(level + levelIncrease);
+                createBoardForLevel(levelCurrent.levelNumber + levelIncrease);
                 break;
             case "m":
             case "M":
@@ -277,7 +274,7 @@ document.addEventListener('mousedown', (e) => {
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
-        createBoardForLevel(level);
+        createBoardForLevel(levelNumber);
     } else if (gameState == GameState.SHOW_SCORE) {
         hideScore();
         initializeGameState();
@@ -321,7 +318,6 @@ document.addEventListener('visibilitychange', () => {
 (() => {
     console.log("Setting up...");
 
-
     changeGameState(GameState.LOAD_START);
     loadStatistics();
 
@@ -333,14 +329,10 @@ document.addEventListener('visibilitychange', () => {
         coinSounds.push(assetLoader.getSound(SoundAsset.COIN_2));
         coinSounds.push(assetLoader.getSound(SoundAsset.COIN_3));
 
-        levelZero.initialize(assetLoader);
-
         // ...and begin the primary loop
         changeGameState(GameState.LOAD_COMPLETE);
         beginGame();
     });
-
-
 
 })();
 
@@ -352,7 +344,7 @@ function initializeGameState() {
     console.log("Initializing...");
     changeGameState(GameState.INTRO);
 
-    level = 1;
+    levelNumber = 0;
     movesThisRun = 0;
     goldCollected = 0;
     entities = [];
@@ -371,79 +363,39 @@ function initializeGameState() {
     backgroundMusicPlayer.playbackRate = 1.0;
 }
 
-function createBoardForLevel(newLevel) {
+function createBoardForLevel(newLevelNumber) {
+    levelNumber = newLevelNumber;
+    levelCurrent = levelManager.getLevel(levelNumber);
+    levelCurrent.initialize(assetLoader);
 
-    levelZero = new Level_0();
-    levelZero.initialize(assetLoader);
-
-    console.log(`LEVEL ${newLevel}`);
+    console.log(`LEVEL ${newLevelNumber}`);
 
     // Handle statistics
-    if (newLevel == 1) {
+    if (newLevelNumber == 1) {
         attemptsLifetime++;
         debtTotal -= costPerAttempt;
     } else {
-        if (newLevel > furthestLevelAchieved) {
-            furthestLevelAchieved = newLevel;
+        if (newLevelNumber > furthestLevelAchieved) {
+            furthestLevelAchieved = newLevelNumber;
         }
     }
 
     updateStatistics();
 
-    playerWizard = levelZero.playerWizard;
-    portal = levelZero.portal;
-    entities = levelZero.entities;
-    obstacles = levelZero.obstacles;
-    hazards = levelZero.hazards;
-    collectables = levelZero.collectables;
-
-    level = levelZero.levelNumber;
-
-    numCollectables = levelZero.numCollectables;
-    numCollectableMonsters = levelZero.numCollectableMonsters;
-
-    // numObstacles = 2 + Math.floor(level / 2);
-    // numHazards = Math.floor(level / 3);
-    // numCollectables = level + 1;
-
-    // numMonstersBasic = level;
-    // numMonstersScary = Math.floor(level / 3);
-    // numMonstersBasic = numMonstersBasic - numMonstersScary;
-
-    // if (level % 3 == 0) {
-    //     numCollectableMonsters = 1;
-    // } else {
-    //     numCollectableMonsters = 0;
-    // }
+    playerWizard = levelCurrent.playerWizard;
+    portal = levelCurrent.portal;
+    entities = levelCurrent.entities;
+    obstacles = levelCurrent.obstacles;
+    hazards = levelCurrent.hazards;
+    collectables = levelCurrent.collectables;
 
     // Clear out prior data
     movers = [];
-    // entities = [];
-    // collectables = [];
-    // obstacles = [];
-    // hazards = [];
-    // effects = [];
     cards = [];
     temporaryEntities = [];
-
     bonusAwarded = false;
 
     controlInput = null;
-
-
-    // // Add COLLECTABLE monster
-    // for (var i = 1; i <= numCollectableMonsters; i++) {
-    //     var location = getSingleUnoccupiedGrid();
-    //     entities.push(
-    //         new CollectableMonster(
-    //             location.x * tileSize,
-    //             location.y * tileSize,
-    //             assetLoader.getImage(ImageAsset.TREASURE_RING)
-    //         )
-    //     );
-    // }
-
-
 
     // Add cards
     let imageSize = 96;
@@ -467,7 +419,7 @@ function renderBackground(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw tiles onto the background image
-    var tiles = assetLoader.getTilesetForName(levelZero.floorTileSetName);
+    var tiles = assetLoader.getTilesetForName(levelCurrent.floorTileSetName);
 
     for (var i = 0; i < 10; i++) {
         for (var j = 0; j < 10; j++) {
@@ -633,7 +585,6 @@ function update() {
         return ent.expiresOnGameState != gameState
     });
 
-
     if (gameState == GameState.INTRO) {
         // skip
     } else if (gameState == GameState.LOAD_START) {
@@ -745,7 +696,7 @@ function update() {
         if (collectables.length == 0) {
             if (bonusAwarded == false) {
                 playBonusSound();
-                var bonusValue = level * 100;
+                var bonusValue = (1 + levelNumber) * 100;
                 goldCollected += bonusValue;
                 goldGatheredLifetime += bonusValue;
                 console.log(`* BONUS ${bonusValue} PTS *`);
@@ -1015,10 +966,10 @@ function decreaseEntityMovementSpeeds() {
 
 function gameOver(fatalEntity) {
 
-    let finalScore = Math.floor((goldCollected / movesThisRun) * level);
+    let finalScore = Math.floor((goldCollected / movesThisRun) * levelNumber);
     console.log("----------------------------------------------------------");
     console.log("Wizard was slain: GAME OVER");
-    console.log(`LEVEL ACHIEVED: ${level}`);
+    console.log(`LEVEL ACHIEVED: ${levelNumber}`);
     console.log(`TOTAL MOVES: ${movesThisRun}`);
     console.log(`TREASURE COLLECTED: ${goldCollected}`);
     console.log(`FINAL SCORE: ${finalScore}`);
@@ -1043,7 +994,7 @@ function gameOver(fatalEntity) {
 
 function showScore() {
     let scoreDisplay = document.getElementById("scoreDisplay");
-    document.getElementById("level").textContent = `LEVEL: ${level}`;
+    document.getElementById("level").textContent = `LEVEL: ${levelNumber}`;
     document.getElementById("gold").textContent = `GOLD COLLECTED: ${goldCollected}`;
     document.getElementById("moves").textContent = `MOVES: ${movesThisRun}`;
     document.getElementById("debt").textContent = `${debtTotal} GOLD`;

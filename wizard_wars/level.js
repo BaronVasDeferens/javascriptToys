@@ -2,7 +2,7 @@ import { AssetLoader, ImageAsset } from './AssetLoader.js';
 import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster } from './entity.js';
 
 
-export const TileType = Object.freeze({
+export const EntityType = Object.freeze({
     PLAYER_START: 0,
     STAIRS_DOWN: 1,
     OBSTACLE: 2,
@@ -37,31 +37,55 @@ export class Level {
     obstacles = [];
     hazards = [];
 
-    numRandomObstacles = 0;
-    numRandomHazards = 0;
+    numObstaclesRandom = 0;
+    numHazardsRandom = 0;
+    numCollectablesRandom = 0;
+
     numMonstersBasic = 0;
     numMonstersScary = 0;
-    numCollectables = 0;
     numCollectableMonsters = 0;
 
     tiles = [];
 
+    constructor(levelNumber) {
+        this.levelNumber = levelNumber
+    }
+
     initialize(assetLoader) {
 
-        // Wizard
-        var wizardDefinition = this.tiles.filter((t) => { return t.type == TileType.PLAYER_START })[0];
-        this.playerWizard = new Wizard(
-            "wizard", wizardDefinition.x * this.tileSize, wizardDefinition.y * this.tileSize, assetLoader.getImage(wizardDefinition.image)
-        );
+        // All of the pre-defined entities shall be placed FIRST, followed by the randomly-placed
+        // entities; we want to avoid accidentally placing a random entity in a tile where one
+        // is defined later.
+
+        // Wizard (defined / undefined)
+        var wizardDefinition = this.tiles.filter((t) => { return t.type == EntityType.PLAYER_START })[0];
+
+        if (wizardDefinition != null) {
+            this.playerWizard = new Wizard(
+                "wizard", wizardDefinition.x * this.tileSize, wizardDefinition.y * this.tileSize, assetLoader.getImage(wizardDefinition.image)
+            );
+        } else {
+            var location = this.getSingleUnoccupiedGrid();
+            this.playerWizard = new Wizard(
+                "wizard", location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.WIZARD_1)
+            );
+        }
+
         this.entities.push(this.playerWizard);
 
-        // Portal
-        var portalDefinition = this.tiles.filter((t) => { return t.type == TileType.STAIRS_DOWN })[0];
-        this.portal = new Portal(this.levelNumber + 1, portalDefinition.x * this.tileSize, portalDefinition.y * this.tileSize, assetLoader.getImage(portalDefinition.image));
+        // Portal (defined / undefined)
+        var portalDefinition = this.tiles.filter((t) => { return t.type == EntityType.STAIRS_DOWN })[0];
 
-        // Obstacles
+        if (portalDefinition != null) {
+            this.portal = new Portal(this.levelNumber + 1, portalDefinition.x * this.tileSize, portalDefinition.y * this.tileSize, assetLoader.getImage(portalDefinition.image));
+        } else {
+            var location = this.getSingleUnoccupiedGrid();
+            this.portal = new Portal(this.levelNumber + 1, location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1));
+        }
+
+        // Obstacles (defined)
         var obstacleImages = assetLoader.getTilesetForName(this.obstacleTileSetName);
-        var obstacleSet = this.tiles.filter((t) => { return t.type == TileType.OBSTACLE });
+        var obstacleSet = this.tiles.filter((t) => { return t.type == EntityType.OBSTACLE });
         obstacleSet.forEach((obs) => {
             var obstacleImage;
             if (obs.image != null) {
@@ -74,19 +98,9 @@ export class Level {
             );
         });
 
-        if (this.numRandomObstacles > 0) {
-            for (var i = 0; i < this.numRandomObstacles; i++) {
-                var location = this.getSingleUnoccupiedGrid();
-                this.obstacles.push(
-                    new Obstacle(
-                        `obstacle_${i}`, location.x * this.tileSize, location.y * this.tileSize, obstacleImages[this.randomIntInRange(0, obstacleImages.length)])
-                );
-            }
-        }
-
-        // Hazards
+        // Hazards (defined)
         var hazardImages = assetLoader.getTilesetForName(this.hazardTileSetName);
-        var hazardSet = this.tiles.filter((t) => { return t.type == TileType.HAZARD });
+        var hazardSet = this.tiles.filter((t) => { return t.type == EntityType.HAZARD });
         hazardSet.forEach((haz) => {
             var hazardImage;
             if (haz.image != null) {
@@ -99,12 +113,49 @@ export class Level {
                 new Hazard(`hazrad_${haz.x}_${haz.y}`, haz.x * this.tileSize, haz.y * this.tileSize, hazardImage)
             );
         });
-        for (var i = 0; i < this.numRandomHazards; i++) {
+
+        // Collectables (defined)
+        var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
+        var collectableSet = this.tiles.filter((t) => { return t.type == EntityType.COLLECTABLE });
+        collectableSet.forEach((collect) => {
+            this.collectables.push(
+                new Collectable(`gold`, collect.x * this.tileSize, collect.y * this.tileSize, coinImages[this.randomIntInRange(0, coinImages.length)])
+            );
+        })
+
+        // Monsters (defined)
+        this.tiles.filter((t) => {
+            return t.type == EntityType.MONSTER
+        }).forEach((monster) => {
+            this.entities.push(
+                this.createMonster(monster.class, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader)
+            );
+        });
+
+        // Obstacles (random)
+        for (var i = 0; i < this.numObstaclesRandom; i++) {
+            var location = this.getSingleUnoccupiedGrid();
+            this.obstacles.push(
+                new Obstacle(
+                    `obstacle_${i}`, location.x * this.tileSize, location.y * this.tileSize, obstacleImages[this.randomIntInRange(0, obstacleImages.length)])
+            );
+        }
+
+        // Hazards (random)
+        for (var i = 0; i < this.numHazardsRandom; i++) {
             var location = this.getSingleUnoccupiedGrid();
             this.hazards.push(
                 new Hazard(
                     `hazard_${i}`, location.x * this.tileSize, location.y * this.tileSize, hazardImages[this.randomIntInRange(0, hazardImages.length)])
             )
+        }
+
+        // Collectables (random)
+        for (var i = 0; i < this.numCollectablesRandom; i++) {
+            var location = this.getSingleUnoccupiedGrid();
+            this.collectables.push(
+                new Collectable(`gold_${i}`, location.x * this.tileSize, location.y * this.tileSize, coinImages[this.randomIntInRange(0, coinImages.length)])
+            );
         }
     }
 
@@ -129,12 +180,88 @@ export class Level {
     getAllOccupiedGrids() {
         var occupiedGrids = [];
 
-        var allEntities = this.entities.concat(this.collectables).concat(this.obstacles).concat(this.hazards);
+        var allEntities = this.entities.concat(this.collectables).concat(this.obstacles).concat(this.hazards).concat(this.portal);
         allEntities.forEach(entity => {
             occupiedGrids.push({ x: Math.floor(entity.x / this.tileSize), y: Math.floor(entity.y / this.tileSize) })
         });
 
         return occupiedGrids;
+    }
+
+    createMonster(type, x, y, assetLoader) {
+        var monster;
+        switch (type) {
+            case MonsterType.RAT:
+                monster = new Monster(
+                    "rat", x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
+                );
+                monster.isBlockedByHazard = true;
+                monster.isBlockedByObstacle = true;
+                monster.isBlockedByCollectable = true;
+                monster.isBlockedByPortal = true;
+                return monster;
+
+            case MonsterType.RAT_MAN:
+                monster = new Monster(
+                    "rat_man", x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_RAT_MAN)
+                );
+                monster.isBlockedByHazard = true;
+                monster.isBlockedByObstacle = true;
+                monster.isBlockedByCollectable = true;
+                monster.isBlockedByPortal = true;
+                return monster;
+
+            case MonsterType.WASP_BASIC:
+                monster = Monster(
+                    `wasp`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
+                );
+                monster.isBlockedByHazard = false;
+                monster.isBlockedByObstacle = true;
+                monster.isBlockedByCollectable = true;
+                monster.isBlockedByPortal = true;
+                return monster;
+
+            case MonsterType.WASP_CHASER:
+                monster = new Monster(
+                    `wasp_chaser`, x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_WASP_RED)
+                );
+                monster.isBlockedByHazard = false;
+                monster.isBlockedByObstacle = true;
+                monster.isBlockedByCollectable = true;
+                monster.isBlockedByPortal = true;
+                return monster;
+
+            case MonsterType.BLOB:
+                monster = new Monster(
+                    `blob`, x, y, MonsterMovementBehavior.REPLICATE, assetLoader.getImage(ImageAsset.MONSTER_BLOB_1)
+                );
+                monster.isBlockedByHazard = true;
+                monster.isBlockedByObstacle = true;
+                monster.isBlockedByCollectable = true;
+                monster.isBlockedByPortal = true;
+                return monster;
+
+            case MonsterType.GHOST_BASIC:
+                monster = new Monster(
+                    `ghost`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_GHOST_1)
+                );
+                monster.isBlockedByHazard = false;
+                monster.isBlockedByObstacle = false;
+                monster.isBlockedByCollectable = false;
+                monster.isBlockedByPortal = false;
+                return monster;
+
+            case MonsterType.GHOST_CHASER:
+                monster = new Monster(
+                    `ghost`, x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_GHOST_2)
+                );
+                monster.isBlockedByHazard = false;
+                monster.isBlockedByObstacle = false;
+                monster.isBlockedByCollectable = false;
+                monster.isBlockedByPortal = false;
+                return monster;
+        }
+
     }
 
     /* --- CONVENIENCE METHODS --- */
@@ -164,44 +291,72 @@ export class Level_0 extends Level {
 
     levelNumber = 0;
 
-    numRandomObstacles = 2;
-    numRandomHazards = 2;
+    numObstaclesRandom = 2;
+    numHazardsRandom = 2;
+    numCollectablesRandom = 20;
+
+    numMonstersBasic = 0;
+    numMonstersScary = 0;
+    numCollectableMonsters = 0;
 
     tiles = [
 
         {
             x: 5,
             y: 3,
-            type: TileType.PLAYER_START,
+            type: EntityType.PLAYER_START,
             image: ImageAsset.WIZARD_2
         },
 
         {
             x: 5,
             y: 5,
-            type: TileType.STAIRS_DOWN,
+            type: EntityType.STAIRS_DOWN,
             image: ImageAsset.STAIRS_DOWN_1
         },
 
         {
             x: 4,
             y: 5,
-            type: TileType.OBSTACLE,
+            type: EntityType.OBSTACLE,
             image: null,
         },
 
         {
             x: 6,
             y: 5,
-            type: TileType.OBSTACLE,
+            type: EntityType.OBSTACLE,
             image: null,
         },
 
         {
             x: 5,
             y: 6,
-            type: TileType.HAZARD,
+            type: EntityType.HAZARD,
             image: null,
+        },
+
+        {
+            x: 1,
+            y: 1,
+            type: EntityType.COLLECTABLE,
+            image: null
+        },
+
+        {
+            x: 9,
+            y: 9,
+            type: EntityType.MONSTER,
+            class: MonsterType.GHOST_CHASER,
+            image:null
+        },
+
+        {
+            x: 0,
+            y: 9,
+            type: EntityType.MONSTER,
+            class: MonsterType.GHOST_CHASER,
+            image:null
         }
 
     ];

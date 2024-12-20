@@ -6,14 +6,17 @@
  * IDEAS
  * 
  *      UNSORTED
+ *          level (HARD): LOTS of gold, a few obstacles/hazrads, and two chaser ghosts!
+ *              + the portal only appears when all gold is collected!
  *          puzzle: a treasure chest in the center of four columns or pits
  *          puzzle: the EXIT in the center of four pits means you MUST use phase spell to leave
  *          [X] a treasure that RUNS AWAY FROM YOU means you MUST freeze it
  *          an EVIL WIZARD is summoned after you cast a certain number of spells
- *          obstacles that are invisible but are reveal through magic (scrye?)
+ *          obstacles that are invisible but are reveal through magic
  *          multiple portals
- *              after reaching level 10 or higher, a new portal becomes available at the level 0 start
- *              the second portal goes to a much harder version of the game
+ *              + after reaching level 10 or higher, a new portal becomes available at the level 0 start
+ *              + the second portal goes to a much harder version of the game
+ *              + the magical portal shimmers
  * 
  *      TECHNICAL
  *          load and use custom font
@@ -36,9 +39,13 @@
  *          
  *      COLLECATBLES
  *          items that FADE with each move
+ *              + perhaps LOTS of collectable gold which fades with each step
  *          some gold stacks are worth more than others
  *          rare chests that contain juicy stuff
  *          potions that do stuff that spells don't
+ *          !! an invisible chest that only appears when you cast precog;
+ *              + doesn't move, or
+ *              + moves randomly (LOL)
  * 
  *      ENEMIES
  *          enemy type that guards stairs or collectables
@@ -383,13 +390,12 @@ function createBoardForLevel(newLevel) {
 
     updateStatistics();
 
-
-
     playerWizard = levelZero.playerWizard;
     portal = levelZero.portal;
     entities = levelZero.entities;
     obstacles = levelZero.obstacles;
     hazards = levelZero.hazards;
+    collectables = levelZero.collectables;
 
     level = levelZero.levelNumber;
 
@@ -1436,81 +1442,7 @@ function getRandomMover(monster) {
     return potentialMoves[0];
 }
 
-function createMonster(type, x, y) {
-    var monster;
-    switch (type) {
-        case MonsterType.RAT:
-            monster = new Monster(
-                "rat", x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
-            );
-            monster.isBlockedByHazard = true;
-            monster.isBlockedByObstacle = true;
-            monster.isBlockedByCollectable = true;
-            monster.isBlockedByPortal = true;
-            return monster;
 
-        case MonsterType.RAT_MAN:
-            monster = new Monster(
-                "rat_man", x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_RAT_MAN)
-            );
-            monster.isBlockedByHazard = true;
-            monster.isBlockedByObstacle = true;
-            monster.isBlockedByCollectable = true;
-            monster.isBlockedByPortal = true;
-            return monster;
-
-        case MonsterType.WASP_BASIC:
-            monster = Monster(
-                `wasp`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
-            );
-            monster.isBlockedByHazard = false;
-            monster.isBlockedByObstacle = true;
-            monster.isBlockedByCollectable = true;
-            monster.isBlockedByPortal = true;
-            return monster;
-
-        case MonsterType.WASP_CHASER:
-            monster = new Monster(
-                `wasp_chaser`, x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_WASP_RED)
-            );
-            monster.isBlockedByHazard = false;
-            monster.isBlockedByObstacle = true;
-            monster.isBlockedByCollectable = true;
-            monster.isBlockedByPortal = true;
-            return monster;
-
-        case MonsterType.BLOB:
-            monster = new Monster(
-                `blob`, x, y, MonsterMovementBehavior.REPLICATE, assetLoader.getImage(ImageAsset.MONSTER_BLOB_1)
-            );
-            monster.isBlockedByHazard = true;
-            monster.isBlockedByObstacle = true;
-            monster.isBlockedByCollectable = true;
-            monster.isBlockedByPortal = true;
-            return monster;
-
-        case MonsterType.GHOST_BASIC:
-            monster = new Monster(
-                `ghost`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_GHOST_1)
-            );
-            monster.isBlockedByHazard = false;
-            monster.isBlockedByObstacle = false;
-            monster.isBlockedByCollectable = false;
-            monster.isBlockedByPortal = false;
-            return monster;
-
-        case MonsterType.GHOST_CHASER:
-            monster = new Monster(
-                `ghost`, x, y, MonsterMovementBehavior.CHASE_PLAYER, assetLoader.getImage(ImageAsset.MONSTER_GHOST_2)
-            );
-            monster.isBlockedByHazard = false;
-            monster.isBlockedByObstacle = false;
-            monster.isBlockedByCollectable = false;
-            monster.isBlockedByPortal = false;
-            return monster;
-    }
-
-}
 
 /** --- SOUNDS --- */
 function playStepSound() {

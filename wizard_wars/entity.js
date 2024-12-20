@@ -17,7 +17,6 @@ class Entity {
     y = 0;
 
     isAlive = true;
-    gridSquare = null;
 
     constructor(id, x, y) {
         this.id = id;

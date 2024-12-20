@@ -430,84 +430,6 @@ function createBoardForLevel(newLevel) {
 
     controlInput = null;
 
-    // // Add player
-    // var location = getSingleUnoccupiedGrid();
-    // playerWizard = new Wizard(
-    //     "wizard", location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.WIZARD_2)
-    // );
-    // entities.push(playerWizard);
-
-    // // Add obstacles
-    // var obstacleImages = assetLoader.getTilesetForName("PILLARS");
-    // for (var i = 0; i < numObstacles; i++) {
-    //     var location = getSingleUnoccupiedGrid();
-    //     obstacles.push(
-    //         new Obstacle(
-    //             `pillar_${i}`, location.x * tileSize, location.y * tileSize, obstacleImages[randomIntInRange(0, obstacleImages.length)])
-    //     );
-    // }
-
-    // // Add hazards
-    // for (var i = 0; i < numHazards; i++) {
-    //     var location = getSingleUnoccupiedGrid();
-    //     hazards.push(
-    //         new Hazard(
-    //             `hazard_${i}`, location.x * tileSize, location.y * tileSize, assetLoader.getImage(ImageAsset.HAZARD_PIT_1))
-    //     )
-    // }
-
-    // // Add BASIC monsters
-    // for (var i = 0; i < numMonstersBasic; i++) {
-    //     var location = getSingleUnoccupiedGrid();
-    //     let monster = createMonster(MonsterType.RAT, location.x * tileSize, location.y * tileSize);
-    //     entities.push(monster);
-    // }
-
-
-    // // Add SCARY monsters
-    // for (var i = 0; i < numMonstersScary; i++) {
-    //     var location = getSingleUnoccupiedGrid();
-    //     let chance = Math.floor(Math.random() * 10);
-
-    //     switch (chance) {
-    //         case 0:
-    //         case 1:
-    //         case 2:
-    //             entities.push(
-    //                 createMonster(MonsterType.RAT_MAN, location.x * tileSize, location.y * tileSize)
-    //             );
-    //             break;
-    //         case 3:
-    //         case 4:
-    //             // Add seeking wasp
-    //             var location = getSingleUnoccupiedGrid();
-    //             entities.push(
-    //                 createMonster(MonsterType.WASP_CHASER, location.x * tileSize, location.y * tileSize)
-    //             );
-    //             break;
-    //         case 5:
-    //         case 6:
-    //             // Add replicating blob
-    //             var location = getSingleUnoccupiedGrid();
-    //             var monster = createMonster(MonsterType.BLOB, location.x * tileSize, location.y * tileSize);
-    //             monster.replicationsRemaining = 1;
-    //             entities.push(monster);
-    //             break;
-    //         case 7:
-    //         case 8:
-    //             // Add ghost (basic)
-    //             var location = getSingleUnoccupiedGrid();
-    //             var monster = createMonster(MonsterType.GHOST_BASIC, location.x * tileSize, location.y * tileSize);
-    //             entities.push(monster);
-    //             break;
-    //         case 9:
-    //             // Add ghost (chaser)
-    //             var location = getSingleUnoccupiedGrid();
-    //             var monster = createMonster(MonsterType.GHOST_CHASER, location.x * tileSize, location.y * tileSize);
-    //             entities.push(monster);
-    //             break;
-    //     }
-    // }
 
     // // Add COLLECTABLE monster
     // for (var i = 1; i <= numCollectableMonsters; i++) {
@@ -521,18 +443,7 @@ function createBoardForLevel(newLevel) {
     //     );
     // }
 
-    // // Add static collectables
-    // var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
-    // for (var i = 0; i < numCollectables; i++) {
-    //     var location = getSingleUnoccupiedGrid();
-    //     collectables.push(
-    //         new Collectable(`gold_${i}`, location.x * tileSize, location.y * tileSize, coinImages[randomIntInRange(0, coinImages.length)])
-    //     );
-    // }
 
-    // // Add the exit
-    // let portalLocation = getSingleUnoccupiedGrid();
-    // portal = new Portal(level + 1, portalLocation.x * tileSize, portalLocation.y * tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1));
 
     // Add cards
     let imageSize = 96;

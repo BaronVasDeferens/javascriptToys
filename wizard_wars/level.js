@@ -110,7 +110,7 @@ export class Level {
             }
 
             this.hazards.push(
-                new Hazard(`hazrad_${haz.x}_${haz.y}`, haz.x * this.tileSize, haz.y * this.tileSize, hazardImage)
+                new Hazard(`hazard_${haz.x}_${haz.y}`, haz.x * this.tileSize, haz.y * this.tileSize, hazardImage)
             );
         });
 
@@ -132,9 +132,13 @@ export class Level {
             );
         });
 
+        // --- RANDOM ELEMENTS ---
+
+        var location = this.getSingleUnoccupiedGrid();
+
         // Obstacles (random)
         for (var i = 0; i < this.numObstaclesRandom; i++) {
-            var location = this.getSingleUnoccupiedGrid();
+            location = this.getSingleUnoccupiedGrid();
             this.obstacles.push(
                 new Obstacle(
                     `obstacle_${i}`, location.x * this.tileSize, location.y * this.tileSize, obstacleImages[this.randomIntInRange(0, obstacleImages.length)])
@@ -143,7 +147,7 @@ export class Level {
 
         // Hazards (random)
         for (var i = 0; i < this.numHazardsRandom; i++) {
-            var location = this.getSingleUnoccupiedGrid();
+            location = this.getSingleUnoccupiedGrid();
             this.hazards.push(
                 new Hazard(
                     `hazard_${i}`, location.x * this.tileSize, location.y * this.tileSize, hazardImages[this.randomIntInRange(0, hazardImages.length)])
@@ -152,10 +156,63 @@ export class Level {
 
         // Collectables (random)
         for (var i = 0; i < this.numCollectablesRandom; i++) {
-            var location = this.getSingleUnoccupiedGrid();
+            location = this.getSingleUnoccupiedGrid();
             this.collectables.push(
                 new Collectable(`gold_${i}`, location.x * this.tileSize, location.y * this.tileSize, coinImages[this.randomIntInRange(0, coinImages.length)])
             );
+        }
+
+        // Monsters: BASIC (random)
+        for (var i = 0; i < this.numMonstersBasic; i++) {
+            location = this.getSingleUnoccupiedGrid();
+            this.entities.push(
+                this.createMonster(
+                    MonsterType.RAT,
+                    location.x * this.tileSize,
+                    location.y * this.tileSize,
+                    assetLoader)
+            );
+        }
+
+        // Monsters: SCARY (random)
+        for (var i = 0; i < this.numMonstersScary; i++) {
+            location = this.getSingleUnoccupiedGrid();
+            let chance = Math.floor(Math.random() * 10);
+
+            switch (chance) {
+                case 0:
+                case 1:
+                case 2:
+                    this.entities.push(
+                        this.createMonster(MonsterType.RAT_MAN, location.x * this.tileSize, location.y * this.tileSize, assetLoader)
+                    );
+                    break;
+                case 3:
+                case 4:
+                    // Add seeking wasp
+                    this.entities.push(
+                        this.createMonster(MonsterType.WASP_CHASER, location.x * this.tileSize, location.y * this.tileSize, assetLoader)
+                    );
+                    break;
+                case 5:
+                case 6:
+                    // Add replicating blob
+                    var monster = this.createMonster(MonsterType.BLOB, location.x * this.tileSize, location.y * this.tileSize, assetLoader);
+                    monster.replicationsRemaining = 1;
+                    this.entities.push(monster);
+                    break;
+                case 7:
+                case 8:
+                    // Add ghost (basic)
+                    var monster = this.createMonster(MonsterType.GHOST_BASIC, location.x * this.tileSize, location.y * this.tileSize, assetLoader);
+                    this.entities.push(monster);
+                    break;
+                case 9:
+                    // Add ghost (chaser)
+                    var monster = this.createMonster(MonsterType.GHOST_CHASER, location.x * this.tileSize, location.y * this.tileSize, assetLoader);
+                    this.entities.push(monster);
+                    break;
+            }
         }
     }
 
@@ -181,8 +238,12 @@ export class Level {
         var occupiedGrids = [];
 
         var allEntities = this.entities.concat(this.collectables).concat(this.obstacles).concat(this.hazards).concat(this.portal);
-        allEntities.forEach(entity => {
-            occupiedGrids.push({ x: Math.floor(entity.x / this.tileSize), y: Math.floor(entity.y / this.tileSize) })
+        allEntities.forEach((entity) => {
+            occupiedGrids.push(
+                {
+                    x: Math.floor(entity.x / this.tileSize),
+                    y: Math.floor(entity.y / this.tileSize)
+                })
         });
 
         return occupiedGrids;
@@ -293,9 +354,9 @@ export class Level_0 extends Level {
 
     numObstaclesRandom = 2;
     numHazardsRandom = 2;
-    numCollectablesRandom = 20;
+    numCollectablesRandom = 9;
 
-    numMonstersBasic = 0;
+    numMonstersBasic = 1;
     numMonstersScary = 0;
     numCollectableMonsters = 0;
 
@@ -348,7 +409,7 @@ export class Level_0 extends Level {
             y: 9,
             type: EntityType.MONSTER,
             class: MonsterType.GHOST_CHASER,
-            image:null
+            image: null
         },
 
         {
@@ -356,7 +417,7 @@ export class Level_0 extends Level {
             y: 9,
             type: EntityType.MONSTER,
             class: MonsterType.GHOST_CHASER,
-            image:null
+            image: null
         }
 
     ];

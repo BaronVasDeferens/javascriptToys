@@ -553,6 +553,8 @@ export class LevelManager {
     level_6 = {
         levelNumber : 6,
         note: "this is a 'safe' area which saves gold and unlocks progress",
+        floorTileSetName: "CLEAN_STONE",
+        
         numObstaclesRandom: 0,
         numHazardsRandom: 0,
         numCollectablesRandom: 0,

@@ -74,7 +74,7 @@ export var ImageAsset = Object.freeze({
     HAZARD_PIT_1: "resources/tiles/64x64/tile_827.png",
 
     STAIRS_DOWN_1: "resources/tiles/64x64/tile_676.png",
-    
+
     STAIRS_DOWN_2: "resources/tiles/64x64/tile_757.png",
     STAIRS_UP_2: "resources/tiles/64x64/tile_758.png",
 
@@ -106,6 +106,17 @@ export var ImageAsset = Object.freeze({
     TILE_MARBLE_PINK_8: "resources/tiles/64x64/tile_584.png",
     TILE_MARBLE_PINK_9: "resources/tiles/64x64/tile_585.png",
     TILE_MARBLE_PINK_10: "resources/tiles/64x64/tile_586.png",
+
+    TILE_CLEAN_STONE_1: "resources/tiles/64x64/tile_1162.png",
+    TILE_CLEAN_STONE_2: "resources/tiles/64x64/tile_1163.png",
+    TILE_CLEAN_STONE_3: "resources/tiles/64x64/tile_1164.png",
+    TILE_CLEAN_STONE_4: "resources/tiles/64x64/tile_1165.png",
+    TILE_CLEAN_STONE_5: "resources/tiles/64x64/tile_1166.png",
+    TILE_CLEAN_STONE_6: "resources/tiles/64x64/tile_1167.png",
+    TILE_CLEAN_STONE_7: "resources/tiles/64x64/tile_1168.png",
+    TILE_CLEAN_STONE_8: "resources/tiles/64x64/tile_1169.png",
+    TILE_CLEAN_STONE_9: "resources/tiles/64x64/tile_1170.png",
+    TILE_CLEAN_STONE_10: "resources/tiles/64x64/tile_1171.png",
 
     TILE_SKULLS_1: "resources/tiles/64x64/tile_562.png",
     TILE_SKULLS_2: "resources/tiles/64x64/tile_564.png",
@@ -153,6 +164,19 @@ export class ImageLoader {
             ImageAsset.TILE_MARBLE_PINK_8,
             ImageAsset.TILE_MARBLE_PINK_9,
             ImageAsset.TILE_MARBLE_PINK_10
+        ]);
+
+        this.tileSets.set("CLEAN_STONE", [
+            ImageAsset.TILE_CLEAN_STONE_1,
+            ImageAsset.TILE_CLEAN_STONE_2,
+            ImageAsset.TILE_CLEAN_STONE_3,
+            ImageAsset.TILE_CLEAN_STONE_4,
+            ImageAsset.TILE_CLEAN_STONE_5,
+            ImageAsset.TILE_CLEAN_STONE_6,
+            ImageAsset.TILE_CLEAN_STONE_7,
+            ImageAsset.TILE_CLEAN_STONE_8,
+            ImageAsset.TILE_CLEAN_STONE_9,
+            ImageAsset.TILE_CLEAN_STONE_10
         ]);
 
         this.tileSets.set("SKULLS", [
@@ -204,7 +228,7 @@ export class ImageLoader {
             var assetLocation = ImageAsset[key];
             let img = new Image();
             this.imageMap.set(assetLocation, img);
-            
+
             img.onload = function () {
                 loadedImages++;
                 if (loadedImages == totalImages) {
@@ -278,8 +302,8 @@ export var SoundAsset = Object.freeze({
     SUCCESS: "resources/sounds/success.wav",
 
     BGM: "resources/sounds/bgm.wav",
-    SAFE_AT_LAST : "resources/sounds/safe_at_last.wav",
-    TENSION:  "resources/sounds/tension.wav"
+    SAFE_AT_LAST: "resources/sounds/safe_at_last.wav",
+    TENSION: "resources/sounds/tension.wav"
 });
 
 export class SoundLoader {

@@ -79,6 +79,8 @@ export class Level {
             }
         }
 
+        var location = null;
+
 
         // All of the pre-defined entities shall be placed FIRST, followed by the randomly-placed
         // entities; we want to avoid accidentally placing a random entity in a tile where one
@@ -92,7 +94,7 @@ export class Level {
                 "wizard", wizardDefinition.x * this.tileSize, wizardDefinition.y * this.tileSize, assetLoader.getImage(wizardDefinition.image)
             );
         } else {
-            var location = this.getSingleUnoccupiedGrid();
+            location = this.getSingleUnoccupiedGrid();
             this.playerWizard = new Wizard(
                 "wizard", location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.WIZARD_2)
             );
@@ -104,7 +106,7 @@ export class Level {
         var stairsDownDefinition = this.definitions.filter((t) => { return t.type == EntityType.PORTAL })[0];
 
         if (stairsDownDefinition == null) {
-            var location = this.getSingleUnoccupiedGrid();
+            location = this.getSingleUnoccupiedGrid();
             this.portals.push(new Portal(this.levelNumber + 1, location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1), SoundAsset.DESCEND));
         } else {
             var portalDefinitions = this.definitions.filter((t) => { return t.type == EntityType.PORTAL });
@@ -434,6 +436,7 @@ export class LevelManager {
 
     level_0 = {
         levelNumber: 0,
+        note: "This is the 'hub' world at the beginning of the game",
         floorTileSetName: "MARBLE_PINK",
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
@@ -547,10 +550,54 @@ export class LevelManager {
         ]
     };
 
+    level_6 = {
+        levelNumber : 6,
+        note: "this is a 'safe' area which saves gold and unlocks progress",
+        numObstaclesRandom: 0,
+        numHazardsRandom: 0,
+        numCollectablesRandom: 0,
+        
+        numMonstersBasic: 0,
+        numMonstersScary: 0,
+        numMonstersCollectable: 0,
+        
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.SAFE_AT_LAST,
+        definitions: [
+            {
+                x: 5,
+                y: 5,
+                type: EntityType.PLAYER_START,
+                image: ImageAsset.WIZARD_2
+            },
+            {
+                x: 3,
+                y: 5,
+                type: EntityType.PORTAL,
+                image: ImageAsset.STAIRS_UP_2,
+                toLevelNumber: 0,
+                isVisible: true,
+                soundEffectName: SoundAsset.DESCEND
+            },
+
+            {
+                x: 7,
+                y: 5,
+                type: EntityType.PORTAL,
+                image: ImageAsset.STAIRS_DOWN_2,
+                toLevelNumber: 7,
+                isVisible: true,
+                soundEffectName: SoundAsset.DESCEND
+            },
+        ]
+    }
+
     level_100 = {
         levelNumber: 100,
+        note: "this is a 'challenge' level",
         numCollectablesRandom: 10,
         numMonstersBasic: 0,
+        numMonstersScary: 0,
         numHazardsRandom: 10,
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.TENSION,
@@ -589,6 +636,7 @@ export class LevelManager {
     constructor() {
         // Level ZERO
         this.levels.set(0, this.level_0);
+        this.levels.set(6,this. level_6);
         this.levels.set(100, this.level_100);
 
 

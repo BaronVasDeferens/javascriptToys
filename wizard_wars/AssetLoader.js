@@ -74,6 +74,9 @@ export var ImageAsset = Object.freeze({
     HAZARD_PIT_1: "resources/tiles/64x64/tile_827.png",
 
     STAIRS_DOWN_1: "resources/tiles/64x64/tile_676.png",
+    
+    STAIRS_DOWN_2: "resources/tiles/64x64/tile_757.png",
+    STAIRS_UP_2: "resources/tiles/64x64/tile_758.png",
 
     MAGIC_PORTAL_1: "resources/tiles/64x64/tile_671.png",
 

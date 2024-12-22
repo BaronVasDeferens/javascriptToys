@@ -36,6 +36,8 @@ export class AssetLoader {
 
 export var ImageAsset = Object.freeze({
 
+    GRAPHIC_TITLE_CARD: "resources/cards/graphic_title_card.png",
+
     WIZARD_1: "resources/tiles/64x64/tile_3807.png",
     WIZARD_2: "resources/tiles/64x64/tile_3795.png",
 
@@ -61,7 +63,6 @@ export var ImageAsset = Object.freeze({
     TREASURE_LAMP: "resources/tiles/64x64/tile_2616.png",
     TREASURE_RING: "resources/tiles/64x64/tile_2733.png",
 
-
     OBSTACLE_PILLAR_1: "resources/tiles/64x64/tile_781.png",
     OBSTACLE_PILLAR_2: "resources/tiles/64x64/tile_782.png",
     OBSTACLE_PILLAR_3: "resources/tiles/64x64/tile_783.png",
@@ -74,7 +75,7 @@ export var ImageAsset = Object.freeze({
 
     STAIRS_DOWN_1: "resources/tiles/64x64/tile_676.png",
 
-    GRAPHIC_TITLE_CARD: "resources/cards/graphic_title_card.png",
+    MAGIC_PORTAL_1: "resources/tiles/64x64/tile_671.png",
 
     CARD_SPELL_FREEZE: "resources/cards/96x96/spell_freeze.png",
     CARD_SPELL_RANDOMIZE: "resources/cards/96x96/spell_randomize.png",
@@ -267,13 +268,15 @@ export var SoundAsset = Object.freeze({
     MOVE_2: "resources/sounds/move_2.wav",
 
     DESCEND: "resources/sounds/descend.wav",
+    PORTAL_1: "resources/sounds/portal_1.wav",
 
     SPELL_THUNDER_1: "resources/sounds/spell_thunder_1.wav",
 
     SUCCESS: "resources/sounds/success.wav",
 
     BGM: "resources/sounds/bgm.wav",
-    SAFE_AT_LAST : "resources/sounds/safe_at_last.wav"
+    SAFE_AT_LAST : "resources/sounds/safe_at_last.wav",
+    TENSION:  "resources/sounds/tension.wav"
 });
 
 export class SoundLoader {

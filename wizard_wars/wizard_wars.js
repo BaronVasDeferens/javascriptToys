@@ -11,9 +11,9 @@
  *              + achieving milestones unlocks portals that appear between columns
  *              + portals go to curated puzzle areas
  * 
- *          !! an invisible key that only appears when you cast precog;
- *              + doesn't move
- *              + is phased, so the wizard mus ALSO be phased to collect it
+ *          no exit
+ *              + key appears after collecting all the treasure
+ *              + sometimes the key moves
  * 
  *          level (HARD): LOTS of gold, a few obstacles/hazrads, and two chaser ghosts!
  *              + the portal only appears when all gold is collected!
@@ -61,6 +61,7 @@
  *      ENVIRONMENT
  *          traps?
  *          tiles that fall away after moving over them N times
+ *              + ghosts
  * 
  *      SPELLS
  *          [X] spell: become immune to monster death for N moves (monsters semi-transparent)
@@ -157,6 +158,7 @@ var moveAdjustment = 2;
 var entities = [];
 var controlInput = null;
 var movers = [];
+var portals = [];
 var collectables = [];
 var obstacles = [];
 var hazards = [];
@@ -164,13 +166,13 @@ var effects = [];
 var specialEffects = [];
 var cards = [];
 var temporaryEntities = [];
-var portal = null;
 var bonusAwarded = false;
 
 var backgroundImage = new Image();
 
 var coinSounds = [];
 
+var backgroundMusicTitle = SoundAsset.BGM;
 var backgroundMusicPlayer = null;
 
 var audioConfig = {
@@ -213,7 +215,7 @@ const ControlInput = Object.freeze({
 document.addEventListener('keydown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-        updateAudio();
+        updateAudioSettings();
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -260,7 +262,7 @@ document.addEventListener('keydown', (e) => {
             case "M":
                 audioConfig.bgmEnabled = !audioConfig.bgmEnabled;
                 audioConfig.efxEnabled = !audioConfig.efxEnabled;
-                updateAudio();
+                updateAudioSettings();
                 break;
             case "Escape":
                 initializeGameState();
@@ -279,7 +281,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('mousedown', (e) => {
 
     if (gameState == GameState.LOAD_COMPLETE) {
-        updateAudio();
+        updateAudioSettings();
         initializeGameState();
     } else if (gameState == GameState.INTRO) {
         changeGameState(GameState.LEVEL_START);
@@ -314,7 +316,7 @@ document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         backgroundMusicPlayer.pause();
     } else {
-        updateAudio();
+        updateAudioSettings();
     }
 });
 
@@ -371,6 +373,8 @@ function initializeGameState() {
     );
     entities.push(introEntity);
 
+
+    updateBackgroundMusic(SoundAsset.BGM, true);
     backgroundMusicPlayer.playbackRate = 1.0;
 }
 
@@ -394,7 +398,7 @@ function createBoardForLevel(newLevelNumber) {
     updateStatistics();
 
     playerWizard = levelCurrent.playerWizard;
-    portal = levelCurrent.portal;
+    portals = levelCurrent.portals;
     entities = levelCurrent.entities;
     obstacles = levelCurrent.obstacles;
     hazards = levelCurrent.hazards;
@@ -418,6 +422,8 @@ function createBoardForLevel(newLevelNumber) {
 
     renderBackground(context);
 
+    updateBackgroundMusic(levelCurrent.backgroundMusicTitle, levelCurrent.backgroundMusicPlay);
+
     changeGameState(GameState.PLAYER_ACTION_SELECT);
 }
 
@@ -440,7 +446,7 @@ function renderBackground(context) {
 
     obstacles.forEach(ob => { ob.render(context) });
     hazards.forEach(hazard => { hazard.render(context) });
-    portal.render(context);
+    portals.forEach(portal => portal.render(context));
 
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
@@ -486,7 +492,7 @@ function processCardAction(card) {
                 if (ent instanceof Card == false) {
                     return ent;
                 }
-            }).concat(obstacles).concat(hazards).concat(collectables).concat(portal);
+            }).concat(obstacles).concat(hazards).concat(collectables).concat(portals);
             shuffle(swappables);
 
             specialEffects.push(new SpecialEffectRandomize(mapWidth, mapHeight, () => {
@@ -753,19 +759,22 @@ function update() {
         if (fatalEntity.length > 0) {
             // Check for GAME OVER: HAZARDS and MONSTERS...
             gameOver(fatalEntity[0]);
-        } else if (isWithinCollisionDistance(playerWizard, portal, 0)) {
+        } else {
             // ...or LEVEL DESCENT
-            effects = [];
-            changeGameState(GameState.CAST_SPELL_EFFECT);
-            let descendSound = assetLoader.getSound(SoundAsset.DESCEND);
-            descendSound.addEventListener("ended", (e) => {
-                createBoardForLevel(portal.toLevelNumber);
-            }, { once: true });
-            descendSound.play();
+            var portal = getPlayerPortal();
+            if (portal != null) {
+                let descendSound = assetLoader.getSound(portal.soundEffectName);
+                descendSound.addEventListener("ended", (e) => {
+                    createBoardForLevel(portal.toLevelNumber);
+                }, { once: true });
+                descendSound.play();
+                effects = [];
+                changeGameState(GameState.CAST_SPELL_EFFECT);
+                specialEffects.push(
+                    new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize, wizardMovePerTick)
+                );
+            }
 
-            specialEffects.push(
-                new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize, wizardMovePerTick)
-            );
         }
     }
 }
@@ -866,6 +875,10 @@ function checkAdjacentToWizard(target) {
     } else {
         return null;
     }
+}
+
+function getPlayerPortal() {
+    return portals.filter( portal => { return isWithinCollisionDistance(playerWizard, portal, 0) })[0];  
 }
 
 /**
@@ -1055,7 +1068,7 @@ function checkIsValidMove(entity, destinationX, destinationY) {
         }
 
         if (entity.isBlockedByPortal) {
-            illegalSpaces = illegalSpaces.concat(portal);
+            illegalSpaces = illegalSpaces.concat(portals);
         }
 
         var isClear = illegalSpaces.map(grid => {
@@ -1160,7 +1173,7 @@ function getUnoccupiedAdjacencies(entity) {
         return (adj.x >= 0 && adj.x < mapWidth && adj.y >= 0 && adj.y < mapHeight);
     });
 
-    var occupiedGrids = getAllOccupiedGrids().concat(portal);
+    var occupiedGrids = getAllOccupiedGrids().concat(portals);
 
     occupiedGrids
         .map(occupied => {
@@ -1358,10 +1371,26 @@ function playBonusSound() {
     sound.play();
 }
 
-function updateAudio() {
+function updateBackgroundMusic(selection, playMusic) {
+
+    if (backgroundMusicTitle != selection) {
+        backgroundMusicTitle = selection;
+        backgroundMusicPlayer.pause();
+        backgroundMusicPlayer = assetLoader.getSound(selection);
+        backgroundMusicPlayer.loop = true;
+        backgroundMusicPlayer.currentTime = 0;
+    }
+
+    if (audioConfig.bgmEnabled && playMusic) {
+        backgroundMusicPlayer.playbackRate = 1.0;
+        backgroundMusicPlayer.play();
+    }
+}
+
+function updateAudioSettings() {
 
     if (backgroundMusicPlayer == null) {
-        backgroundMusicPlayer = assetLoader.getSound(SoundAsset.BGM);
+        backgroundMusicPlayer = assetLoader.getSound(backgroundMusicTitle);
         backgroundMusicPlayer.loop = true;
         backgroundMusicPlayer.pause();
     }

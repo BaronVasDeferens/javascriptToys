@@ -4,12 +4,12 @@ import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementB
 
 export const EntityType = Object.freeze({
     PLAYER_START: 0,
-    STAIRS_DOWN: 1,
+    PORTAL: 1,
     OBSTACLE: 2,
     HAZARD: 3,
     MONSTER: 4,
     COLLECTABLE: 5,
-    COLLECT_MONSTER_RING: 6
+    COLLECT_MONSTER_RING: 6,
 });
 
 export const LevelType = Object.freeze({
@@ -37,8 +37,8 @@ export class Level {
     requiresKeyToExit = false;
 
     playerWizard = null;
-    portal = null;
 
+    portals = [];
     entities = [];
     collectables = [];
     obstacles = [];
@@ -52,7 +52,8 @@ export class Level {
     numMonstersScary = 0;
     numMonstersCollectable = 0;
 
-    tiles = [];
+    // Definitions: the entity definitions (including portals) for this level
+    definitions = [];
 
     constructor(levelNumber) {
         this.levelNumber = levelNumber;
@@ -61,7 +62,7 @@ export class Level {
     initialize(assetLoader) {
 
         // FIXME: this may NOT be the best test for whether to populate the dungeon....
-        if (this.tiles.length == 0) {
+        if (this.definitions.length == 0) {
 
             this.numObstaclesRandom = 7 + (Math.floor(this.levelNumber / 2));
             this.numHazardsRandom = 2 + (Math.floor(this.levelNumber / 3));
@@ -84,7 +85,7 @@ export class Level {
         // is defined later.
 
         // Wizard (defined / undefined)
-        var wizardDefinition = this.tiles.filter((t) => { return t.type == EntityType.PLAYER_START })[0];
+        var wizardDefinition = this.definitions.filter((t) => { return t.type == EntityType.PLAYER_START })[0];
 
         if (wizardDefinition != null) {
             this.playerWizard = new Wizard(
@@ -99,19 +100,22 @@ export class Level {
 
         this.entities.push(this.playerWizard);
 
-        // Portal (defined / undefined)
-        var portalDefinition = this.tiles.filter((t) => { return t.type == EntityType.STAIRS_DOWN })[0];
+        // Stairs down (defined / undefined)
+        var stairsDownDefinition = this.definitions.filter((t) => { return t.type == EntityType.PORTAL })[0];
 
-        if (portalDefinition != null) {
-            this.portal = new Portal(this.levelNumber + 1, portalDefinition.x * this.tileSize, portalDefinition.y * this.tileSize, assetLoader.getImage(portalDefinition.image));
-        } else {
+        if (stairsDownDefinition == null) {
             var location = this.getSingleUnoccupiedGrid();
-            this.portal = new Portal(this.levelNumber + 1, location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1));
+            this.portals.push(new Portal(this.levelNumber + 1, location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1), SoundAsset.DESCEND));
+        } else {
+            var portalDefinitions = this.definitions.filter((t) => { return t.type == EntityType.PORTAL });
+            portalDefinitions.forEach(portal => {
+                this.portals.push(new Portal(portal.toLevelNumber, portal.x * this.tileSize, portal.y * this.tileSize, assetLoader.getImage(portal.image), portal.soundEffectName));
+            });
         }
 
         // Obstacles (defined)
         var obstacleImages = assetLoader.getTilesetForName(this.obstacleTileSetName);
-        var obstacleSet = this.tiles.filter((t) => { return t.type == EntityType.OBSTACLE });
+        var obstacleSet = this.definitions.filter((t) => { return t.type == EntityType.OBSTACLE });
         obstacleSet.forEach((obs) => {
             var obstacleImage;
             if (obs.image != null) {
@@ -126,7 +130,7 @@ export class Level {
 
         // Hazards (defined)
         var hazardImages = assetLoader.getTilesetForName(this.hazardTileSetName);
-        var hazardSet = this.tiles.filter((t) => { return t.type == EntityType.HAZARD });
+        var hazardSet = this.definitions.filter((t) => { return t.type == EntityType.HAZARD });
         hazardSet.forEach((haz) => {
             var hazardImage;
             if (haz.image != null) {
@@ -142,7 +146,7 @@ export class Level {
 
         // Collectables (defined)
         var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
-        var collectableSet = this.tiles.filter((t) => { return t.type == EntityType.COLLECTABLE });
+        var collectableSet = this.definitions.filter((t) => { return t.type == EntityType.COLLECTABLE });
         collectableSet.forEach((collect) => {
             this.collectables.push(
                 new Collectable(`gold`, collect.x * this.tileSize, collect.y * this.tileSize, coinImages[this.randomIntInRange(0, coinImages.length)])
@@ -150,16 +154,16 @@ export class Level {
         })
 
         // Monsters (defined)
-        this.tiles.filter((t) => {
+        this.definitions.filter((t) => {
             return t.type == EntityType.MONSTER
         }).forEach((monster) => {
             this.entities.push(
-                this.createMonster(monster.class, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader)
+                this.createMonster(monster.monsterClass, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader)
             );
         });
 
         // Monster : Collectable Ring (defined)
-        this.tiles.filter((t) => {
+        this.definitions.filter((t) => {
             return t.type == EntityType.COLLECT_MONSTER_RING
         }).forEach((ring) => {
             this.entities.push(
@@ -313,7 +317,7 @@ export class Level {
     getAllOccupiedGrids() {
         var occupiedGrids = [];
 
-        var allEntities = this.entities.concat(this.collectables).concat(this.obstacles).concat(this.hazards).concat(this.portal);
+        var allEntities = this.entities.concat(this.collectables).concat(this.obstacles).concat(this.hazards).concat(this.portals);
         allEntities.filter((ent) => { return ent != null }).forEach((entity) => {
             occupiedGrids.push(
                 {
@@ -428,108 +432,166 @@ export class LevelManager {
 
     levels = new Map();
 
+    level_0 = {
+        levelNumber: 0,
+        floorTileSetName: "MARBLE_PINK",
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+        numCollectablesRandom: 0,
+        numMonstersBasic: 1,
+        definitions: [
+
+            {
+                x: 5,
+                y: 0,
+                type: EntityType.PORTAL,
+                image: ImageAsset.MAGIC_PORTAL_1,
+                toLevelNumber: 100,
+                isVisible: true,
+                soundEffectName: SoundAsset.PORTAL_1
+            },
+
+            {
+                x: 5,
+                y: 9,
+                type: EntityType.PORTAL,
+                image: ImageAsset.STAIRS_DOWN_1,
+                toLevelNumber: 1,
+                isVisible: true,
+                soundEffectName: SoundAsset.DESCEND
+            },
+
+            {
+                x: 5,
+                y: 5,
+                type: EntityType.PLAYER_START,
+                image: ImageAsset.WIZARD_2
+            },
+
+            {
+                x: 5,
+                y: 7,
+                type: EntityType.COLLECTABLE,
+                image: ImageAsset.GOLD_COIN_STACK_1
+            },
+
+            {
+                x: 3,
+                y: 1,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 3,
+                y: 3,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 3,
+                y: 5,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 3,
+                y: 7,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 3,
+                y: 9,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+
+            {
+                x: 7,
+                y: 1,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+            {
+                x: 7,
+                y: 3,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 7,
+                y: 5,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 7,
+                y: 7,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+
+            {
+                x: 7,
+                y: 9,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+        ]
+    };
+
+    level_100 = {
+        levelNumber: 100,
+        numCollectablesRandom: 10,
+        numMonstersBasic: 0,
+        numHazardsRandom: 10,
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.TENSION,
+
+        definitions: [
+            {
+                x: 5,
+                y: 0,
+                type: EntityType.PLAYER_START,
+                image: ImageAsset.WIZARD_2
+            },
+            {
+                x: 0,
+                y: 9,
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.GHOST_CHASER
+            },
+            {
+                x: 9,
+                y: 9,
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.GHOST_CHASER
+            },
+            {
+                x: 5,
+                y: 9,
+                type: EntityType.PORTAL,
+                image: ImageAsset.MAGIC_PORTAL_1,
+                toLevelNumber: 100,
+                isVisible: true,
+                soundEffectName: SoundAsset.PORTAL_1
+            },
+        ]
+    };
+
     constructor() {
         // Level ZERO
-        this.levels.set(0,
-            {
-                floorTileSetName: "MARBLE_PINK",
-                numCollectablesRandom: 0,
-                numMonstersBasic: 1,
-                tiles: [
-                    {
-                        x: 5,
-                        y: 5,
-                        type: EntityType.PLAYER_START,
-                        image: ImageAsset.WIZARD_2
-                    },
-
-                    {
-                        x: 5,
-                        y: 7,
-                        type: EntityType.COLLECTABLE,
-                        image: ImageAsset.GOLD_COIN_STACK_1
-                    },
-
-                    {
-                        x: 5,
-                        y: 9,
-                        type: EntityType.STAIRS_DOWN,
-                        image: ImageAsset.STAIRS_DOWN_1
-                    },
-
-                    {
-                        x: 3,
-                        y: 1,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 3,
-                        y: 3,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 3,
-                        y: 5,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 3,
-                        y: 7,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 3,
-                        y: 9,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
+        this.levels.set(0, this.level_0);
+        this.levels.set(100, this.level_100);
 
 
-                    {
-                        x: 7,
-                        y: 1,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-                    {
-                        x: 7,
-                        y: 3,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 7,
-                        y: 5,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 7,
-                        y: 7,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-
-                    {
-                        x: 7,
-                        y: 9,
-                        type: EntityType.OBSTACLE,
-                        image: null,
-                    },
-                ]
-            });
-
-        // Level SIX
     }
 
     getLevel(levelNumber) {
@@ -542,5 +604,4 @@ export class LevelManager {
             return new Level(levelNumber);
         }
     }
-
 }

@@ -164,10 +164,15 @@ export class Hazard extends Entity {
 }
 
 export class Portal extends Entity {
-    constructor(toLevelNumber, x, y, image) {
+
+    isVisible = true;
+    isHidden = false;
+
+    constructor(toLevelNumber, x, y, image, soundEffectName) {
         super(`portal_${toLevelNumber}`, x, y);
         this.toLevelNumber = toLevelNumber;
         this.image = image;
+        this.soundEffectName = soundEffectName;
     }
 }
 

@@ -7,9 +7,13 @@
  * 
  *      UNSORTED
  * 
- *          !! an invisible chest that only appears when you cast precog;
- *              + doesn't move, or
- *              + moves randomly (LOL)
+ *          level 0: outside, column arcade
+ *              + achieving milestones unlocks portals that appear between columns
+ *              + portals go to curated puzzle areas
+ * 
+ *          !! an invisible key that only appears when you cast precog;
+ *              + doesn't move
+ *              + is phased, so the wizard mus ALSO be phased to collect it
  * 
  *          level (HARD): LOTS of gold, a few obstacles/hazrads, and two chaser ghosts!
  *              + the portal only appears when all gold is collected!
@@ -49,7 +53,6 @@
  *          some gold stacks are worth more than others
  *          rare chests that contain juicy stuff
  *          potions that do stuff that spells don't
-
  * 
  *      ENEMIES
  *          enemy type that guards stairs or collectables
@@ -104,7 +107,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster, EffectTimerProcog } from './entity.js';
 import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
 import { Level, LevelManager } from './level.js';
 
@@ -348,6 +351,8 @@ function initializeGameState() {
     movesThisRun = 0;
     goldCollected = 0;
     entities = [];
+    effects = [];
+    specialEffects = [];
     cards = [];
 
     let introImage = assetLoader.getImage(ImageAsset.GRAPHIC_TITLE_CARD);
@@ -557,6 +562,15 @@ function processCardAction(card) {
                     );
                 });
 
+            var invisibleCollecatbleMonsters = entities.filter((ent) => { return ent instanceof CollectableMonster && ent.isSecret == true});
+            effects.push(
+                new EffectTimerProcog(
+                    SpellAction.SPELL_PRECOGNITION,
+                    1,
+                    invisibleCollecatbleMonsters
+                )
+            );
+
             specialEffects.push(
                 new SpecialEffectPrecognition(mapWidth, mapHeight)
             );
@@ -564,7 +578,6 @@ function processCardAction(card) {
 
         case SpellAction.SPELL_PHASE:
             specialEffects.push(new SpecialEffectPhase(mapWidth, mapHeight));
-            playerWizard.isPhasedOut = true;
             effects.push(new EffectTimerPhase(card.action, 2, playerWizard));
             break;
     }
@@ -611,11 +624,11 @@ function update() {
             return mover.isAlive;
         });
 
-        var hasFreeze = effects.map(ef => { return ef.effectType == SpellAction.SPELL_FREEZE }).includes(true);
+        var isFreezeInEffect = effects.map(ef => { return ef.effectType == SpellAction.SPELL_FREEZE }).includes(true);
 
         // Monsters plot thier moves here
         if (gameState == GameState.ENEMY_MOVE_PREPARE) {
-            if (!hasFreeze) {
+            if (!isFreezeInEffect) {
                 entities
                     .filter(entity => { return entity instanceof Monster })
                     .filter(entity => { return entity.mover == null || entity.mover.isAlive == false })
@@ -667,7 +680,7 @@ function update() {
                     mover.update();
                 }
             } else if (gameState == GameState.ENEMY_MOVE_EXECUTE) {
-                if (mover.entity instanceof Monster && !hasFreeze) {
+                if (mover.entity instanceof Monster && !isFreezeInEffect) {
                     mover.update();
                 }
             }
@@ -682,7 +695,7 @@ function update() {
 
         // Consume the collectables
         collectables
-            .filter(item => item.isCollected == false && playerWizard.isPhasedOut == false)
+            .filter(item => item.isCollected == false && playerWizard.isPhased == false)
             .forEach(item => {
                 if (isWithinCollisionDistance(playerWizard, item, 0)) {
                     item.isCollected = true;
@@ -710,7 +723,11 @@ function update() {
 
         // Check for COLLECTABLE MONSTER
         entities.filter((ent) => { return ent instanceof CollectableMonster }).forEach((mon) => {
-            if (isWithinCollisionDistance(playerWizard, mon, 0)) {
+
+            // Wizard and collecatble phases must match.
+            var isInPhaseWithWizard = mon.isPhased == playerWizard.isPhased;
+
+            if (isWithinCollisionDistance(playerWizard, mon, 0) && !mon.isSecret && isInPhaseWithWizard) {
                 assetLoader.getSound(SoundAsset.SUCCESS).play();
                 mon.isAlive = false;
                 goldCollected += 1000;
@@ -792,7 +809,7 @@ function render() {
             if (effect instanceof EffectTimerFreeze) {
                 effect.render(
                     context,
-                    entities.filter(ent => { return ent instanceof Monster }),
+                    entities.filter(ent => { return ent instanceof Monster && !ent.isSecret && !ent.isPhased}),
                     tileSize
                 );
             }
@@ -1035,7 +1052,7 @@ function checkIsValidMove(entity, destinationX, destinationY) {
         return !isClear.includes(true) && inBounds;
 
     } else {
-        var isUnobstruced = checkUnobstructed(destinationX, destinationY) || playerWizard.isPhasedOut;
+        var isUnobstruced = checkUnobstructed(destinationX, destinationY) || playerWizard.isPhased;
         return isUnobstruced && inBounds;
     }
 }
@@ -1055,7 +1072,7 @@ function checkUnobstructed(destinationX, destinationY) {
 
 function getFatalEntity(source, potentials) {
     var fatalEntities = potentials.map((entity) => {
-        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0)) && !playerWizard.isPhasedOut) {
+        if ((source !== entity) && (entity.isLethal == true) && (isWithinCollisionDistance(source, entity, 0)) && !playerWizard.isPhased) {
             return entity;
         };
     });

@@ -1,4 +1,4 @@
-import { AssetLoader, ImageAsset } from './AssetLoader.js';
+import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
 import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster } from './entity.js';
 
 
@@ -31,6 +31,11 @@ export class Level {
     obstacleTileSetName = "PILLARS";
     hazardTileSetName = "PITS";
 
+    backgroundMusicPlay = true;
+    backgroundMusicTitle = SoundAsset.BGM;
+
+    requiresKeyToExit = false;
+
     playerWizard = null;
     portal = null;
 
@@ -58,13 +63,13 @@ export class Level {
         // FIXME: this may NOT be the best test for whether to populate the dungeon....
         if (this.tiles.length == 0) {
 
-            this.numObstaclesRandom = 4 + (Math.floor(this.levelNumber / 2));
+            this.numObstaclesRandom = 7 + (Math.floor(this.levelNumber / 2));
             this.numHazardsRandom = 2 + (Math.floor(this.levelNumber / 3));
             this.numCollectablesRandom = this.levelNumber + 3;
 
             // Default monster population
             this.numMonstersScary = Math.floor(this.levelNumber / 3);
-            this.numMonstersBasic = 1 + this.levelNumber - this.numMonstersScary;
+            this.numMonstersBasic = 2 + this.levelNumber - this.numMonstersScary;
 
             if (this.levelNumber % 3 == 0) {
                 this.numMonstersCollectable = 1;
@@ -249,16 +254,47 @@ export class Level {
             }
         }
 
-        // Monster: Collectable Ring (random)
+        // Monster: Collectable (random)
         for (var i = 0; i < this.numMonstersCollectable; i++) {
             location = this.getSingleUnoccupiedGrid();
-            this.entities.push(
-                new CollectableMonster(
-                    location.x * this.tileSize,
-                    location.y * this.tileSize,
-                    assetLoader.getImage(ImageAsset.TREASURE_RING)
-                )
-            );
+
+            let chance = Math.floor(Math.random() * 10);
+
+            switch (chance) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    var magicRing = new CollectableMonster(
+                        location.x * this.tileSize,
+                        location.y * this.tileSize,
+                        assetLoader.getImage(ImageAsset.TREASURE_RING)
+                    );
+                    magicRing.isPhased = false;
+                    magicRing.isSecret = false;
+                    this.entities.push(
+
+                    );
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                    var phasedKey = new CollectableMonster(
+                        location.x * this.tileSize,
+                        location.y * this.tileSize,
+                        assetLoader.getImage(ImageAsset.TREASURE_KEY)
+                    );
+                    phasedKey.behavior = MonsterMovementBehavior.IMMOBILE;
+                    phasedKey.isSecret = true;
+                    phasedKey.isVisible = false;
+                    phasedKey.isPhased = true;
+                    this.entities.push(phasedKey);
+                    break;
+
+            }
         }
     }
 
@@ -403,7 +439,7 @@ export class LevelManager {
         this.levels.set(0,
             {
                 floorTileSetName: "MARBLE_PINK",
-                numCollectablesRandom: 2,
+                numCollectablesRandom: 0,
                 numMonstersBasic: 1,
                 tiles: [
                     {
@@ -411,6 +447,13 @@ export class LevelManager {
                         y: 5,
                         type: EntityType.PLAYER_START,
                         image: ImageAsset.WIZARD_2
+                    },
+
+                    {
+                        x: 5,
+                        y: 7,
+                        type: EntityType.COLLECTABLE,
+                        image: ImageAsset.GOLD_COIN_STACK_1
                     },
 
                     {

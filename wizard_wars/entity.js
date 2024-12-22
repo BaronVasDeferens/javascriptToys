@@ -17,6 +17,7 @@ class Entity {
     y = 0;
 
     isAlive = true;
+    isPhased = false;
 
     constructor(id, x, y) {
         this.id = id;
@@ -50,15 +51,13 @@ export class ImageDisplayEntity extends Entity {
 
 export class Wizard extends Entity {
 
-    isPhasedOut = false;
-
     constructor(id, x, y, image) {
         super(id, x, y);
         this.image = image;
     }
 
     render(context) {
-        if (this.isPhasedOut) {
+        if (this.isPhased) {
             var offset = Math.floor(Math.random() * 3) + 1;
             context.globalAlpha = 0.25;
             context.drawImage(this.image, this.x + offset, this.y);
@@ -83,10 +82,11 @@ export var MonsterType = Object.freeze({
 
 
 export var MonsterMovementBehavior = Object.freeze({
+    IMMOBILE: 0,
     RANDOM: 1,
     CHASE_PLAYER: 2,
     REPLICATE: 3,
-    FLEE_PLAYER: 4
+    FLEE_PLAYER: 4,
 });
 
 
@@ -102,6 +102,11 @@ export class Monster extends Entity {
 
     replicationsRemaining = 0;      // When the behavior is replicating, this is the number of mx number of times it may replicate
 
+    // Graphic representation
+    isVisible = true;
+    isPhasedGraphic = false;        // should show up as "phased" (blurry and incorporeal)
+
+
     constructor(id, x, y, behavior, image) {
         super(id, x, y);
         this.behavior = behavior;
@@ -111,11 +116,28 @@ export class Monster extends Entity {
     setMover(mover) {
         this.mover = mover;
     }
+
+    render(context) {
+        if (this.isVisible) {
+            if (this.isPhasedGraphic) {
+                var offset = Math.floor(Math.random() * 3) + 1;
+                context.globalAlpha = 0.25;
+                context.drawImage(this.image, this.x + offset, this.y);
+                context.drawImage(this.image, this.x - offset, this.y);
+                context.globalAlpha = 1.0;
+            } else {
+                context.drawImage(this.image, this.x, this.y);
+            }
+        }
+    }
 }
 
 export class CollectableMonster extends Monster {
-    
+
     isLethal = false;
+    isSecret = false;       // When true, cannot be collected
+    isPhased = false;       // When true, wizard must ALSO be phased in order to collect
+
     behavior = MonsterMovementBehavior.FLEE_PLAYER;
 
     constructor(x, y, image) {
@@ -240,8 +262,38 @@ export class EffectTimerFreeze extends EffectTimer {
 
 /**
  * Effect Timer: Phase
- * Used in the phase" spell effect. Lets the game engine know that the
+ * Used in the "phase" spell effect. Lets the game engine know that the
  * wizard is out-of-phase.
+ */
+export class EffectTimerProcog extends EffectTimer {
+
+    isAlive = true;
+
+    constructor(effectType, cycles, affectedEntities) {
+        super(effectType, cycles);
+        this.affectedEntities = affectedEntities;
+        this.affectedEntities.forEach(ent => {
+            ent.isSecret = false;
+            ent.isVisible = true;
+            ent.isPhasedGraphic = true;
+        })
+    }
+
+    update() {
+        this.cycles--;
+        if (this.cycles <= 0) {
+            this.isAlive = false;
+            this.affectedEntities.forEach( ent => {
+                ent.isVisible = false;
+            })
+        }
+    }
+}
+
+/**
+ * Effect Timer: Precog
+ * Used in the "precog" spell effect. Lets the game engine know that the
+ * spell is in effect.
  */
 export class EffectTimerPhase extends EffectTimer {
 
@@ -250,13 +302,14 @@ export class EffectTimerPhase extends EffectTimer {
     constructor(effectType, cycles, wizard) {
         super(effectType, cycles);
         this.wizard = wizard;
+        this.wizard.isPhased = true;
     }
 
     update() {
         this.cycles--;
         if (this.cycles <= 0) {
             this.isAlive = false;
-            this.wizard.isPhasedOut = false;
+            this.wizard.isPhased = false;
         }
     }
 }

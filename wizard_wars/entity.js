@@ -188,12 +188,13 @@ export class Card extends Entity {
 
     isExpended = false;
 
-    constructor(x, y, action, image) {
+    constructor(x, y, action, image, numberBind) {
         super(action, x, y);
         this.x = x;
         this.y = y;
         this.action = action;
         this.image = image;
+        this.numberBind = numberBind;
     }
 
     containsClick(clickX, clickY) {

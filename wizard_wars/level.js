@@ -266,6 +266,7 @@ export class Level {
                 case 2:
                 case 3:
                 case 4:
+                case 5:
                     var magicRing = new CollectableMonster(
                         location.x * this.tileSize,
                         location.y * this.tileSize,
@@ -273,15 +274,9 @@ export class Level {
                     );
                     magicRing.isPhased = false;
                     magicRing.isSecret = false;
-                    this.entities.push(
-
-                    );
+                    this.entities.push(magicRing);
                     break;
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
+                default:
                     var phasedKey = new CollectableMonster(
                         location.x * this.tileSize,
                         location.y * this.tileSize,
@@ -293,7 +288,6 @@ export class Level {
                     phasedKey.isPhased = true;
                     this.entities.push(phasedKey);
                     break;
-
             }
         }
     }

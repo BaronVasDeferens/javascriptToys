@@ -244,6 +244,12 @@ document.addEventListener('keydown', (e) => {
             case "D":
                 moveIfAble(ControlInput.RIGHT);
                 break;
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+                getSpellCardForBinding(e.key);
+                break;
             case "o":
             case "O":
                 // DEBUG ONLY
@@ -405,10 +411,10 @@ function createBoardForLevel(newLevelNumber) {
     // Add cards
     let imageSize = 96;
     let gap = 16;
-    cards.push(new Card(0 * (imageSize + gap), 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE)));
-    cards.push(new Card(1 * (imageSize + gap), 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE)));
-    cards.push(new Card(2 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION)));
-    cards.push(new Card(3 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PHASE, assetLoader.getImage(ImageAsset.CARD_SPELL_PHASE)));
+    cards.push(new Card(0 * (imageSize + gap), 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE), 1));
+    cards.push(new Card(1 * (imageSize + gap), 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE), 2));
+    cards.push(new Card(2 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION), 3));
+    cards.push(new Card(3 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PHASE, assetLoader.getImage(ImageAsset.CARD_SPELL_PHASE), 4));
 
     renderBackground(context);
 
@@ -444,6 +450,13 @@ function beginGame() {
     update();
     render();
     requestAnimationFrame(beginGame);
+}
+
+function getSpellCardForBinding(num) {
+    var spellCard = cards.filter(card => { return card.numberBind == Number(num) })[0];
+    if (spellCard != null) {
+        processCardAction(spellCard);
+    }
 }
 
 function processCardAction(card) {
@@ -562,7 +575,7 @@ function processCardAction(card) {
                     );
                 });
 
-            var invisibleCollecatbleMonsters = entities.filter((ent) => { return ent instanceof CollectableMonster && ent.isSecret == true});
+            var invisibleCollecatbleMonsters = entities.filter((ent) => { return ent instanceof CollectableMonster && ent.isSecret == true });
             effects.push(
                 new EffectTimerProcog(
                     SpellAction.SPELL_PRECOGNITION,
@@ -809,7 +822,7 @@ function render() {
             if (effect instanceof EffectTimerFreeze) {
                 effect.render(
                     context,
-                    entities.filter(ent => { return ent instanceof Monster && !ent.isSecret && !ent.isPhased}),
+                    entities.filter(ent => { return ent instanceof Monster && !ent.isSecret && !ent.isPhased }),
                     tileSize
                 );
             }

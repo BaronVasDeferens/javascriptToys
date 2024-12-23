@@ -592,19 +592,56 @@ export class LevelManager {
     level_3 = {
 
         levelNumber: 3,
-        note: "The first few levels are gentle tutorials",
+        note: "This level requires the player to hase through pillars in order to exit",
         floorTileSetName: "MARBLE",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
 
-        numObstaclesRandom: 3,
+        numObstaclesRandom: 2,
         numHazardsRandom: 1,
         numCollectablesRandom: 4,
 
         numMonstersBasic: 2,
         numMonstersScary: 1,
         numMonstersCollectable: 0,
+
+        definitions: [
+            
+            {
+                x: 4,
+                y: 8,
+                type: EntityType.PORTAL,
+                image: ImageAsset.STAIRS_DOWN_1,
+                toLevelNumber: 4,
+                isVisible: true,
+                soundEffectName: SoundAsset.DESCEND
+            },
+            {
+                x: 3,
+                y: 8,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+            {
+                x: 5,
+                y: 8,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+            {
+                x: 4,
+                y: 7,
+                type: EntityType.OBSTACLE,
+                image: null,
+            },
+            {
+                x: 4,
+                y: 9,
+                type: EntityType.OBSTACLE,
+                image: null,
+            }
+        ]
     };
 
     level_4 = {

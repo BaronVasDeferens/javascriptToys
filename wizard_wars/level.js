@@ -27,7 +27,7 @@ export class Level {
     tileSize = 64;
 
     levelType = LevelType.SURFACE;
-    floorTileSetName = "SKULLS";
+    floorTileSetName = "CRYPT";
     obstacleTileSetName = "PILLARS";
     hazardTileSetName = "PITS";
 
@@ -59,28 +59,28 @@ export class Level {
         this.levelNumber = levelNumber;
     }
 
+
+    // Populates the level with a challenging number of collectables and obstacles
+    setRandomValues() {
+        this.numObstaclesRandom = 3 + (Math.floor(this.levelNumber / 2));
+        this.numHazardsRandom = 2 + (Math.floor(this.levelNumber / 3));
+        this.numCollectablesRandom = this.levelNumber + 3;
+
+        // Default monster population
+        this.numMonstersScary = Math.floor(this.levelNumber / 3);
+        this.numMonstersBasic = 2 + this.levelNumber - this.numMonstersScary;
+
+        if (this.levelNumber % 3 == 0) {
+            this.numMonstersCollectable = 1;
+        } else {
+            this.numMonstersCollectable = 0;
+        }
+    }
+
+
     initialize(assetLoader) {
 
-        // FIXME: this may NOT be the best test for whether to populate the dungeon....
-        if (this.definitions.length == 0) {
-
-            this.numObstaclesRandom = 7 + (Math.floor(this.levelNumber / 2));
-            this.numHazardsRandom = 2 + (Math.floor(this.levelNumber / 3));
-            this.numCollectablesRandom = this.levelNumber + 3;
-
-            // Default monster population
-            this.numMonstersScary = Math.floor(this.levelNumber / 3);
-            this.numMonstersBasic = 2 + this.levelNumber - this.numMonstersScary;
-
-            if (this.levelNumber % 3 == 0) {
-                this.numMonstersCollectable = 1;
-            } else {
-                this.numMonstersCollectable = 0;
-            }
-        }
-
         var location = null;
-
 
         // All of the pre-defined entities shall be placed FIRST, followed by the randomly-placed
         // entities; we want to avoid accidentally placing a random entity in a tile where one
@@ -382,6 +382,7 @@ export class Level {
                 monster.isBlockedByObstacle = true;
                 monster.isBlockedByCollectable = true;
                 monster.isBlockedByPortal = true;
+                monster.replicationsRemaining = 1;
                 return monster;
 
             case MonsterType.GHOST_BASIC:
@@ -550,11 +551,108 @@ export class LevelManager {
         ]
     };
 
+    /* TUTORIAL LEVELS */
+
+    level_1 = {
+
+        levelNumber: 1,
+        note: "The first few levels are gentle tutorials",
+        floorTileSetName: "MARBLE",
+
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+        
+        numHazardsRandom: 0,
+        numObstaclesRandom: 2,
+        numCollectablesRandom: 2,
+
+        numMonstersBasic: 1,
+        numMonstersScary: 0,
+        numMonstersCollectable: 0
+    };
+
+    level_2 = {
+
+        levelNumber: 2,
+        note: "The first few levels are gentle tutorials",
+        floorTileSetName: "MARBLE",
+
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+
+        numObstaclesRandom: 3,
+        numHazardsRandom: 0,
+        numCollectablesRandom: 3,
+
+        numMonstersBasic: 2,
+        numMonstersScary: 0,
+        numMonstersCollectable: 0
+    };
+
+    level_3 = {
+
+        levelNumber: 3,
+        note: "The first few levels are gentle tutorials",
+        floorTileSetName: "MARBLE",
+
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+
+        numObstaclesRandom: 3,
+        numHazardsRandom: 1,
+        numCollectablesRandom: 4,
+
+        numMonstersBasic: 2,
+        numMonstersScary: 1,
+        numMonstersCollectable: 0,
+    };
+
+    level_4 = {
+
+        levelNumber: 4,
+        note: "The first few levels are gentle tutorials",
+        floorTileSetName: "MARBLE",
+
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+        
+        numObstaclesRandom: 4,
+        numHazardsRandom: 1,
+        numCollectablesRandom: 5,
+
+        numMonstersBasic: 3,
+        numMonstersScary: 1,
+        numMonstersCollectable: 0
+    };
+
+    level_5 = {
+
+        levelNumber: 5,
+        note: "The first few levels are gentle tutorials",
+        floorTileSetName: "MARBLE",
+
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+        
+        numObstaclesRandom: 4,
+        numHazardsRandom: 1,
+        numCollectablesRandom: 6,
+
+        numMonstersBasic: 4,
+        numMonstersScary: 1,
+        numMonstersCollectable: 0,
+
+    };
+
     level_6 = {
+
         levelNumber : 6,
         note: "this is a 'safe' area which saves gold and unlocks progress",
         floorTileSetName: "CLEAN_STONE",
         
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.SAFE_AT_LAST,
+
         numObstaclesRandom: 0,
         numHazardsRandom: 0,
         numCollectablesRandom: 0,
@@ -563,8 +661,6 @@ export class LevelManager {
         numMonstersScary: 0,
         numMonstersCollectable: 0,
         
-        backgroundMusicPlay: true,
-        backgroundMusicTitle: SoundAsset.SAFE_AT_LAST,
         definitions: [
             {
                 x: 5,
@@ -572,6 +668,7 @@ export class LevelManager {
                 type: EntityType.PLAYER_START,
                 image: ImageAsset.WIZARD_2
             },
+
             {
                 x: 3,
                 y: 5,
@@ -597,7 +694,7 @@ export class LevelManager {
     level_100 = {
         levelNumber: 100,
         note: "this is a 'challenge' level",
-        numCollectablesRandom: 10,
+        numCollectablesRandom: 5,
         numMonstersBasic: 0,
         numMonstersScary: 0,
         numHazardsRandom: 10,
@@ -611,18 +708,35 @@ export class LevelManager {
                 type: EntityType.PLAYER_START,
                 image: ImageAsset.WIZARD_2
             },
+
             {
-                x: 0,
-                y: 9,
+                x: 1,
+                y: 1,
                 type: EntityType.MONSTER,
-                monsterClass: MonsterType.GHOST_CHASER
+                monsterClass: MonsterType.BLOB
             },
+
             {
-                x: 9,
-                y: 9,
+                x: 8,
+                y: 1,
                 type: EntityType.MONSTER,
-                monsterClass: MonsterType.GHOST_CHASER
+                monsterClass: MonsterType.BLOB
             },
+
+            {
+                x: 1,
+                y: 8,
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.BLOB
+            },
+
+            {
+                x: 8,
+                y: 8,
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.BLOB
+            },
+
             {
                 x: 5,
                 y: 9,
@@ -638,10 +752,13 @@ export class LevelManager {
     constructor() {
         // Level ZERO
         this.levels.set(0, this.level_0);
+        this.levels.set(1, this.level_1);
+        this.levels.set(2, this.level_2);
+        this.levels.set(3, this.level_3);
+        this.levels.set(4, this.level_4);
+        this.levels.set(5, this.level_5);
         this.levels.set(6,this. level_6);
         this.levels.set(100, this.level_100);
-
-
     }
 
     getLevel(levelNumber) {
@@ -651,7 +768,10 @@ export class LevelManager {
             level = Object.assign(level, levelDetails);
             return level;
         } else {
-            return new Level(levelNumber);
+            console.log(`Level ${levelNumber} not found; generating random...`)
+            var newLevel = new Level(levelNumber);
+            newLevel.setRandomValues();
+            return newLevel;
         }
     }
 }

@@ -118,6 +118,19 @@ export var ImageAsset = Object.freeze({
     TILE_CLEAN_STONE_9: "resources/tiles/64x64/tile_1170.png",
     TILE_CLEAN_STONE_10: "resources/tiles/64x64/tile_1171.png",
 
+    TILE_CRYPT_1: "resources/tiles/64x64/tile_910.png",
+    TILE_CRYPT_2: "resources/tiles/64x64/tile_911.png",
+    TILE_CRYPT_3: "resources/tiles/64x64/tile_912.png",
+    TILE_CRYPT_4: "resources/tiles/64x64/tile_913.png",
+    TILE_CRYPT_5: "resources/tiles/64x64/tile_918.png",
+    TILE_CRYPT_6: "resources/tiles/64x64/tile_919.png",
+    TILE_CRYPT_7: "resources/tiles/64x64/tile_920.png",
+    TILE_CRYPT_8: "resources/tiles/64x64/tile_921.png",
+    TILE_CRYPT_9: "resources/tiles/64x64/tile_922.png",
+    TILE_CRYPT_10: "resources/tiles/64x64/tile_923.png",
+    TILE_CRYPT_11: "resources/tiles/64x64/tile_924.png",
+    TILE_CRYPT_12: "resources/tiles/64x64/tile_925.png",
+
     TILE_SKULLS_1: "resources/tiles/64x64/tile_562.png",
     TILE_SKULLS_2: "resources/tiles/64x64/tile_564.png",
     TILE_SKULLS_3: "resources/tiles/64x64/tile_566.png",
@@ -177,6 +190,21 @@ export class ImageLoader {
             ImageAsset.TILE_CLEAN_STONE_8,
             ImageAsset.TILE_CLEAN_STONE_9,
             ImageAsset.TILE_CLEAN_STONE_10
+        ]);
+
+        this.tileSets.set("CRYPT", [
+            ImageAsset.TILE_CRYPT_1,
+            ImageAsset.TILE_CRYPT_2,
+            ImageAsset.TILE_CRYPT_3,
+            ImageAsset.TILE_CRYPT_4,
+            ImageAsset.TILE_CRYPT_5,
+            ImageAsset.TILE_CRYPT_6,
+            ImageAsset.TILE_CRYPT_7,
+            ImageAsset.TILE_CRYPT_8,
+            ImageAsset.TILE_CRYPT_9,
+            ImageAsset.TILE_CRYPT_10,
+            ImageAsset.TILE_CRYPT_11,
+            ImageAsset.TILE_CRYPT_12
         ]);
 
         this.tileSets.set("SKULLS", [

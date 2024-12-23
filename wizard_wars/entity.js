@@ -140,9 +140,15 @@ export class CollectableMonster extends Monster {
 
     behavior = MonsterMovementBehavior.FLEE_PLAYER;
 
+    onCollect = () => {};
+
     constructor(x, y, image) {
         super(`lamp`, x, y);
         this.image = image;
+    }
+
+    setOnCollectCallback(onCollect) {
+        this.onCollect = onCollect;
     }
 
 }
@@ -166,7 +172,7 @@ export class Hazard extends Entity {
 export class Portal extends Entity {
 
     isVisible = true;
-    isHidden = false;
+    requiresKey = false;
 
     constructor(toLevelNumber, x, y, image, soundEffectName) {
         super(`portal_${toLevelNumber}`, x, y);
@@ -174,7 +180,19 @@ export class Portal extends Entity {
         this.image = image;
         this.soundEffectName = soundEffectName;
     }
-}
+
+    setHiddenImage(hiddenImage) {
+        this.hiddenImage = hiddenImage;
+    }
+
+    render(context) {
+        if (this.isVisible == false && this.hiddenImage != null) {
+            context.drawImage(this.hiddenImage, this.x, this.y);
+        } else {
+            context.drawImage(this.image, this.x, this.y);
+        }
+    }
+ }
 
 
 export class Collectable extends Entity {
@@ -324,11 +342,11 @@ export class EffectTimerPhase extends EffectTimer {
 // ----- SPECIAL EFFECTS -----
 // ---------------------------
 
-export class SpecialEffectFreeze {
-
+export class SpecialEffectFlash {
     opacityLevel = 1.0;
 
-    constructor(canvasWidth, canvasHeight) {
+    constructor(color, canvasWidth, canvasHeight) {
+        this.color = color;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
     }
@@ -337,11 +355,19 @@ export class SpecialEffectFreeze {
         if (this.opacityLevel > 0.01) {
             this.opacityLevel = this.opacityLevel - 0.01;
             context.globalAlpha = this.opacityLevel;
-            context.fillStyle = "blue";
+            context.fillStyle = this.color;
             context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
             context.globalAlpha = 1.0;
         }
     }
+}
+
+export class SpecialEffectFreeze extends SpecialEffectFlash {
+
+    constructor(canvasWidth, canvasHeight) {
+        super("blue", canvasWidth, canvasHeight);
+    }
+
 }
 
 export class SpecialEffectDescend {

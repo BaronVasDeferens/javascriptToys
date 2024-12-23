@@ -108,7 +108,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster, EffectTimerProcog } from './entity.js';
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster, EffectTimerProcog, SpecialEffectFlash } from './entity.js';
 import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
 import { Level, LevelManager } from './level.js';
 
@@ -444,10 +444,6 @@ function renderBackground(context) {
         }
     }
 
-    obstacles.forEach(ob => { ob.render(context) });
-    hazards.forEach(hazard => { hazard.render(context) });
-    portals.forEach(portal => portal.render(context));
-
     var updatedSrc = canvas.toDataURL();
     backgroundImage.src = updatedSrc;
 }
@@ -581,12 +577,12 @@ function processCardAction(card) {
                     );
                 });
 
-            var invisibleCollecatbleMonsters = entities.filter((ent) => { return ent instanceof CollectableMonster && ent.isSecret == true });
+            var invisibleCollectableMonsters = entities.filter((ent) => { return ent instanceof CollectableMonster && ent.isVisible == false });
             effects.push(
                 new EffectTimerProcog(
                     SpellAction.SPELL_PRECOGNITION,
                     1,
-                    invisibleCollecatbleMonsters
+                    invisibleCollectableMonsters
                 )
             );
 
@@ -744,13 +740,28 @@ function update() {
         entities.filter((ent) => { return ent instanceof CollectableMonster }).forEach((mon) => {
 
             // Wizard and collecatble phases must match.
-            var isInPhaseWithWizard = mon.isPhased == playerWizard.isPhased;
+            var isInPhaseWithWizard = (mon.isPhased == playerWizard.isPhased);
 
-            if (isWithinCollisionDistance(playerWizard, mon, 0) && !mon.isSecret && isInPhaseWithWizard) {
-                assetLoader.getSound(SoundAsset.SUCCESS).play();
+            if (isWithinCollisionDistance(playerWizard, mon, 0) && isInPhaseWithWizard) {
+                mon.onCollect();
+
                 mon.isAlive = false;
                 goldCollected += 1000;
                 goldBankedLifetime += 1000;
+
+                update();
+                render();
+
+                var successSound = assetLoader.getSound(SoundAsset.SUCCESS)
+                successSound.addEventListener("ended", (e) => {
+                    changeGameState(GameState.PLAYER_ACTION_SELECT);
+                }, { once: true });
+                successSound.play();
+
+                specialEffects.push(
+                    new SpecialEffectFlash("yellow", mapWidth, mapHeight)
+                );
+                changeGameState(GameState.CAST_SPELL_EFFECT);
             }
         });
 
@@ -763,18 +774,19 @@ function update() {
             // ...or LEVEL DESCENT
             var portal = getPlayerPortal();
             if (portal != null) {
-                let descendSound = assetLoader.getSound(portal.soundEffectName);
-                descendSound.addEventListener("ended", (e) => {
-                    createBoardForLevel(portal.toLevelNumber);
-                }, { once: true });
-                descendSound.play();
-                effects = [];
-                changeGameState(GameState.CAST_SPELL_EFFECT);
-                specialEffects.push(
-                    new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize, wizardMovePerTick)
-                );
+                if (portal.isVisible == true && portal.requiresKey == false) {
+                    let descendSound = assetLoader.getSound(portal.soundEffectName);
+                    descendSound.addEventListener("ended", (e) => {
+                        createBoardForLevel(portal.toLevelNumber);
+                    }, { once: true });
+                    descendSound.play();
+                    effects = [];
+                    specialEffects.push(
+                        new SpecialEffectDescend(mapWidth, mapHeight, portal.x, portal.y, tileSize, wizardMovePerTick)
+                    );
+                    changeGameState(GameState.CAST_SPELL_EFFECT);
+                }
             }
-
         }
     }
 }
@@ -805,6 +817,18 @@ function render() {
         // Draw background
         context.drawImage(backgroundImage, 0, 0);
 
+        portals.forEach( portal => {
+            portal.render(context);
+        });
+
+        obstacles.forEach( obstacle => {
+            obstacle.render(context);
+        });
+
+        hazards.forEach( hazard => {
+            hazard.render(context);
+        })
+
         cards.forEach(card => {
             card.render(context);
         });
@@ -831,7 +855,7 @@ function render() {
             if (effect instanceof EffectTimerFreeze) {
                 effect.render(
                     context,
-                    entities.filter(ent => { return ent instanceof Monster && !ent.isSecret && !ent.isPhased }),
+                    entities.filter(ent => { return ent instanceof Monster && ent.isVisible && !ent.isPhased }),
                     tileSize
                 );
             }

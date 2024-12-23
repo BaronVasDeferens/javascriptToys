@@ -10,6 +10,7 @@ export const EntityType = Object.freeze({
     MONSTER: 4,
     COLLECTABLE: 5,
     COLLECT_MONSTER_RING: 6,
+    COLLECT_MONSTER_KEY: 7
 });
 
 export const LevelType = Object.freeze({
@@ -60,7 +61,7 @@ export class Level {
     }
 
 
-    // Populates the level with a challenging number of collectables and obstacles
+    // Populates the level with a challenging number of monsters, collectables, hazards, and obstacles.
     setRandomValues() {
         this.numObstaclesRandom = 3 + (Math.floor(this.levelNumber / 2));
         this.numHazardsRandom = 2 + (Math.floor(this.levelNumber / 3));
@@ -102,7 +103,7 @@ export class Level {
 
         this.entities.push(this.playerWizard);
 
-        // Stairs down (defined / undefined)
+        // Portals (defined / undefined)
         var stairsDownDefinition = this.definitions.filter((t) => { return t.type == EntityType.PORTAL })[0];
 
         if (stairsDownDefinition == null) {
@@ -111,7 +112,27 @@ export class Level {
         } else {
             var portalDefinitions = this.definitions.filter((t) => { return t.type == EntityType.PORTAL });
             portalDefinitions.forEach(portal => {
-                this.portals.push(new Portal(portal.toLevelNumber, portal.x * this.tileSize, portal.y * this.tileSize, assetLoader.getImage(portal.image), portal.soundEffectName));
+
+                var newPortal = null;
+                if (portal.randomLocation == true) {
+                    location = this.getSingleUnoccupiedGrid();
+                    newPortal = new Portal(portal.toLevelNumber, location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(portal.image), portal.soundEffectName);
+                } else {
+                    newPortal = new Portal(portal.toLevelNumber, portal.x * this.tileSize, portal.y * this.tileSize, assetLoader.getImage(portal.image), portal.soundEffectName);
+                }
+
+                if (portal.isVisible == false) {
+                    var tiles = assetLoader.getTilesetForName(this.floorTileSetName);
+                    this.shuffle(tiles);
+                    newPortal.setHiddenImage(tiles[0]);
+                    newPortal.isVisible = false;
+                }
+
+                if (portal.requiresKey != null) {
+                    newPortal.requiresKey = portal.requiresKey;
+                }
+
+                this.portals.push(newPortal);
             });
         }
 
@@ -146,7 +167,7 @@ export class Level {
             );
         });
 
-        // Collectables (defined)
+        // Collectables: Gold (defined)
         var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
         var collectableSet = this.definitions.filter((t) => { return t.type == EntityType.COLLECTABLE });
         collectableSet.forEach((collect) => {
@@ -159,12 +180,18 @@ export class Level {
         this.definitions.filter((t) => {
             return t.type == EntityType.MONSTER
         }).forEach((monster) => {
-            this.entities.push(
-                this.createMonster(monster.monsterClass, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader)
-            );
+
+            var newMonster = null;
+            if (monster.x == undefined || monster.y == undefined) {
+                location = this.getSingleUnoccupiedGrid();
+                newMonster = this.createMonster(monster.monsterClass, location.x * this.tileSize, location.y * this.tileSize, assetLoader);
+            } else {
+                newMonster = this.createMonster(monster.monsterClass, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader);
+            }
+            this.entities.push(newMonster);
         });
 
-        // Monster : Collectable Ring (defined)
+        // Collectable Monster: Ring (defined)
         this.definitions.filter((t) => {
             return t.type == EntityType.COLLECT_MONSTER_RING
         }).forEach((ring) => {
@@ -175,6 +202,49 @@ export class Level {
                     assetLoader.getImage(ImageAsset.TREASURE_RING)
                 )
             );
+        });
+
+        // Collectable Monster: Key (defined)
+        this.definitions.filter((t) => {
+            return t.type == EntityType.COLLECT_MONSTER_KEY
+        }).forEach((key) => {
+
+            var newKey = null;
+            if (key.x == undefined || key.y == undefined) {
+                location = this.getSingleUnoccupiedGrid();
+                newKey = new CollectableMonster(
+                    location.x * this.tileSize,
+                    location.y * this.tileSize,
+                    assetLoader.getImage(ImageAsset.TREASURE_KEY)
+                );
+            } else {
+                newKey = new CollectableMonster(
+                    key.x * this.tileSize,
+                    key.y * this.tileSize,
+                    assetLoader.getImage(ImageAsset.TREASURE_KEY)
+                );
+            }
+
+            if (key.behavior != null) {
+                newKey.behavior = key.behavior;
+            }
+
+            if (key.isPhased != null) {
+                newKey.isPhased = key.isPhased;
+            }
+
+            if (key.isVisible != null) {
+                newKey.isVisible = key.isVisible;
+            }
+
+            newKey.setOnCollectCallback( () => {
+                this.portals.forEach( prtl => {
+                    prtl.requiresKey = false;       // picking up this key REVEALS and UNLOCKS ALL portals
+                    prtl.isVisible = true;
+                })
+            });
+
+            this.entities.push(newKey);
         });
 
         // --- RANDOM ELEMENTS ---
@@ -452,6 +522,7 @@ export class LevelManager {
                 image: ImageAsset.MAGIC_PORTAL_1,
                 toLevelNumber: 100,
                 isVisible: true,
+                requiresKey: false,
                 soundEffectName: SoundAsset.PORTAL_1
             },
 
@@ -462,6 +533,7 @@ export class LevelManager {
                 image: ImageAsset.STAIRS_DOWN_1,
                 toLevelNumber: 1,
                 isVisible: true,
+                requiresKey: false,
                 soundEffectName: SoundAsset.DESCEND
             },
 
@@ -561,12 +633,12 @@ export class LevelManager {
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
-        
+
         numHazardsRandom: 0,
         numObstaclesRandom: 2,
-        numCollectablesRandom: 2,
+        numCollectablesRandom: 3,
 
-        numMonstersBasic: 1,
+        numMonstersBasic: 2,
         numMonstersScary: 0,
         numMonstersCollectable: 0
     };
@@ -574,7 +646,7 @@ export class LevelManager {
     level_2 = {
 
         levelNumber: 2,
-        note: "The first few levels are gentle tutorials",
+        note: "This level introduced the wizard to advanced monsters",
         floorTileSetName: "MARBLE",
 
         backgroundMusicPlay: true,
@@ -584,9 +656,21 @@ export class LevelManager {
         numHazardsRandom: 0,
         numCollectablesRandom: 3,
 
-        numMonstersBasic: 2,
+        numMonstersBasic: 0,
         numMonstersScary: 0,
-        numMonstersCollectable: 0
+        numMonstersCollectable: 0,
+
+        definitions: [
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT_MAN,
+            },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT,
+            },
+        ]
     };
 
     level_3 = {
@@ -600,14 +684,14 @@ export class LevelManager {
 
         numObstaclesRandom: 2,
         numHazardsRandom: 1,
-        numCollectablesRandom: 4,
+        numCollectablesRandom: 3,
 
-        numMonstersBasic: 2,
-        numMonstersScary: 1,
+        numMonstersBasic: 3,
+        numMonstersScary: 0,
         numMonstersCollectable: 0,
 
         definitions: [
-            
+
             {
                 x: 4,
                 y: 8,
@@ -617,24 +701,28 @@ export class LevelManager {
                 isVisible: true,
                 soundEffectName: SoundAsset.DESCEND
             },
+
             {
                 x: 3,
                 y: 8,
                 type: EntityType.OBSTACLE,
                 image: null,
             },
+
             {
                 x: 5,
                 y: 8,
                 type: EntityType.OBSTACLE,
                 image: null,
             },
+
             {
                 x: 4,
                 y: 7,
                 type: EntityType.OBSTACLE,
                 image: null,
             },
+
             {
                 x: 4,
                 y: 9,
@@ -647,57 +735,101 @@ export class LevelManager {
     level_4 = {
 
         levelNumber: 4,
-        note: "The first few levels are gentle tutorials",
+        note: "This level requires you to find a key to open the stairs down",
         floorTileSetName: "MARBLE",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
-        
+
         numObstaclesRandom: 4,
         numHazardsRandom: 1,
-        numCollectablesRandom: 5,
+        numCollectablesRandom: 3,
 
-        numMonstersBasic: 3,
-        numMonstersScary: 1,
-        numMonstersCollectable: 0
+        numMonstersBasic: 4,
+        numMonstersScary: 0,
+        numMonstersCollectable: 0,
+
+        definitions: [
+            {
+                x: 0,
+                y: 0,
+                type: EntityType.PORTAL,
+                randomLocation: true,
+                isVisible: false,
+                requiresKey: true,
+                image: ImageAsset.STAIRS_DOWN_1,
+                toLevelNumber: 5,
+                soundEffectName: SoundAsset.DESCEND
+            },
+
+            {
+                type: EntityType.COLLECT_MONSTER_KEY,
+                isVisible: true,
+                isPhased: false,
+                behavior: MonsterMovementBehavior.IMMOBILE,
+                image: ImageAsset.TREASURE_KEY,
+            },
+        ]
     };
 
     level_5 = {
 
         levelNumber: 5,
-        note: "The first few levels are gentle tutorials",
-        floorTileSetName: "MARBLE",
+        note: "This level requires the wizard to find and collect the invisble and phased key",
+        floorTileSetName: "SKULLS",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
-        
+
         numObstaclesRandom: 4,
         numHazardsRandom: 1,
         numCollectablesRandom: 6,
 
         numMonstersBasic: 4,
-        numMonstersScary: 1,
+        numMonstersScary: 0,
         numMonstersCollectable: 0,
+
+        definitions: [
+            {
+                x: 0,
+                y: 0,
+                type: EntityType.PORTAL,
+                randomLocation: true,
+                isVisible: false,
+                requiresKey: true,
+                image: ImageAsset.STAIRS_DOWN_1,
+                toLevelNumber: 6,
+                soundEffectName: SoundAsset.DESCEND
+            },
+
+            {
+                type: EntityType.COLLECT_MONSTER_KEY,
+                isPhased: true,
+                isVisible: false,
+                behavior: MonsterMovementBehavior.IMMOBILE,
+                image: ImageAsset.TREASURE_KEY,
+            },
+        ]
 
     };
 
     level_6 = {
 
-        levelNumber : 6,
+        levelNumber: 6,
         note: "this is a 'safe' area which saves gold and unlocks progress",
         floorTileSetName: "CLEAN_STONE",
-        
+
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.SAFE_AT_LAST,
 
         numObstaclesRandom: 0,
         numHazardsRandom: 0,
         numCollectablesRandom: 0,
-        
+
         numMonstersBasic: 0,
         numMonstersScary: 0,
         numMonstersCollectable: 0,
-        
+
         definitions: [
             {
                 x: 5,
@@ -794,7 +926,7 @@ export class LevelManager {
         this.levels.set(3, this.level_3);
         this.levels.set(4, this.level_4);
         this.levels.set(5, this.level_5);
-        this.levels.set(6,this. level_6);
+        this.levels.set(6, this.level_6);
         this.levels.set(100, this.level_100);
     }
 

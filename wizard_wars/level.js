@@ -195,13 +195,36 @@ export class Level {
         this.definitions.filter((t) => {
             return t.type == EntityType.COLLECT_MONSTER_RING
         }).forEach((ring) => {
-            this.entities.push(
-                new CollectableMonster(
+
+            var newRing = null;
+            if (ring.x == undefined || ring.y == undefined) {
+                location = this.getSingleUnoccupiedGrid();
+                newRing = new CollectableMonster(
+                    location.x * this.tileSize,
+                    location.y * this.tileSize,
+                    assetLoader.getImage(ImageAsset.TREASURE_RING)
+                );
+            } else {
+                newRing = new CollectableMonster(
                     ring.x * this.tileSize,
                     ring.y * this.tileSize,
                     assetLoader.getImage(ImageAsset.TREASURE_RING)
-                )
-            );
+                );
+            }
+
+            if (ring.behavior != null) {
+                newRing.behavior = ring.behavior;
+            }
+
+            if (ring.isPhased != null) {
+                newRing.isPhased = ring.isPhased;
+            }
+
+            if (ring.isVisible != null) {
+                newRing.isVisible = ring.isVisible;
+            }
+
+            this.entities.push(newRing);
         });
 
         // Collectable Monster: Key (defined)
@@ -628,7 +651,7 @@ export class LevelManager {
     level_1 = {
 
         levelNumber: 1,
-        note: "The first few levels are gentle tutorials",
+        note: "This level introduces the wizard to the freeze spell",
         floorTileSetName: "MARBLE",
 
         backgroundMusicPlay: true,
@@ -638,9 +661,46 @@ export class LevelManager {
         numObstaclesRandom: 2,
         numCollectablesRandom: 3,
 
-        numMonstersBasic: 2,
+        numMonstersBasic: 0,
         numMonstersScary: 0,
-        numMonstersCollectable: 0
+        numMonstersCollectable: 0,
+
+        definitions: [
+
+            {
+                x: 5,
+                y: 0,
+                type: EntityType.PLAYER_START,
+                image: ImageAsset.WIZARD_2
+            },
+
+            {
+                x: 5,
+                y: 9,
+                type: EntityType.PORTAL,
+                image: ImageAsset.STAIRS_DOWN_1,
+                toLevelNumber: 2,
+                isVisible: true,
+                requiresKey: false,
+                soundEffectName: SoundAsset.DESCEND
+            },
+
+            {
+                type: EntityType.COLLECT_MONSTER_RING,
+                x: 5,
+                y: 7
+            },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT,
+            },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT,
+            },
+        ]
     };
 
     level_2 = {

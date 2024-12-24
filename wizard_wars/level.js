@@ -264,8 +264,8 @@ export class Level {
                 newKey.isVisible = key.isVisible;
             }
 
-            newKey.setOnCollectCallback( () => {
-                this.portals.forEach( prtl => {
+            newKey.setOnCollectCallback(() => {
+                this.portals.forEach(prtl => {
                     prtl.requiresKey = false;       // picking up this key REVEALS and UNLOCKS ALL portals
                     prtl.isVisible = true;
                 })
@@ -309,7 +309,7 @@ export class Level {
             location = this.getSingleUnoccupiedGrid();
             this.entities.push(
                 this.createMonster(
-                    MonsterType.RAT,
+                    MonsterType.RAT_BASIC,
                     location.x * this.tileSize,
                     location.y * this.tileSize,
                     assetLoader)
@@ -364,34 +364,16 @@ export class Level {
             let chance = Math.floor(Math.random() * 10);
 
             switch (chance) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                    var magicRing = new CollectableMonster(
-                        location.x * this.tileSize,
-                        location.y * this.tileSize,
-                        assetLoader.getImage(ImageAsset.TREASURE_RING)
-                    );
-                    magicRing.monsterType = MonsterType.COLLECT_RING;
-                    magicRing.isPhased = false;
-                    magicRing.isSecret = false;
-                    this.entities.push(magicRing);
-                    break;
                 default:
-                    var phasedKey = new CollectableMonster(
+                    var magicRing = this.createMonster(
+                        MonsterType.COLLECT_RING,
                         location.x * this.tileSize,
                         location.y * this.tileSize,
-                        assetLoader.getImage(ImageAsset.TREASURE_KEY)
-                    );
-                    magicRing.monsterType = MonsterType.COLLECT_KEY;
-                    phasedKey.behavior = MonsterMovementBehavior.IMMOBILE;
-                    phasedKey.isSecret = true;
-                    phasedKey.isVisible = false;
-                    phasedKey.isPhased = true;
-                    this.entities.push(phasedKey);
+                        assetLoader);
+
+                    console.log(magicRing)
+
+                    this.entities.push(magicRing);
                     break;
             }
         }
@@ -431,9 +413,10 @@ export class Level {
     }
 
     createMonster(monsterType, x, y, assetLoader) {
+
         var monster;
         switch (monsterType) {
-            case MonsterType.RAT:
+            case MonsterType.RAT_BASIC:
                 monster = new Monster(
                     "rat", x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
                 );
@@ -502,6 +485,15 @@ export class Level {
                 monster.isBlockedByObstacle = false;
                 monster.isBlockedByCollectable = false;
                 monster.isBlockedByPortal = false;
+                break;
+
+            case MonsterType.COLLECT_RING:
+                monster = new CollectableMonster(
+                    x,
+                    y,
+                    assetLoader.getImage(ImageAsset.TREASURE_RING)
+                );
+                monster.behavior = MonsterMovementBehavior.FLEE_PLAYER;
                 break;
         }
 
@@ -701,12 +693,12 @@ export class LevelManager {
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
         ]
 
@@ -737,12 +729,12 @@ export class LevelManager {
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             }
         ]
     };
@@ -785,15 +777,15 @@ export class LevelManager {
 
 
             {
-                x:0,
-                y:9,
+                x: 0,
+                y: 9,
                 entityType: EntityType.MONSTER,
                 monsterType: MonsterType.WASP_BASIC
             },
 
             {
-                x:9,
-                y:9,
+                x: 9,
+                y: 9,
                 entityType: EntityType.MONSTER,
                 monsterType: MonsterType.WASP_BASIC
             },
@@ -915,12 +907,12 @@ export class LevelManager {
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             }
         ]
     };
@@ -970,12 +962,12 @@ export class LevelManager {
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             }
         ]
     };
@@ -1020,17 +1012,17 @@ export class LevelManager {
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             },
 
             {
                 entityType: EntityType.MONSTER,
-                monsterType: MonsterType.RAT,
+                monsterType: MonsterType.RAT_BASIC,
             }
         ]
 

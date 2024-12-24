@@ -729,8 +729,8 @@ function update() {
                 }
             });
 
-        // Award BONUS for collecting everything
-        if (collectables.length == 0) {
+        // Award BONUS for collecting everything (if there is something to collect)
+        if (collectables.length == 0 && levelCurrent.numCollectablesRandom > 0) {
             if (bonusAwarded == false) {
                 playBonusSound();
                 var bonusValue = (1 + levelNumber) * 100;

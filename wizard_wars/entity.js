@@ -17,6 +17,7 @@ class Entity {
     y = 0;
 
     isAlive = true;
+    isVisible = true;
     isPhased = false;
 
     constructor(id, x, y) {
@@ -30,42 +31,32 @@ class Entity {
         this.y += deltaY;
     }
 
-    render(context) {
-        context.drawImage(this.image, this.x, this.y);
+        render(context) {
+        if (this.isVisible) {
+            if (this.isPhased) {
+                for (var i = 0; i < 5; i++) {
+                    var offset = 3 - Math.floor(Math.random() * 6);
+                    context.globalAlpha = 0.20;
+                    context.drawImage(this.image, this.x + offset, this.y + (-1 * offset));
+                    context.globalAlpha = 1.0;
+                }
+
+            } else {
+                context.drawImage(this.image, this.x, this.y);
+            }
+        }
     }
 }
 
-export class ImageDisplayEntity extends Entity {
-    constructor(id, x, y, image, alpha) {
-        super(id, x, y);
-        this.alpha = alpha;
-        this.image = image;
-    }
-
-    render(context) {
-        context.globalAlpha = this.alpha;
-        context.drawImage(this.image, this.x, this.y);
-        context.globalAlpha = 1.0;
-    }
-}
 
 export class Wizard extends Entity {
+
+    isVisible = true;
+    isPhased = false;
 
     constructor(id, x, y, image) {
         super(id, x, y);
         this.image = image;
-    }
-
-    render(context) {
-        if (this.isPhased) {
-            var offset = Math.floor(Math.random() * 3) + 1;
-            context.globalAlpha = 0.25;
-            context.drawImage(this.image, this.x + offset, this.y);
-            context.drawImage(this.image, this.x - offset, this.y);
-            context.globalAlpha = 1.0;
-        } else {
-            super.render(context);
-        }
     }
 }
 
@@ -92,6 +83,9 @@ export var MonsterMovementBehavior = Object.freeze({
 
 export class Monster extends Entity {
 
+    isVisible = true;
+    isPhased = false;
+
     isLethal = true;                // When true, the monster kills the wizard if they occupy the same space
     isBlocking = false;             // When true, the wizard cannot occupy the same space.
 
@@ -102,11 +96,6 @@ export class Monster extends Entity {
 
     replicationsRemaining = 0;      // When the behavior is replicating, this is the number of mx number of times it may replicate
 
-    // Graphic representation
-    isVisible = true;
-    isPhasedGraphic = false;        // should show up as "phased" (blurry and incorporeal)
-
-
     constructor(id, x, y, behavior, image) {
         super(id, x, y);
         this.behavior = behavior;
@@ -115,20 +104,6 @@ export class Monster extends Entity {
 
     setMover(mover) {
         this.mover = mover;
-    }
-
-    render(context) {
-        if (this.isVisible) {
-            if (this.isPhasedGraphic) {
-                var offset = Math.floor(Math.random() * 3) + 1;
-                context.globalAlpha = 0.25;
-                context.drawImage(this.image, this.x + offset, this.y);
-                context.drawImage(this.image, this.x - offset, this.y);
-                context.globalAlpha = 1.0;
-            } else {
-                context.drawImage(this.image, this.x, this.y);
-            }
-        }
     }
 }
 
@@ -140,10 +115,10 @@ export class CollectableMonster extends Monster {
 
     behavior = MonsterMovementBehavior.FLEE_PLAYER;
 
-    onCollect = () => {};
+    onCollect = () => { };
 
     constructor(x, y, image) {
-        super(`lamp`, x, y);
+        super(`collectable_monster_${x}_${y}`, x, y);
         this.image = image;
     }
 
@@ -192,7 +167,7 @@ export class Portal extends Entity {
             context.drawImage(this.image, this.x, this.y);
         }
     }
- }
+}
 
 
 export class Collectable extends Entity {
@@ -225,7 +200,6 @@ export class Card extends Entity {
     }
 }
 
-
 export class TemporaryEntity {
 
     constructor(x, y, image, alpha, expiresOnGameState) {
@@ -234,6 +208,20 @@ export class TemporaryEntity {
         this.image = image;
         this.alpha = alpha;
         this.expiresOnGameState = expiresOnGameState;
+    }
+
+    render(context) {
+        context.globalAlpha = this.alpha;
+        context.drawImage(this.image, this.x, this.y);
+        context.globalAlpha = 1.0;
+    }
+}
+
+export class ImageDisplayEntity extends Entity {    // TODO: replace with temporary entity
+    constructor(id, x, y, image, alpha) {
+        super(id, x, y);
+        this.alpha = alpha;
+        this.image = image;
     }
 
     render(context) {
@@ -307,7 +295,7 @@ export class EffectTimerProcog extends EffectTimer {
         this.cycles--;
         if (this.cycles <= 0) {
             this.isAlive = false;
-            this.affectedEntities.forEach( ent => {
+            this.affectedEntities.forEach(ent => {
                 ent.isVisible = false;
             })
         }

@@ -298,7 +298,7 @@ document.addEventListener('mousedown', (e) => {
         // Check for SPELL CLICKED
         cards.forEach(card => {
             if (card.containsClick(clickX, clickY)) {
-                processCardAction(card);
+                processSpellAction(card);
             }
         });
 
@@ -412,13 +412,7 @@ function createBoardForLevel(newLevelNumber) {
 
     controlInput = null;
 
-    // Add cards
-    let imageSize = 96;
-    let gap = 16;
-    cards.push(new Card(0 * (imageSize + gap), 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE), 1));
-    cards.push(new Card(1 * (imageSize + gap), 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE), 2));
-    cards.push(new Card(2 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION), 3));
-    cards.push(new Card(3 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PHASE, assetLoader.getImage(ImageAsset.CARD_SPELL_PHASE), 4));
+    replenishAllSpells();
 
     renderBackground(context);
 
@@ -457,11 +451,22 @@ function beginGame() {
 function getSpellCardForBinding(num) {
     var spellCard = cards.filter(card => { return card.numberBind == Number(num) })[0];
     if (spellCard != null) {
-        processCardAction(spellCard);
+        processSpellAction(spellCard);
     }
 }
 
-function processCardAction(card) {
+function replenishAllSpells() {
+    cards = [];
+    // Add cards
+    let imageSize = 96;
+    let gap = 16;
+    cards.push(new Card(0 * (imageSize + gap), 640 + gap, SpellAction.SPELL_FREEZE, assetLoader.getImage(ImageAsset.CARD_SPELL_FREEZE), 1));
+    cards.push(new Card(1 * (imageSize + gap), 640 + gap, SpellAction.SPELL_RANDOMIZE, assetLoader.getImage(ImageAsset.CARD_SPELL_RANDOMIZE), 2));
+    cards.push(new Card(2 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PRECOGNITION, assetLoader.getImage(ImageAsset.CARD_SPELL_PRECOGNITION), 3));
+    cards.push(new Card(3 * (imageSize + gap), 640 + gap, SpellAction.SPELL_PHASE, assetLoader.getImage(ImageAsset.CARD_SPELL_PHASE), 4));
+}
+
+function processSpellAction(card) {
 
     switch (card.action) {
 
@@ -577,6 +582,8 @@ function processCardAction(card) {
                     );
                 });
 
+
+            // Invisible collectables appear when precog is cast (see Monster.render() for more)
             var invisibleCollectableMonsters = entities.filter((ent) => { return ent instanceof CollectableMonster && ent.isVisible == false });
             effects.push(
                 new EffectTimerProcog(
@@ -752,6 +759,8 @@ function update() {
                 update();
                 render();
 
+                // If the ring is acquired, recover all spells
+
                 var successSound = assetLoader.getSound(SoundAsset.SUCCESS)
                 successSound.addEventListener("ended", (e) => {
                     changeGameState(GameState.PLAYER_ACTION_SELECT);
@@ -817,15 +826,15 @@ function render() {
         // Draw background
         context.drawImage(backgroundImage, 0, 0);
 
-        portals.forEach( portal => {
+        portals.forEach(portal => {
             portal.render(context);
         });
 
-        obstacles.forEach( obstacle => {
+        obstacles.forEach(obstacle => {
             obstacle.render(context);
         });
 
-        hazards.forEach( hazard => {
+        hazards.forEach(hazard => {
             hazard.render(context);
         })
 
@@ -902,7 +911,7 @@ function checkAdjacentToWizard(target) {
 }
 
 function getPlayerPortal() {
-    return portals.filter( portal => { return isWithinCollisionDistance(playerWizard, portal, 0) })[0];  
+    return portals.filter(portal => { return isWithinCollisionDistance(playerWizard, portal, 0) })[0];
 }
 
 /**
@@ -1107,7 +1116,6 @@ function checkIsValidMove(entity, destinationX, destinationY) {
     }
 }
 
-
 function checkInBounds(destinationX, destinationY) {
     var inBounds = (destinationX >= 0) && (destinationX < mapWidth) && (destinationY >= 0) && (destinationY < mapHeight);
     return inBounds;
@@ -1128,18 +1136,6 @@ function getFatalEntity(source, potentials) {
     });
 
     return fatalEntities.filter(it => { return (it != null) });
-}
-
-function checkFatalCollision(source, entities) {
-    var collisions = entities.map((entity) => {
-        if (source === entity) {
-            return false;
-        } else {
-            return isWithinCollisionDistance(source, entity, 0)
-        }
-    });
-
-    return collisions.includes(true);
 }
 
 function isWithinCollisionDistance(entityA, entityB, distance) {

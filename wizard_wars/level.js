@@ -651,8 +651,8 @@ export class LevelManager {
     level_1 = {
 
         levelNumber: 1,
-        note: "This level introduces the wizard to the freeze spell",
-        floorTileSetName: "MARBLE",
+        note: "This level encourages the wizard to use the freeze spell in order to catch a ring",
+        floorTileSetName: "SKULLS",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
@@ -701,18 +701,19 @@ export class LevelManager {
                 monsterClass: MonsterType.RAT,
             },
         ]
+
     };
 
     level_2 = {
 
         levelNumber: 2,
         note: "This level introduced the wizard to advanced monsters",
-        floorTileSetName: "MARBLE",
+        floorTileSetName: "SKULLS",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
 
-        numObstaclesRandom: 3,
+        numObstaclesRandom: 5,
         numHazardsRandom: 0,
         numCollectablesRandom: 3,
 
@@ -736,8 +737,8 @@ export class LevelManager {
     level_3 = {
 
         levelNumber: 3,
-        note: "This level requires the player to hase through pillars in order to exit",
-        floorTileSetName: "MARBLE",
+        note: "This level requires the player to phase through hazards in order to reach the exit",
+        floorTileSetName: "SKULLS",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
@@ -753,8 +754,15 @@ export class LevelManager {
         definitions: [
 
             {
+                x: 5,
+                y: 0,
+                type: EntityType.PLAYER_START,
+                image: ImageAsset.WIZARD_2
+            },
+
+            {
                 x: 4,
-                y: 8,
+                y: 9,
                 type: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_1,
                 toLevelNumber: 4,
@@ -763,32 +771,74 @@ export class LevelManager {
             },
 
             {
+                x: 0,
+                y: 8,
+                type: EntityType.HAZARD,
+                image: null,
+            },
+
+            {
+                x: 1,
+                y: 8,
+                type: EntityType.HAZARD,
+                image: null,
+            },
+
+            {
+                x: 2,
+                y: 8,
+                type: EntityType.HAZARD,
+                image: null,
+            },
+
+            {
                 x: 3,
                 y: 8,
-                type: EntityType.OBSTACLE,
+                type: EntityType.HAZARD,
+                image: null,
+            },
+
+            {
+                x: 4,
+                y: 8,
+                type: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 5,
                 y: 8,
-                type: EntityType.OBSTACLE,
+                type: EntityType.HAZARD,
                 image: null,
             },
 
             {
-                x: 4,
-                y: 7,
-                type: EntityType.OBSTACLE,
+                x: 6,
+                y: 8,
+                type: EntityType.HAZARD,
                 image: null,
             },
 
             {
-                x: 4,
-                y: 9,
-                type: EntityType.OBSTACLE,
+                x: 7,
+                y: 8,
+                type: EntityType.HAZARD,
                 image: null,
-            }
+            },
+
+            {
+                x: 8,
+                y: 8,
+                type: EntityType.HAZARD,
+                image: null,
+            },
+
+            {
+                x: 9,
+                y: 8,
+                type: EntityType.HAZARD,
+                image: null,
+            },
         ]
     };
 
@@ -796,7 +846,7 @@ export class LevelManager {
 
         levelNumber: 4,
         note: "This level requires you to find a key to open the stairs down",
-        floorTileSetName: "MARBLE",
+        floorTileSetName: "SKULLS",
 
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
@@ -805,7 +855,7 @@ export class LevelManager {
         numHazardsRandom: 1,
         numCollectablesRandom: 3,
 
-        numMonstersBasic: 4,
+        numMonstersBasic: 0,
         numMonstersScary: 0,
         numMonstersCollectable: 0,
 
@@ -829,12 +879,72 @@ export class LevelManager {
                 behavior: MonsterMovementBehavior.IMMOBILE,
                 image: ImageAsset.TREASURE_KEY,
             },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT_MAN,
+            },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT,
+            },
         ]
     };
 
     level_5 = {
 
         levelNumber: 5,
+        note: "This level requires you to find a CHASE a key to open the stairs down",
+        floorTileSetName: "SKULLS",
+
+        backgroundMusicPlay: true,
+        backgroundMusicTitle: SoundAsset.BGM,
+
+        numObstaclesRandom: 4,
+        numHazardsRandom: 1,
+        numCollectablesRandom: 3,
+
+        numMonstersBasic: 0,
+        numMonstersScary: 0,
+        numMonstersCollectable: 0,
+
+        definitions: [
+            {
+                x: 0,
+                y: 0,
+                type: EntityType.PORTAL,
+                randomLocation: true,
+                isVisible: false,
+                requiresKey: true,
+                image: ImageAsset.STAIRS_DOWN_1,
+                toLevelNumber: 6,
+                soundEffectName: SoundAsset.DESCEND
+            },
+
+            {
+                type: EntityType.COLLECT_MONSTER_KEY,
+                isVisible: true,
+                isPhased: false,
+                behavior: MonsterMovementBehavior.FLEE_PLAYER,
+                image: ImageAsset.TREASURE_KEY
+            },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT_MAN,
+            },
+
+            {
+                type: EntityType.MONSTER,
+                monsterClass: MonsterType.RAT,
+            },
+        ]
+    };
+
+    level_6 = {
+
+        levelNumber: 6,
         note: "This level requires the wizard to find and collect the invisble and phased key",
         floorTileSetName: "SKULLS",
 
@@ -858,7 +968,7 @@ export class LevelManager {
                 isVisible: false,
                 requiresKey: true,
                 image: ImageAsset.STAIRS_DOWN_1,
-                toLevelNumber: 6,
+                toLevelNumber: 7,
                 soundEffectName: SoundAsset.DESCEND
             },
 
@@ -873,9 +983,9 @@ export class LevelManager {
 
     };
 
-    level_6 = {
+    level_7 = {
 
-        levelNumber: 6,
+        levelNumber: 7,
         note: "this is a 'safe' area which saves gold and unlocks progress",
         floorTileSetName: "CLEAN_STONE",
 
@@ -913,7 +1023,7 @@ export class LevelManager {
                 y: 5,
                 type: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_2,
-                toLevelNumber: 7,
+                toLevelNumber: 8,
                 isVisible: true,
                 soundEffectName: SoundAsset.DESCEND
             },
@@ -987,6 +1097,7 @@ export class LevelManager {
         this.levels.set(4, this.level_4);
         this.levels.set(5, this.level_5);
         this.levels.set(6, this.level_6);
+        this.levels.set(7, this.level_7);
         this.levels.set(100, this.level_100);
     }
 

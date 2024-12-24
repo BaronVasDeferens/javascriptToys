@@ -68,7 +68,10 @@ export var MonsterType = Object.freeze({
     WASP_CHASER: "WASP_CHASER",
     BLOB: "BLOB",
     GHOST_BASIC: "GHOST_BASIC",
-    GHOST_CHASER: "GHOST_CHASER"
+    GHOST_CHASER: "GHOST_CHASER",
+    COLLECT_RING: "COLLECT_RING",
+    COLLECT_KEY: "COLLECT_KEY",
+    COLLECT_LAMP: "COLLECT_LAMP"
 });
 
 
@@ -82,6 +85,8 @@ export var MonsterMovementBehavior = Object.freeze({
 
 
 export class Monster extends Entity {
+
+    monsterType = MonsterType.RAT_BASIC;
 
     isVisible = true;
     isPhased = false;
@@ -108,6 +113,8 @@ export class Monster extends Entity {
 }
 
 export class CollectableMonster extends Monster {
+
+    monsterType = MonsterType.RAT_BASIC;
 
     isLethal = false;
     isSecret = false;       // When true, cannot be collected

@@ -3,7 +3,7 @@ import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementB
 
 
 export const EntityType = Object.freeze({
-    PLAYER_START: 0,
+    WIZARD: 0,
     PORTAL: 1,
     OBSTACLE: 2,
     HAZARD: 3,
@@ -88,7 +88,7 @@ export class Level {
         // is defined later.
 
         // Wizard (defined / undefined)
-        var wizardDefinition = this.definitions.filter((t) => { return t.type == EntityType.PLAYER_START })[0];
+        var wizardDefinition = this.definitions.filter((t) => { return t.entityType == EntityType.WIZARD })[0];
 
         if (wizardDefinition != null) {
             this.playerWizard = new Wizard(
@@ -104,13 +104,13 @@ export class Level {
         this.entities.push(this.playerWizard);
 
         // Portals (defined / undefined)
-        var stairsDownDefinition = this.definitions.filter((t) => { return t.type == EntityType.PORTAL })[0];
+        var stairsDownDefinition = this.definitions.filter((t) => { return t.entityType == EntityType.PORTAL })[0];
 
         if (stairsDownDefinition == null) {
             location = this.getSingleUnoccupiedGrid();
             this.portals.push(new Portal(this.levelNumber + 1, location.x * this.tileSize, location.y * this.tileSize, assetLoader.getImage(ImageAsset.STAIRS_DOWN_1), SoundAsset.DESCEND));
         } else {
-            var portalDefinitions = this.definitions.filter((t) => { return t.type == EntityType.PORTAL });
+            var portalDefinitions = this.definitions.filter((t) => { return t.entityType == EntityType.PORTAL });
             portalDefinitions.forEach(portal => {
 
                 var newPortal = null;
@@ -138,7 +138,7 @@ export class Level {
 
         // Obstacles (defined)
         var obstacleImages = assetLoader.getTilesetForName(this.obstacleTileSetName);
-        var obstacleSet = this.definitions.filter((t) => { return t.type == EntityType.OBSTACLE });
+        var obstacleSet = this.definitions.filter((t) => { return t.entityType == EntityType.OBSTACLE });
         obstacleSet.forEach((obs) => {
             var obstacleImage;
             if (obs.image != null) {
@@ -153,7 +153,7 @@ export class Level {
 
         // Hazards (defined)
         var hazardImages = assetLoader.getTilesetForName(this.hazardTileSetName);
-        var hazardSet = this.definitions.filter((t) => { return t.type == EntityType.HAZARD });
+        var hazardSet = this.definitions.filter((t) => { return t.entityType == EntityType.HAZARD });
         hazardSet.forEach((haz) => {
             var hazardImage;
             if (haz.image != null) {
@@ -169,7 +169,7 @@ export class Level {
 
         // Collectables: Gold (defined)
         var coinImages = assetLoader.getTilesetForName("GOLDSTACKS");
-        var collectableSet = this.definitions.filter((t) => { return t.type == EntityType.COLLECTABLE });
+        var collectableSet = this.definitions.filter((t) => { return t.entityType == EntityType.COLLECTABLE });
         collectableSet.forEach((collect) => {
             this.collectables.push(
                 new Collectable(`gold`, collect.x * this.tileSize, collect.y * this.tileSize, coinImages[this.randomIntInRange(0, coinImages.length)])
@@ -178,22 +178,22 @@ export class Level {
 
         // Monsters (defined)
         this.definitions.filter((t) => {
-            return t.type == EntityType.MONSTER
+            return t.entityType == EntityType.MONSTER
         }).forEach((monster) => {
 
             var newMonster = null;
             if (monster.x == undefined || monster.y == undefined) {
                 location = this.getSingleUnoccupiedGrid();
-                newMonster = this.createMonster(monster.monsterClass, location.x * this.tileSize, location.y * this.tileSize, assetLoader);
+                newMonster = this.createMonster(monster.monsterType, location.x * this.tileSize, location.y * this.tileSize, assetLoader);
             } else {
-                newMonster = this.createMonster(monster.monsterClass, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader);
+                newMonster = this.createMonster(monster.monsterType, monster.x * this.tileSize, monster.y * this.tileSize, assetLoader);
             }
             this.entities.push(newMonster);
         });
 
         // Collectable Monster: Ring (defined)
         this.definitions.filter((t) => {
-            return t.type == EntityType.COLLECT_MONSTER_RING
+            return t.entityType == EntityType.COLLECT_MONSTER_RING
         }).forEach((ring) => {
 
             var newRing = null;
@@ -212,6 +212,8 @@ export class Level {
                 );
             }
 
+            newRing.monsterType = MonsterType.COLLECT_RING;
+
             if (ring.behavior != null) {
                 newRing.behavior = ring.behavior;
             }
@@ -229,7 +231,7 @@ export class Level {
 
         // Collectable Monster: Key (defined)
         this.definitions.filter((t) => {
-            return t.type == EntityType.COLLECT_MONSTER_KEY
+            return t.entityType == EntityType.COLLECT_MONSTER_KEY
         }).forEach((key) => {
 
             var newKey = null;
@@ -247,6 +249,8 @@ export class Level {
                     assetLoader.getImage(ImageAsset.TREASURE_KEY)
                 );
             }
+
+            newKey.monsterType = MonsterType.COLLECT_KEY;
 
             if (key.behavior != null) {
                 newKey.behavior = key.behavior;
@@ -371,6 +375,7 @@ export class Level {
                         location.y * this.tileSize,
                         assetLoader.getImage(ImageAsset.TREASURE_RING)
                     );
+                    magicRing.monsterType = MonsterType.COLLECT_RING;
                     magicRing.isPhased = false;
                     magicRing.isSecret = false;
                     this.entities.push(magicRing);
@@ -381,6 +386,7 @@ export class Level {
                         location.y * this.tileSize,
                         assetLoader.getImage(ImageAsset.TREASURE_KEY)
                     );
+                    magicRing.monsterType = MonsterType.COLLECT_KEY;
                     phasedKey.behavior = MonsterMovementBehavior.IMMOBILE;
                     phasedKey.isSecret = true;
                     phasedKey.isVisible = false;
@@ -424,9 +430,9 @@ export class Level {
         return occupiedGrids;
     }
 
-    createMonster(type, x, y, assetLoader) {
+    createMonster(monsterType, x, y, assetLoader) {
         var monster;
-        switch (type) {
+        switch (monsterType) {
             case MonsterType.RAT:
                 monster = new Monster(
                     "rat", x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_RAT_SMALL)
@@ -435,7 +441,7 @@ export class Level {
                 monster.isBlockedByObstacle = true;
                 monster.isBlockedByCollectable = true;
                 monster.isBlockedByPortal = true;
-                return monster;
+                break;
 
             case MonsterType.RAT_MAN:
                 monster = new Monster(
@@ -445,17 +451,17 @@ export class Level {
                 monster.isBlockedByObstacle = true;
                 monster.isBlockedByCollectable = true;
                 monster.isBlockedByPortal = true;
-                return monster;
+                break;
 
             case MonsterType.WASP_BASIC:
-                monster = Monster(
+                monster = new Monster(
                     `wasp`, x, y, MonsterMovementBehavior.RANDOM, assetLoader.getImage(ImageAsset.MONSTER_WASP_YELLOW)
                 );
                 monster.isBlockedByHazard = false;
                 monster.isBlockedByObstacle = true;
                 monster.isBlockedByCollectable = true;
                 monster.isBlockedByPortal = true;
-                return monster;
+                break;
 
             case MonsterType.WASP_CHASER:
                 monster = new Monster(
@@ -465,7 +471,7 @@ export class Level {
                 monster.isBlockedByObstacle = true;
                 monster.isBlockedByCollectable = true;
                 monster.isBlockedByPortal = true;
-                return monster;
+                break;
 
             case MonsterType.BLOB:
                 monster = new Monster(
@@ -476,7 +482,7 @@ export class Level {
                 monster.isBlockedByCollectable = true;
                 monster.isBlockedByPortal = true;
                 monster.replicationsRemaining = 1;
-                return monster;
+                break;
 
             case MonsterType.GHOST_BASIC:
                 monster = new Monster(
@@ -486,7 +492,7 @@ export class Level {
                 monster.isBlockedByObstacle = false;
                 monster.isBlockedByCollectable = false;
                 monster.isBlockedByPortal = false;
-                return monster;
+                break;
 
             case MonsterType.GHOST_CHASER:
                 monster = new Monster(
@@ -496,9 +502,11 @@ export class Level {
                 monster.isBlockedByObstacle = false;
                 monster.isBlockedByCollectable = false;
                 monster.isBlockedByPortal = false;
-                return monster;
+                break;
         }
 
+        monster.monsterType = monsterType;
+        return monster;
     }
 
     /* --- CONVENIENCE METHODS --- */
@@ -541,7 +549,7 @@ export class LevelManager {
             {
                 x: 5,
                 y: 0,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.MAGIC_PORTAL_1,
                 toLevelNumber: 100,
                 isVisible: true,
@@ -552,7 +560,7 @@ export class LevelManager {
             {
                 x: 5,
                 y: 9,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_1,
                 toLevelNumber: 1,
                 isVisible: true,
@@ -563,49 +571,49 @@ export class LevelManager {
             {
                 x: 5,
                 y: 5,
-                type: EntityType.PLAYER_START,
+                entityType: EntityType.WIZARD,
                 image: ImageAsset.WIZARD_2
             },
 
             {
                 x: 5,
                 y: 7,
-                type: EntityType.COLLECTABLE,
+                entityType: EntityType.COLLECTABLE,
                 image: ImageAsset.GOLD_COIN_STACK_1
             },
 
             {
                 x: 3,
                 y: 1,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 3,
                 y: 3,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 3,
                 y: 5,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 3,
                 y: 7,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 3,
                 y: 9,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
@@ -613,34 +621,34 @@ export class LevelManager {
             {
                 x: 7,
                 y: 1,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
             {
                 x: 7,
                 y: 3,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 7,
                 y: 5,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 7,
                 y: 7,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
 
             {
                 x: 7,
                 y: 9,
-                type: EntityType.OBSTACLE,
+                entityType: EntityType.OBSTACLE,
                 image: null,
             },
         ]
@@ -670,14 +678,14 @@ export class LevelManager {
             {
                 x: 5,
                 y: 0,
-                type: EntityType.PLAYER_START,
+                entityType: EntityType.WIZARD,
                 image: ImageAsset.WIZARD_2
             },
 
             {
                 x: 5,
                 y: 9,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_1,
                 toLevelNumber: 2,
                 isVisible: true,
@@ -686,19 +694,19 @@ export class LevelManager {
             },
 
             {
-                type: EntityType.COLLECT_MONSTER_RING,
+                entityType: EntityType.COLLECT_MONSTER_RING,
                 x: 5,
                 y: 7
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
             },
         ]
 
@@ -723,14 +731,19 @@ export class LevelManager {
 
         definitions: [
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT_MAN,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT_MAN,
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
             },
+
+            {
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
+            }
         ]
     };
 
@@ -747,7 +760,7 @@ export class LevelManager {
         numHazardsRandom: 1,
         numCollectablesRandom: 3,
 
-        numMonstersBasic: 3,
+        numMonstersBasic: 0,
         numMonstersScary: 0,
         numMonstersCollectable: 0,
 
@@ -756,87 +769,102 @@ export class LevelManager {
             {
                 x: 5,
                 y: 0,
-                type: EntityType.PLAYER_START,
+                entityType: EntityType.WIZARD,
                 image: ImageAsset.WIZARD_2
             },
 
             {
                 x: 4,
                 y: 9,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_1,
                 toLevelNumber: 4,
                 isVisible: true,
                 soundEffectName: SoundAsset.DESCEND
             },
 
+
+            {
+                x:0,
+                y:9,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.WASP_BASIC
+            },
+
+            {
+                x:9,
+                y:9,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.WASP_BASIC
+            },
+
             {
                 x: 0,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 1,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 2,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 3,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 4,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 5,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 6,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 7,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 8,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
 
             {
                 x: 9,
                 y: 8,
-                type: EntityType.HAZARD,
+                entityType: EntityType.HAZARD,
                 image: null,
             },
         ]
@@ -863,7 +891,7 @@ export class LevelManager {
             {
                 x: 0,
                 y: 0,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 randomLocation: true,
                 isVisible: false,
                 requiresKey: true,
@@ -873,7 +901,7 @@ export class LevelManager {
             },
 
             {
-                type: EntityType.COLLECT_MONSTER_KEY,
+                entityType: EntityType.COLLECT_MONSTER_KEY,
                 isVisible: true,
                 isPhased: false,
                 behavior: MonsterMovementBehavior.IMMOBILE,
@@ -881,14 +909,19 @@ export class LevelManager {
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT_MAN,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT_MAN,
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
             },
+
+            {
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
+            }
         ]
     };
 
@@ -901,8 +934,8 @@ export class LevelManager {
         backgroundMusicPlay: true,
         backgroundMusicTitle: SoundAsset.BGM,
 
-        numObstaclesRandom: 4,
-        numHazardsRandom: 1,
+        numObstaclesRandom: 5,
+        numHazardsRandom: 2,
         numCollectablesRandom: 3,
 
         numMonstersBasic: 0,
@@ -913,7 +946,7 @@ export class LevelManager {
             {
                 x: 0,
                 y: 0,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 randomLocation: true,
                 isVisible: false,
                 requiresKey: true,
@@ -923,7 +956,7 @@ export class LevelManager {
             },
 
             {
-                type: EntityType.COLLECT_MONSTER_KEY,
+                entityType: EntityType.COLLECT_MONSTER_KEY,
                 isVisible: true,
                 isPhased: false,
                 behavior: MonsterMovementBehavior.FLEE_PLAYER,
@@ -931,14 +964,19 @@ export class LevelManager {
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT_MAN,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT_MAN,
             },
 
             {
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.RAT,
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
             },
+
+            {
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
+            }
         ]
     };
 
@@ -955,7 +993,7 @@ export class LevelManager {
         numHazardsRandom: 1,
         numCollectablesRandom: 6,
 
-        numMonstersBasic: 4,
+        numMonstersBasic: 0,
         numMonstersScary: 0,
         numMonstersCollectable: 0,
 
@@ -963,7 +1001,7 @@ export class LevelManager {
             {
                 x: 0,
                 y: 0,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 randomLocation: true,
                 isVisible: false,
                 requiresKey: true,
@@ -973,12 +1011,27 @@ export class LevelManager {
             },
 
             {
-                type: EntityType.COLLECT_MONSTER_KEY,
+                entityType: EntityType.COLLECT_MONSTER_KEY,
                 isPhased: true,
                 isVisible: false,
                 behavior: MonsterMovementBehavior.IMMOBILE,
                 image: ImageAsset.TREASURE_KEY,
             },
+
+            {
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
+            },
+
+            {
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
+            },
+
+            {
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.RAT,
+            }
         ]
 
     };
@@ -1004,14 +1057,14 @@ export class LevelManager {
             {
                 x: 5,
                 y: 5,
-                type: EntityType.PLAYER_START,
+                entityType: EntityType.WIZARD,
                 image: ImageAsset.WIZARD_2
             },
 
             {
                 x: 3,
                 y: 5,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_UP_2,
                 toLevelNumber: 0,
                 isVisible: true,
@@ -1021,7 +1074,7 @@ export class LevelManager {
             {
                 x: 7,
                 y: 5,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_2,
                 toLevelNumber: 8,
                 isVisible: true,
@@ -1044,42 +1097,42 @@ export class LevelManager {
             {
                 x: 5,
                 y: 0,
-                type: EntityType.PLAYER_START,
+                entityType: EntityType.WIZARD,
                 image: ImageAsset.WIZARD_2
             },
 
             {
                 x: 1,
                 y: 1,
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.BLOB
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.BLOB
             },
 
             {
                 x: 8,
                 y: 1,
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.BLOB
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.BLOB
             },
 
             {
                 x: 1,
                 y: 8,
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.BLOB
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.BLOB
             },
 
             {
                 x: 8,
                 y: 8,
-                type: EntityType.MONSTER,
-                monsterClass: MonsterType.BLOB
+                entityType: EntityType.MONSTER,
+                monsterType: MonsterType.BLOB
             },
 
             {
                 x: 5,
                 y: 9,
-                type: EntityType.PORTAL,
+                entityType: EntityType.PORTAL,
                 image: ImageAsset.MAGIC_PORTAL_1,
                 toLevelNumber: 100,
                 isVisible: true,

@@ -1,3 +1,7 @@
+import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster, EffectTimerProcog, SpecialEffectFlash } from './entity.js';
+import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
+import { Level, LevelManager } from './level.js';
+
 /**
  * 
  * WIZARD WARS
@@ -108,9 +112,7 @@
 
 
 
-import { Card, Collectable, EffectTimerFreeze, Hazard, Monster, MonsterMovementBehavior, Mover, Obstacle, Portal, SpecialEffectDeath, SpecialEffectDescend, SpecialEffectFreeze, SpecialEffectRandomize, ImageDisplayEntity, Wizard, SpecialEffectScoreDisplay, MonsterType, SpecialEffectPrecognition, TemporaryEntity, SpecialEffectPhase, EffectTimerPhase, CollectableMonster, EffectTimerProcog, SpecialEffectFlash } from './entity.js';
-import { AssetLoader, ImageAsset, SoundAsset } from './AssetLoader.js';
-import { Level, LevelManager } from './level.js';
+
 
 const debugOutput = false;
 
@@ -756,10 +758,13 @@ function update() {
                 goldCollected += 1000;
                 goldBankedLifetime += 1000;
 
+                // If the ring is acquired, recover all spells...
+                if (mon.monsterType == MonsterType.COLLECT_RING) {
+                    replenishAllSpells();
+                }
+
                 update();
                 render();
-
-                // If the ring is acquired, recover all spells
 
                 var successSound = assetLoader.getSound(SoundAsset.SUCCESS)
                 successSound.addEventListener("ended", (e) => {

@@ -377,7 +377,7 @@ function initializeGameState() {
 
 function createBoardForLevel(newLevelNumber) {
     levelNumber = newLevelNumber;
-    levelCurrent = levelManager.getLevel(levelNumber);
+    levelCurrent = levelManager.getLevel(levelNumber, furthestLevelAchieved, tileSize, assetLoader);
     levelCurrent.initialize(assetLoader);
 
     console.log(`LEVEL ${newLevelNumber}`);

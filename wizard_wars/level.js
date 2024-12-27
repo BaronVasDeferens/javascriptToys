@@ -542,17 +542,6 @@ export class LevelManager {
                 x: 5,
                 y: 0,
                 entityType: EntityType.PORTAL,
-                image: ImageAsset.MAGIC_PORTAL_1,
-                toLevelNumber: 100,
-                isVisible: true,
-                requiresKey: false,
-                soundEffectName: SoundAsset.PORTAL_1
-            },
-
-            {
-                x: 5,
-                y: 9,
-                entityType: EntityType.PORTAL,
                 image: ImageAsset.STAIRS_DOWN_1,
                 toLevelNumber: 1,
                 isVisible: true,
@@ -569,7 +558,7 @@ export class LevelManager {
 
             {
                 x: 5,
-                y: 7,
+                y: 3,
                 entityType: EntityType.COLLECTABLE,
                 image: ImageAsset.GOLD_COIN_STACK_1
             },
@@ -608,7 +597,6 @@ export class LevelManager {
                 entityType: EntityType.OBSTACLE,
                 image: null,
             },
-
 
             {
                 x: 7,
@@ -1133,6 +1121,33 @@ export class LevelManager {
         ]
     };
 
+    portalToLevel6 = {
+        x: 3,
+        y: 2,
+        entityType: EntityType.PORTAL,
+        image: ImageAsset.MAGIC_PORTAL_1,
+        toLevelNumber: 6,
+        isVisible: true,
+        requiresKey: false,
+        soundEffectName: SoundAsset.PORTAL_1
+    }
+
+    challengePortal = {
+        x: 5,
+        y: 9,
+        entityType: EntityType.PORTAL,
+        image: ImageAsset.MAGIC_PORTAL_1,
+        toLevelNumber: 100,
+        isVisible: true,
+        requiresKey: false,
+        soundEffectName: SoundAsset.PORTAL_1
+    };
+
+    unlockablePortals = [
+        this.portalToLevel6,
+        this.challengePortal
+    ];
+
     constructor() {
         // Level ZERO
         this.levels.set(0, this.level_0);
@@ -1146,11 +1161,35 @@ export class LevelManager {
         this.levels.set(100, this.level_100);
     }
 
-    getLevel(levelNumber) {
+    getLevel(levelNumber, furthestLevelAchieved, tileSize, assetLoader) {
+
+        // FIXME: this needs more thought; how should the portlas work? is "highest level achieved" sufficient?
+
         var levelDetails = this.levels.get(levelNumber);
         if (levelDetails != null) {
             var level = new Level(levelNumber);
             level = Object.assign(level, levelDetails);
+
+            // The hub world has unlockable portals
+            if (levelNumber == 0) {
+
+                this.unlockablePortals
+                    .filter(portal => { return (Number(portal.toLevelNumber) <= furthestLevelAchieved) })
+                    .forEach(portal => {
+
+                        level.portals.push(
+                            new Portal(
+                                portal.toLevelNumber,
+                                portal.x * tileSize,
+                                portal.y * tileSize,
+                                assetLoader.getImage(portal.image),
+                                SoundAsset.PORTAL_1
+                            )
+                        )
+                    });
+
+            }
+
             return level;
         } else {
             console.log(`Level ${levelNumber} not found; generating random...`)
@@ -1158,5 +1197,6 @@ export class LevelManager {
             newLevel.setRandomValues();
             return newLevel;
         }
+
     }
 }

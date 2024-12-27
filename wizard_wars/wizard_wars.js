@@ -14,11 +14,7 @@ import { Level, LevelManager } from './level.js';
  *          level 0: outside, column arcade
  *              + achieving milestones unlocks portals that appear between columns
  *              + portals go to curated puzzle areas
- * 
- *          no exit
- *              + key appears after collecting all the treasure
- *              + sometimes the key moves
- * 
+ *
  *          level (HARD): LOTS of gold, a few obstacles/hazrads, and two chaser ghosts!
  *              + the portal only appears when all gold is collected!
  * 
@@ -52,7 +48,7 @@ import { Level, LevelManager } from './level.js';
  *          bonus / safe room / campfire
  *          
  *      COLLECATBLES
- *          items that FADE with each move
+ *          items that FADE AWAY with each move
  *              + perhaps LOTS of collectable gold which fades with each step
  *          some gold stacks are worth more than others
  *          rare chests that contain juicy stuff
@@ -63,12 +59,12 @@ import { Level, LevelManager } from './level.js';
  *          some enemies can't stack (occupy same space) (easier)
  * 
  *      ENVIRONMENT
+ *          pressure plates / stateful tiles?  
  *          traps?
  *          tiles that fall away after moving over them N times
  *              + ghosts
  * 
  *      SPELLS
- *          [X] spell: become immune to monster death for N moves (monsters semi-transparent)
  *          spell: turn hazards into obstacles?
  *          spell: make smart monsters dumb?
  *          spell: push all monsters to edges?
@@ -87,7 +83,6 @@ import { Level, LevelManager } from './level.js';
  *      SCORING
  *          score display
  *          online score board
- *          better "bonus" sound
  *          bonus for certain monsters on the board
  *          bonus for number of blobs on board
  *          bonus for collecting everything

@@ -1,0 +1,41 @@
+--------------------------------------
+WHAT DO I DO NEXT??
+
+FEATURE
+* Targetting a blob displays whether shot is obstructed/possible
+* Dramatic attack animation
+* games state as JSON
+* read/write to local storage
+* different weapons?
+* better monster pathing
+* GAME OVER state
+* Attack animation sound effects
+* Game over state music
+* Blobs who survive an attack will target the attacking soldier
+* "Focus" transient entity to orient which monster is moving/attacking
+
+
+PERFORMANCE
+* Reduce GPU load! XD
+
+ARTISTIC
+* Better soldier sprites (esp movement)
+* Ravening blob sprites with twichy jaws and moving tentacles
+* sprite facings change
+
+
+--------------------------------------
+THINGS TO THINK ABOUT
+
+* Balance competing concepts: beyond risk/reward...
+
+
+
+--------------------------------------
+CRAZY STUFF
+
+* Walls that move
+* Enemies that fragment instead of die
+* Combine soldiers into a single square? Split apart?
+* Morale: soldiers next to blobs without adjacent buddies suffer penalties
+* Captains: soldiers adjacent to captains enjoy bonuses

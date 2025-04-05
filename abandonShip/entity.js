@@ -9,6 +9,9 @@ class Entity {
     isAlive = true;
     gridSquare = null;
 
+    actionsMax = 5;
+    actionsCurrent = this.actionsMax;
+
     constructor(id, x, y) {
         this.id = id;
         this.x = x;
@@ -315,6 +318,9 @@ export class Soldier extends Entity {
 
     movementDrivers = new Array();
 
+    actionsMax = 5;
+    actionsCurrent = this.actionsMax;
+
     constructor(id, x, y, imageLoader) {
         super(id, x, y);
         this.image = imageLoader.getImage(ImageAsset.SOLDIER_STRIP);
@@ -413,6 +419,9 @@ export class Blob extends Entity {
     maxTicks = 30;
 
     movementDrivers = new Array();
+
+    actionsMax = 3;
+    actionsCurrent = this.actionsMax;
 
     constructor(id, x, y, imageLoader) {
         super(id, x, y);
@@ -780,7 +789,7 @@ export class MovementAnimationDriver extends BlockingDriver {
     maxTicks = 1;
 
     currentStep = 0;
-    maxSteps = 20;
+    maxSteps = 25;
 
     soundComplete = false;
 
@@ -792,7 +801,7 @@ export class MovementAnimationDriver extends BlockingDriver {
         this.destination = destination;
 
         if (entity instanceof Soldier) {
-            this.sound = soundLoader.getSound(SoundAsset.SOLDIER_SCREAM);
+            this.sound = soundLoader.getSound(SoundAsset.SOLDIER_MOVE_1);
         } else {
             // Random blob sound
             if (Math.random() > 0.5) {
@@ -812,6 +821,10 @@ export class MovementAnimationDriver extends BlockingDriver {
 
     update() {
 
+        if (this.currentStep === 0 && this.currentTick === 0) {
+            this.sound.play();
+        }
+
         if (this.isDone() == true) {
             this.origin.isOccupied = false;
             this.entity.setGridSquare(this.destination);
@@ -819,12 +832,7 @@ export class MovementAnimationDriver extends BlockingDriver {
             return;
         }
 
-        if (this.currentStep == 0 && this.currentTick == 0) {
-            this.sound.pause();
-            this.sound.currentTime = 0;
-            //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
-            this.sound.play();
-        }
+
 
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {

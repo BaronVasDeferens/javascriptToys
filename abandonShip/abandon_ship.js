@@ -20,6 +20,7 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+const audioContext = new AudioContext();
 
 
 /**
@@ -227,6 +228,7 @@ window.onkeydown = function (event) {
             break;
     }
 }
+ 
 
 // Process mouse clicks
 window.onmousedown = function (event) {
@@ -304,6 +306,10 @@ window.onmousedown = function (event) {
 
 // Process mouse movement
 window.onmousemove = function (event) {
+
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 
     switch (currentState) {
         case States.INTRO:
@@ -708,7 +714,7 @@ function startEnemyTurn() {
         let attemptedMoves = 0;
         let attemptedMovesMax = 5;
         let movesMade = 0;
-        let movesMadeMax = 6;
+        let movesMadeMax = 3;
 
         // Does the monster have a LIVE target? If not, obtain one.
         if (activeBlob.target == undefined || activeBlob.target == null || !activeBlob.target.isAlive) {

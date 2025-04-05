@@ -223,24 +223,14 @@ function drawScene() {
 }
 
 async function downloadMapfile(content) {
-    const options = {
-        types: [
-            {
-                description: "",
-                accept: {
-                    "text/plain": [".json"],
-                },
-            },
-        ],
-    };
-
-    const handle = await window.showSaveFilePicker(options);
-    const writable = await handle.createWritable();
-
-    await writable.write(content);
-    await writable.close();
-
-    return handle;
+    const blob = new Blob([content], { type: "application/json" });
+    const downloadelem = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    document.body.appendChild(downloadelem);
+    downloadelem.href = url;
+    downloadelem.click();
+    downloadelem.remove();
+    window.URL.revokeObjectURL(url);
 }
 
 

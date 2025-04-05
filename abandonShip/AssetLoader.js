@@ -135,10 +135,11 @@ export class SoundLoader {
             }
 
             snd.src = assetLocation;            // <-- triggers the sound load
+            snd.load();
         };
     }
 
     getSound(sndAsset) {
-        return this.soundMap.get(sndAsset);
+        return this.soundMap.get(sndAsset).cloneNode();
     };
 }

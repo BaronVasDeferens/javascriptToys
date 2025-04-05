@@ -1,0 +1,11 @@
+<script>
+    function playBeeps() {
+      const a = new Audio("https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg");
+      const b = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  
+      a.play().catch(console.error);
+      b.play().catch(console.error);
+    }
+  </script>
+  
+  <button onclick="playBeeps()">Play Beeps</button>

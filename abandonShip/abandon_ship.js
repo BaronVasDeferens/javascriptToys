@@ -20,6 +20,7 @@ const context = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+// AudioContext is necessary for sounds to play correctly
 const audioContext = new AudioContext();
 
 
@@ -45,7 +46,7 @@ const gridRows = 10;
 
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
-const numSoldiers = 5;
+const numSoldiers = 1;
 const numBlobs = 10;
 
 const numBonusTiles = 10;
@@ -80,6 +81,7 @@ var actionPointsAvailable = 0;
 var actionPointsCostPotential = 0;
 var actionPointCostAdjustment = 0;
 
+var isSoundEnabled = true;
 
 function actionPointCostTotal() {
     return actionPointsCostPotential + actionPointCostAdjustment;
@@ -223,6 +225,10 @@ window.onkeydown = function (event) {
         case 'l':
             console.log("Loading map...");
             loadMap();
+            break;
+        case 'm':
+            isSoundEnabled = !isSoundEnabled;
+            console.log(`Sound enabled: ${isSoundEnabled}`);
             break;
         default:
             break;

@@ -493,7 +493,6 @@ export class Blob extends Entity {
 
 }
 
-
 export class EffectTile {
 
     x = 0;
@@ -811,6 +810,7 @@ export class MovementAnimationDriver extends BlockingDriver {
             }
         }
 
+        //this.sound.playbackRate = 1.20 - (Math.random() * 0.5);
 
         let destinationPos = destination.getOnScreenPos();
         let originScreenPos = origin.getOnScreenPos();
@@ -831,8 +831,6 @@ export class MovementAnimationDriver extends BlockingDriver {
             this.sound.pause();
             return;
         }
-
-
 
         this.currentTick++;
         if (this.currentTick >= this.maxTicks) {

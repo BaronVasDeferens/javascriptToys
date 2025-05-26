@@ -12,6 +12,9 @@ const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
 const soundLoader = new SoundLoader();
 
+// AudioContext is necessary for sounds to play correctly
+const audioContext = new AudioContext();
+
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
@@ -43,10 +46,10 @@ const gridRows = 10;
 const numObstructedSquares = randomIntInRange(gridRows, gridCols);
 
 const numSoldiers = 5;
-const numBlobs = 1;
+const numBlobs = 15;
 
 const numBonusTiles = 10;
-const numFires = 10;
+const numFires = 0;
 
 const gridSquares = new Array(0);
 
@@ -302,6 +305,10 @@ window.onmousedown = function (event) {
 
 // Process mouse movement
 window.onmousemove = function (event) {
+
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 
     switch (currentState) {
         case States.INTRO:

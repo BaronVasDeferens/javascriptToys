@@ -29,6 +29,33 @@ var inputs = new Set();
   // Load the bunny texture
   const texture = await Assets.load("/assets/bunny.png");
 
+  const muzzleFlashes = [
+    new Sprite(await Assets.load("/assets/m_1.png")),
+    new Sprite(await Assets.load("/assets/m_2.png")),
+    new Sprite(await Assets.load("/assets/m_3.png")),
+    new Sprite(await Assets.load("/assets/m_4.png")),
+    new Sprite(await Assets.load("/assets/m_5.png")),
+    new Sprite(await Assets.load("/assets/m_6.png")),
+    new Sprite(await Assets.load("/assets/m_7.png")),
+    new Sprite(await Assets.load("/assets/m_8.png")),
+    new Sprite(await Assets.load("/assets/m_9.png")),
+    new Sprite(await Assets.load("/assets/m_10.png")),
+    new Sprite(await Assets.load("/assets/m_11.png")),
+    new Sprite(await Assets.load("/assets/m_12.png")),
+    new Sprite(await Assets.load("/assets/m_13.png")),
+    new Sprite(await Assets.load("/assets/m_14.png")),
+    new Sprite(await Assets.load("/assets/m_15.png")),
+    new Sprite(await Assets.load("/assets/m_16.png"))
+  ];
+
+  muzzleFlashes.forEach(flash => {
+    flash.scale.set(0.5);
+    flash.anchor.set(0.5);
+    flash.position.set(app.screen.width / 2, app.screen.height / 2);
+    flash.visible = false;
+    app.stage.addChild(flash);
+  });
+
   // Create a bunny Sprite
   const bunny = new Sprite(texture);
 
@@ -93,6 +120,26 @@ var inputs = new Set();
 
   app.ticker.add((time) => {
     bunny.rotation = bunnyTheta;
-    console.log(inputs)
+
+    if (inputs.has(Inputs.MOUSE_PRIMARY)) {
+      var selectedIndex = randomIntInRange(0, muzzleFlashes.length - 1);
+      muzzleFlashes.forEach((flash, index) => {
+        if (index == selectedIndex) {
+          flash.visible = true;
+          flash.rotation = bunnyTheta + (3 * (Math.PI / 2)) ;
+        } else {
+          flash.visible = false;
+        }
+      });
+    } else {
+      muzzleFlashes.forEach(flash => {
+        flash.visible = false;
+      })
+    }
+
   });
 })();
+
+function randomIntInRange(min, max) {
+  return parseInt(Math.random() * max + min);
+};

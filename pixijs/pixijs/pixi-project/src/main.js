@@ -3,7 +3,8 @@ import { Application, Assets, Sprite } from "pixi.js";
 
 const Inputs = Object.freeze({
   MOUSE_PRIMARY: "MOUSE_PRIMARY",
-  MOUSE_SECONDARY: "MOUSE_SECONDARY"
+  MOUSE_SECONDARY: "MOUSE_SECONDARY",
+  KEYBOARD_FORWARD: "KEYBOARD_FORWARD"
 });
 
 
@@ -60,6 +61,7 @@ var inputs = new Set();
   const bunny = new Sprite(texture);
 
   var bunnyTheta = 0.0;
+  var bunnySpeed = 0.5;
 
   // Center the sprite's anchor point
   bunny.anchor.set(0.5);
@@ -74,18 +76,18 @@ var inputs = new Set();
   const centerX = app.screen.width / 2;
   const centerY = app.screen.height / 2;
 
+  // Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
+  document.addEventListener('contextmenu', event => event.preventDefault());
+
   document.addEventListener("mousemove", (event) => {
 
     if (event != undefined) {
-      let mouseX = event.clientX - centerX;
-      let mouseY = event.clientY - centerY;
+      let mouseX = event.clientX - bunny.x;
+      let mouseY = event.clientY - bunny.y;
       bunnyTheta = Math.atan2(mouseY, mouseX) + (Math.PI / 2);
     }
 
   });
-
-  // Prevent the right click from summoning the context menu. Considered "bad form" but LOL whatever
-  document.addEventListener('contextmenu', event => event.preventDefault());
 
   document.addEventListener("mousedown", (event) => {
     switch (event.button) {
@@ -117,16 +119,46 @@ var inputs = new Set();
     }
   });
 
+  document.addEventListener("keydown", (event) => {
+    switch (event.key) {
+      case 'w':
+        inputs.add(Inputs.KEYBOARD_FORWARD);
+        break;
+    }
+  });
 
-  app.ticker.add((time) => {
-    bunny.rotation = bunnyTheta;
+  document.addEventListener("keyup", (event) => {
+    switch (event.key) {
+      case 'w':
+        inputs.delete(Inputs.KEYBOARD_FORWARD);
+        break;
+    }
+  });
 
+  function processInputs() {
+
+    var deltaX = 0.0;
+    var deltaY = 0.0;
+
+    // MOVEMENT
+    if (inputs.has(Inputs.KEYBOARD_FORWARD)) {
+      deltaX = Math.sin(bunnyTheta) / bunnySpeed;
+      deltaY = Math.cos(bunnyTheta) / bunnySpeed;
+      bunny.x += deltaX;
+      bunny.y -= deltaY;
+    }
+
+    // FIRING MAIN WEAPON
     if (inputs.has(Inputs.MOUSE_PRIMARY)) {
+
+      // Choose and draw a random muzzle flash
       var selectedIndex = randomIntInRange(0, muzzleFlashes.length - 1);
       muzzleFlashes.forEach((flash, index) => {
         if (index == selectedIndex) {
           flash.visible = true;
-          flash.rotation = bunnyTheta + (3 * (Math.PI / 2)) ;
+          flash.rotation = bunnyTheta + (3 * (Math.PI / 2));
+          flash.x = bunny.x;
+          flash.y = bunny.y;
         } else {
           flash.visible = false;
         }
@@ -137,9 +169,23 @@ var inputs = new Set();
       })
     }
 
+
+  }
+
+  function randomIntInRange(min, max) {
+    return parseInt(Math.random() * max + min);
+  };
+
+
+  app.ticker.add((time) => {
+
+    // console.log(inputs);
+
+    bunny.rotation = bunnyTheta;
+
+    processInputs();
+
   });
 })();
 
-function randomIntInRange(min, max) {
-  return parseInt(Math.random() * max + min);
-};
+

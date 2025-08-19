@@ -19,7 +19,7 @@ const roomSize = canvas.width / numCols;
 
 var maze;
 
-const entitySize = 50;
+const entitySize = roomSize / 4;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
 
@@ -76,19 +76,22 @@ function initialize() {
     maze.openNeighboringRooms(4, 3, Directions.DOWN);
     maze.computeBorders();
 
-    var roomZero = maze.getRoomByArrayPosition(0, 0)
-    var centerCoords = roomZero.getCenterCoordsWithOffset(entitySize);
+    // Add some players
+    for (var n = 0; n < numCols; n++) {
+        var roomZero = maze.getRoomByArrayPosition(n, n)
+        var centerCoords = roomZero.getCenterCoordsWithOffset(entitySize);
 
-    console.log(centerCoords);
+        console.log(centerCoords);
 
-    playerEntities.push(
-        new EnititySimple(
-            centerCoords.x,
-            centerCoords.y,
-            entitySize,
-            "#FF0000"
+        playerEntities.push(
+            new EnititySimple(
+                centerCoords.x,
+                centerCoords.y,
+                entitySize
+            )
         )
-    )
+    }
+
 }
 
 function beginGame() {
@@ -111,7 +114,6 @@ function render(context) {
     if (selectedPlayerEntity != null) {
         selectedPlayerEntity.render(context);
     }
-
 }
 
 
@@ -133,7 +135,6 @@ document.addEventListener('mousedown', (click) => {
 });
 
 document.addEventListener('mousemove', (click) => {
-
     switch (gameState) {
         case GameState.IDLE:
             break;
@@ -146,7 +147,6 @@ document.addEventListener('mousemove', (click) => {
 
 
 document.addEventListener('mouseup', (click) => {
-
     // Find the nearest room and snap to the center
     var targetRoom = maze.getRoomAtClick(click);
     if (targetRoom != null && selectedPlayerEntity != null) {

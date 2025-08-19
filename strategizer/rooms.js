@@ -19,7 +19,7 @@ export class Border {
     }
 
     render(context) {
-        context.fillStyle = "#000000"
+        context.fillStyle = "#ACACAC"
         context.fillRect(this.xStart, this.yStart, this.width, this.height);
     }
 

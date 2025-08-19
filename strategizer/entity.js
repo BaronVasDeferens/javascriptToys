@@ -13,7 +13,7 @@ export class EnititySimple {
     x = 0;
     y = 0;
     imageSize = 50;
-    color = "#000000";
+    color = this.getRandomColor();
 
     constructor(x, y, imageSize, color) {
 
@@ -32,6 +32,15 @@ export class EnititySimple {
         if (color != null) {
             this.color = color;
         }
+    }
+
+    getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
 
     render(context) {

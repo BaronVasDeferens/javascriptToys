@@ -29,6 +29,7 @@ export class Room {
 
     x = 0;
     y = 0;
+    size = 50;
     color = "#000000";
 
     borders = new Array();
@@ -43,9 +44,13 @@ export class Room {
         this.x = x;
         this.y = y;
         this.size = size;
-        this.wallWidth = this.size * 0.02;
+        if (color != null) {
+            this.color = color;
+        } else {
+            this.changeColor("#FFFFFF");
+        }
 
-        this.changeColor("#FFFFFF");
+        this.wallWidth = this.size * 0.02;
     }
 
     changeColor(newColor) {
@@ -64,6 +69,20 @@ export class Room {
         return this.borders.some(border => {
             return click.offsetX >= border.xStart && click.offsetX <= border.xEnd && click.offsetY >= border.yStart && click.offsetY <= border.yEnd
         })
+    }
+
+    //* Computes the center point of the room. When an offset is provided, this calculates 
+    // the upper-left corner point for an entity place at the center
+    // */
+    getCenterCoordsWithOffset(offset) {
+        if (offset == null) {
+            offset = 0;
+        }
+
+        return {
+            x: (this.x * this.size) + (this.size / 2) - (offset / 2),
+            y: (this.y * this.size) + (this.size / 2) - (offset / 2)
+        }
     }
 
     render(context) {
@@ -155,7 +174,7 @@ export class Maze {
         });
     }
 
-    findRoom(x, y) {
+    getRoomByArrayPosition(x, y) {
         return this.rooms.filter(room => { return (room.x == x && room.y == y) })[0];
     }
 
@@ -173,7 +192,7 @@ export class Maze {
 
     openNeighboringRooms(x, y, dir) {
 
-        var targetRoom = this.findRoom(x, y);
+        var targetRoom = this.getRoomByArrayPosition(x, y);
 
         if (targetRoom != null) {
 

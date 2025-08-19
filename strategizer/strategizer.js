@@ -1,5 +1,6 @@
 import { Maze, Directions } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
+import { EnititySimple, GameState } from "./entity.js";
 
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
@@ -10,23 +11,29 @@ const context = canvas.getContext('2d');
 
 var audioContext;
 
+var gameState = GameState.IDLE;
+
 const numRows = 5;
 const numCols = 5;
 const roomSize = canvas.width / numCols;
 
 var maze;
 
+const entitySize = 50;
+var playerEntities = new Array();
+var selectedPlayerEntity = null;
+
 var setup = function () {
+
+    // Clear background
     context.fillStyle = "#FF0000";
     context.fillRect(0, 0, canvas.width, canvas.height);
-
 
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, soundLoader, () => {
         initialize();
         beginGame();
     });
-
 
 }();
 
@@ -68,6 +75,20 @@ function initialize() {
     maze.openNeighboringRooms(4, 2, Directions.DOWN);
     maze.openNeighboringRooms(4, 3, Directions.DOWN);
     maze.computeBorders();
+
+    var roomZero = maze.getRoomByArrayPosition(0, 0)
+    var centerCoords = roomZero.getCenterCoordsWithOffset(entitySize);
+
+    console.log(centerCoords);
+
+    playerEntities.push(
+        new EnititySimple(
+            centerCoords.x,
+            centerCoords.y,
+            entitySize,
+            "#FF0000"
+        )
+    )
 }
 
 function beginGame() {
@@ -82,17 +103,60 @@ function updateGameState() {
 
 function render(context) {
     maze.render(context);
+
+    playerEntities.forEach(entity => {
+        entity.render(context);
+    });
+
+    if (selectedPlayerEntity != null) {
+        selectedPlayerEntity.render(context);
+    }
+
 }
 
 
-// Process mouse movement
-window.onmousemove = function (event) {
+// --- PLAYER INPUT ---
 
-    // if (audioContext == null) {
-    //     audioContext = new AudioContext();
-    // }
+document.addEventListener('mousedown', (click) => {
+    playerEntities.forEach(entity => {
+        if (entity.containsClick(click)) {
+            selectedPlayerEntity = entity;
+            gameState = GameState.SELECTED_PLAYER_ENTITY;
+        }
+    });
 
-    // if (audioContext.state === 'suspended') {
-    //     audioContext.resume();
-    // }
-}
+    if (selectedPlayerEntity == null) {
+        gameState = GameState.IDLE;
+    }
+
+    console.log(`state: ${gameState}`);
+});
+
+document.addEventListener('mousemove', (click) => {
+
+    switch (gameState) {
+        case GameState.IDLE:
+            break;
+        case GameState.SELECTED_PLAYER_ENTITY:
+            selectedPlayerEntity.x = click.offsetX - (entitySize / 2);
+            selectedPlayerEntity.y = click.offsetY - (entitySize / 2);
+            break;
+    }
+});
+
+
+document.addEventListener('mouseup', (click) => {
+
+    // Find the nearest room and snap to the center
+    var targetRoom = maze.getRoomAtClick(click);
+    if (targetRoom != null && selectedPlayerEntity != null) {
+        var centerCoords = targetRoom.getCenterCoordsWithOffset(entitySize);
+        selectedPlayerEntity.x = centerCoords.x;
+        selectedPlayerEntity.y = centerCoords.y;
+        selectedPlayerEntity = null;
+    }
+
+    gameState = GameState.IDLE;
+    console.log(`state: ${gameState}`);
+
+});

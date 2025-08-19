@@ -8,13 +8,23 @@ const soundLoader = new SoundLoader();
 const canvas = document.getElementById('playArea');
 const context = canvas.getContext('2d');
 
-var audioContext;
+var audioContext; // AudioContext must be initialized after interactions
 
 const numRows = 5;
 const numCols = 5;
 const roomSize = canvas.width / numCols;
 
 var maze;
+
+// Process mouse movement
+document.addEventListener('mousemove', (event) => {
+    checkAudioContext();
+});
+
+// Process mouse movement
+document.addEventListener('mousedown', (event) => {
+    checkAudioContext();
+});
 
 var setup = function () {
     context.fillStyle = "#FF0000";
@@ -26,8 +36,6 @@ var setup = function () {
         initialize();
         beginGame();
     });
-
-
 }();
 
 function initialize() {
@@ -84,15 +92,13 @@ function render(context) {
     maze.render(context);
 }
 
+function checkAudioContext() {
 
-// Process mouse movement
-window.onmousemove = function (event) {
+    if (audioContext == null) {
+        audioContext = new AudioContext();
+    }
 
-    // if (audioContext == null) {
-    //     audioContext = new AudioContext();
-    // }
-
-    // if (audioContext.state === 'suspended') {
-    //     audioContext.resume();
-    // }
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 }

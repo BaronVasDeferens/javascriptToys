@@ -64,11 +64,7 @@ export class EntitySimple {
             var centerCoords = this.room.getCenterCoordsWithOffset(this.imageSize);
             this.x = centerCoords.x;
             this.y = centerCoords.y;
-            this.room.visibility = Visibility.BRIGHT;
         } else {
-            if (this.room != null) {
-                this.room.visibility = Visibility.DARK;
-            }
             this.room = null;
         }
     }

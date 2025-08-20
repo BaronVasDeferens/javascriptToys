@@ -26,8 +26,9 @@ export class Border {
 
 export const Visibility = Object.freeze({
     DARK: "#000000",
+    DIM: "#383737",
     BRIGHT: "#ffffff"
-}); 
+});
 
 export class Room {
 
@@ -44,7 +45,6 @@ export class Room {
     rightOpen = false;
 
     constructor(x, y, size) {
-
         this.x = x;
         this.y = y;
         this.size = size;
@@ -171,6 +171,57 @@ export class Maze {
         return this.rooms.filter(room => { return (room.x == x && room.y == y) })[0];
     }
 
+    computeVisibility(playerEntities) {
+        this.rooms.forEach(room => {
+            room.visibility = Visibility.DARK;
+        });
+
+        playerEntities.forEach(player => {
+            var playerRoom = player.getRoom();
+            playerRoom.visibility = Visibility.BRIGHT;
+            this.getOpenNeighborsToRoom(playerRoom).forEach( neighbor => {
+                if (neighbor.visibility == Visibility.DARK) {
+                    neighbor.visibility = Visibility.DIM;
+                } else if (neighbor.visibility == Visibility.DIM) {
+                    neighbor.visibility = Visibility.BRIGHT;
+                }
+            })
+        })
+    }
+
+    getOpenNeighborsToRoom(room) {
+
+        var neighbors = new Array();
+        if (room.upOpen) {
+            neighbors.push(this.getRoomByArrayPosition(room.x, room.y - 1));
+        }
+
+        if (room.downOpen) {
+            neighbors.push(this.getRoomByArrayPosition(room.x, room.y + 1));
+        }
+
+        if (room.leftOpen) {
+            neighbors.push(this.getRoomByArrayPosition(room.x - 1, room.y));
+        }
+
+        if (room.rightOpen) {
+            neighbors.push(this.getRoomByArrayPosition(room.x + 1, room.y));
+        }
+
+        return neighbors;
+    }
+
+    getAdjacentRooms(room) {
+        var neighbors = new Array();
+        neighbors.push(this.getRoomByArrayPosition(room.x, room.y - 1));
+        neighbors.push(this.getRoomByArrayPosition(room.x, room.y + 1));
+        neighbors.push(this.getRoomByArrayPosition(room.x - 1, room.y));
+        neighbors.push(this.getRoomByArrayPosition(room.x + 1, room.y));
+        return neighbors.filter(neighbor => {
+            return neighbor != null
+        });
+    }
+
     getRoomAtClick(click) {
 
         var xClick = click.offsetX;
@@ -197,11 +248,11 @@ export class Maze {
 
             switch (dir) {
                 case Directions.UP:
-                    neighborRoom = this.getRoomByArrayPosition(x, y - 1); 
+                    neighborRoom = this.getRoomByArrayPosition(x, y - 1);
                     this.openRoomSingle(neighborRoom, Directions.DOWN);
                     break;
                 case Directions.DOWN:
-                    neighborRoom = this.getRoomByArrayPosition(x, y + 1); 
+                    neighborRoom = this.getRoomByArrayPosition(x, y + 1);
                     this.openRoomSingle(neighborRoom, Directions.UP);
                     break;
                 case Directions.LEFT:

@@ -105,6 +105,8 @@ function initialize() {
         entity.setRoom(room);
         playerEntities.push(entity);
     }
+
+    maze.computeVisibility(playerEntities);
 }
 
 function beginGame() {
@@ -163,6 +165,7 @@ document.addEventListener('mouseup', (click) => {
     var targetRoom = maze.getRoomAtClick(click);
     if (targetRoom != null && selectedPlayerEntity != null) {
         selectedPlayerEntity.setRoom(targetRoom);
+        maze.computeVisibility(playerEntities);
         selectedPlayerEntity = null;
     }
 

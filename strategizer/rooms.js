@@ -63,7 +63,7 @@ export class Room {
 
     /**
      * Computes the center point of the room. When an offset is provided, this calculates the upper-left corner point for an entity place at the center
-     */    
+     */
     getCenterCoordsWithOffset(offset) {
 
         if (offset == null) {
@@ -178,7 +178,7 @@ export class Maze {
         playerEntities.forEach(player => {
             var playerRoom = player.getRoom();
             playerRoom.visibility = Visibility.BRIGHT;
-            this.getOpenNeighborsToRoom(playerRoom).forEach( neighbor => {
+            this.getOpenNeighborsToRoom(playerRoom).forEach(neighbor => {
                 if (neighbor.visibility == Visibility.DARK) {
                     neighbor.visibility = Visibility.DIM;
                 } else if (neighbor.visibility == Visibility.DIM) {
@@ -218,6 +218,37 @@ export class Maze {
         neighbors.push(this.getRoomByArrayPosition(room.x + 1, room.y));
         return neighbors.filter(neighbor => {
             return neighbor != null
+        });
+    }
+
+    getAdjacentRoomsWithDirection(room) {
+        var neighbors = new Array();
+        neighbors.push(
+            {
+                room: this.getRoomByArrayPosition(room.x, room.y - 1),
+                direction: Directions.UP
+            });
+
+        neighbors.push(
+            {
+                room: this.getRoomByArrayPosition(room.x, room.y + 1),
+                direction: Directions.DOWN
+            });
+
+        neighbors.push(
+            {
+                room: this.getRoomByArrayPosition(room.x - 1, room.y),
+                direction: Directions.LEFT
+            });
+
+        neighbors.push(
+            {
+                room: this.getRoomByArrayPosition(room.x + 1, room.y),
+                direction: Directions.RIGHT
+            });
+
+        return neighbors.filter(neighbor => {
+            return neighbor.room != null
         });
     }
 
@@ -276,7 +307,7 @@ export class Maze {
             return;
         }
 
-        console.log(`opening room ${targetRoom.x} ${targetRoom.y} -> ${dir}`);
+        // console.log(`opening room ${targetRoom.x} ${targetRoom.y} -> ${dir}`);
 
         switch (dir) {
             case Directions.UP:

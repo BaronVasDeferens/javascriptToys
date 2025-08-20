@@ -32,15 +32,18 @@ var audioContext; // AudioContext must be initialized after interactions
 
 var gameState = GameState.IDLE;
 
-const numRows = 5;
-const numCols = 5;
+const numRows = 10;
+const numCols = 10;
 const roomSize = canvas.width / numCols;
 
-var maze;
+var maze = new Maze(numRows, numCols, roomSize);
 
+const numPlayers = 5;
 const entitySize = roomSize / 4;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
+
+// -------------------------------------------------------
 
 var setup = function () {
 
@@ -57,8 +60,12 @@ var setup = function () {
 
 function initialize() {
 
+    console.log("Initializing...");
+
+    playerEntities = new Array();
     maze = new Maze(numRows, numCols, roomSize);
 
+/*
     maze.openNeighboringRooms(0, 0, Directions.RIGHT);
     maze.openNeighboringRooms(0, 0, Directions.DOWN);
     maze.openNeighboringRooms(0, 1, Directions.DOWN);
@@ -92,11 +99,29 @@ function initialize() {
     maze.openNeighboringRooms(4, 1, Directions.DOWN);
     maze.openNeighboringRooms(4, 2, Directions.DOWN);
     maze.openNeighboringRooms(4, 3, Directions.DOWN);
+
+*/
+
+    // Open all rooms to each other
+    maze.rooms.forEach( room => {
+        var adjacentRooms = maze.getAdjacentRoomsWithDirection(room);
+        adjacentRooms.forEach( neighbor => {
+            maze.openNeighboringRooms(room.x, room.y, neighbor.direction);
+        });
+    })
+
+    // TODO: remove a few random doors?
+
+    // TODO: place monsters in dark rooms?
+
     maze.computeBorders();
 
     // Add some players
-    for (var n = 0; n < numCols; n++) {
-        var room = maze.getRoomByArrayPosition(n, n);
+    for (var n = 0; n < numPlayers; n++) {
+        var room = maze.getRoomByArrayPosition(
+            random(0, numCols),
+            random(0, numRows)
+        );
         var entity = new EntitySimple(
             0,
             0,
@@ -128,6 +153,17 @@ function render(context) {
 
     if (selectedPlayerEntity != null) {
         selectedPlayerEntity.render(context);
+    }
+}
+
+function random(min, max) {
+    return parseInt(Math.random() * max + min);
+};
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }
 
@@ -179,4 +215,13 @@ document.addEventListener('mouseup', (click) => {
 
     gameState = GameState.IDLE;
     console.log(`state: ${gameState}`);
+});
+
+document.addEventListener('keydown', (event) => {
+
+    switch(event.key) {
+        case 'r':
+            initialize();
+            break;
+    }
 });

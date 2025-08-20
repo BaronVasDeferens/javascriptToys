@@ -1,6 +1,6 @@
 import { Maze, Directions } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EnititySimple, GameState } from "./entity.js";
+import { EntitySimple, GameState } from "./entity.js";
 
 /**
  * 
@@ -10,11 +10,11 @@ import { EnititySimple, GameState } from "./entity.js";
  *          player controls agents who must track and kill a monster lurking the maze.
  *          agents are limited to LOS
  *          only some agents can fight and defeat the monster
- *      - spaceship boarding action
+ *      - spaceship defense
  *          player controls agents who must cleanse the ship and rescue captives
  *          solo agents are weak and die during invader encounters
  *          individual agents merge into parties when in the same room
- *          parties may overcome invaders
+ *          parties may overcome invaders more easily but can be in fewer places
  *          collectable weapons may help either
  * 
  * 
@@ -45,7 +45,7 @@ var selectedPlayerEntity = null;
 var setup = function () {
 
     // Clear background
-    context.fillStyle = "#FF0000";
+    context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     // Invoke AssetLoader and trigger callback upon completion...
@@ -53,7 +53,6 @@ var setup = function () {
         initialize();
         beginGame();
     });
-
 }();
 
 function initialize() {
@@ -97,20 +96,15 @@ function initialize() {
 
     // Add some players
     for (var n = 0; n < numCols; n++) {
-        var roomZero = maze.getRoomByArrayPosition(n, n)
-        var centerCoords = roomZero.getCenterCoordsWithOffset(entitySize);
-
-        console.log(centerCoords);
-
-        playerEntities.push(
-            new EnititySimple(
-                centerCoords.x,
-                centerCoords.y,
+        var room = maze.getRoomByArrayPosition(n, n);
+        var entity = new EntitySimple(
+                0,
+                0,
                 entitySize
-            )
-        )
+            );
+        entity.setRoom(room);
+        playerEntities.push(entity);
     }
-
 }
 
 function beginGame() {
@@ -164,14 +158,11 @@ document.addEventListener('mousemove', (click) => {
     }
 });
 
-
 document.addEventListener('mouseup', (click) => {
     // Find the nearest room and snap to the center
     var targetRoom = maze.getRoomAtClick(click);
     if (targetRoom != null && selectedPlayerEntity != null) {
-        var centerCoords = targetRoom.getCenterCoordsWithOffset(entitySize);
-        selectedPlayerEntity.x = centerCoords.x;
-        selectedPlayerEntity.y = centerCoords.y;
+        selectedPlayerEntity.setRoom(targetRoom);
         selectedPlayerEntity = null;
     }
 

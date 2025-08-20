@@ -19,18 +19,22 @@ export class Border {
     }
 
     render(context) {
-        context.fillStyle = "#ACACAC"
+        context.fillStyle = "#5c5c5c"
         context.fillRect(this.xStart, this.yStart, this.width, this.height);
     }
-
 }
+
+export const Visibility = Object.freeze({
+    DARK: "#000000",
+    BRIGHT: "#ffffff"
+}); 
 
 export class Room {
 
     x = 0;
     y = 0;
     size = 50;
-    color = "#000000";
+    visibility = Visibility.DARK;
 
     borders = new Array();
 
@@ -39,26 +43,12 @@ export class Room {
     leftOpen = false;
     rightOpen = false;
 
-    constructor(x, y, size, color) {
+    constructor(x, y, size) {
 
         this.x = x;
         this.y = y;
         this.size = size;
-        if (color != null) {
-            this.color = color;
-        } else {
-            this.changeColor("#FFFFFF");
-        }
-
         this.wallWidth = this.size * 0.02;
-    }
-
-    changeColor(newColor) {
-        if (newColor == null) {
-            this.color = this.getRandomColor();
-        } else {
-            this.color = newColor;
-        }
     }
 
     isOpen() {
@@ -75,6 +65,7 @@ export class Room {
     // the upper-left corner point for an entity place at the center
     // */
     getCenterCoordsWithOffset(offset) {
+
         if (offset == null) {
             offset = 0;
         }
@@ -88,7 +79,7 @@ export class Room {
     render(context) {
 
         // Draw the base color
-        context.fillStyle = this.color;
+        context.fillStyle = this.visibility;
         context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
 
         // Draw the borders
@@ -131,6 +122,7 @@ export class Room {
     }
 
     getRandomColor() {
+
         var letters = '0123456789ABCDEF';
         var color = '#';
         for (var i = 0; i < 6; i++) {
@@ -153,22 +145,23 @@ export class Maze {
 
         for (var i = 0; i < numCols; i++) {
             for (var j = 0; j < numRows; j++) {
-                this.rooms.push(
-                    new Room(
-                        i, j, roomSize
-                    )
-                )
+                var room = new Room(i, j, roomSize);
+                this.rooms.push(room)
             }
         }
     }
 
     computeBorders() {
+
         this.rooms.forEach(room => {
             room.computeBorders();
         });
     }
 
     render(context) {
+
+        context.fillStyle = this.color;
+        context.fillRect(0, 0, this.numRows * this.roomSize, this.numCols * this.roomSize);
         this.rooms.forEach(room => {
             room.render(context);
         });
@@ -179,6 +172,7 @@ export class Maze {
     }
 
     getRoomAtClick(click) {
+
         var xClick = click.offsetX;
         var yClick = click.offsetY;
 
@@ -203,19 +197,19 @@ export class Maze {
 
             switch (dir) {
                 case Directions.UP:
-                    neighborRoom = this.rooms.filter(room => { return (room.x == x && room.y == y - 1) })[0];
+                    neighborRoom = this.getRoomByArrayPosition(x, y - 1); 
                     this.openRoomSingle(neighborRoom, Directions.DOWN);
                     break;
                 case Directions.DOWN:
-                    neighborRoom = this.rooms.filter(room => { return (room.x == x && room.y == y + 1) })[0];
+                    neighborRoom = this.getRoomByArrayPosition(x, y + 1); 
                     this.openRoomSingle(neighborRoom, Directions.UP);
                     break;
                 case Directions.LEFT:
-                    neighborRoom = this.rooms.filter(room => { return (room.x == x - 1 && room.y == y) })[0];
+                    neighborRoom = this.getRoomByArrayPosition(x - 1, y);
                     this.openRoomSingle(neighborRoom, Directions.RIGHT);
                     break;
                 case Directions.RIGHT:
-                    neighborRoom = this.rooms.filter(room => { return (room.x == x + 1 && room.y == y) })[0];
+                    neighborRoom = this.getRoomByArrayPosition(x + 1, y);
                     this.openRoomSingle(neighborRoom, Directions.LEFT);
                     break;
             }

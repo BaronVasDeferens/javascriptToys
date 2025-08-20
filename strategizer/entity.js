@@ -1,3 +1,4 @@
+import { Visibility } from "./rooms.js";
 
 export const GameState = Object.freeze({
     IDLE: "IDLE",
@@ -7,7 +8,7 @@ export const GameState = Object.freeze({
 /**
  * A simple colored square
  */
-export class EnititySimple {
+export class EntitySimple {
 
     // x and y coords describe the top-left corner of the image
     x = 0;
@@ -50,6 +51,30 @@ export class EnititySimple {
 
     containsClick(click) {
         return (click.offsetX >= this.x && click.offsetX <= this.x + this.imageSize) && (click.offsetY >= this.y && click.offsetY <= this.y + this.imageSize);
+    }
+
+    setRoom(room) {
+
+        if (this.room != null) {
+            this.room.visibility = Visibility.DARK;
+        }
+
+        this.room = room;
+        if (this.room != null) {
+            var centerCoords = this.room.getCenterCoordsWithOffset(this.imageSize);
+            this.x = centerCoords.x;
+            this.y = centerCoords.y;
+            this.room.visibility = Visibility.BRIGHT;
+        } else {
+            if (this.room != null) {
+                this.room.visibility = Visibility.DARK;
+            }
+            this.room = null;
+        }
+    }
+
+    getRoom() {
+        return this.room;
     }
 
 }

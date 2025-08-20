@@ -2,6 +2,25 @@ import { Maze, Directions } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
 import { EnititySimple, GameState } from "./entity.js";
 
+/**
+ * 
+ * IDEAS
+ * 
+ *      - monster hunt 
+ *          player controls agents who must track and kill a monster lurking the maze.
+ *          agents are limited to LOS
+ *          only some agents can fight and defeat the monster
+ *      - spaceship boarding action
+ *          player controls agents who must cleanse the ship and rescue captives
+ *          solo agents are weak and die during invader encounters
+ *          individual agents merge into parties when in the same room
+ *          parties may overcome invaders
+ *          collectable weapons may help either
+ * 
+ * 
+ */
+
+
 const assetLoader = new AssetLoader();
 const imageLoader = new ImageLoader();
 const soundLoader = new SoundLoader();

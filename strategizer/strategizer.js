@@ -98,10 +98,10 @@ function initialize() {
     for (var n = 0; n < numCols; n++) {
         var room = maze.getRoomByArrayPosition(n, n);
         var entity = new EntitySimple(
-                0,
-                0,
-                entitySize
-            );
+            0,
+            0,
+            entitySize
+        );
         entity.setRoom(room);
         playerEntities.push(entity);
     }
@@ -131,7 +131,7 @@ function render(context) {
     }
 }
 
-
+// -----------------------------------------------
 // --- PLAYER INPUT ---
 
 document.addEventListener('mousedown', (click) => {
@@ -164,12 +164,19 @@ document.addEventListener('mouseup', (click) => {
     // Find the nearest room and snap to the center
     var targetRoom = maze.getRoomAtClick(click);
     if (targetRoom != null && selectedPlayerEntity != null) {
-        selectedPlayerEntity.setRoom(targetRoom);
+
+        // Only move the player entity if the room they're moving to
+        // is adjacent to their starting room 
+        if (maze.getOpenNeighborsToRoom(selectedPlayerEntity.room).includes(targetRoom)) {
+            selectedPlayerEntity.setRoom(targetRoom);
+        } else {
+            selectedPlayerEntity.setRoom(selectedPlayerEntity.room);
+        }
+
         maze.computeVisibility(playerEntities);
         selectedPlayerEntity = null;
     }
 
     gameState = GameState.IDLE;
     console.log(`state: ${gameState}`);
-
 });

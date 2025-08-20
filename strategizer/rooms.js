@@ -61,9 +61,9 @@ export class Room {
         })
     }
 
-    //* Computes the center point of the room. When an offset is provided, this calculates 
-    // the upper-left corner point for an entity place at the center
-    // */
+    /**
+     * Computes the center point of the room. When an offset is provided, this calculates the upper-left corner point for an entity place at the center
+     */    
     getCenterCoordsWithOffset(offset) {
 
         if (offset == null) {
@@ -130,7 +130,6 @@ export class Room {
         }
         return color;
     }
-
 }
 
 export class Maze {

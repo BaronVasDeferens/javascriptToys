@@ -67,43 +67,6 @@ function initialize() {
     playerEntities = new Array();
     maze = new Maze(numRows, numCols, roomSize);
 
-    /*
-        maze.openNeighboringRooms(0, 0, Directions.RIGHT);
-        maze.openNeighboringRooms(0, 0, Directions.DOWN);
-        maze.openNeighboringRooms(0, 1, Directions.DOWN);
-        maze.openNeighboringRooms(0, 2, Directions.RIGHT);
-        maze.openNeighboringRooms(0, 3, Directions.RIGHT);
-        maze.openNeighboringRooms(0, 3, Directions.DOWN);
-        maze.openNeighboringRooms(0, 4, Directions.RIGHT);
-    
-        maze.openNeighboringRooms(1, 0, Directions.RIGHT);
-        maze.openNeighboringRooms(1, 1, Directions.LEFT);
-        maze.openNeighboringRooms(1, 1, Directions.DOWN);
-        maze.openNeighboringRooms(1, 2, Directions.RIGHT);
-        maze.openNeighboringRooms(1, 2, Directions.DOWN);
-        maze.openNeighboringRooms(1, 3, Directions.RIGHT);
-        maze.openNeighboringRooms(1, 4, Directions.RIGHT);
-    
-        maze.openNeighboringRooms(2, 1, Directions.UP);
-        maze.openNeighboringRooms(2, 1, Directions.RIGHT);
-        maze.openNeighboringRooms(2, 2, Directions.UP);
-        maze.openNeighboringRooms(2, 2, Directions.DOWN);
-        maze.openNeighboringRooms(2, 4, Directions.RIGHT);
-    
-        maze.openNeighboringRooms(3, 0, Directions.DOWN);
-        maze.openNeighboringRooms(3, 1, Directions.DOWN);
-        maze.openNeighboringRooms(3, 2, Directions.DOWN);
-        maze.openNeighboringRooms(3, 3, Directions.LEFT);
-        maze.openNeighboringRooms(3, 4, Directions.RIGHT);
-    
-        maze.openNeighboringRooms(4, 0, Directions.LEFT);
-        maze.openNeighboringRooms(4, 0, Directions.DOWN);
-        maze.openNeighboringRooms(4, 1, Directions.DOWN);
-        maze.openNeighboringRooms(4, 2, Directions.DOWN);
-        maze.openNeighboringRooms(4, 3, Directions.DOWN);
-    
-    */
-
     // Open all rooms to each other
     maze.rooms.forEach(room => {
         var adjacentRooms = maze.getAdjacentRoomsWithDirection(room);
@@ -112,7 +75,14 @@ function initialize() {
         });
     })
 
-    // TODO: remove a few random doors?
+    // Close a few doors...
+    shuffleArray(maze.rooms);
+    for (var n = 0; n < 17; n++) {
+        var room = maze.rooms[n];
+        var neighbors = maze.getAdjacentRoomsWithDirection(room);
+        shuffleArray(neighbors);
+        maze.closeNeighboringRooms(room.x, room.y, neighbors[0].direction);
+    }
 
     maze.computeBorders();
 

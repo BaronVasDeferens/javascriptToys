@@ -5,6 +5,8 @@ export const Directions = Object.freeze({
     RIGHT: "RIGHT"
 });
 
+// ------------------------------- BORDER -------------------------------
+
 export class Border {
 
     constructor(xStart, yStart, width, height) {
@@ -19,7 +21,7 @@ export class Border {
     }
 
     render(context) {
-        context.fillStyle = "#5c5c5c"
+        context.fillStyle = "#5c5c5c";
         context.fillRect(this.xStart, this.yStart, this.width, this.height);
     }
 }
@@ -30,12 +32,15 @@ export const Visibility = Object.freeze({
     BRIGHT: "#ffffff"
 });
 
+// --------------------------------- ROOM -------------------------------
+
 export class Room {
 
     x = 0;
     y = 0;
     size = 50;
     visibility = Visibility.DARK;
+    color = this.visibility;
 
     borders = new Array();
 
@@ -77,20 +82,64 @@ export class Room {
     }
 
     render(context) {
+        this.renderRoom(context);
+        this.renderBorders(context);
+    }
 
+    renderRoom(context) {
         // Draw the base color
         context.fillStyle = this.visibility;
         context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
+    }
 
+    renderBorders(context) {
         // Draw the borders
         this.borders.forEach(border => {
             border.render(context);
         });
     }
 
+    openDirection(direction) {
+
+        switch (direction) {
+            case Directions.UP:
+                this.upOpen = true;
+                break;
+            case Directions.DOWN:
+                this.downOpen = true;
+                break;
+            case Directions.LEFT:
+                this.leftOpen = true;
+                break;
+            case Directions.RIGHT:
+                this.rightOpen = true;
+                break;
+        }
+    }
+
+    closeDirection(direction) {
+
+        switch (direction) {
+            case Directions.UP:
+                this.upOpen = false;
+                break;
+            case Directions.DOWN:
+                this.downOpen = false;
+                break;
+            case Directions.LEFT:
+                this.leftOpen = false;
+                break;
+            case Directions.RIGHT:
+                this.rightOpen = false;
+                break;
+        }
+
+        this.computeBorders();
+    }
+
     computeBorders() {
 
-        // TODO: clear existing borders?
+        this.borders = new Array();
 
         if (this.upOpen) {
             this.borders.push(new Border(this.x * this.size, this.y * this.size, this.size / 3, this.wallWidth));
@@ -131,6 +180,7 @@ export class Room {
         return color;
     }
 }
+// ---------------------------- MAZE ----------------------------
 
 export class Maze {
 
@@ -159,10 +209,13 @@ export class Maze {
 
     render(context) {
 
-        context.fillStyle = this.color;
-        context.fillRect(0, 0, this.numRows * this.roomSize, this.numCols * this.roomSize);
         this.rooms.forEach(room => {
-            room.render(context);
+            room.renderRoom(context);
+        });
+
+
+        this.rooms.forEach(room => {
+            room.renderBorders(context);
         });
     }
 
@@ -171,6 +224,7 @@ export class Maze {
     }
 
     computeVisibility(playerEntities) {
+
         this.rooms.forEach(room => {
             room.visibility = Visibility.DARK;
         });
@@ -300,6 +354,43 @@ export class Maze {
         }
     }
 
+    closeNeighboringRooms(x, y, dir) {
+
+        var targetRoom = this.getRoomByArrayPosition(x, y);
+
+        if (targetRoom != null) {
+
+            targetRoom.closeDirection(dir)
+
+            // Find the neighbor
+            var neighborRoom;
+
+            switch (dir) {
+                case Directions.UP:
+                    neighborRoom = this.getRoomByArrayPosition(x, y - 1);
+                    neighborRoom.closeDirection(Directions.DOWN);
+                    break;
+                case Directions.DOWN:
+                    neighborRoom = this.getRoomByArrayPosition(x, y + 1);
+                    neighborRoom.closeDirection(Directions.UP);
+                    break;
+                case Directions.LEFT:
+                    neighborRoom = this.getRoomByArrayPosition(x - 1, y);
+                    neighborRoom.closeDirection(Directions.RIGHT);
+                    break;
+                case Directions.RIGHT:
+                    neighborRoom = this.getRoomByArrayPosition(x + 1, y);
+                    neighborRoom.closeDirection(Directions.LEFT);
+                    break;
+            }
+
+        } else {
+            console.log(`ERROR : openNeighboringRooms : room ${x} ${y} not found!`)
+        }
+
+
+    }
+
     openRoomSingle(targetRoom, dir) {
 
         if (targetRoom == null) {
@@ -307,21 +398,6 @@ export class Maze {
             return;
         }
 
-        // console.log(`opening room ${targetRoom.x} ${targetRoom.y} -> ${dir}`);
-
-        switch (dir) {
-            case Directions.UP:
-                targetRoom.upOpen = true;
-                break;
-            case Directions.DOWN:
-                targetRoom.downOpen = true;
-                break;
-            case Directions.LEFT:
-                targetRoom.leftOpen = true;
-                break;
-            case Directions.RIGHT:
-                targetRoom.rightOpen = true;
-                break;
-        }
+        targetRoom.openDirection(dir);
     }
 }

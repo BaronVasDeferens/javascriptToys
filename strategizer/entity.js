@@ -5,9 +5,8 @@ export const GameState = Object.freeze({
     SELECTED_PLAYER_ENTITY: "SELECTED_PLAYER_ENTITY",
 });
 
-/**
- * A simple colored square
- */
+// ------------------------------ ENTITY - SIMPLE ------------------------------
+
 export class EntitySimple {
 
     // x and y coords describe the top-left corner of the image
@@ -75,6 +74,8 @@ export class EntitySimple {
 
 }
 
+// -------------------------------- BEAST ------------------------------
+
 export class Beast {
 
     x = 0;
@@ -94,7 +95,7 @@ export class Beast {
 
     setRoom(room) {
         this.room = room;
-        console.log(room)
+        console.log(`the beast stalks to ${this.room.x},${this.room.y}...`);
         if (this.room != null) {
             var centerCoords = this.room.getCenterCoordsWithOffset(this.imageSize);
             this.x = centerCoords.x;
@@ -130,7 +131,4 @@ export class Beast {
             }
         }
     }
-
-
-
 }

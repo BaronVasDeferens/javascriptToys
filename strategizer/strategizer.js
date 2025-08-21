@@ -1,6 +1,6 @@
-import { Maze, Directions } from "./rooms.js";
+import { Maze, Directions, Visibility } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EntitySimple, GameState } from "./entity.js";
+import { Beast, EntitySimple, GameState } from "./entity.js";
 
 /**
  * 
@@ -32,8 +32,8 @@ var audioContext; // AudioContext must be initialized after interactions
 
 var gameState = GameState.IDLE;
 
-const numRows = 10;
-const numCols = 10;
+const numRows = 7;
+const numCols = 7;
 const roomSize = canvas.width / numCols;
 
 var maze = new Maze(numRows, numCols, roomSize);
@@ -42,6 +42,8 @@ const numPlayers = 5;
 const entitySize = roomSize / 4;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
+
+var beast;      // Beast
 
 // -------------------------------------------------------
 
@@ -65,54 +67,52 @@ function initialize() {
     playerEntities = new Array();
     maze = new Maze(numRows, numCols, roomSize);
 
-/*
-    maze.openNeighboringRooms(0, 0, Directions.RIGHT);
-    maze.openNeighboringRooms(0, 0, Directions.DOWN);
-    maze.openNeighboringRooms(0, 1, Directions.DOWN);
-    maze.openNeighboringRooms(0, 2, Directions.RIGHT);
-    maze.openNeighboringRooms(0, 3, Directions.RIGHT);
-    maze.openNeighboringRooms(0, 3, Directions.DOWN);
-    maze.openNeighboringRooms(0, 4, Directions.RIGHT);
-
-    maze.openNeighboringRooms(1, 0, Directions.RIGHT);
-    maze.openNeighboringRooms(1, 1, Directions.LEFT);
-    maze.openNeighboringRooms(1, 1, Directions.DOWN);
-    maze.openNeighboringRooms(1, 2, Directions.RIGHT);
-    maze.openNeighboringRooms(1, 2, Directions.DOWN);
-    maze.openNeighboringRooms(1, 3, Directions.RIGHT);
-    maze.openNeighboringRooms(1, 4, Directions.RIGHT);
-
-    maze.openNeighboringRooms(2, 1, Directions.UP);
-    maze.openNeighboringRooms(2, 1, Directions.RIGHT);
-    maze.openNeighboringRooms(2, 2, Directions.UP);
-    maze.openNeighboringRooms(2, 2, Directions.DOWN);
-    maze.openNeighboringRooms(2, 4, Directions.RIGHT);
-
-    maze.openNeighboringRooms(3, 0, Directions.DOWN);
-    maze.openNeighboringRooms(3, 1, Directions.DOWN);
-    maze.openNeighboringRooms(3, 2, Directions.DOWN);
-    maze.openNeighboringRooms(3, 3, Directions.LEFT);
-    maze.openNeighboringRooms(3, 4, Directions.RIGHT);
-
-    maze.openNeighboringRooms(4, 0, Directions.LEFT);
-    maze.openNeighboringRooms(4, 0, Directions.DOWN);
-    maze.openNeighboringRooms(4, 1, Directions.DOWN);
-    maze.openNeighboringRooms(4, 2, Directions.DOWN);
-    maze.openNeighboringRooms(4, 3, Directions.DOWN);
-
-*/
+    /*
+        maze.openNeighboringRooms(0, 0, Directions.RIGHT);
+        maze.openNeighboringRooms(0, 0, Directions.DOWN);
+        maze.openNeighboringRooms(0, 1, Directions.DOWN);
+        maze.openNeighboringRooms(0, 2, Directions.RIGHT);
+        maze.openNeighboringRooms(0, 3, Directions.RIGHT);
+        maze.openNeighboringRooms(0, 3, Directions.DOWN);
+        maze.openNeighboringRooms(0, 4, Directions.RIGHT);
+    
+        maze.openNeighboringRooms(1, 0, Directions.RIGHT);
+        maze.openNeighboringRooms(1, 1, Directions.LEFT);
+        maze.openNeighboringRooms(1, 1, Directions.DOWN);
+        maze.openNeighboringRooms(1, 2, Directions.RIGHT);
+        maze.openNeighboringRooms(1, 2, Directions.DOWN);
+        maze.openNeighboringRooms(1, 3, Directions.RIGHT);
+        maze.openNeighboringRooms(1, 4, Directions.RIGHT);
+    
+        maze.openNeighboringRooms(2, 1, Directions.UP);
+        maze.openNeighboringRooms(2, 1, Directions.RIGHT);
+        maze.openNeighboringRooms(2, 2, Directions.UP);
+        maze.openNeighboringRooms(2, 2, Directions.DOWN);
+        maze.openNeighboringRooms(2, 4, Directions.RIGHT);
+    
+        maze.openNeighboringRooms(3, 0, Directions.DOWN);
+        maze.openNeighboringRooms(3, 1, Directions.DOWN);
+        maze.openNeighboringRooms(3, 2, Directions.DOWN);
+        maze.openNeighboringRooms(3, 3, Directions.LEFT);
+        maze.openNeighboringRooms(3, 4, Directions.RIGHT);
+    
+        maze.openNeighboringRooms(4, 0, Directions.LEFT);
+        maze.openNeighboringRooms(4, 0, Directions.DOWN);
+        maze.openNeighboringRooms(4, 1, Directions.DOWN);
+        maze.openNeighboringRooms(4, 2, Directions.DOWN);
+        maze.openNeighboringRooms(4, 3, Directions.DOWN);
+    
+    */
 
     // Open all rooms to each other
-    maze.rooms.forEach( room => {
+    maze.rooms.forEach(room => {
         var adjacentRooms = maze.getAdjacentRoomsWithDirection(room);
-        adjacentRooms.forEach( neighbor => {
+        adjacentRooms.forEach(neighbor => {
             maze.openNeighboringRooms(room.x, room.y, neighbor.direction);
         });
     })
 
     // TODO: remove a few random doors?
-
-    // TODO: place monsters in dark rooms?
 
     maze.computeBorders();
 
@@ -125,13 +125,23 @@ function initialize() {
         var entity = new EntitySimple(
             0,
             0,
-            entitySize
+            entitySize,
+            "#0000FF"
         );
         entity.setRoom(room);
         playerEntities.push(entity);
     }
 
     maze.computeVisibility(playerEntities);
+
+    // Add beast/s
+    shuffleArray(maze.rooms);
+    var beastRoom = maze.rooms.filter(room => {
+        return room.visibility == Visibility.DARK
+    })[0];
+
+    beast = new Beast(0, 0, entitySize)
+    beast.setRoom(beastRoom);
 }
 
 function beginGame() {
@@ -145,15 +155,20 @@ function updateGameState() {
 }
 
 function render(context) {
+
     maze.render(context);
 
     playerEntities.forEach(entity => {
         entity.render(context);
     });
 
+    beast.render(context);
+
     if (selectedPlayerEntity != null) {
         selectedPlayerEntity.render(context);
     }
+
+
 }
 
 function random(min, max) {
@@ -205,6 +220,7 @@ document.addEventListener('mouseup', (click) => {
         // is adjacent to their starting room 
         if (maze.getOpenNeighborsToRoom(selectedPlayerEntity.room).includes(targetRoom)) {
             selectedPlayerEntity.setRoom(targetRoom);
+            beast.move(maze);
         } else {
             selectedPlayerEntity.setRoom(selectedPlayerEntity.room);
         }
@@ -219,7 +235,7 @@ document.addEventListener('mouseup', (click) => {
 
 document.addEventListener('keydown', (event) => {
 
-    switch(event.key) {
+    switch (event.key) {
         case 'r':
             initialize();
             break;

@@ -74,3 +74,63 @@ export class EntitySimple {
     }
 
 }
+
+export class Beast {
+
+    x = 0;
+    y = 0;
+    imageSize = 50;
+    color = "#FF0000"
+
+    constructor(x, y, imageSize) {
+        this.x = x;
+        this.y = y;
+        this.imageSize = imageSize;
+    }
+
+    random(min, max) {
+        return parseInt(Math.random() * max + min);
+    };
+
+    setRoom(room) {
+        this.room = room;
+        console.log(room)
+        if (this.room != null) {
+            var centerCoords = this.room.getCenterCoordsWithOffset(this.imageSize);
+            this.x = centerCoords.x;
+            this.y = centerCoords.y;
+        }
+    }
+
+    move(maze) {
+        
+        var possibilities = maze.getOpenNeighborsToRoom(this.room).filter ( room => {
+            return room.visibility == Visibility.DARK
+        });
+
+        if (possibilities.length > 0) {
+            var newRoom = possibilities[this.random(0, possibilities.length)];
+            this.setRoom(newRoom);
+        } else {
+            console.log("MONSTER IS TRAPPED!");
+        }
+    }
+
+    render(context) {
+
+        if (this.room != null) {
+            switch (this.room.visibility) {
+                case Visibility.DIM:
+                case Visibility.BRIGHT:
+                    context.fillStyle = this.color;
+                    context.fillRect(this.x, this.y, this.imageSize, this.imageSize);
+                    break;
+                case Visibility.DARK:
+                    break;
+            }
+        }
+    }
+
+
+
+}

@@ -113,7 +113,7 @@ export class Beast {
             var newRoom = possibilities[this.random(0, possibilities.length)];
             this.setRoom(newRoom);
         } else {
-            console.log("MONSTER IS TRAPPED!");
+            console.log(`MONSTER IS TRAPPED AT (${this.room.x}, ${this.room.y})!`);
         }
     }
 

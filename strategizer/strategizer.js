@@ -43,16 +43,12 @@ const entitySize = roomSize / 4;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
 
-var beast;      // Beast
+const numBeasts = 3;
+var beastEntities = new Array();
 
 // -------------------------------------------------------
 
 var setup = function () {
-
-    // Clear background
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
     // Invoke AssetLoader and trigger callback upon completion...
     assetLoader.loadAssets(imageLoader, soundLoader, () => {
         initialize();
@@ -64,10 +60,16 @@ function initialize() {
 
     console.log("Initializing...");
 
+        // Clear background
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
     playerEntities = new Array();
+    beastEntities = new Array();
+    
     maze = new Maze(numRows, numCols, roomSize);
 
-    // Open all rooms to each other
+    // Open all rooms to each other...
     maze.rooms.forEach(room => {
         var adjacentRooms = maze.getAdjacentRoomsWithDirection(room);
         adjacentRooms.forEach(neighbor => {
@@ -75,9 +77,10 @@ function initialize() {
         });
     })
 
-    // Close a few doors...
+    // ...then close a few doors...
     shuffleArray(maze.rooms);
-    for (var n = 0; n < 17; n++) {
+    var closedDoors = (numRows * numCols) * 0.5;
+    for (var n = 0; n < closedDoors; n++) {
         var room = maze.rooms[n];
         var neighbors = maze.getAdjacentRoomsWithDirection(room);
         shuffleArray(neighbors);
@@ -106,12 +109,16 @@ function initialize() {
 
     // Add beast/s
     shuffleArray(maze.rooms);
-    var beastRoom = maze.rooms.filter(room => {
+    var beastRooms = maze.rooms.filter(room => {
         return room.visibility == Visibility.DARK
-    })[0];
+    });
 
-    beast = new Beast(0, 0, entitySize)
-    beast.setRoom(beastRoom);
+    for (var n = 0; n < numBeasts; n++) {
+        var beast = new Beast(0, 0, entitySize);
+        beast.setRoom(beastRooms[n]);
+        beastEntities.push(beast);
+    }
+
 }
 
 function beginGame() {
@@ -132,13 +139,13 @@ function render(context) {
         entity.render(context);
     });
 
-    beast.render(context);
+    beastEntities.forEach(beast => {
+        beast.render(context);
+    })
 
     if (selectedPlayerEntity != null) {
         selectedPlayerEntity.render(context);
     }
-
-
 }
 
 function random(min, max) {
@@ -190,7 +197,9 @@ document.addEventListener('mouseup', (click) => {
         // is adjacent to their starting room 
         if (maze.getOpenNeighborsToRoom(selectedPlayerEntity.room).includes(targetRoom)) {
             selectedPlayerEntity.setRoom(targetRoom);
-            beast.move(maze);
+            beastEntities.forEach(beast => {
+                beast.move(maze);
+            })
         } else {
             selectedPlayerEntity.setRoom(selectedPlayerEntity.room);
         }

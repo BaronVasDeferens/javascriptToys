@@ -32,13 +32,13 @@ var audioContext; // AudioContext must be initialized after interactions
 
 var gameState = GameState.IDLE;
 
-const numRows = 7;
-const numCols = 7;
+const numRows = 4;
+const numCols = 4;
 const roomSize = canvas.width / numCols;
 
 var maze = new Maze(numRows, numCols, roomSize);
 
-const numPlayers = 5;
+const numPlayers = 1;
 const entitySize = roomSize / 4;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
@@ -79,7 +79,7 @@ function initialize() {
 
     // ...then close a few doors...
     shuffleArray(maze.rooms);
-    var closedDoors = (numRows * numCols) * 0.5;
+    var closedDoors = (numRows * numCols) * 0.25;
     for (var n = 0; n < closedDoors; n++) {
         var room = maze.rooms[n];
         var neighbors = maze.getAdjacentRoomsWithDirection(room);

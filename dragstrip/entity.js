@@ -5,6 +5,9 @@ export const GameState = Object.freeze({
     SELECTED_PLAYER_ENTITY: "SELECTED_PLAYER_ENTITY",
 });
 
+
+
+
 // ------------------------------ ENTITY - SIMPLE ------------------------------
 
 export class EntitySimple {

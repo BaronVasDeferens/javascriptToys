@@ -5,6 +5,71 @@ export const Directions = Object.freeze({
     RIGHT: "RIGHT"
 });
 
+// ------------------------------ VERTEX ---------------------------------------
+
+export class Vertex {
+    x = 0;
+    y = 0;
+    radius = 2;
+    size = 100;
+    color = "#d2d4d2"
+
+    constructor(x, y, size) {
+        this.x = x;
+        this.y = y;
+        if (size != null) {
+            this.size = size;
+        }
+
+    }
+
+    render(context) {
+        var offset = 0; //(this.y % 2) * this.size;
+        context.fillStyle = this.color;
+        context.beginPath();
+        context.ellipse(
+            (this.x * this.size) + (this.size / 2) + offset,
+            (this.y * this.size) + (this.size / 2),
+            this.radius,
+            this.radius,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+        context.strokeStyle = this.color;
+        context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+    }
+}
+
+// ------------------------------ PLACEMENT GRID -----------------------------
+
+export class PlacementGrid {
+
+    vertices = new Array();
+
+    constructor(numRows, numCols, roomSize) {
+
+        console.log(`placement grid ${numRows} x ${numCols} @ size ${roomSize}`)
+
+        this.numRows = numRows;
+        this.numCols = numCols;
+        this.roomSize = roomSize;
+
+        for (var i = 0; i < numCols; i++) {
+            for (var j = 0; j < numRows; j++) {
+                this.vertices.push(new Vertex(i, j, roomSize))
+            }
+        }
+    }
+
+    render(context) {
+        this.vertices.forEach(vtx => {
+            vtx.render(context);
+        });
+    }
+}
+
+
 // ------------------------------- BORDER -------------------------------
 
 export class Border {

@@ -12,7 +12,7 @@ export class Vertex {
     y = 0;
     radius = 2;
     size = 100;
-    color = "#d2d4d2"
+    color = "#2c2c2cff"
 
     constructor(x, y, size) {
         this.x = x;

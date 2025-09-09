@@ -35,6 +35,11 @@ var selectedPlayerEntity = null;
 const numBeasts = 3;
 var beastEntities = new Array();
 
+/**
+ * Background image is rendered one and re-used on each re-draw
+ */
+var backgroundImage = new Image();
+
 // -------------------------------------------------------
 
 var setup = function () {
@@ -48,8 +53,6 @@ var setup = function () {
 function initialize() {
 
     console.log("Initializing...");
-
-    clearBackground(context);
 
     var room = placementGrid.getRoomByArrayPosition(
         numCols / globalDivisor,
@@ -66,6 +69,7 @@ function initialize() {
     entity.setRoom(room);
     playerEntities.push(entity);
 
+    renderBackgroundImage(context);
 }
 
 function beginGame() {
@@ -78,18 +82,24 @@ function updateGameState() {
 
 }
 
-function clearBackground(context) {
+
+
+/**
+ * Renders the background once into a reusable image
+ */
+function renderBackgroundImage(context) {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
+    placementGrid.render(context);
+    var updatedSrc = canvas.toDataURL();
+    backgroundImage.src = updatedSrc;
 }
 
 function render(context) {
-    clearBackground(context);
-    placementGrid.render(context);
+    context.drawImage(backgroundImage, 0, 0,);
     playerEntities.forEach(entity => {
         entity.render(context);
     });
-
 }
 
 function random(min, max) {
@@ -112,12 +122,11 @@ document.addEventListener('mousedown', (click) => {
         if (entity.containsClick(click)) {
             selectedPlayerEntity = entity;
             gameState = GameState.SELECTED_PLAYER_ENTITY;
+        } else {
+            selectedPlayerEntity = null;
+            gameState = GameState.IDLE;
         }
     });
-
-    if (selectedPlayerEntity == null) {
-        gameState = GameState.IDLE;
-    }
 
     console.log(`state: ${gameState}`);
 });
@@ -135,7 +144,7 @@ document.addEventListener('mousemove', (click) => {
 
 document.addEventListener('mouseup', (click) => {
 
-    var targetVertex = placementGrid.getRoomAtClick(click);
+    var targetVertex = placementGrid.getVertexAtClick(click);
     if (targetVertex != null && selectedPlayerEntity != null) {
         selectedPlayerEntity.setRoom(targetVertex);
     }

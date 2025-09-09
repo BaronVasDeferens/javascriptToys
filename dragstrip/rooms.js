@@ -81,7 +81,7 @@ export class PlacementGrid {
         return this.vertices.filter(vertex => { return (vertex.x == x && vertex.y == y) })[0];
     }
 
-    getRoomAtClick(click) {
+    getVertexAtClick(click) {
 
         var xClick = click.offsetX;
         var yClick = click.offsetY;

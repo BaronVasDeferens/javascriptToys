@@ -20,7 +20,7 @@ var audioContext; // AudioContext must be initialized after interactions
 
 var gameState = GameState.IDLE;
 
-const globalDivisor = 20;
+const globalDivisor = 10;
 const numRows = canvas.height / globalDivisor;
 const numCols = canvas.width / globalDivisor;
 const roomSize = globalDivisor * 2 //numRows / globalDivisor;
@@ -28,7 +28,7 @@ const roomSize = globalDivisor * 2 //numRows / globalDivisor;
 const placementGrid = new PlacementGrid(numRows, numCols, roomSize);
 
 const numPlayers = 1;
-const entitySize = roomSize / 4;
+const entitySize = 40 // roomSize / 4;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
 
@@ -49,9 +49,22 @@ function initialize() {
 
     console.log("Initializing...");
 
-    // Clear background
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    clearBackground(context);
+
+    var room = placementGrid.getRoomByArrayPosition(
+        numCols / globalDivisor,
+        numRows / globalDivisor
+    );
+
+    var entity = new EntitySimple(
+        0,
+        0,
+        entitySize,
+        "#FF0000"
+    );
+
+    entity.setRoom(room);
+    playerEntities.push(entity);
 
 }
 
@@ -65,9 +78,18 @@ function updateGameState() {
 
 }
 
-function render(context) {
+function clearBackground(context) {
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+}
 
+function render(context) {
+    clearBackground(context);
     placementGrid.render(context);
+    playerEntities.forEach(entity => {
+        entity.render(context);
+    });
+
 }
 
 function random(min, max) {
@@ -112,6 +134,12 @@ document.addEventListener('mousemove', (click) => {
 });
 
 document.addEventListener('mouseup', (click) => {
+
+    var targetVertex = placementGrid.getRoomAtClick(click);
+    if (targetVertex != null && selectedPlayerEntity != null) {
+        selectedPlayerEntity.setRoom(targetVertex);
+    }
+
     gameState = GameState.IDLE;
     console.log(`state: ${gameState}`);
 });

@@ -69,6 +69,8 @@ export class EntitySimple {
         } else {
             this.room = null;
         }
+
+        console.log(`entity location set: ${this.room.x} ${this.room.y}`);
     }
 
     getRoom() {

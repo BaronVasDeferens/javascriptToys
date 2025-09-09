@@ -10,7 +10,7 @@ export const Directions = Object.freeze({
 export class Vertex {
     x = 0;
     y = 0;
-    radius = 2;
+    radius = 1;
     size = 100;
     color = "#2c2c2cff"
 
@@ -21,6 +21,21 @@ export class Vertex {
             this.size = size;
         }
 
+    }
+
+        /**
+     * Computes the center point of the room. When an offset is provided, this calculates the upper-left corner point for an entity place at the center
+     */
+    getCenterCoordsWithOffset(offset) {
+
+        if (offset == null) {
+            offset = 0;
+        }
+
+        return {
+            x: (this.x * this.size) + (this.size / 2) - (offset / 2),
+            y: (this.y * this.size) + (this.size / 2) - (offset / 2)
+        }
     }
 
     render(context) {
@@ -36,8 +51,8 @@ export class Vertex {
             2 * Math.PI,
             false);
         context.fill();
-        context.strokeStyle = this.color;
-        context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+        // context.strokeStyle = this.color;
+        // context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
     }
 }
 
@@ -60,6 +75,23 @@ export class PlacementGrid {
                 this.vertices.push(new Vertex(i, j, roomSize))
             }
         }
+    }
+
+    getRoomByArrayPosition(x, y) {
+        return this.vertices.filter(vertex => { return (vertex.x == x && vertex.y == y) })[0];
+    }
+
+    getRoomAtClick(click) {
+
+        var xClick = click.offsetX;
+        var yClick = click.offsetY;
+
+        return this.vertices.filter(vertex => {
+            return (xClick >= (vertex.x * vertex.size))
+                && (xClick <= (vertex.x * vertex.size) + vertex.size)
+                && (yClick >= vertex.y * vertex.size)
+                && (yClick <= (vertex.y * vertex.size) + vertex.size)
+        })[0];
     }
 
     render(context) {

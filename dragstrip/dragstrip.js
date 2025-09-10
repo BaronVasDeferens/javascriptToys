@@ -21,13 +21,15 @@ var audioContext; // AudioContext must be initialized after interactions
 var gameState = GameState.IDLE;
 
 const globalDivisor = 10;
-const numRows = canvas.height / globalDivisor;
-const numCols = canvas.width / globalDivisor;
-const roomSize = globalDivisor * 2; //numRows / globalDivisor;
+const numRows = canvas.height / 20;
+const numCols = canvas.width / 20;
+const roomSize = globalDivisor * 2;
 
 const placementGrid = new PlacementGrid(numRows, numCols, roomSize);
 
-const entitySize = 40; // roomSize / 4;
+const entitySize = 40;
+
+const numPlayerEntities = 5;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
 
@@ -55,32 +57,39 @@ function initialize() {
 
     console.log("Initializing...");
 
-    var vertex = placementGrid.getVertexByArrayPosition(
-        numCols / globalDivisor,
-        numRows / globalDivisor
-    );
+    playerEntities = new Array();
 
-    var entity = new EntitySimple(
-        0,
-        0,
-        entitySize,
-        "#FF0000"
-    );
+    for (var i = 0; i < numPlayerEntities; i++) {
 
-    entity.setVertex(vertex);
-    playerEntities.push(entity);
+        var vertex = placementGrid.getVertexByArrayPosition(
+            random(0, numCols),
+            random(0, numRows)
+        );
+
+        var entity = new EntitySimple(
+            0,
+            0,
+            entitySize,
+            "#FF0000"
+        );
+
+        entity.setVertex(vertex);
+        playerEntities.push(entity);
+    }
 
     renderBackgroundImage(context);
 }
 
 function beginGame() {
-    updateGameState();
     render(context);
     requestAnimationFrame(beginGame);
 }
 
-function updateGameState() {
-
+function updateGameState(newState) {
+    if (newState != gameState) {
+        gameState = newState;
+        console.log(`gameState: ${gameState}`);
+    }
 }
 
 /**
@@ -91,6 +100,7 @@ function renderBackgroundImage(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
     placementGrid.render(context);
     var updatedSrc = canvas.toDataURL();
+    backgroundImage = new Image();
     backgroundImage.src = updatedSrc;
 }
 
@@ -129,21 +139,24 @@ function shuffleArray(array) {
 
 document.addEventListener('mousedown', (click) => {
 
-    playerEntities.forEach(entity => {
-        if (entity.containsClick(click)) {
-            selectedPlayerEntity = new TransientEntitySimple(
-                entity,
-                0.25
-            );
-            gameState = GameState.SELECTED_PLAYER_ENTITY;
-        } else {
-            selectedPlayerEntity = null;
-            gameState = GameState.IDLE;
-        }
-    });
+    // Identify the first player under the mouse...
+    var candidate = playerEntities.filter(entity => {
+        return entity.containsClick(click)
+    })[0];
 
-    console.log(`state: ${gameState}`);
+    //...and if a candidate is found, set a selectedEntity
+    if (candidate != null) {
+        selectedPlayerEntity = new TransientEntitySimple(
+            candidate,
+            0.25
+        );
+        updateGameState(GameState.SELECTED_PLAYER_ENTITY);
+    } else {
+        selectedPlayerEntity = null;
+        updateGameState(GameState.IDLE);
+    }
 });
+
 
 document.addEventListener('mousemove', (click) => {
 
@@ -168,8 +181,7 @@ document.addEventListener('mouseup', (click) => {
 
     selectedPlayerEntity = null;
 
-    gameState = GameState.IDLE;
-    console.log(`state: ${gameState}`);
+    updateGameState(GameState.IDLE);
 });
 
 document.addEventListener('keydown', (event) => {

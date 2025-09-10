@@ -59,22 +59,10 @@ export class EntitySimple {
     vertex = null;
 
     constructor(x, y, imageSize, color) {
-
-        if (x != null) {
-            this.x = x;
-        }
-
-        if (y != null) {
-            this.y = y;
-        }
-
-        if (imageSize != null) {
-            this.imageSize = imageSize;
-        }
-
-        if (color != null) {
-            this.color = color;
-        }
+        this.x = x;
+        this.y = y;
+        this.imageSize = imageSize;
+        this.color = color;
     }
 
     getRandomColor() {
@@ -96,7 +84,6 @@ export class EntitySimple {
     }
 
     setVertex(vertex) {
-
         this.vertex = vertex;
         if (this.vertex != null) {
             var centerCoords = this.vertex.getCenterCoordsWithOffset(this.imageSize);

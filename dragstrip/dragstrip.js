@@ -1,6 +1,6 @@
 import { PlacementGrid } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EntitySimple, TransientEntitySimple, GameState } from "./entity.js";
+import { EntitySimple, TransientEntitySimple, GameState, TransientLine } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
@@ -81,8 +81,25 @@ function initialize() {
 }
 
 function beginGame() {
+    update();
     render(context);
     requestAnimationFrame(beginGame);
+}
+
+function update() {
+
+    // Add a line between the selected entity's ghost and source
+    if (selectedPlayerEntity != null) {
+        transientEntities.push(
+            new TransientLine(
+                selectedPlayerEntity.originalEntity.vertex,
+                selectedPlayerEntity.vertex,
+                1.0,
+                "#FF0000"
+            )
+        )
+    }
+
 }
 
 function updateGameState(newState) {

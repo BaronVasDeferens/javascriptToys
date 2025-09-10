@@ -6,6 +6,37 @@ export const GameState = Object.freeze({
 });
 
 
+// ----------------------------- LINE - TRANSIENT-----------------------------------
+export class TransientLine {
+
+    constructor(source, destination, width, color) {
+        this.width = width;
+        this.color = color;
+
+        this.sourceCoords = source.getCenterCoordsWithOffset()
+        this.destinationCoords = destination.getCenterCoordsWithOffset();
+
+    }
+
+    render(context) {
+
+        var startX = this.sourceCoords.x;
+        var startY = this.sourceCoords.y;
+        var endX = this.destinationCoords.x;
+        var endY = this.destinationCoords.y;
+
+        // console.log(`${startX} ${startY} ${endX} ${endY}`);
+
+        context.beginPath(); 
+        context.strokeStyle = this.color;
+        context.lineWidth = this.width;
+        context.moveTo(startX, startY);
+        context.lineTo(endX, endY); 
+        context.stroke(); 
+    }
+
+}
+
 // ----------------------------- ENTITY - TRANSIENT --------------------------------
 
 export class TransientEntitySimple {

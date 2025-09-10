@@ -163,7 +163,7 @@ document.addEventListener('mouseup', (click) => {
 
     var targetVertex = placementGrid.getVertexAtClick(click);
     if (targetVertex != null && selectedPlayerEntity != null) {
-        selectedPlayerEntity.setVertex(targetVertex);
+        selectedPlayerEntity.originalEntity.setVertex(targetVertex);
     }
 
     selectedPlayerEntity = null;

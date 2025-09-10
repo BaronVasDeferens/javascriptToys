@@ -10,6 +10,9 @@ export const GameState = Object.freeze({
 
 export class TransientEntitySimple {
 
+    // This entity is a "ghost" that appears under the mouse as a player entity is dragged
+    originalEntity = null;
+
     // x and y coords describe the top-left corner of the image
     x = 0;
     y = 0;
@@ -19,6 +22,7 @@ export class TransientEntitySimple {
     vertex = null;
 
     constructor(originalEntity, opacity) {
+        this.originalEntity = originalEntity;
         this.x = originalEntity.x;
         this.y = originalEntity.y;
         this.imageSize = originalEntity.imageSize;
@@ -92,6 +96,8 @@ export class EntitySimple {
         } else {
             this.vertex = null;
         }
+
+        console.log(`player entity moved to vertex: ${this.vertex.x},${this.vertex.y}`);
     }
 
     getVertex() {

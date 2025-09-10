@@ -6,6 +6,45 @@ export const GameState = Object.freeze({
 });
 
 
+// ----------------------------- ENTITY - TRANSIENT --------------------------------
+
+export class TransientEntitySimple {
+
+    // x and y coords describe the top-left corner of the image
+    x = 0;
+    y = 0;
+    imageSize = 50;
+    color = "#FFFFFF";
+    opacity = 1.0;
+    vertex = null;
+
+    constructor(originalEntity, opacity) {
+        this.x = originalEntity.x;
+        this.y = originalEntity.y;
+        this.imageSize = originalEntity.imageSize;
+        this.color = originalEntity.color;
+        this.vertex = originalEntity.vertex;
+        this.opacity = opacity;
+    }
+
+    setVertex(vertex) {
+        this.vertex = vertex;
+        if (this.vertex != null) {
+            var centerCoords = this.vertex.getCenterCoordsWithOffset(this.imageSize);
+            this.x = centerCoords.x;
+            this.y = centerCoords.y;
+        } else {
+            this.vertex = null;
+        }
+    }
+
+    render(context) {
+        context.fillStyle = this.color;
+        context.globalAlpha = this.opacity;
+        context.fillRect(this.x, this.y, this.imageSize, this.imageSize);
+        context.globalAlpha = 1.0;
+    }
+}
 
 
 // ------------------------------ ENTITY - SIMPLE ------------------------------
@@ -17,6 +56,7 @@ export class EntitySimple {
     y = 0;
     imageSize = 50;
     color = this.getRandomColor();
+    vertex = null;
 
     constructor(x, y, imageSize, color) {
 
@@ -55,26 +95,20 @@ export class EntitySimple {
         return (click.offsetX >= this.x && click.offsetX <= this.x + this.imageSize) && (click.offsetY >= this.y && click.offsetY <= this.y + this.imageSize);
     }
 
-    setRoom(room) {
+    setVertex(vertex) {
 
-        if (this.room != null) {
-            this.room.visibility = Visibility.DARK;
-        }
-
-        this.room = room;
-        if (this.room != null) {
-            var centerCoords = this.room.getCenterCoordsWithOffset(this.imageSize);
+        this.vertex = vertex;
+        if (this.vertex != null) {
+            var centerCoords = this.vertex.getCenterCoordsWithOffset(this.imageSize);
             this.x = centerCoords.x;
             this.y = centerCoords.y;
         } else {
-            this.room = null;
+            this.vertex = null;
         }
-
-        console.log(`entity location set: ${this.room.x} ${this.room.y}`);
     }
 
-    getRoom() {
-        return this.room;
+    getVertex() {
+        return this.vertex;
     }
 
 }
@@ -109,8 +143,8 @@ export class Beast {
     }
 
     move(maze) {
-        
-        var possibilities = maze.getOpenNeighborsToRoom(this.room).filter ( room => {
+
+        var possibilities = maze.getOpenNeighborsToRoom(this.room).filter(room => {
             return room.visibility == Visibility.DARK
         });
 

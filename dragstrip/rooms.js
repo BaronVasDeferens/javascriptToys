@@ -77,7 +77,7 @@ export class PlacementGrid {
         }
     }
 
-    getRoomByArrayPosition(x, y) {
+    getVertexByArrayPosition(x, y) {
         return this.vertices.filter(vertex => { return (vertex.x == x && vertex.y == y) })[0];
     }
 

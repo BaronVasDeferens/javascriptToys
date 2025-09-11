@@ -3,10 +3,12 @@ import { Visibility } from "./rooms.js";
 export const GameState = Object.freeze({
     IDLE: "IDLE",
     SELECTED_PLAYER_ENTITY: "SELECTED_PLAYER_ENTITY",
+    PROCESSING_PLAYER_MOVE: "PROCESSING_PLAYER_MOVE"
 });
 
 
 // ----------------------------- LINE - TRANSIENT-----------------------------------
+
 export class TransientLine {
 
     constructor(source, destination, width, color) {
@@ -27,12 +29,14 @@ export class TransientLine {
 
         // console.log(`${startX} ${startY} ${endX} ${endY}`);
 
-        context.beginPath(); 
+        context.beginPath();
         context.strokeStyle = this.color;
+        context.globalAlpha = 0.25;
         context.lineWidth = this.width;
         context.moveTo(startX, startY);
-        context.lineTo(endX, endY); 
-        context.stroke(); 
+        context.lineTo(endX, endY);
+        context.stroke();
+        context.globalAlpha = 1.0;
     }
 
 }
@@ -137,61 +141,71 @@ export class EntitySimple {
 
 }
 
-// -------------------------------- BEAST ------------------------------
+// ---------------------------------- ANIMATOR - ENTITY MOVER -------------------------------
 
-export class Beast {
+export class EntityMovementDriver {
 
-    x = 0;
-    y = 0;
-    imageSize = 50;
-    color = "#FF0000"
+    isComplete = false;
+    isDischarged = false;
 
-    constructor(x, y, imageSize) {
-        this.x = x;
-        this.y = y;
-        this.imageSize = imageSize;
-    }
+    deltaX = 1;
+    deltaY = 1;
 
-    random(min, max) {
-        return parseInt(Math.random() * max + min);
-    };
+    constructor(entity, vertexSource, vertexDestination, deltaPerTick, onCompletionCallback) {
+        this.entity = entity;
+        this.vertexSource = vertexSource;
+        this.vertexDestination = vertexDestination;
+        this.deltaPerTick = deltaPerTick;
+        this.onCompletionCallback = onCompletionCallback;
 
-    setRoom(room) {
-        this.room = room;
-        console.log(`the beast stalks to ${this.room.x},${this.room.y}...`);
-        if (this.room != null) {
-            var centerCoords = this.room.getCenterCoordsWithOffset(this.imageSize);
-            this.x = centerCoords.x;
-            this.y = centerCoords.y;
-        }
-    }
 
-    move(maze) {
+        // TODO: use the getCenterCoordsWithOffset() 
 
-        var possibilities = maze.getOpenNeighborsToRoom(this.room).filter(room => {
-            return room.visibility == Visibility.DARK
-        });
-
-        if (possibilities.length > 0) {
-            var newRoom = possibilities[this.random(0, possibilities.length)];
-            this.setRoom(newRoom);
+        if (vertexDestination.x < vertexSource.x) {
+            this.deltaX = -deltaPerTick;
+        } else if (vertexDestination.x > vertexSource.x) {
+            this.deltaX = deltaPerTick;
         } else {
-            console.log(`MONSTER IS TRAPPED AT (${this.room.x}, ${this.room.y})!`);
+            this.deltaX = 0;
+        }
+
+        if (vertexDestination.y < vertexSource.y) {
+            this.deltaY = -deltaPerTick;
+        } else if (vertexDestination.y > vertexSource.y) {
+            this.deltaY = deltaPerTick;
+        } else {
+            this.deltaY = 0;
         }
     }
 
-    render(context) {
+    update() {
 
-        if (this.room != null) {
-            switch (this.room.visibility) {
-                case Visibility.DIM:
-                case Visibility.BRIGHT:
-                    context.fillStyle = this.color;
-                    context.fillRect(this.x, this.y, this.imageSize, this.imageSize);
-                    break;
-                case Visibility.DARK:
-                    break;
-            }
+        if (this.isComplete) {
+            return
         }
+
+        // TODO: this needs to compute the hypoteneus
+
+        this.entity.x += this.deltaX;
+        this.entity.y += this.deltaY;
+
+        if (this.vertexDestination.x == this.vertexSource.x) {
+            this.deltaX = 0;
+        }
+
+        if (this.vertexDestination.y == this.vertexSource.y) {
+            this.deltaY = 0;
+        }
+
+        if (this.deltaX == 0 && this.deltaY == 0) {
+            this.isComplete = true;
+        }
+
+        if (this.isComplete == true && this.isDischarged == false) {
+            this.onCompletionCallback();
+            this.isDischarged = true;
+        }
+
     }
+
 }

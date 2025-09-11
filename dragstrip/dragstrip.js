@@ -1,6 +1,6 @@
 import { PlacementGrid } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EntitySimple, TransientEntitySimple, GameState, TransientLine } from "./entity.js";
+import { EntitySimple, TransientEntitySimple, GameState, TransientLine, EntityMovementDriver } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
@@ -34,9 +34,11 @@ var playerEntities = new Array();
 var selectedPlayerEntity = null;
 
 
-
 /** TRANSIENT ENTITIES: these entities will be disposed of at the end of each rendering cycle */
 var transientEntities = new Array();
+
+/** ENTITY MOVEMENT DRIVERS */
+var entityMovementDrivers = new Array();
 
 /**
  * Background image is rendered one and re-used on each re-draw
@@ -100,6 +102,14 @@ function update() {
         )
     }
 
+    if (gameState == GameState.PROCESSING_PLAYER_MOVE) {
+        entityMovementDrivers.forEach(driver => {
+            driver.update();
+        });
+
+        // TODO remove completed drivers
+
+    }
 }
 
 function updateGameState(newState) {
@@ -193,12 +203,25 @@ document.addEventListener('mouseup', (click) => {
 
     var targetVertex = placementGrid.getVertexAtClick(click);
     if (targetVertex != null && selectedPlayerEntity != null) {
-        selectedPlayerEntity.originalEntity.setVertex(targetVertex);
+        
+
+        entityMovementDrivers.push(
+            new EntityMovementDriver(
+                selectedPlayerEntity.originalEntity,
+                selectedPlayerEntity.originalEntity.vertex,
+                targetVertex,
+                1,
+                function() { 
+                    selectedPlayerEntity.originalEntity.setVertex(targetVertex);
+                    updateGameState(GameState.IDLE) 
+                }
+            )
+        )
+
+        updateGameState(GameState.PROCESSING_PLAYER_MOVE);
     }
 
     selectedPlayerEntity = null;
-
-    updateGameState(GameState.IDLE);
 });
 
 document.addEventListener('keydown', (event) => {

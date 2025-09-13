@@ -1,6 +1,6 @@
 import { PlacementGrid } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EntitySimple, TransientEntitySimple, GameState, TransientLine, EntityMovementDriver } from "./entity.js";
+import { EntityImage, TransientEntityImage, GameState, TransientLine, EntityMovementDriver } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
@@ -68,11 +68,11 @@ function initialize() {
             random(0, numRows)
         );
 
-        var entity = new EntitySimple(
+        var entity = new EntityImage(
             0,
             0,
             entitySize,
-            "#FF0000"
+            imageLoader
         );
 
         entity.setVertex(vertex);
@@ -173,7 +173,7 @@ document.addEventListener('mousedown', (click) => {
 
     //...and if a candidate is found, set a selectedEntity
     if (candidate != null) {
-        selectedPlayerEntity = new TransientEntitySimple(
+        selectedPlayerEntity = new TransientEntityImage(
             candidate,
             0.25
         );
@@ -193,8 +193,10 @@ document.addEventListener('mousemove', (click) => {
             break;
 
         case GameState.SELECTED_PLAYER_ENTITY:
-            var vertex = placementGrid.getVertexAtClick(click);
-            selectedPlayerEntity.setVertex(vertex);
+            if (selectedPlayerEntity != null) {
+                var vertex = placementGrid.getVertexAtClick(click);
+                selectedPlayerEntity.setVertex(vertex);
+            }
             break;
     }
 });
@@ -203,17 +205,20 @@ document.addEventListener('mouseup', (click) => {
 
     var targetVertex = placementGrid.getVertexAtClick(click);
     if (targetVertex != null && selectedPlayerEntity != null) {
-        
+
+        var targetEntity = selectedPlayerEntity.originalEntity;
+        var sourceVertex = targetEntity.vertex;
 
         entityMovementDrivers.push(
+
             new EntityMovementDriver(
-                selectedPlayerEntity.originalEntity,
-                selectedPlayerEntity.originalEntity.vertex,
+                targetEntity,
+                sourceVertex,
                 targetVertex,
                 1,
-                function() { 
-                    selectedPlayerEntity.originalEntity.setVertex(targetVertex);
-                    updateGameState(GameState.IDLE) 
+                function () {
+                    targetEntity.setVertex(targetVertex);
+                    updateGameState(GameState.IDLE)
                 }
             )
         )

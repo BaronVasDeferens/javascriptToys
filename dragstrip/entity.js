@@ -1,3 +1,4 @@
+import { ImageAsset } from "./assets.js";
 import { Visibility } from "./rooms.js";
 
 export const GameState = Object.freeze({
@@ -43,7 +44,7 @@ export class TransientLine {
 
 // ----------------------------- ENTITY - TRANSIENT --------------------------------
 
-export class TransientEntitySimple {
+export class TransientEntityImage {
 
     // This entity is a "ghost" that appears under the mouse as a player entity is dragged
     originalEntity = null;
@@ -52,7 +53,6 @@ export class TransientEntitySimple {
     x = 0;
     y = 0;
     imageSize = 50;
-    color = "#FFFFFF";
     opacity = 1.0;
     vertex = null;
 
@@ -60,8 +60,6 @@ export class TransientEntitySimple {
         this.originalEntity = originalEntity;
         this.x = originalEntity.x;
         this.y = originalEntity.y;
-        this.imageSize = originalEntity.imageSize;
-        this.color = originalEntity.color;
         this.vertex = originalEntity.vertex;
         this.opacity = opacity;
     }
@@ -78,9 +76,8 @@ export class TransientEntitySimple {
     }
 
     render(context) {
-        context.fillStyle = this.color;
         context.globalAlpha = this.opacity;
-        context.fillRect(this.x, this.y, this.imageSize, this.imageSize);
+        context.drawImage(this.originalEntity.image, this.x, this.y);
         context.globalAlpha = 1.0;
     }
 }
@@ -141,6 +138,52 @@ export class EntitySimple {
 
 }
 
+// ---------------------------------- ENTITY - IMAGE ---------------------------------------
+
+export class EntityImage {
+
+    // x and y coords describe the top-left corner of the image
+    x = 0;
+    y = 0;
+    imageSize = 50;
+    image = null;
+    vertex = null;
+
+    constructor(x, y, imageSize, imageLoader) {
+        this.x = x;
+        this.y = y;
+        this.imageSize = imageSize;
+        this.image = imageLoader.getImage(ImageAsset.SOLDIER);
+    }
+
+    render(context) {
+        context.drawImage(this.image, this.x, this.y);
+    }
+
+    containsClick(click) {
+        return (click.offsetX >= this.x && click.offsetX <= this.x + this.imageSize) && (click.offsetY >= this.y && click.offsetY <= this.y + this.imageSize);
+    }
+
+    setVertex(vertex) {
+        this.vertex = vertex;
+        if (this.vertex != null) {
+            var centerCoords = this.vertex.getCenterCoordsWithOffset(this.imageSize);
+            this.x = centerCoords.x;
+            this.y = centerCoords.y;
+        } else {
+            this.vertex = null;
+        }
+
+        console.log(`player entity moved to vertex: ${this.vertex.x},${this.vertex.y}`);
+    }
+
+    getVertex() {
+        return this.vertex;
+    }
+
+}
+
+
 // ---------------------------------- ANIMATOR - ENTITY MOVER -------------------------------
 
 export class EntityMovementDriver {
@@ -180,6 +223,19 @@ export class EntityMovementDriver {
 
     update() {
 
+
+        // FIXME: hack this for now
+        this.isComplete = true;
+
+        if (this.deltaX == 0 && this.deltaY == 0) {
+            this.isComplete = true;
+        }
+
+        if (this.isComplete == true && this.isDischarged == false) {
+            this.onCompletionCallback();
+            this.isDischarged = true;
+        }
+
         if (this.isComplete) {
             return
         }
@@ -196,16 +252,6 @@ export class EntityMovementDriver {
         if (this.vertexDestination.y == this.vertexSource.y) {
             this.deltaY = 0;
         }
-
-        if (this.deltaX == 0 && this.deltaY == 0) {
-            this.isComplete = true;
-        }
-
-        if (this.isComplete == true && this.isDischarged == false) {
-            this.onCompletionCallback();
-            this.isDischarged = true;
-        }
-
     }
 
 }

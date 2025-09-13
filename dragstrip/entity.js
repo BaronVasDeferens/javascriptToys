@@ -55,6 +55,7 @@ export class TransientEntityImage {
     imageSize = 50;
     opacity = 1.0;
     vertex = null;
+    color = "#FF0000";
 
     constructor(originalEntity, opacity) {
         this.originalEntity = originalEntity;
@@ -75,10 +76,15 @@ export class TransientEntityImage {
         }
     }
 
-    render(context) {
+    render(context, drawBorder) {
         context.globalAlpha = this.opacity;
         context.drawImage(this.originalEntity.image, this.x, this.y);
         context.globalAlpha = 1.0;
+
+        if (drawBorder == true) {
+            context.strokeStyle = this.borderColor;
+            context.strokeRect(this.x, this.y, this.imageSize, this.imageSize);
+        }
     }
 }
 
@@ -91,7 +97,7 @@ export class EntitySimple {
     x = 0;
     y = 0;
     imageSize = 50;
-    color = this.getRandomColor();
+    color = "#FF0000";
     vertex = null;
 
     constructor(x, y, imageSize, color) {
@@ -148,6 +154,7 @@ export class EntityImage {
     imageSize = 50;
     image = null;
     vertex = null;
+    borderColor = "#FF0000"
 
     constructor(x, y, imageSize, imageLoader) {
         this.x = x;
@@ -156,8 +163,12 @@ export class EntityImage {
         this.image = imageLoader.getImage(ImageAsset.SOLDIER);
     }
 
-    render(context) {
+    render(context, drawBorder) {
         context.drawImage(this.image, this.x, this.y);
+        if (drawBorder == true) {
+            context.strokeStyle = this.borderColor;
+            context.strokeRect(this.x, this.y, this.imageSize, this.imageSize);
+        }
     }
 
     containsClick(click) {

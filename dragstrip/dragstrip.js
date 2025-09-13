@@ -20,6 +20,8 @@ var audioContext; // AudioContext must be initialized after interactions
 
 var gameState = GameState.IDLE;
 
+var debugMode = false;
+
 const globalDivisor = 10;
 const numRows = canvas.height / 20;
 const numCols = canvas.width / 20;
@@ -125,7 +127,7 @@ function updateGameState(newState) {
 function renderBackgroundImage(context) {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    placementGrid.render(context);
+    placementGrid.render(context, debugMode);
     var updatedSrc = canvas.toDataURL();
     backgroundImage = new Image();
     backgroundImage.src = updatedSrc;
@@ -136,15 +138,15 @@ function render(context) {
     context.drawImage(backgroundImage, 0, 0,);
 
     playerEntities.forEach(entity => {
-        entity.render(context);
+        entity.render(context, debugMode);
     });
 
     if (selectedPlayerEntity != null) {
-        selectedPlayerEntity.render(context);
+        selectedPlayerEntity.render(context, debugMode);
     }
 
     transientEntities.forEach(entity => {
-        entity.render(context);
+        entity.render(context, debugMode);
     });
 
     transientEntities.length = 0;
@@ -232,6 +234,12 @@ document.addEventListener('mouseup', (click) => {
 document.addEventListener('keydown', (event) => {
 
     switch (event.key) {
+        
+        case 'd':
+            debugMode = !debugMode
+            renderBackgroundImage(context);
+            break;
+        
         case 'r':
             initialize();
             break;

@@ -23,9 +23,9 @@ export class Vertex {
 
     }
 
-        /**
-     * Computes the center point of the room. When an offset is provided, this calculates the upper-left corner point for an entity place at the center
-     */
+    /**
+ * Computes the center point of the room. When an offset is provided, this calculates the upper-left corner point for an entity place at the center
+ */
     getCenterCoordsWithOffset(offset) {
 
         if (offset == null) {
@@ -38,7 +38,7 @@ export class Vertex {
         }
     }
 
-    render(context) {
+    render(context, drawBorder) {
         var offset = 0; //(this.y % 2) * this.size;
         context.fillStyle = this.color;
         context.beginPath();
@@ -51,8 +51,12 @@ export class Vertex {
             2 * Math.PI,
             false);
         context.fill();
-        // context.strokeStyle = this.color;
-        // context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+
+        if (drawBorder == true) {
+            context.strokeStyle = this.color;
+            context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
+        }
+
     }
 }
 
@@ -94,9 +98,9 @@ export class PlacementGrid {
         })[0];
     }
 
-    render(context) {
+    render(context, drawBorder) {
         this.vertices.forEach(vtx => {
-            vtx.render(context);
+            vtx.render(context, drawBorder);
         });
     }
 }

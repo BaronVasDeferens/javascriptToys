@@ -88,7 +88,7 @@ export class TransientLine {
             deltaY = deltaY * -1;
         }
 
-        for (var i = 0; i < (hypoteneus / interval); i += interval) {
+        for (var i = interval; i < (hypoteneus / interval); i += interval) {
 
             points.push(
                 {

@@ -93,7 +93,7 @@ function beginGame() {
 function update() {
 
     // Add a line between the selected entity's ghost and source
-    if (selectedPlayerEntity != null) {
+    if (selectedPlayerEntity != null && selectedPlayerEntity.vertex != null) {
         transientEntities.push(
             new TransientLine(
                 selectedPlayerEntity.originalEntity.vertex,

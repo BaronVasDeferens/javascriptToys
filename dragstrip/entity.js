@@ -38,6 +38,67 @@ export class TransientLine {
         context.lineTo(endX, endY);
         context.stroke();
         context.globalAlpha = 1.0;
+
+        context.fillStyle = this.color;
+
+        var points = this.getPointsAtInterval(5);
+        points.forEach(point => {
+
+            context.beginPath();
+            context.ellipse(
+                point.x,
+                point.y,
+                2.5,
+                2.5,
+                2 * Math.PI,
+                2 * Math.PI,
+                false);
+            context.fill();
+        });
+
+    }
+
+    getPointsAtInterval(interval) {
+
+        var points = [];
+
+        if (interval == null) {
+            interval = 5;
+        }
+
+        var startX = this.sourceCoords.x;
+        var startY = this.sourceCoords.y;
+        var endX = this.destinationCoords.x;
+        var endY = this.destinationCoords.y;
+
+        var hypoteneus = Math.sqrt(Math.pow((endY - startY), 2) + Math.pow((endX - startX), 2));
+        hypoteneus = Math.abs(hypoteneus);
+
+        let rise = endY - startY;           // vertical difference: rise
+        let run = endX - startX;           // horizontal difference: run
+        let theta = Math.atan(Math.abs(rise) / Math.abs(run));
+
+        let deltaX = Math.cos(theta) * interval;
+        if (run < 0 && deltaX > 0) {
+            deltaX = deltaX * -1;
+        }
+
+        let deltaY = Math.sin(theta) * interval;
+        if (rise < 0 && deltaY > 0) {
+            deltaY = deltaY * -1;
+        }
+
+        for (var i = 0; i < (hypoteneus / interval); i += interval) {
+
+            points.push(
+                {
+                    x: startX + (i * deltaX),
+                    y: startY + (i * deltaY)
+                }
+            )
+        }
+
+        return points;
     }
 
 }

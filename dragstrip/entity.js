@@ -30,14 +30,14 @@ export class TransientLine {
 
         // console.log(`${startX} ${startY} ${endX} ${endY}`);
 
-        context.beginPath();
+        // context.beginPath();
         context.strokeStyle = this.color;
         context.globalAlpha = 0.25;
-        context.lineWidth = this.width;
-        context.moveTo(startX, startY);
-        context.lineTo(endX, endY);
-        context.stroke();
-        context.globalAlpha = 1.0;
+        // context.lineWidth = this.width;
+        // context.moveTo(startX, startY);
+        // context.lineTo(endX, endY);
+        // context.stroke();
+
 
         context.fillStyle = this.color;
 
@@ -55,6 +55,8 @@ export class TransientLine {
                 false);
             context.fill();
         });
+
+        context.globalAlpha = 1.0;
 
     }
 
@@ -217,19 +219,10 @@ export class EntityImage {
     vertex = null;
     borderColor = "#FF0000"
 
-    constructor(x, y, imageSize, imageLoader) {
+    constructor(x, y, imageSize) {
         this.x = x;
         this.y = y;
         this.imageSize = imageSize;
-        this.image = imageLoader.getImage(ImageAsset.SOLDIER);
-    }
-
-    render(context, drawBorder) {
-        context.drawImage(this.image, this.x, this.y);
-        if (drawBorder == true) {
-            context.strokeStyle = this.borderColor;
-            context.strokeRect(this.x, this.y, this.imageSize, this.imageSize);
-        }
     }
 
     containsClick(click) {
@@ -253,6 +246,30 @@ export class EntityImage {
         return this.vertex;
     }
 
+    render(context, drawBorder) {
+        context.drawImage(this.image, this.x, this.y);
+        if (drawBorder == true) {
+            context.strokeStyle = this.borderColor;
+            context.strokeRect(this.x, this.y, this.imageSize, this.imageSize);
+        }
+    }
+
+}
+
+export class PlayerEntity extends EntityImage {
+
+    constructor(x, y, imageSize, imageLoader) {
+        super(x, y, imageSize)
+        this.image = imageLoader.getImage(ImageAsset.SOLDIER);
+    }
+
+}
+
+export class EnemyEntity extends EntityImage {
+    constructor(x, y, imageSize, imageLoader) {
+        super(x, y, imageSize)
+        this.image = imageLoader.getImage(ImageAsset.ENEMY);
+    }
 }
 
 

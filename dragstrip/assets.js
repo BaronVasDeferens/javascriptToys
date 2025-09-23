@@ -13,7 +13,8 @@ export class AssetLoader {
  */
 
 export var ImageAsset = Object.freeze({
-    SOLDIER: "resources/soldier_1.png"
+    SOLDIER: "resources/soldier_1.png",
+    ENEMY: "resources/enemy_1.png"
 });
 
 export class ImageLoader {

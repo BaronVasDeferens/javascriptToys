@@ -1,6 +1,6 @@
 import { PlacementGrid } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EntityImage, TransientEntityImage, GameState, TransientLine, EntityMovementDriver } from "./entity.js";
+import { EnemyEntity, TransientEntityImage, GameState, TransientLine, EntityMovementDriver, PlayerEntity } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
@@ -29,12 +29,14 @@ const roomSize = globalDivisor * 2;
 
 const placementGrid = new PlacementGrid(numRows, numCols, roomSize);
 
-const entitySize = 40;
+const entitySize = 50;
 
 const numPlayerEntities = 5;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
 
+const numEnemyEntities = 5;
+var enemyEntities = new Array();
 
 /** TRANSIENT ENTITIES: these entities will be disposed of at the end of each rendering cycle */
 var transientEntities = new Array();
@@ -61,6 +63,8 @@ function initialize() {
 
     console.log("Initializing...");
 
+
+    // --- Create players (random placement) ---
     playerEntities = new Array();
 
     for (var i = 0; i < numPlayerEntities; i++) {
@@ -70,7 +74,7 @@ function initialize() {
             random(0, numRows)
         );
 
-        var entity = new EntityImage(
+        var entity = new PlayerEntity(
             0,
             0,
             entitySize,
@@ -79,6 +83,27 @@ function initialize() {
 
         entity.setVertex(vertex);
         playerEntities.push(entity);
+    }
+
+    // --- Create enemies (random placement) ---
+    enemyEntities = new Array();
+
+    for (var i = 0; i < numEnemyEntities; i++) {
+
+        var vertex = placementGrid.getVertexByArrayPosition(
+            random(0, numCols),
+            random(0, numRows)
+        );
+
+        var entity = new EnemyEntity(
+            0,
+            0,
+            entitySize,
+            imageLoader
+        );
+
+        entity.setVertex(vertex);
+        enemyEntities.push(entity);
     }
 
     renderBackgroundImage(context);
@@ -138,6 +163,10 @@ function render(context) {
     context.drawImage(backgroundImage, 0, 0,);
 
     playerEntities.forEach(entity => {
+        entity.render(context, debugMode);
+    });
+
+    enemyEntities.forEach(entity => {
         entity.render(context, debugMode);
     });
 
@@ -234,12 +263,12 @@ document.addEventListener('mouseup', (click) => {
 document.addEventListener('keydown', (event) => {
 
     switch (event.key) {
-        
+
         case 'd':
             debugMode = !debugMode
             renderBackgroundImage(context);
             break;
-        
+
         case 'r':
             initialize();
             break;

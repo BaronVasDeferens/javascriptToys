@@ -110,7 +110,7 @@ function initialize() {
 
     // --- Create OBSTACLES
     obstacles = [];
-    
+
     for (let i = 0; i < numRandomObstacles; i++) {
         let vertex = shuffledVertices[index];
         index++;
@@ -135,7 +135,7 @@ function update() {
         let pointsAtInterval = placementGrid.getPointsAtInterval(
             selectedPlayerEntity.originalEntity.vertex,
             selectedPlayerEntity.vertex,
-            3
+            4
         );
 
         transientEntities.push(

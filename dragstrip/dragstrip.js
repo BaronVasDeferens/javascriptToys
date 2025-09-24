@@ -32,21 +32,21 @@ const placementGrid = new PlacementGrid(numRows, numCols, roomSize);
 const entitySize = 50;
 
 const numPlayerEntities = 3;
-var playerEntities = new Array();
+var playerEntities = [];
 var selectedPlayerEntity = null;
 var selectedPlayerPath = null;
 
 const numEnemyEntities = 3;
-var enemyEntities = new Array();
+var enemyEntities = [];
 
 const numRandomObstacles = 60;
-const obstacles = new Array();
+var obstacles = [];
 
 /** TRANSIENT ENTITIES: these entities will be disposed of at the end of each rendering cycle */
-var transientEntities = new Array();
+var transientEntities = [];
 
 /** ENTITY MOVEMENT DRIVERS */
-var entityMovementDrivers = new Array();
+var entityMovementDrivers = [];
 
 /**
  * Background image is rendered one and re-used on each re-draw
@@ -71,7 +71,7 @@ function initialize() {
     let index = 0;
 
     // --- Create PLAYERS (random placement) ---
-    playerEntities = new Array();
+    playerEntities = [];
 
     for (let i = 0; i < numPlayerEntities; i++) {
 
@@ -90,7 +90,7 @@ function initialize() {
     }
 
     // --- Create ENEMIES (random placement) ---
-    enemyEntities = new Array();
+    enemyEntities = [];
 
     for (let i = 0; i < numEnemyEntities; i++) {
 
@@ -109,7 +109,8 @@ function initialize() {
     }
 
     // --- Create OBSTACLES
-    obstacles.length = 0;
+    obstacles = [];
+    
     for (let i = 0; i < numRandomObstacles; i++) {
         let vertex = shuffledVertices[index];
         index++;

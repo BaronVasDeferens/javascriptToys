@@ -97,6 +97,12 @@ export class PlacementGrid {
         }
     }
 
+    resetObstructions() {
+        this.vertices.forEach( vtx => {
+            vtx.isObstructed = false;
+        })
+    }
+
     getVertexByArrayPosition(x, y) {
         return this.vertices.filter(vertex => { return (vertex.x == x && vertex.y == y) })[0];
     }

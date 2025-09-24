@@ -67,6 +67,8 @@ function initialize() {
 
     console.log("Initializing...");
 
+    placementGrid.resetObstructions();
+
     let shuffledVertices = placementGrid.getRandomizedVertices();
     let index = 0;
 
@@ -210,7 +212,7 @@ function render(context) {
         entity.render(context, debugMode);
     });
 
-    transientEntities.length = 0;
+    transientEntities = [];
 }
 
 function random(min, max) {

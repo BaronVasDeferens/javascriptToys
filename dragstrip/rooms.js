@@ -14,13 +14,18 @@ export class Vertex {
     size = 100;
     color = "#2c2c2cff"
 
-    constructor(x, y, size) {
+    isObstructed = false;
+
+    constructor(x, y, size, color) {
         this.x = x;
         this.y = y;
         if (size != null) {
             this.size = size;
         }
 
+        if (color != null) {
+            this.color = color;
+        }
     }
 
     /**
@@ -38,8 +43,19 @@ export class Vertex {
         }
     }
 
+    containsPoint(point) {
+        let containsPt = (point.x >= (this.x * this.size)
+            && point.x <= (this.x * this.size) + this.size
+            && point.y >= (this.y * this.size)
+            && point.y <= (this.y * this.size) + this.size);
+
+            // console.log(`${this.x * this.size} ${this.y * this. size} ${point.x} ${point.y} ${containsPt}`);
+
+            return containsPt && this.isObstructed;
+    }
+
     render(context, drawBorder) {
-        var offset = 0; //(this.y % 2) * this.size;
+        let offset = 0;
         context.fillStyle = this.color;
         context.beginPath();
         context.ellipse(
@@ -87,8 +103,8 @@ export class PlacementGrid {
 
     getVertexAtClick(click) {
 
-        var xClick = click.offsetX;
-        var yClick = click.offsetY;
+        let xClick = click.offsetX;
+        let yClick = click.offsetY;
 
         return this.vertices.filter(vertex => {
             return (xClick >= (vertex.x * vertex.size))
@@ -98,11 +114,114 @@ export class PlacementGrid {
         })[0];
     }
 
+    getRandomizedVertices() {
+        let shuffledVertices = this.vertices.slice();
+        this.shuffleArray(shuffledVertices);
+        return shuffledVertices;
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    getPointsAtInterval(sourceVertex, destinationVertex, interval) {
+
+        let points = [];
+
+        if (interval == null) {
+            interval = 1;
+        }
+
+        let sourceCoords = sourceVertex.getCenterCoordsWithOffset()
+        let destinationCoords = destinationVertex.getCenterCoordsWithOffset();
+
+        let startX = sourceCoords.x;
+        let startY = sourceCoords.y;
+        let endX = destinationCoords.x;
+        let endY = destinationCoords.y;
+
+        let hypoteneus = Math.sqrt(Math.pow((endY - startY), 2) + Math.pow((endX - startX), 2));
+        hypoteneus = Math.abs(hypoteneus);
+
+        let rise = endY - startY;           // vertical difference: rise
+        let run = endX - startX;           // horizontal difference: run
+        let theta = Math.atan(Math.abs(rise) / Math.abs(run));
+
+        let deltaX = Math.cos(theta) * interval;
+        if (run < 0 && deltaX > 0) {
+            deltaX = deltaX * -1;
+        }
+
+        let deltaY = Math.sin(theta) * interval;
+        if (rise < 0 && deltaY > 0) {
+            deltaY = deltaY * -1;
+        }
+
+        for (let i = interval; i < (hypoteneus / interval); i += interval) {
+
+            let point = {
+                x: startX + (i * deltaX),
+                y: startY + (i * deltaY),
+            };
+
+            points.push(
+                {
+                    x: point.x,
+                    y: point.y,
+                    isObstructed: this.vertices.some(vtx => {
+                        return vtx.containsPoint(point)
+                    })
+                }
+            )
+        }
+
+        return points;
+    }
+
+    getVerticesForPoints(points) {
+
+        let intersections = new Set();
+
+        points.map( vtx => {
+            return {
+                x: Math.floor(vtx.x / this.roomSize),
+                y: Math.floor(vtx.y / this.roomSize)
+            }
+        }).forEach( coord => {
+            intersections.add(this.getVertexByArrayPosition(coord.x, coord.y));
+        });
+
+        return intersections;
+    }
+
     render(context, drawBorder) {
         this.vertices.forEach(vtx => {
             vtx.render(context, drawBorder);
         });
     }
+}
+
+
+// ------------------------------- OBSTACLE -----------------------------
+
+export class ObstacleSimple {
+
+    constructor(vertex, size, color) {
+        this.vertex = vertex;
+        this.size = size;
+        this.color = color;
+
+        this.vertex.isObstructed = true;
+    }
+
+    render(context) {
+        context.fillStyle = this.color;
+        context.fillRect(this.vertex.x * this.vertex.size, this.vertex.y * this.vertex.size, this.size, this.size);
+    }
+
 }
 
 

@@ -8,41 +8,26 @@ export const GameState = Object.freeze({
 });
 
 
-// ----------------------------- LINE - TRANSIENT-----------------------------------
+// ------------------------------ LINE - TRANSIENT-----------------------------------
 
-export class TransientLine {
+export class DottedLineTransient {
 
-    constructor(source, destination, width, color) {
-        this.width = width;
+    constructor(pointsAtIntveral, color) {
         this.color = color;
-
-        this.sourceCoords = source.getCenterCoordsWithOffset()
-        this.destinationCoords = destination.getCenterCoordsWithOffset();
-
+        this.pointsAtInterval = pointsAtIntveral;
     }
 
     render(context) {
 
-        var startX = this.sourceCoords.x;
-        var startY = this.sourceCoords.y;
-        var endX = this.destinationCoords.x;
-        var endY = this.destinationCoords.y;
-
-        // console.log(`${startX} ${startY} ${endX} ${endY}`);
-
-        // context.beginPath();
-        context.strokeStyle = this.color;
-        context.globalAlpha = 0.25;
-        // context.lineWidth = this.width;
-        // context.moveTo(startX, startY);
-        // context.lineTo(endX, endY);
-        // context.stroke();
-
+        //context.globalAlpha = 0.25;
 
         context.fillStyle = this.color;
 
-        var points = this.getPointsAtInterval(5);
-        points.forEach(point => {
+        this.pointsAtInterval.forEach(point => {
+
+            if (point.isObstructed == true) {
+                context.fillStyle = "#0000FF";
+            }
 
             context.beginPath();
             context.ellipse(
@@ -57,55 +42,10 @@ export class TransientLine {
         });
 
         context.globalAlpha = 1.0;
-
     }
-
-    getPointsAtInterval(interval) {
-
-        var points = [];
-
-        if (interval == null) {
-            interval = 5;
-        }
-
-        var startX = this.sourceCoords.x;
-        var startY = this.sourceCoords.y;
-        var endX = this.destinationCoords.x;
-        var endY = this.destinationCoords.y;
-
-        var hypoteneus = Math.sqrt(Math.pow((endY - startY), 2) + Math.pow((endX - startX), 2));
-        hypoteneus = Math.abs(hypoteneus);
-
-        let rise = endY - startY;           // vertical difference: rise
-        let run = endX - startX;           // horizontal difference: run
-        let theta = Math.atan(Math.abs(rise) / Math.abs(run));
-
-        let deltaX = Math.cos(theta) * interval;
-        if (run < 0 && deltaX > 0) {
-            deltaX = deltaX * -1;
-        }
-
-        let deltaY = Math.sin(theta) * interval;
-        if (rise < 0 && deltaY > 0) {
-            deltaY = deltaY * -1;
-        }
-
-        for (var i = interval; i < (hypoteneus / interval); i += interval) {
-
-            points.push(
-                {
-                    x: startX + (i * deltaX),
-                    y: startY + (i * deltaY)
-                }
-            )
-        }
-
-        return points;
-    }
-
 }
 
-// ----------------------------- ENTITY - TRANSIENT --------------------------------
+// ------------------------------ ENTITY - TRANSIENT --------------------------------
 
 export class TransientEntityImage {
 
@@ -207,7 +147,7 @@ export class EntitySimple {
 
 }
 
-// ---------------------------------- ENTITY - IMAGE ---------------------------------------
+// ------------------------------ ENTITY - IMAGE ---------------------------------------
 
 export class EntityImage {
 
@@ -266,6 +206,7 @@ export class PlayerEntity extends EntityImage {
 }
 
 export class EnemyEntity extends EntityImage {
+
     constructor(x, y, imageSize, imageLoader) {
         super(x, y, imageSize)
         this.image = imageLoader.getImage(ImageAsset.ENEMY);

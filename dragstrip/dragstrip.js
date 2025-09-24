@@ -1,6 +1,6 @@
-import { PlacementGrid } from "./rooms.js";
+import { PlacementGrid, ObstacleSimple, Vertex } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EnemyEntity, TransientEntityImage, GameState, TransientLine, EntityMovementDriver, PlayerEntity } from "./entity.js";
+import { EnemyEntity, TransientEntityImage, GameState, DottedLineTransient, EntityMovementDriver, PlayerEntity } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
@@ -31,12 +31,16 @@ const placementGrid = new PlacementGrid(numRows, numCols, roomSize);
 
 const entitySize = 50;
 
-const numPlayerEntities = 5;
+const numPlayerEntities = 3;
 var playerEntities = new Array();
 var selectedPlayerEntity = null;
+var selectedPlayerPath = null;
 
-const numEnemyEntities = 5;
+const numEnemyEntities = 3;
 var enemyEntities = new Array();
+
+const numRandomObstacles = 60;
+const obstacles = new Array();
 
 /** TRANSIENT ENTITIES: these entities will be disposed of at the end of each rendering cycle */
 var transientEntities = new Array();
@@ -63,16 +67,16 @@ function initialize() {
 
     console.log("Initializing...");
 
+    let shuffledVertices = placementGrid.getRandomizedVertices();
+    let index = 0;
 
-    // --- Create players (random placement) ---
+    // --- Create PLAYERS (random placement) ---
     playerEntities = new Array();
 
-    for (var i = 0; i < numPlayerEntities; i++) {
+    for (let i = 0; i < numPlayerEntities; i++) {
 
-        var vertex = placementGrid.getVertexByArrayPosition(
-            random(0, numCols),
-            random(0, numRows)
-        );
+        let vertex = shuffledVertices[index];
+        index++;
 
         var entity = new PlayerEntity(
             0,
@@ -85,17 +89,15 @@ function initialize() {
         playerEntities.push(entity);
     }
 
-    // --- Create enemies (random placement) ---
+    // --- Create ENEMIES (random placement) ---
     enemyEntities = new Array();
 
-    for (var i = 0; i < numEnemyEntities; i++) {
+    for (let i = 0; i < numEnemyEntities; i++) {
 
-        var vertex = placementGrid.getVertexByArrayPosition(
-            random(0, numCols),
-            random(0, numRows)
-        );
+        let vertex = shuffledVertices[index];
+        index++;
 
-        var entity = new EnemyEntity(
+        let entity = new EnemyEntity(
             0,
             0,
             entitySize,
@@ -104,6 +106,15 @@ function initialize() {
 
         entity.setVertex(vertex);
         enemyEntities.push(entity);
+    }
+
+    // --- Create OBSTACLES
+    obstacles.length = 0;
+    for (let i = 0; i < numRandomObstacles; i++) {
+        let vertex = shuffledVertices[index];
+        index++;
+        let obstacle = new ObstacleSimple(vertex, roomSize, "#424242ff")
+        obstacles.push(obstacle);
     }
 
     renderBackgroundImage(context);
@@ -119,14 +130,30 @@ function update() {
 
     // Add a line between the selected entity's ghost and source
     if (selectedPlayerEntity != null && selectedPlayerEntity.vertex != null) {
+
+        let pointsAtInterval = placementGrid.getPointsAtInterval(
+            selectedPlayerEntity.originalEntity.vertex,
+            selectedPlayerEntity.vertex,
+            3
+        );
+
         transientEntities.push(
-            new TransientLine(
-                selectedPlayerEntity.originalEntity.vertex,
-                selectedPlayerEntity.vertex,
-                1.0,
+            new DottedLineTransient(
+                pointsAtInterval,
                 "#FF0000"
             )
         )
+
+        selectedPlayerPath = placementGrid.getVerticesForPoints(pointsAtInterval);
+
+        if (debugMode == true) {
+            selectedPlayerPath.forEach(vtx => {
+                transientEntities.push(
+                    new Vertex(vtx.x, vtx.y, roomSize, "#FFFF00")
+                )
+            });
+            console.log(`distance: ${selectedPlayerPath.size}`)
+        }
     }
 
     if (gameState == GameState.PROCESSING_PLAYER_MOVE) {
@@ -153,7 +180,7 @@ function renderBackgroundImage(context) {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
     placementGrid.render(context, debugMode);
-    var updatedSrc = canvas.toDataURL();
+    let updatedSrc = canvas.toDataURL();
     backgroundImage = new Image();
     backgroundImage.src = updatedSrc;
 }
@@ -161,6 +188,10 @@ function renderBackgroundImage(context) {
 function render(context) {
 
     context.drawImage(backgroundImage, 0, 0,);
+
+    obstacles.forEach(obstacle => {
+        obstacle.render(context)
+    });
 
     playerEntities.forEach(entity => {
         entity.render(context, debugMode);
@@ -185,20 +216,16 @@ function random(min, max) {
     return parseInt(Math.random() * max + min);
 };
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
 
 // -----------------------------------------------
 // --- PLAYER INPUT ---
 
+
+// Mouse DOWN
 document.addEventListener('mousedown', (click) => {
 
     // Identify the first player under the mouse...
-    var candidate = playerEntities.filter(entity => {
+    let candidate = playerEntities.filter(entity => {
         return entity.containsClick(click)
     })[0];
 
@@ -215,7 +242,7 @@ document.addEventListener('mousedown', (click) => {
     }
 });
 
-
+// Mouse MOVE
 document.addEventListener('mousemove', (click) => {
 
     switch (gameState) {
@@ -225,36 +252,45 @@ document.addEventListener('mousemove', (click) => {
 
         case GameState.SELECTED_PLAYER_ENTITY:
             if (selectedPlayerEntity != null) {
-                var vertex = placementGrid.getVertexAtClick(click);
+                let vertex = placementGrid.getVertexAtClick(click);
                 selectedPlayerEntity.setVertex(vertex);
             }
             break;
     }
 });
 
+// Mouse UP
 document.addEventListener('mouseup', (click) => {
 
-    var targetVertex = placementGrid.getVertexAtClick(click);
+    let targetVertex = placementGrid.getVertexAtClick(click);
     if (targetVertex != null && selectedPlayerEntity != null) {
 
-        var targetEntity = selectedPlayerEntity.originalEntity;
-        var sourceVertex = targetEntity.vertex;
+        // Check for path obstruction
+        if (selectedPlayerPath != null && !(selectedPlayerPath.values().some(vtx => {
+            return vtx.isObstructed
+        }))) {
 
-        entityMovementDrivers.push(
+            let targetEntity = selectedPlayerEntity.originalEntity;
+            let sourceVertex = targetEntity.vertex;
 
-            new EntityMovementDriver(
-                targetEntity,
-                sourceVertex,
-                targetVertex,
-                1,
-                function () {
-                    targetEntity.setVertex(targetVertex);
-                    updateGameState(GameState.IDLE)
-                }
+            entityMovementDrivers.push(
+
+                new EntityMovementDriver(
+                    targetEntity,
+                    sourceVertex,
+                    targetVertex,
+                    1,
+                    function () {
+                        targetEntity.setVertex(targetVertex);
+                        updateGameState(GameState.IDLE)
+                    }
+                )
             )
-        )
 
-        updateGameState(GameState.PROCESSING_PLAYER_MOVE);
+            updateGameState(GameState.PROCESSING_PLAYER_MOVE);
+        }
+
+        selectedPlayerPath = null;
     }
 
     selectedPlayerEntity = null;
@@ -269,7 +305,7 @@ document.addEventListener('keydown', (event) => {
             renderBackgroundImage(context);
             break;
 
-        case 'r':
+        case 'i':
             initialize();
             break;
     }

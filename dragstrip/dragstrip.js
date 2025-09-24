@@ -1,6 +1,6 @@
 import { PlacementGrid, ObstacleSimple, Vertex } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
-import { EnemyEntity, TransientEntityImage, GameState, DottedLineTransient, EntityMovementDriver, PlayerEntity } from "./entity.js";
+import { EnemyEntity, EntityImageTransient, GameState, DottedLineTransient, EntityMovementDriver, PlayerEntity } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
@@ -143,7 +143,7 @@ function update() {
         transientEntities.push(
             new DottedLineTransient(
                 pointsAtInterval,
-                "#FF0000"
+                "#FFFFFF"
             )
         )
 
@@ -234,7 +234,7 @@ document.addEventListener('mousedown', (click) => {
 
     //...and if a candidate is found, set a selectedEntity
     if (candidate != null) {
-        selectedPlayerEntity = new TransientEntityImage(
+        selectedPlayerEntity = new EntityImageTransient(
             candidate,
             0.25
         );

@@ -19,15 +19,11 @@ export class DottedLineTransient {
 
     render(context) {
 
-        //context.globalAlpha = 0.25;
-
         context.fillStyle = this.color;
+        context.strokeStyle = this.color;
 
+        let shouldFill = true;
         this.pointsAtInterval.forEach(point => {
-
-            if (point.isObstructed == true) {
-                context.fillStyle = "#0000FF";
-            }
 
             context.beginPath();
             context.ellipse(
@@ -38,7 +34,16 @@ export class DottedLineTransient {
                 2 * Math.PI,
                 2 * Math.PI,
                 false);
-            context.fill();
+
+            if (point.isObstructed == true) {
+                shouldFill = false;
+            }
+
+            if (shouldFill) {
+                context.fill();
+            } else {
+                context.stroke();
+            }
         });
 
         context.globalAlpha = 1.0;
@@ -47,7 +52,7 @@ export class DottedLineTransient {
 
 // ------------------------------ ENTITY - TRANSIENT --------------------------------
 
-export class TransientEntityImage {
+export class EntityImageTransient {
 
     // This entity is a "ghost" that appears under the mouse as a player entity is dragged
     originalEntity = null;

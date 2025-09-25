@@ -39,7 +39,7 @@ var selectedPlayerPath = null;
 const numEnemyEntities = 3;
 var enemyEntities = [];
 
-const numRandomObstacles = 60;
+const numRandomObstacles = 30;
 var obstacles = [];
 
 /** TRANSIENT ENTITIES: these entities will be disposed of at the end of each rendering cycle */
@@ -160,12 +160,17 @@ function update() {
     }
 
     if (gameState == GameState.PROCESSING_PLAYER_MOVE) {
-        entityMovementDrivers.forEach(driver => {
-            driver.update();
-        });
 
-        // TODO remove completed drivers
-
+        let activeDriver = entityMovementDrivers[0];
+        if (activeDriver != null) {
+            if (activeDriver.isDischarged == false) {
+                activeDriver.update();
+            } else {
+                entityMovementDrivers.shift();
+            }
+        } else {
+            updateGameState(GameState.IDLE);
+        }
     }
 }
 
@@ -266,7 +271,7 @@ document.addEventListener('mousemove', (click) => {
 document.addEventListener('mouseup', (click) => {
 
     let targetVertex = placementGrid.getVertexAtClick(click);
-    if (targetVertex != null && selectedPlayerEntity != null) {
+    if (targetVertex != null && selectedPlayerEntity != null && gameState == GameState.SELECTED_PLAYER_ENTITY)  {
 
         // Check for path obstruction
         if (selectedPlayerPath != null && !(selectedPlayerPath.values().some(vtx => {
@@ -275,20 +280,41 @@ document.addEventListener('mouseup', (click) => {
 
             let targetEntity = selectedPlayerEntity.originalEntity;
             let sourceVertex = targetEntity.vertex;
+            // let path = ;
+            
+            Array.from(selectedPlayerPath).forEach((vtx, index, array) => {
+
+                sourceVertex = vtx;
+
+                let destinationVertex = array[index + 1];
+                if (destinationVertex == null) {
+                    destinationVertex = targetVertex;
+                }
+
+                entityMovementDrivers.push(
+
+                    new EntityMovementDriver(
+                        targetEntity,
+                        null,
+                        null,
+                        1,
+                        function () {
+                            targetEntity.setVertex(destinationVertex);
+                        }
+                    )
+                )
+            });
 
             entityMovementDrivers.push(
-
                 new EntityMovementDriver(
                     targetEntity,
-                    sourceVertex,
-                    targetVertex,
+                    null,
+                    null,
                     1,
                     function () {
-                        targetEntity.setVertex(targetVertex);
                         updateGameState(GameState.IDLE)
                     }
-                )
-            )
+                ));
 
             updateGameState(GameState.PROCESSING_PLAYER_MOVE);
         }

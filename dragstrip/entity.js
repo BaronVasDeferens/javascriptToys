@@ -226,66 +226,21 @@ export class EntityMovementDriver {
     isComplete = false;
     isDischarged = false;
 
-    deltaX = 1;
-    deltaY = 1;
-
     constructor(entity, vertexSource, vertexDestination, deltaPerTick, onCompletionCallback) {
         this.entity = entity;
         this.vertexSource = vertexSource;
         this.vertexDestination = vertexDestination;
         this.deltaPerTick = deltaPerTick;
         this.onCompletionCallback = onCompletionCallback;
-
-
-        // TODO: use the getCenterCoordsWithOffset() 
-
-        if (vertexDestination.x < vertexSource.x) {
-            this.deltaX = -deltaPerTick;
-        } else if (vertexDestination.x > vertexSource.x) {
-            this.deltaX = deltaPerTick;
-        } else {
-            this.deltaX = 0;
-        }
-
-        if (vertexDestination.y < vertexSource.y) {
-            this.deltaY = -deltaPerTick;
-        } else if (vertexDestination.y > vertexSource.y) {
-            this.deltaY = deltaPerTick;
-        } else {
-            this.deltaY = 0;
-        }
     }
 
     update() {
 
 
-        // FIXME: hack this for now
-        this.isComplete = true;
-
-        if (this.deltaX == 0 && this.deltaY == 0) {
-            this.isComplete = true;
-        }
-
-        if (this.isComplete == true && this.isDischarged == false) {
+        if (this.isComplete == false) {
             this.onCompletionCallback();
+            this.isComplete = true;
             this.isDischarged = true;
-        }
-
-        if (this.isComplete) {
-            return
-        }
-
-        // TODO: this needs to compute the hypoteneus
-
-        this.entity.x += this.deltaX;
-        this.entity.y += this.deltaY;
-
-        if (this.vertexDestination.x == this.vertexSource.x) {
-            this.deltaX = 0;
-        }
-
-        if (this.vertexDestination.y == this.vertexSource.y) {
-            this.deltaY = 0;
         }
     }
 

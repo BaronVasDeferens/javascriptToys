@@ -22,10 +22,17 @@ var gameState = GameState.IDLE;
 
 var debugMode = false;
 
-const globalDivisor = 10;
-const numRows = canvas.height / 20;
-const numCols = canvas.width / 20;
-const roomSize = globalDivisor * 2;
+
+/**
+ * ROOM SIZE
+ * Smaller room sizes make the map more granular, offering a larger
+ * number of spaces in which to move. Larger values (like 
+ * entitySize) make for a more chessboard-like experience.
+ */
+
+const roomSize = 50;        
+const numRows = canvas.height / roomSize;
+const numCols = canvas.width / roomSize;
 
 const placementGrid = new PlacementGrid(numRows, numCols, roomSize);
 

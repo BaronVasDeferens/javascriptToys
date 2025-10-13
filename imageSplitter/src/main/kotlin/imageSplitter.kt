@@ -8,28 +8,45 @@ fun main() {
 
     val sourceImageName =
         "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\wizard_wars\\resources\\tiles\\ProjectUtumno_full.png"
+
     val sourceDirectoryName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\wizard_wars\\resources\\tiles\\32x32"
+    val sourceDirectory = File(sourceDirectoryName)
+
     val outputDirectoryName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\wizard_wars\\resources\\tiles\\64x64"
-
-//    splitImage(sourceImageName, 32, outputDirectoryName)
-
-
-    val scaleFactor = 2
     val outputDirectory = File(outputDirectoryName)
 
-    File(sourceDirectoryName).listFiles()
+    /**
+     * ORIGINAL TILE SIZE
+     * Defines the size of each tile in a tilemap.
+     */
+    val originalTileSize = 32
+
+    // This routine splits the specified file into individual images
+    splitImage(sourceImageName, originalTileSize, outputDirectoryName)
+
+    /**
+     * SCALE FACTOR
+     * When re-sizing, each pixel will be rendered as a square whose sides are equal to this value.
+     * For example, a scaleFactor of 5 will convert every pixel in the original image to a 5x5 pixel block.
+     */
+    val scaleFactor = 2
+    scaleImagesInDirectory(sourceDirectory, scaleFactor, outputDirectory)
+
+}
+
+// This routine scales every .png image in the specified directory and saves a copy.
+fun scaleImagesInDirectory(sourceDirectory: File, scaleFactor: Int, outputDirectory: File) {
+    sourceDirectory.listFiles().orEmpty()
         .filterNotNull()
         .filter { it.isFile }
         .filter { it.name.endsWith(".png") }
         .forEach { file ->
             println("Converting ${file.name} size x${scaleFactor}...")
             val imageName = file.absolutePath
-            val scaledImage = scaleImage(imageName, scaleFactor)
+            val scaledImage = scaleImageByFactor(imageName, scaleFactor)
             saveImage(scaledImage, outputDirectory, file.name)
         }
-
 }
-
 
 fun splitImage(imageName: String, tileSize: Int, outputDirName: String) {
 
@@ -69,7 +86,7 @@ fun splitImage(imageName: String, tileSize: Int, outputDirName: String) {
 }
 
 
-fun scaleImage(imageName: String, blockSize: Int): BufferedImage {
+fun scaleImageByFactor(imageName: String, blockSize: Int): BufferedImage {
     val image = loadImageFile(imageName)
     // sanity check: input image size
     if (image.width != image.height) {

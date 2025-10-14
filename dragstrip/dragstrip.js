@@ -1,9 +1,31 @@
-import { PlacementGrid, ObstacleSimple, Vertex } from "./rooms.js";
+import { PlacementGrid, ObstacleSimple, Vertex, Directions } from "./rooms.js";
 import { AssetLoader, ImageLoader, SoundLoader } from "./assets.js";
 import { EnemyEntity, EntityImageTransient, GameState, DottedLineTransient, EntityMovementDriver, PlayerEntity } from "./entity.js";
 
 /**
  * THIS WAS SPAWNED FROM STRATEGIZER 
+ * 
+ * 
+ * 
+ * IDEAS
+ *      +   each round, two sets of dice/cards are drawn to create two pools:
+ *          direction and a speed. For each vehicle under the players control,
+ *          a player assembles a pair of direction and speed and applies it to
+ *          one of their vehicles.
+ * 
+ *      +   some vehicles may be incapable of moving at certain speeds
+ * 
+ *      +   pushing vehicles beyond their specs causes a loss of CONTROL
+ * 
+ *      +   radically altering the course or speed of a vehicle causes loss of CONTROL
+ * 
+ *      +   maintaining a straigh course regains CONTROL
+ * 
+ *      +   after every turn the road advances. any vehicle left behind is considered lost
+ * 
+ *      +   certain events, like a collision with an road obstacle, forces the vehicle to make a CONTROL
+ *          ROLL. BAd stuff happens when the roll is failed
+ * 
  * 
  * 
  */
@@ -30,7 +52,7 @@ var debugMode = false;
  * entitySize) make for a more chessboard-like experience.
  */
 
-const roomSize = 50;        
+const roomSize = 50;
 const numRows = canvas.height / roomSize;
 const numCols = canvas.width / roomSize;
 
@@ -278,7 +300,7 @@ document.addEventListener('mousemove', (click) => {
 document.addEventListener('mouseup', (click) => {
 
     let targetVertex = placementGrid.getVertexAtClick(click);
-    if (targetVertex != null && selectedPlayerEntity != null && gameState == GameState.SELECTED_PLAYER_ENTITY)  {
+    if (targetVertex != null && selectedPlayerEntity != null && gameState == GameState.SELECTED_PLAYER_ENTITY) {
 
         // Check for path obstruction
         if (selectedPlayerPath != null && !(selectedPlayerPath.values().some(vtx => {
@@ -287,8 +309,7 @@ document.addEventListener('mouseup', (click) => {
 
             let targetEntity = selectedPlayerEntity.originalEntity;
             let sourceVertex = targetEntity.vertex;
-            // let path = ;
-            
+
             Array.from(selectedPlayerPath).forEach((vtx, index, array) => {
 
                 sourceVertex = vtx;
@@ -319,7 +340,8 @@ document.addEventListener('mouseup', (click) => {
                     null,
                     1,
                     function () {
-                        updateGameState(GameState.IDLE)
+                        placementGrid.shiftRooms(Directions.DOWN, 1, 0);
+                        updateGameState(GameState.IDLE);
                     }
                 ));
 

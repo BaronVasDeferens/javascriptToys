@@ -203,6 +203,35 @@ export class PlacementGrid {
         return intersections;
     }
 
+    shiftRooms(direction, shiftBy, numObstacles) {
+
+        let deltaX = 0;
+        let deltaY = 0;
+
+        switch (direction) {
+            case Directions.DOWN:
+                deltaY = 1 * shiftBy;
+                break;
+            default:
+                break;
+        }
+
+        // Shift all vertices
+        this.vertices.forEach( vtx => {
+            vtx.y = vtx.y + deltaY;
+        });
+
+        // Shift the entities
+
+
+        // TODO: cull 
+
+        // Generate new vertices
+
+
+
+    }
+
     render(context, drawBorder) {
         this.vertices.forEach(vtx => {
             vtx.render(context, drawBorder);

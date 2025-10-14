@@ -4,128 +4,152 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
+
 fun main() {
 
-    val sourceImageName =
-        "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\wizard_wars\\resources\\tiles\\ProjectUtumno_full.png"
+    val splitter = ImageSplitter()
 
-    val sourceDirectoryName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\wizard_wars\\resources\\tiles\\32x32"
-    val sourceDirectory = File(sourceDirectoryName)
-
-    val outputDirectoryName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\wizard_wars\\resources\\tiles\\64x64"
-    val outputDirectory = File(outputDirectoryName)
 
     /**
      * ORIGINAL TILE SIZE
-     * Defines the size of each tile in a tilemap.
+     * Defines the size of each (in pixels) tile in the tilemap.
      */
-    val originalTileSize = 32
-
-    // This routine splits the specified file into individual images
-    splitImage(sourceImageName, originalTileSize, outputDirectoryName)
+    val originalTileSize = 16
 
     /**
      * SCALE FACTOR
      * When re-sizing, each pixel will be rendered as a square whose sides are equal to this value.
      * For example, a scaleFactor of 5 will convert every pixel in the original image to a 5x5 pixel block.
      */
-    val scaleFactor = 2
-    scaleImagesInDirectory(sourceDirectory, scaleFactor, outputDirectory)
+    val scaleFactor = 4
+
+
+    // This routine splits the specified file into individual images
+    splitter.splitImage(
+        imageName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\imageSplitter\\input\\input.png",
+        tileSize = originalTileSize,
+        outputDirName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\imageSplitter\\output\\16x16")
+
+    // Scale up all images in the specified directory by the specified amount
+    splitter.scaleImagesInDirectory(
+        sourceDirectoryName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\imageSplitter\\output\\16x16",
+        scaleFactor = scaleFactor,
+        outputDirectoryName = "C:\\Users\\scott\\IdeaProjects\\javascriptToys\\imageSplitter\\output\\64x64")
 
 }
 
-// This routine scales every .png image in the specified directory and saves a copy.
-fun scaleImagesInDirectory(sourceDirectory: File, scaleFactor: Int, outputDirectory: File) {
-    sourceDirectory.listFiles().orEmpty()
-        .filterNotNull()
-        .filter { it.isFile }
-        .filter { it.name.endsWith(".png") }
-        .forEach { file ->
-            println("Converting ${file.name} size x${scaleFactor}...")
-            val imageName = file.absolutePath
-            val scaledImage = scaleImageByFactor(imageName, scaleFactor)
-            saveImage(scaledImage, outputDirectory, file.name)
+class ImageSplitter {
+
+    fun splitImage(imageName: String, tileSize: Int, outputDirName: String) {
+
+        val sourceImage = loadImageFile(imageName)
+
+        val outputDir = File(outputDirName)
+        if (outputDir.exists() && !outputDir.isDirectory) {
+            throw RuntimeException("output dir $outputDirName is NOT a directory!")
         }
-}
+        if (!outputDir.exists()) {
+            println("Creating output directory $outputDirName ...")
+            outputDir.mkdir()
+        }
 
-fun splitImage(imageName: String, tileSize: Int, outputDirName: String) {
+        var imageCount = 0
+        // Go row by row
+        for (y in 0 until sourceImage.height / tileSize) {
+            for (x in 0 until sourceImage.width / tileSize) {
+                val newImage = BufferedImage(tileSize, tileSize, BufferedImage.TYPE_INT_ARGB)
+                val graphics = newImage.graphics as Graphics2D
+                graphics.drawImage(
+                    sourceImage.getSubimage(x * tileSize, y * tileSize, tileSize, tileSize),
+                    0,
+                    0,
+                    null
+                )
+                graphics.dispose()
 
-    val sourceImage = loadImageFile(imageName)
-    if (sourceImage.width % tileSize != 0
-        || sourceImage.height % tileSize != 0
-    ) {
-        throw RuntimeException("source image not evenly divisible by $tileSize")
+                // Examine the image: only save it if there's content
+                var blackCount = 0
+                for (i in 0 until tileSize) {
+                    for (j in 0 until tileSize) {
+                        val pixel = newImage.getRGB(i, j)
+                        if (pixel == 0) {
+                            blackCount++
+                        }
+                    }
+                }
+
+                if (blackCount >= (tileSize * tileSize)) {
+                    println("SKIPPING TILE WRITE -- BLANK")
+                } else {
+                    saveImage(newImage, outputDir, "tile_${imageCount}.png")
+                    imageCount++
+                }
+            }
+        }
     }
 
-    val outputDir = File(outputDirName)
-    if (outputDir.exists() && !outputDir.isDirectory) {
-        throw RuntimeException("output dir $outputDirName is NOT a directory!")
-    }
-    if (!outputDir.exists()) {
-        println("Creating output directory $outputDirName ...")
-        outputDir.mkdir()
+    // This routine scales every .png image in the specified directory and saves a copy.
+    fun scaleImagesInDirectory(sourceDirectoryName: String, scaleFactor: Int, outputDirectoryName: String) {
+
+        val sourceDirectory = File(sourceDirectoryName)
+        val outputDirectory = File(outputDirectoryName)
+
+        sourceDirectory.listFiles().orEmpty()
+            .filterNotNull()
+            .filter { it.isFile }
+            .filter { it.name.endsWith(".png") }
+            .forEach { file ->
+                println("Converting ${file.name} size x${scaleFactor}...")
+                val imageName = file.absolutePath
+                val scaledImage = scaleImageByFactor(imageName, scaleFactor)
+                saveImage(scaledImage, outputDirectory, file.name)
+            }
     }
 
-    var imageCount = 0
-    // Go row by row
-    for (y in 0 until sourceImage.height / tileSize) {
-        for (x in 0 until sourceImage.width / tileSize) {
-            val newImage = BufferedImage(tileSize, tileSize, BufferedImage.TYPE_INT_ARGB)
-            val graphics = newImage.graphics as Graphics2D
-            graphics.drawImage(
-                sourceImage.getSubimage(x * tileSize, y * tileSize, tileSize, tileSize),
-                0,
-                0,
-                null
+    fun scaleImageByFactor(imageName: String, blockSize: Int): BufferedImage {
+        val image = loadImageFile(imageName)
+        // sanity check: input image size
+        if (image.width != image.height) {
+            throw RuntimeException("${image.width} x ${image.height} input image is not square!")
+        } else {
+            println("${image.width} x ${image.height} input image size OK!")
+        }
+
+        return convertToScaledImage(image, blockSize)
+    }
+
+    fun loadImageFile(fileName: String): BufferedImage {
+        return ImageIO.read(File(fileName))
+    }
+
+    fun convertToScaledImage(sourceImage: BufferedImage, targetSize: Int): BufferedImage {
+        println("Creating new image ${sourceImage.width * targetSize} x ${sourceImage.height * targetSize}")
+        val newImage =
+            BufferedImage(
+                sourceImage.width * targetSize,
+                sourceImage.height * targetSize,
+                BufferedImage.TYPE_INT_ARGB
             )
-            graphics.dispose()
-            saveImage(newImage, outputDir, "tile_${imageCount}")
-            imageCount++
+        val graphics = newImage.graphics as Graphics2D
+
+        for (x in 0..<sourceImage.width) {
+            for (y in 0..<sourceImage.height) {
+                val colorAsRGBa = Color(sourceImage.getRGB(x, y), true)
+                graphics.color = colorAsRGBa
+                graphics.fillRect(x * targetSize, y * targetSize, targetSize, targetSize)
+            }
         }
-    }
-}
-
-
-fun scaleImageByFactor(imageName: String, blockSize: Int): BufferedImage {
-    val image = loadImageFile(imageName)
-    // sanity check: input image size
-    if (image.width != image.height) {
-        throw RuntimeException("${image.width} x ${image.height} input image is not square!")
-    } else {
-        println("${image.width} x ${image.height} input image size OK!")
+        return newImage
     }
 
-    return convertToScaledImage(image, blockSize)
-
-}
-
-fun loadImageFile(fileName: String): BufferedImage {
-    return ImageIO.read(File(fileName))
-}
-
-fun convertToScaledImage(sourceImage: BufferedImage, targetSize: Int): BufferedImage {
-    println("Creating new image ${sourceImage.width * targetSize} x ${sourceImage.height * targetSize}")
-    val newImage =
-        BufferedImage(
-            sourceImage.width * targetSize,
-            sourceImage.height * targetSize,
-            BufferedImage.TYPE_INT_ARGB
-        )
-    val graphics = newImage.graphics as Graphics2D
-
-    for (x in 0..<sourceImage.width) {
-        for (y in 0..<sourceImage.height) {
-            val colorAsRGBa = Color(sourceImage.getRGB(x, y), true)
-            graphics.color = colorAsRGBa
-            graphics.fillRect(x * targetSize, y * targetSize, targetSize, targetSize)
-        }
+    fun saveImage(newImage: BufferedImage, outputDir: File, imageName: String) {
+        val newFile = File(outputDir, "$imageName")
+        newFile.createNewFile()
+        ImageIO.write(newImage, "png", newFile)
+        println("Saved ${newFile.name}")
     }
-    return newImage
+
 }
 
-fun saveImage(newImage: BufferedImage, outputDir: File, imageName: String) {
-    val newFile = File(outputDir, imageName)
-    newFile.createNewFile()
-    ImageIO.write(newImage, "png", newFile)
-    println("Saved ${newFile.name}")
-}
+
+

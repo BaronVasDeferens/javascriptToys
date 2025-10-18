@@ -140,13 +140,11 @@ function initialize() {
     }
 
     // --- Create OBSTACLES
-    obstacles = [];
-
     for (let i = 0; i < numRandomObstacles; i++) {
         let vertex = shuffledVertices[index];
         index++;
         let obstacle = new ObstacleSimple(vertex, roomSize, "#424242ff")
-        obstacles.push(obstacle);
+        placementGrid.addObstacle(obstacle);
     }
 
     renderBackgroundImage(context);
@@ -216,7 +214,7 @@ function updateGameState(newState) {
 function renderBackgroundImage(context) {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    placementGrid.render(context, debugMode);
+    //placementGrid.render(context, debugMode);
     let updatedSrc = canvas.toDataURL();
     backgroundImage = new Image();
     backgroundImage.src = updatedSrc;
@@ -224,11 +222,10 @@ function renderBackgroundImage(context) {
 
 function render(context) {
 
-    context.drawImage(backgroundImage, 0, 0,);
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-    obstacles.forEach(obstacle => {
-        obstacle.render(context)
-    });
+    placementGrid.render(context);
 
     playerEntities.forEach(entity => {
         entity.render(context, debugMode);
@@ -340,7 +337,7 @@ document.addEventListener('mouseup', (click) => {
                     null,
                     1,
                     function () {
-                        placementGrid.shiftRooms(Directions.DOWN, 1, 0);
+                        placementGrid.shiftObstacles(Directions.DOWN, 1, 0);
                         updateGameState(GameState.IDLE);
                     }
                 ));

@@ -8,6 +8,7 @@ export const Directions = Object.freeze({
 // ------------------------------ VERTEX ---------------------------------------
 
 export class Vertex {
+
     x = 0;
     y = 0;
     radius = 1;
@@ -29,10 +30,10 @@ export class Vertex {
     }
 
     /**
- * Computes the center point of the room. When an offset is provided, this calculates the upper-left corner point for an entity place at the center
- */
+    * Computes the center point of the room. When an offset is provided, this calculates
+    * the upper-left corner point for an entity place at the center
+    */
     getCenterCoordsWithOffset(offset) {
-
         if (offset == null) {
             offset = 0;
         }
@@ -49,9 +50,7 @@ export class Vertex {
             && point.y >= (this.y * this.size)
             && point.y <= (this.y * this.size) + this.size);
 
-            // console.log(`${this.x * this.size} ${this.y * this. size} ${point.x} ${point.y} ${containsPt}`);
-
-            return containsPt && this.isObstructed;
+        return containsPt && this.isObstructed;
     }
 
     render(context, drawBorder) {
@@ -81,6 +80,7 @@ export class Vertex {
 export class PlacementGrid {
 
     vertices = new Array();
+    obstacles = new Array();
 
     constructor(numRows, numCols, roomSize) {
 
@@ -98,9 +98,11 @@ export class PlacementGrid {
     }
 
     resetObstructions() {
-        this.vertices.forEach( vtx => {
+        this.vertices.forEach(vtx => {
             vtx.isObstructed = false;
-        })
+        });
+
+        this.obstacles = new Array();;
     }
 
     getVertexByArrayPosition(x, y) {
@@ -133,6 +135,11 @@ export class PlacementGrid {
         }
     }
 
+    /**
+     * Given a source and destination vertex and a interval (in pixels), this methods returns
+     * a list of (x,y) pairs representing points between the two points, spaced by the interval.
+     * Used for computing line of sight.
+     */
     getPointsAtInterval(sourceVertex, destinationVertex, interval) {
 
         let points = [];
@@ -191,19 +198,27 @@ export class PlacementGrid {
 
         let intersections = new Set();
 
-        points.map( vtx => {
+        points.map(vtx => {
             return {
                 x: Math.floor(vtx.x / this.roomSize),
                 y: Math.floor(vtx.y / this.roomSize)
             }
-        }).forEach( coord => {
+        }).forEach(coord => {
             intersections.add(this.getVertexByArrayPosition(coord.x, coord.y));
         });
 
         return intersections;
     }
 
-    shiftRooms(direction, shiftBy, numObstacles) {
+    addObstacle(obstacle) {
+        this.obstacles.push(obstacle);
+    }
+
+    /**
+     * Shifts the map's obstacles specified direction by a number of vertices (shiftBy).
+     * New obstacles will be computed for the newly-generated vertices.
+     */
+    shiftObstacles(direction, shiftBy, numObstacles) {
 
         let deltaX = 0;
         let deltaY = 0;
@@ -212,29 +227,54 @@ export class PlacementGrid {
             case Directions.DOWN:
                 deltaY = 1 * shiftBy;
                 break;
-            default:
+            case Directions.UP:
+                deltaY = -1 * shiftBy;
+                break;
+            case Directions.LEFT:
+                deltaX = -1 * shiftBy;
+                break;
+            case Directions.RIGHT:
+                deltaX = 1 * shiftBy;
                 break;
         }
 
-        // Shift all vertices
-        this.vertices.forEach( vtx => {
-            vtx.y = vtx.y + deltaY;
+        // Shift obstacles
+        let cullTheseObstacles = [];
+        this.obstacles.forEach(obs => {
+            let currentVertex = obs.vertex;
+            let newVertex = this.getVertexByArrayPosition(
+                currentVertex.x + deltaX,
+                currentVertex.y + deltaY
+            );
+
+            obs.setVertex(newVertex);
+
+            if (newVertex == null) {
+                cullTheseObstacles.push(obs);
+            }
         });
 
-        // Shift the entities
+        cullTheseObstacles.forEach( obs => {
+            let index = this.obstacles.indexOf(obs);
+            this.obstacles.splice(index, 1);
+        });
+    }
 
-
-        // TODO: cull 
-
-        // Generate new vertices
-
-
+    /**
+     * Given a list of entites, this returns a list of (entity, obstacle) pairs that co-occupy
+     * the same vertex
+     */
+    entityObstacleCollision(entities) {
 
     }
 
     render(context, drawBorder) {
         this.vertices.forEach(vtx => {
             vtx.render(context, drawBorder);
+        });
+
+        this.obstacles.forEach( obs => {
+            obs.render(context)
         });
     }
 }
@@ -250,6 +290,15 @@ export class ObstacleSimple {
         this.color = color;
 
         this.vertex.isObstructed = true;
+    }
+
+    setVertex(vertex) {
+        this.vertex.isObstructed = false;
+        if (vertex != null) {
+            this.vertex = vertex;
+            this.vertex.isObstructed = true;
+        }
+
     }
 
     render(context) {

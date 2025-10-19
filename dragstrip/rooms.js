@@ -215,7 +215,7 @@ export class PlacementGrid {
     }
 
     /**
-     * Shifts the map's obstacles specified direction by a number of vertices (shiftBy).
+     * Shifts the map's obstacles in the specified direction by a number of vertices (shiftBy).
      * New obstacles will be computed for the newly-generated vertices.
      */
     shiftObstacles(direction, shiftBy, numObstacles) {

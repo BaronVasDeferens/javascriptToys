@@ -57,7 +57,8 @@ var backgroundImage = new Image();
 var gameFont = null;
 
 var frames = 0;
-var milliseconds = Date.now();
+const renderBegin = Date.now();
+var lastRenderMillis = Date.now();
 
 
 
@@ -66,7 +67,7 @@ var milliseconds = Date.now();
 
 // ----------------------------- DEBUGGING ----------------------------------
 
-var debugMode = false;
+var debugMode = true;
 
 
 
@@ -167,12 +168,12 @@ function update() {
             break;
 
         case Stage.INSERT_COIN:
-           
+
             break;
 
         case Stage.GAME_ACTIVE:
-            
-          break;
+
+            break;
 
         default:
             break;
@@ -222,6 +223,10 @@ function render(context) {
 
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
+
+            if (debugMode == true) {
+                renderDebug(context);
+            }
 
             entitiesEnemies.filter(enemy => {
                 return enemy.isAlive == true
@@ -284,16 +289,21 @@ function renderDebug(context) {
 
     frames++;
     let now = Date.now();
-    let delta = now - milliseconds;
-    if (delta >= 1000) {
-        frames = 0;
-        milliseconds = now;
-    } else {
-        let framesPerSecond = Math.floor(frames / (delta / 1000));
-        context.fillStyle = "#FFFFFF";
-        context.font = "16px micronian";
-        context.fillText(`fps: ${framesPerSecond}`, 50, 100);
-    }
+    let runtimeMillis = now - renderBegin;
+    let delta = now - lastRenderMillis;
+    lastRenderMillis = now;
+
+    let framesPerSecond = (frames / (runtimeMillis / 1000));
+    
+    context.fillStyle = "#FFFFFF";
+    context.font = "16px micronian";
+
+    context.fillText(`seconds: ${runtimeMillis / 1000}`, 50, 50);
+    context.fillText(`frames: ${frames}`, 50, 75);
+    context.fillText(`fps (avg): ${framesPerSecond}`, 50, 100);
+    context.fillText(`delta: ${delta}`, 50, 125);
+
+
 
 }
 

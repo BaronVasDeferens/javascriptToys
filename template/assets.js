@@ -131,7 +131,7 @@ export class ImageLoader {
 
             var assetLocation = relativePath + ImageAsset[key];
             let img = new Image();
-            this.imageMap.set(assetLocation, img);
+            this.imageMap.set(ImageAsset[key], img);
 
             img.onload = function () {
                 loadedImages++;
@@ -185,7 +185,7 @@ export class SoundLoader {
             let response = await fetch(asset);
             let buffer = await response.arrayBuffer();
             let decodedBuffer = await this.audioContext.decodeAudioData(buffer);
-            this.decodedBufferMap.set(asset, decodedBuffer);
+            this.decodedBufferMap.set(SoundAsset[key], decodedBuffer);
         };
 
         callback();

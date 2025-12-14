@@ -8,6 +8,9 @@ export class Entity {
     image = null;
     alpha = 1.0;
 
+    deltaX = 0;             // pixels per second
+    deltaY = 64;             // pixels per second
+
     isOffScreen = false;
     isAlive = true;
 
@@ -19,11 +22,21 @@ export class Entity {
         this.imageWidth = image.width;
     }
 
+    setSpeedDelta(dX, dY) {
+        this.deltaX = dX;
+        this.deltaY = dY;
+    }
+
     isCollideWithEntity(otherEntity) {
         return (otherEntity.x + otherEntity.imageWidth >= this.x)
             && (otherEntity.x <= this.x + this.imageWidth)
             && (otherEntity.y + otherEntity.imageHeight >= this.y)
             && (otherEntity.y <= this.y + this.imageHeight)
+    }
+
+    update(delta) {
+        this.x += (delta / 1000) * this.deltaX;
+        this.y += (delta / 1000) * this.deltaY;
     }
 
     render(context) {

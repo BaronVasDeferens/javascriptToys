@@ -67,7 +67,7 @@ var lastRenderMillis = Date.now();
 
 // ----------------------------- DEBUGGING ----------------------------------
 
-var debugMode = true;
+var debugMode = false;
 
 
 
@@ -107,8 +107,22 @@ function initialize() {
 }
 
 function beginGame() {
-    update();
+
+    let now = Date.now();
+    let runtimeMillis = now - renderBegin;
+    let delta = now - lastRenderMillis;
+    let framesPerSecond = (frames / (runtimeMillis / 1000));
+
+    lastRenderMillis = now;
+    frames++;
+
+    update(delta);
     render(context);
+
+    if (debugMode == true) {
+        renderDebug(context, framesPerSecond);
+    }
+
     requestAnimationFrame(beginGame);
 }
 
@@ -134,15 +148,7 @@ function updateStage(newStage) {
             case Stage.INSERT_COIN:
 
                 projectilesPlayer = [];
-
-                timers.forEach(timer => {
-                    timer.isActive = false;
-                });
                 timers = [];
-
-                entitiesEnemies.forEach(enemy => {
-                    enemy.isOffScreen = true;
-                });
                 entitiesEnemies = [];
 
                 break;
@@ -156,7 +162,7 @@ function updateStage(newStage) {
     }
 }
 
-function update() {
+function update(delta) {
 
     switch (stage) {
 
@@ -168,7 +174,9 @@ function update() {
             break;
 
         case Stage.INSERT_COIN:
-
+            entitiesEnemies.forEach(enemy => {
+                enemy.update(delta);
+            });
             break;
 
         case Stage.GAME_ACTIVE:
@@ -195,7 +203,7 @@ function update() {
 
 function render(context) {
 
-    context.fillStyle = "#ff0000ff";
+    context.fillStyle = "#000000ff";
     context.globalAlpha = 1.0;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -224,16 +232,6 @@ function render(context) {
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
 
-            if (debugMode == true) {
-                renderDebug(context);
-            }
-
-            entitiesEnemies.filter(enemy => {
-                return enemy.isAlive == true
-            }).forEach(enemy => {
-                enemy.render(context);
-            });
-
             entitiesTemporary.forEach(entity => {
                 entity.render(context);
             });
@@ -254,8 +252,6 @@ function render(context) {
                 ent.render(context);
             });
 
-            playerEntity.render(context);
-
             entitiesTransient.forEach(transient => {
                 transient.render(context)
             });
@@ -264,9 +260,6 @@ function render(context) {
 
             renderHUD(context);
 
-            if (debugMode == true) {
-                renderDebug(context);
-            }
             break;
     }
 
@@ -285,26 +278,10 @@ function toggleDebug() {
     }
 }
 
-function renderDebug(context) {
-
-    frames++;
-    let now = Date.now();
-    let runtimeMillis = now - renderBegin;
-    let delta = now - lastRenderMillis;
-    lastRenderMillis = now;
-
-    let framesPerSecond = (frames / (runtimeMillis / 1000));
-    
+function renderDebug(context, framesPerSecond) {
     context.fillStyle = "#FFFFFF";
     context.font = "16px micronian";
-
-    context.fillText(`seconds: ${runtimeMillis / 1000}`, 50, 50);
-    context.fillText(`frames: ${frames}`, 50, 75);
     context.fillText(`fps (avg): ${framesPerSecond}`, 50, 100);
-    context.fillText(`delta: ${delta}`, 50, 125);
-
-
-
 }
 
 function random(min, max) {
@@ -351,6 +328,9 @@ document.addEventListener('mousedown', (click) => {
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
+
+            updateStage(Stage.GAME_ACTIVE);
+
             break;
     }
 

@@ -159,12 +159,11 @@ export class EntityExplosion {
     animationRate = 1000 / 16;
     lastRenderMillis = Date.now();
 
-    constructor(entity, dX, dY, assetManager) {
+    constructor(x, y, randomStartIndex, period, assetManager) {
 
-        this.x = entity.x;
-        this.y = entity.y;
-        this.dX = dX;
-        this.dY = dY;
+        this.x = x;
+        this.y = y;
+        this.period = period;
 
         this.imageArray = [
             assetManager.getImage(ImageAsset.EXPLOSION_0),
@@ -185,13 +184,26 @@ export class EntityExplosion {
             assetManager.getImage(ImageAsset.EXPLOSION_15)
         ];
 
-        this.animationRate = 1000 / this.imageArray.length;
+        if (this.period == null) {
+            this.period = 1000;
+        }
+
+        if (randomStartIndex == true) {
+            this.index = this.randomInRange(0, this.imageArray.length)
+        } else {
+            this.index = 0;
+        }
+
+        this.animationRate = this.period / this.imageArray.length;
     }
 
     update(nowMillis) {
         let deltaMillis = nowMillis - this.lastRenderMillis;
-        if (deltaMillis >= this.animationRate) {
-            this.index = this.index + 1;
+
+        let indicies = Math.floor(deltaMillis / this.animationRate)
+
+        if (indicies > 0) {
+            this.index += indicies;
             this.index = this.index % this.imageArray.length;
             this.lastRenderMillis = nowMillis;
         }
@@ -203,6 +215,10 @@ export class EntityExplosion {
         }
     }
 
+    randomInRange(min, max) {
+        let range = Math.abs(max - min);
+        return Math.floor(Math.random() * range) + min
+    }
 
 }
 

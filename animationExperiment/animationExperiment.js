@@ -151,17 +151,21 @@ function updateStage(newStage) {
                 projectilesPlayer = [];
                 timers = [];
                 entitiesEnemies = [];
-
                 break;
 
             case Stage.GAME_ACTIVE:
 
-                for (let i = 0; i < 10; i++) {
+                for (let i = 1; i < 10; i++) {
                     entitiesEnemies.push(
-                        new EntityExplosion({ x: randomInRange(0, 500), y: randomInRange(0, 500) }, 0, 0, assetManager)
+                        new EntityExplosion(
+                            0,
+                            i * 64,
+                            false,
+                            i * 100,
+                            assetManager
+                        )
                     )
                 }
-
 
                 break;
 

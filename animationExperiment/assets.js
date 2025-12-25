@@ -45,7 +45,7 @@ export class AssetManager {
  */
 
 export var ImageAsset = Object.freeze({
-  
+
     EXPLOSION_0: "explosion_0.png",
     EXPLOSION_1: "explosion_1.png",
     EXPLOSION_2: "explosion_2.png",
@@ -61,7 +61,68 @@ export var ImageAsset = Object.freeze({
     EXPLOSION_12: "explosion_12.png",
     EXPLOSION_13: "explosion_13.png",
     EXPLOSION_14: "explosion_14.png",
-    EXPLOSION_15: "explosion_15.png"
+    EXPLOSION_15: "explosion_15.png",
+
+    FIRE_0: "fire/0.png",
+    FIRE_1: "fire/1.png",
+    FIRE_2: "fire/2.png",
+    FIRE_3: "fire/3.png",
+    FIRE_4: "fire/4.png",
+    FIRE_5: "fire/5.png",
+    FIRE_6: "fire/6.png",
+    FIRE_7: "fire/7.png",
+    FIRE_8: "fire/8.png",
+    FIRE_9: "fire/9.png",
+    FIRE_10: "fire/10.png",
+    FIRE_11: "fire/11.png",
+    FIRE_12: "fire/12.png",
+    FIRE_13: "fire/13.png",
+    FIRE_14: "fire/14.png",
+    FIRE_15: "fire/15.png",
+    FIRE_16: "fire/16.png",
+    FIRE_17: "fire/17.png",
+    FIRE_18: "fire/18.png",
+    FIRE_19: "fire/19.png",
+    FIRE_20: "fire/20.png",
+    FIRE_21: "fire/21.png",
+    FIRE_22: "fire/22.png",
+    FIRE_23: "fire/23.png",
+    FIRE_24: "fire/24.png",
+    FIRE_25: "fire/25.png",
+    FIRE_26: "fire/26.png",
+    FIRE_27: "fire/27.png",
+    FIRE_28: "fire/28.png",
+    FIRE_29: "fire/29.png",
+    FIRE_30: "fire/30.png",
+    FIRE_31: "fire/31.png",
+    FIRE_32: "fire/32.png",
+    FIRE_33: "fire/33.png",
+    FIRE_34: "fire/34.png",
+    FIRE_35: "fire/35.png",
+    FIRE_36: "fire/36.png",
+    FIRE_37: "fire/37.png",
+    FIRE_38: "fire/38.png",
+    FIRE_39: "fire/39.png",
+    FIRE_40: "fire/40.png",
+    FIRE_41: "fire/41.png",
+    FIRE_42: "fire/42.png",
+    FIRE_43: "fire/43.png",
+    FIRE_44: "fire/44.png",
+    FIRE_45: "fire/45.png",
+    FIRE_46: "fire/46.png",
+    FIRE_47: "fire/47.png",
+    FIRE_48: "fire/48.png",
+    FIRE_49: "fire/49.png",
+    FIRE_50: "fire/50.png",
+    FIRE_51: "fire/51.png",
+    FIRE_52: "fire/52.png",
+    FIRE_53: "fire/53.png",
+    FIRE_54: "fire/54.png",
+    FIRE_55: "fire/55.png",
+    FIRE_56: "fire/56.png",
+    FIRE_57: "fire/57.png",
+    FIRE_58: "fire/58.png",
+    FIRE_59: "fire/59.png"
 });
 
 export class ImageLoader {
@@ -174,7 +235,7 @@ export class FontLoader {
             let response = await fetch(asset);
             let arrayBuffer = await response.arrayBuffer();
             let buffer = arrayBuffer.transfer();
-            this.fontMap.set(key, buffer); 
+            this.fontMap.set(key, buffer);
         };
     }
 

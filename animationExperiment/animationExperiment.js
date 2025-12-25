@@ -1,5 +1,5 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion } from "./entity.js";
+import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire } from "./entity.js";
 import { RoadManager } from "./roads.js";
 import { Level, LevelManager } from "./levels.js"
 import { SoundLooper, SoundPlayer } from "./sound.js";
@@ -108,22 +108,9 @@ function initialize() {
 }
 
 function beginGame() {
-
     let now = Date.now();
-    let runtimeMillis = now - renderBegin;
-    let delta = now - lastRenderMillis;
-    let framesPerSecond = (frames / (runtimeMillis / 1000));
-
-    lastRenderMillis = now;
-    frames++;
-
     update(now);
     render(context);
-
-    if (debugMode == true) {
-        renderDebug(context, framesPerSecond);
-    }
-
     requestAnimationFrame(beginGame);
 }
 
@@ -157,14 +144,24 @@ function updateStage(newStage) {
 
                 for (let i = 1; i < 10; i++) {
                     entitiesEnemies.push(
-                        new EntityExplosion(
+                        new EntityFire(
                             0,
                             i * 64,
                             false,
                             i * 100,
                             assetManager
                         )
-                    )
+                    );
+
+                    entitiesEnemies.push(
+                        new EntityExplosion(
+                            64,
+                            i * 64,
+                            false,
+                            i * 100,
+                            assetManager
+                        )
+                    );
                 }
 
                 break;

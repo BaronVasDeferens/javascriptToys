@@ -143,6 +143,7 @@ function updateStage(newStage) {
             case Stage.GAME_ACTIVE:
 
                 for (let i = 1; i < 10; i++) {
+                    
                     entitiesEnemies.push(
                         new EntityFire(
                             0,

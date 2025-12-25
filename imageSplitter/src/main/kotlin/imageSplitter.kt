@@ -63,9 +63,17 @@ fun main(args: Array<String>) {
         println(
             """
             *** Image Splitter Usage ***
+            
+            This will split the specified image into square chunks
+            of a specified size, then scale those chunks up by a
+            specified amount, and finally save the scaled-up images
+            in the specified directory.
+            
+            Why? For lulz and splitting up sprite sheets.
+            
             arg 0: input image file to split
-            arg 1: size of images (in pixels)
-            arg 2: scale factor
+            arg 1: size of image chunks (in pixels)
+            arg 2: scale factor (1 = original chunk size)
             arg 3: output directory
         """.trimIndent()
         )

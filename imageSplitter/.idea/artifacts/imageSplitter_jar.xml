@@ -1,0 +1,72 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="imageSplitter:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/imageSplitter_jar</output-path>
+    <root id="archive" name="imageSplitter.jar">
+      <element id="module-output" name="imageSplitter.main" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-idea/1.9.21/83cf5d4acdbf6c1e7b32ca96cb79b96e4cce032e/kotlin-gradle-plugin-idea-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-engine/1.6.3/a926b9bbc7fe67c5795ee1f00cc1b618b313e5ce/junit-platform-engine-1.6.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/kotlin-stdlib-1.9.20.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-ant-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apiguardian/apiguardian-api/1.1.0/fc9dff4bb36d627bdc553de77e1f17efd790876c/apiguardian-api-1.1.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/1.9.21/e21e55f41ec5f254aec366097b902709b5843234/kotlin-daemon-embeddable-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-templates-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-kotlin-dsl-tooling-models-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-common/1.9.21/8213aed8eac445b515678dbb407193b9da983038/kotlin-scripting-common-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-compiler-embeddable/1.9.21/660c1f9bbf2ac3ac9713a0e2724c831ce5af969c/kotlin-scripting-compiler-embeddable-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.5.0/d8cebccdcddd029022aa8646a5a953ff88b13ac8/kotlinx-coroutines-core-jvm-1.5.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-kotlin-dsl-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.9.21/17ee3e873d439566c7d8354403b5f3d9744c4c9c/kotlin-stdlib-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-installation-beacon-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-console-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-engine/5.6.3/234f250d1608684c4436d72214e7530f23cb8a03/junit-jupiter-engine-5.6.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-base-services-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-android-extensions/1.9.21/fc4a4960f90bd90282274e611a707947c9771c1b/kotlin-android-extensions-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.gradle.toolchains/foojay-resolver/0.5.0/ea9de2dd6593295f79b4eb723dc8b1a68d04c627/foojay-resolver-0.5.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-dateutil-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-json-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-klib-commonizer-api/1.9.21/431262bf19ca73328504c4fda5fded401fa16dd1/kotlin-klib-commonizer-api-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-groovydoc-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/kotlin-reflect-1.9.20.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-annotations/1.9.21/6823522697ea0f29985959dd4ec2abc7daddba40/kotlin-gradle-plugin-annotations-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-idea-proto/1.9.21/50b0749475e419fb75b2606d75ba01030ac97bd0/kotlin-gradle-plugin-idea-proto-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin/1.9.21/1d2f9c44a9c527d92a23abd2d466c23ab6767eb0/kotlin-gradle-plugin-1.9.21-gradle82.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/8.5/generated-gradle-jars/gradle-api-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-client/1.9.21/37e26257f1dbec3dc6fd566ddedb8613c9fced98/kotlin-daemon-client-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-api/1.9.21/c7b5bd5dcd4be5b762c32c81c4dcd86640c26cd4/kotlin-gradle-plugin-api-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-native-utils/1.9.21/4a2b08b807c4a36c57340dcd821b1bdd80d1cdad/kotlin-native-utils-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-xml-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-util-klib/1.9.21/891c3d73a2f0b0ebd52357746bc25d5facc7ce3a/kotlin-util-klib-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-core-api-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/1.9.21/a8f2d2fed3fc195beef3fab4a7fd1a844e101f0e/kotlin-compiler-embeddable-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test/1.9.21/2e03c9f094744905ef267dad17bfdddf4f2095d9/kotlin-test-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-test-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-datetime-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-api/1.9.21/b7bc45688d837095bc721173b172acb47b9e7e74/kotlin-build-tools-api-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-core-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-nio-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-jvm/1.9.21/39be7444439f0a9db3b2d5dd175f3b54f4a714d1/kotlin-scripting-jvm-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.junit.jupiter/junit-jupiter-api/5.6.3/73ea5e2b7f112616315d3e2325a98e6e93c2813a/junit-jupiter-api-5.6.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-project-model/1.9.21/1a4063d8e9b25cc0b0c33b520e444dd9f92eda8d/kotlin-project-model-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-junit5/1.9.21/65746a66412497c739a8f8a4f55b74543c180d39/kotlin-test-junit5-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-kotlin-dsl-extensions-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-sql-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-runner/1.9.21/cd35bea5df179b127562024867601c0ee504ad3e/kotlin-compiler-runner-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/javaparser-core-3.17.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-base-services-groovy-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/gradle-kotlin-dsl-shared-runtime-8.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.9.1/2cc2131b98ebfb04e2b2c7dfb84431f4045096b/gson-2.9.1.jar" path-in-jar="/" />
+      <element id="library" level="project" name="c7bff1046693f520a99efbdf475d01da/classes" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-astbuilder-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-compiler-impl-embeddable/1.9.21/861560931dd9d68c6ccb6328d10569cef71ce835/kotlin-scripting-compiler-impl-embeddable-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.intellij.deps/trove4j/1.0.20200330/3afb14d5f9ceb459d724e907a21145e8ff394f02/trove4j-1.0.20200330.jar" path-in-jar="/" />
+      <element id="library" level="project" name="cd174340dce0a5f0f0e5923d367fe801-PS/classes" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/wrapper/dists/gradle-8.5-bin/5t9huq95ubn472n8rpzujfbqh/gradle-8.5/lib/groovy-3.0.17.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.junit.platform/junit-platform-commons/1.6.3/7ce526bbb9e6202e8a30140a50bfff644fddd10e/junit-platform-commons-1.6.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-gradle-plugin-model/1.9.21/60bbc2a87dc06ac5d8a11b999aa8603030fa4efd/kotlin-gradle-plugin-model-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.opentest4j/opentest4j/1.2.0/28c11eb91f9b6d8e200631d46e20a7f407f2a046/opentest4j-1.2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-tooling-core/1.9.21/bdc01105250e7ecc8bbcf49a21805685cd557dda/kotlin-tooling-core-1.9.21.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-util-io/1.9.21/c57871ba1e3852f2c2bad65b16407f305c0654d1/kotlin-util-io-1.9.21.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

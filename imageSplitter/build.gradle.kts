@@ -3,7 +3,8 @@ plugins {
 }
 
 group = "org.derp"
-version = "1.0-SNAPSHOT"
+version = ""
+
 
 repositories {
     mavenCentral()
@@ -12,6 +13,22 @@ repositories {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
+tasks {
+    jar {
+        manifest {
+            attributes["Main-Class"] = "ImageSplitterKt"
+        }
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+        from(
+            configurations.runtimeClasspath.get().map {
+                if (it.isDirectory) it else zipTree(it)
+            }
+        )
+    }
+}
+
 
 tasks.test {
     useJUnitPlatform()

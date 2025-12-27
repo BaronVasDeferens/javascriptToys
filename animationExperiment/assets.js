@@ -145,7 +145,6 @@ export class ImageLoader {
             img.onload = function () {
                 loadedImages++;
                 if (loadedImages == totalImages) {
-                    console.log(`...images loaded!`);
                     callback();
                 }
             }

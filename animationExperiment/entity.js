@@ -46,6 +46,22 @@ export class Entity {
     }
 }
 
+export class EntityText extends Entity {
+    
+    constructor(x, y, text, font, textSize, textColor) {
+        super(x, y, null);
+        this.text = text;
+        this.font = font;
+        this.textSize = textSize;
+        this.textColor - textColor;
+    }
+
+    render(context) {
+        context.fillStyle = this.textColor;
+        context.font = this.font
+        context.fillText("Click to continue...", this.x, this.y);
+    }
+}
 
 export class EntityEnemy extends Entity {
 

@@ -1,5 +1,5 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire } from "./entity.js";
+import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
 import { RoadManager } from "./roads.js";
 import { Level, LevelManager } from "./levels.js"
 import { SoundLooper, SoundPlayer } from "./sound.js";
@@ -48,6 +48,7 @@ var entitiesEnemies = [];
 var projectilesPlayer = [];
 
 // ------------------------- MAP & BACKGROUND ------------------------------------
+
 const tileSize = 64;                            // in pixels
 const tileRows = canvas.height / tileSize;
 const tileCols = canvas.width / tileSize;
@@ -56,27 +57,10 @@ var backgroundImage = new Image();
 
 var gameFont = null;
 
-var frames = 0;
-const renderBegin = Date.now();
-var lastRenderMillis = Date.now();
-
-
-
-
-
-
 
 // ----------------------------- DEBUGGING ----------------------------------
 
 var debugMode = false;
-
-
-
-
-
-
-
-
 
 
 // ---------------------------- CORE LOGIC -----------------------
@@ -134,17 +118,16 @@ function updateStage(newStage) {
                 break;
 
             case Stage.INSERT_COIN:
-
                 projectilesPlayer = [];
                 timers = [];
                 entitiesEnemies = [];
-                break;
 
-            case Stage.GAME_ACTIVE:
+                // !!!!!! ANIMATION TEST !!!!!
+                // Add some varibale speed entities
 
                 for (let i = 1; i < 10; i++) {
-                    
-                    entitiesEnemies.push(
+
+                    entitiesTemporary.push(
                         new EntityFire(
                             0,
                             i * 64,
@@ -154,7 +137,7 @@ function updateStage(newStage) {
                         )
                     );
 
-                    entitiesEnemies.push(
+                    entitiesTemporary.push(
                         new EntityExplosion(
                             64,
                             i * 64,
@@ -164,7 +147,9 @@ function updateStage(newStage) {
                         )
                     );
                 }
+                break;
 
+            case Stage.GAME_ACTIVE:
                 break;
 
             default:
@@ -185,12 +170,14 @@ function update(delta) {
             break;
 
         case Stage.INSERT_COIN:
-
+            entitiesTemporary.forEach(entity => {
+                entity.update(delta);
+            });
             break;
 
         case Stage.GAME_ACTIVE:
-            entitiesEnemies.forEach(enemy => {
-                enemy.update(delta);
+            entitiesTemporary.forEach(entity => {
+                entity.update(delta);
             });
             break;
 
@@ -209,7 +196,6 @@ function update(delta) {
     });
 
 }
-
 
 
 function render(context) {
@@ -242,7 +228,6 @@ function render(context) {
 
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
-
             entitiesTemporary.forEach(entity => {
                 entity.render(context);
             });
@@ -250,7 +235,6 @@ function render(context) {
             break;
 
         case Stage.GAME_ACTIVE:
-
             projectilesPlayer.forEach(projectile => {
                 projectile.render(context);
             })
@@ -341,7 +325,6 @@ document.addEventListener('mousedown', (click) => {
             }
 
             updateStage(Stage.GAME_ACTIVE);
-
             break;
     }
 

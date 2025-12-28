@@ -46,22 +46,22 @@ export class AssetManager {
 
 export var ImageAsset = Object.freeze({
 
-    EXPLOSION_0: "explosion_0.png",
-    EXPLOSION_1: "explosion_1.png",
-    EXPLOSION_2: "explosion_2.png",
-    EXPLOSION_3: "explosion_3.png",
-    EXPLOSION_4: "explosion_4.png",
-    EXPLOSION_5: "explosion_5.png",
-    EXPLOSION_6: "explosion_6.png",
-    EXPLOSION_7: "explosion_7.png",
-    EXPLOSION_8: "explosion_8.png",
-    EXPLOSION_9: "explosion_9.png",
-    EXPLOSION_10: "explosion_10.png",
-    EXPLOSION_11: "explosion_11.png",
-    EXPLOSION_12: "explosion_12.png",
-    EXPLOSION_13: "explosion_13.png",
-    EXPLOSION_14: "explosion_14.png",
-    EXPLOSION_15: "explosion_15.png",
+    EXPLOSION_0: "explosion/explosion_0.png",
+    EXPLOSION_1: "explosion/explosion_1.png",
+    EXPLOSION_2: "explosion/explosion_2.png",
+    EXPLOSION_3: "explosion/explosion_3.png",
+    EXPLOSION_4: "explosion/explosion_4.png",
+    EXPLOSION_5: "explosion/explosion_5.png",
+    EXPLOSION_6: "explosion/explosion_6.png",
+    EXPLOSION_7: "explosion/explosion_7.png",
+    EXPLOSION_8: "explosion/explosion_8.png",
+    EXPLOSION_9: "explosion/explosion_9.png",
+    EXPLOSION_10: "explosion/explosion_10.png",
+    EXPLOSION_11: "explosion/explosion_11.png",
+    EXPLOSION_12: "explosion/explosion_12.png",
+    EXPLOSION_13: "explosion/explosion_13.png",
+    EXPLOSION_14: "explosion/explosion_14.png",
+    EXPLOSION_15: "explosion/explosion_15.png",
 
     FIRE_0: "fire/0.png",
     FIRE_1: "fire/1.png",
@@ -127,6 +127,8 @@ export var ImageAsset = Object.freeze({
 
 export class ImageLoader {
 
+    imageSubDir = "tiles/"
+
     imageMap = new Map();
 
     loadImages(callback) {
@@ -138,7 +140,7 @@ export class ImageLoader {
 
         for (const key in ImageAsset) {
 
-            var assetLocation = relativePath + ImageAsset[key];
+            var assetLocation = relativePath + this.imageSubDir + ImageAsset[key];
             let img = new Image();
             this.imageMap.set(ImageAsset[key], img);
 
@@ -171,6 +173,8 @@ export var SoundAsset = Object.freeze({
 
 export class SoundLoader {
 
+    soundSubDir = "sounds/"
+
     decodedBufferMap = new Map();
 
     constructor(audioContext) {
@@ -184,7 +188,7 @@ export class SoundLoader {
         console.log(`Loading ${soundsTotal} sounds...`);
 
         for (const key in SoundAsset) {
-            let asset = relativePath + SoundAsset[key];
+            let asset = relativePath + this.soundSubDir + SoundAsset[key];
             let response = await fetch(asset);
             let buffer = await response.arrayBuffer();
             let decodedBuffer = await this.audioContext.decodeAudioData(buffer);
@@ -222,6 +226,8 @@ export var FontAsset = Object.freeze({
 
 export class FontLoader {
 
+    fontSubDir = "fonts/"
+
     fontMap = new Map();
 
     async loadFonts() {
@@ -230,7 +236,7 @@ export class FontLoader {
         console.log(`Loading ${fontsTotal} fonts...`);
 
         for (const key in FontAsset) {
-            let asset = relativePath + FontAsset[key];
+            let asset = relativePath + this.fontSubDir + FontAsset[key];
             let response = await fetch(asset);
             let arrayBuffer = await response.arrayBuffer();
             let buffer = arrayBuffer.transfer();

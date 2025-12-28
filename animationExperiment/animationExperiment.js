@@ -5,7 +5,7 @@ import { Level, LevelManager } from "./levels.js"
 import { SoundLooper, SoundPlayer } from "./sound.js";
 
 
-
+// ------------------------------------- HTML ELEMENTS -------------------------------------
 
 var audioContext = new AudioContext(); // AudioContext must be initialized after interactions
 
@@ -308,7 +308,7 @@ document.addEventListener('mousedown', (click) => {
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            soundPlayer.playOneShot(SoundAsset.MACHINEGUN_1);
+            soundPlayer.playOneShot(SoundAsset.MACHINEGUN_2);
             break;
     }
 

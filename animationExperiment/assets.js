@@ -244,8 +244,6 @@ export class FontLoader {
         };
     }
 
-
-
     getFont(fontName) {
         return this.fontMap.get(fontName);
     }

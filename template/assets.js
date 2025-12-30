@@ -45,78 +45,89 @@ export class AssetManager {
  */
 
 export var ImageAsset = Object.freeze({
-    TITLE: "title_temp_g.png",
 
-    VISION_NIGHT_MODE: "vision_night.png",
-    VISION_INFRARED_MODE: "vision_infrared.png",
+    EXPLOSION_0: "explosion/explosion_0.png",
+    EXPLOSION_1: "explosion/explosion_1.png",
+    EXPLOSION_2: "explosion/explosion_2.png",
+    EXPLOSION_3: "explosion/explosion_3.png",
+    EXPLOSION_4: "explosion/explosion_4.png",
+    EXPLOSION_5: "explosion/explosion_5.png",
+    EXPLOSION_6: "explosion/explosion_6.png",
+    EXPLOSION_7: "explosion/explosion_7.png",
+    EXPLOSION_8: "explosion/explosion_8.png",
+    EXPLOSION_9: "explosion/explosion_9.png",
+    EXPLOSION_10: "explosion/explosion_10.png",
+    EXPLOSION_11: "explosion/explosion_11.png",
+    EXPLOSION_12: "explosion/explosion_12.png",
+    EXPLOSION_13: "explosion/explosion_13.png",
+    EXPLOSION_14: "explosion/explosion_14.png",
+    EXPLOSION_15: "explosion/explosion_15.png",
 
-    INFILTRATOR: "infiltrator_2.png",
-    PLAYER_PROJECTILE_1: "player_projectile_1.png",
-
-    ENEMY_SPIDER_1: "enemy_1.png",
-    ENEMY_MUTANT_1: "enemy_2.png",
-    ENEMY_TRUCK: "enemy_truck.png",
-
-    BLACK: "black.png",
-
-    DECAL_GRASS_1: "grass_1.png",
-    DECAL_GRASS_2: "grass_2.png",
-    DECAL_GRASS_3: "grass_3.png",
-    DECAL_GRASS_4: "grass_4.png",
-
-    DECAL_PLANT_1: "plant_1.png",
-    DECAL_PLANT_2: "plant_2.png",
-
-    DECAL_ROCK_1: "rock_1.png",
-
-    DECAL_CAR_1: "car_1.png",
-    DECAL_CAR_2: "car_2.png",
-    DECAL_CAR_3: "car_3.png",
-    DECAL_CAR_4: "car_4.png",
-
-    DECAL_BONES_1: "bones_1.png",
-    DECAL_BONES_2: "bones_2.png",
-    DECAL_BONES_3: "bones_3.png",
-    DECAL_BONES_4: "bones_4.png",
-    DECAL_BONES_5: "bones_5.png",
-
-    TILE_92: "tile_92b.png",
-    TILE_93: "tile_93b.png",
-    TILE_94: "tile_94b.png",
-    TILE_95: "tile_95b.png",
-    TILE_96: "tile_96.png",
-    TILE_97: "tile_97.png",
-    TILE_98: "tile_98.png",
-    TILE_99: "tile_99.png",
-    TILE_100: "tile_100.png",
-    TILE_101: "tile_101.png",
-    TILE_102: "tile_102.png",
-    TILE_103: "tile_103.png",
-
-    TILE_SHOULDER_0: "tile_shoulder_0.png",
-    TILE_SHOULDER_90: "tile_shoulder_90.png",
-    TILE_SHOULDER_180: "tile_shoulder_180.png",
-    TILE_SHOULDER_270: "tile_shoulder_270.png",
-
-    EXPLOSION_0: "explosion_0.png",
-    EXPLOSION_1: "explosion_1.png",
-    EXPLOSION_2: "explosion_2.png",
-    EXPLOSION_3: "explosion_3.png",
-    EXPLOSION_4: "explosion_4.png",
-    EXPLOSION_5: "explosion_5.png",
-    EXPLOSION_6: "explosion_6.png",
-    EXPLOSION_7: "explosion_7.png",
-    EXPLOSION_8: "explosion_8.png",
-    EXPLOSION_9: "explosion_9.png",
-    EXPLOSION_10: "explosion_10.png",
-    EXPLOSION_11: "explosion_11.png",
-    EXPLOSION_12: "explosion_12.png",
-    EXPLOSION_13: "explosion_13.png",
-    EXPLOSION_14: "explosion_14.png",
-    EXPLOSION_15: "explosion_15.png"
+    FIRE_0: "fire/0.png",
+    FIRE_1: "fire/1.png",
+    FIRE_2: "fire/2.png",
+    FIRE_3: "fire/3.png",
+    FIRE_4: "fire/4.png",
+    FIRE_5: "fire/5.png",
+    FIRE_6: "fire/6.png",
+    FIRE_7: "fire/7.png",
+    FIRE_8: "fire/8.png",
+    FIRE_9: "fire/9.png",
+    FIRE_10: "fire/10.png",
+    FIRE_11: "fire/11.png",
+    FIRE_12: "fire/12.png",
+    FIRE_13: "fire/13.png",
+    FIRE_14: "fire/14.png",
+    FIRE_15: "fire/15.png",
+    FIRE_16: "fire/16.png",
+    FIRE_17: "fire/17.png",
+    FIRE_18: "fire/18.png",
+    FIRE_19: "fire/19.png",
+    FIRE_20: "fire/20.png",
+    FIRE_21: "fire/21.png",
+    FIRE_22: "fire/22.png",
+    FIRE_23: "fire/23.png",
+    FIRE_24: "fire/24.png",
+    FIRE_25: "fire/25.png",
+    FIRE_26: "fire/26.png",
+    FIRE_27: "fire/27.png",
+    FIRE_28: "fire/28.png",
+    FIRE_29: "fire/29.png",
+    FIRE_30: "fire/30.png",
+    FIRE_31: "fire/31.png",
+    FIRE_32: "fire/32.png",
+    FIRE_33: "fire/33.png",
+    FIRE_34: "fire/34.png",
+    FIRE_35: "fire/35.png",
+    FIRE_36: "fire/36.png",
+    FIRE_37: "fire/37.png",
+    FIRE_38: "fire/38.png",
+    FIRE_39: "fire/39.png",
+    FIRE_40: "fire/40.png",
+    FIRE_41: "fire/41.png",
+    FIRE_42: "fire/42.png",
+    FIRE_43: "fire/43.png",
+    FIRE_44: "fire/44.png",
+    FIRE_45: "fire/45.png",
+    FIRE_46: "fire/46.png",
+    FIRE_47: "fire/47.png",
+    FIRE_48: "fire/48.png",
+    FIRE_49: "fire/49.png",
+    FIRE_50: "fire/50.png",
+    FIRE_51: "fire/51.png",
+    FIRE_52: "fire/52.png",
+    FIRE_53: "fire/53.png",
+    FIRE_54: "fire/54.png",
+    FIRE_55: "fire/55.png",
+    FIRE_56: "fire/56.png",
+    FIRE_57: "fire/57.png",
+    FIRE_58: "fire/58.png",
+    FIRE_59: "fire/59.png"
 });
 
 export class ImageLoader {
+
+    imageSubDir = "tiles/"
 
     imageMap = new Map();
 
@@ -129,14 +140,13 @@ export class ImageLoader {
 
         for (const key in ImageAsset) {
 
-            var assetLocation = relativePath + ImageAsset[key];
+            var assetLocation = relativePath + this.imageSubDir + ImageAsset[key];
             let img = new Image();
             this.imageMap.set(ImageAsset[key], img);
 
             img.onload = function () {
                 loadedImages++;
                 if (loadedImages == totalImages) {
-                    console.log(`...images loaded!`);
                     callback();
                 }
             }
@@ -156,17 +166,14 @@ export class ImageLoader {
  */
 
 export var SoundAsset = Object.freeze({
-    THEME_1: "theme_1.wav",
     MACHINEGUN_1: "machinegun_1.wav",
     MACHINEGUN_2: "machinegun_2.wav",
-    MACHINEGUN_TRAIL: "machinegun_trail.wav",
-    EXPLOSION_1: "explosion_1.wav",
-    CRASH_1: "crash_1.wav",
-    CRASH_2: "crash_2.wav"
 });
 
 
 export class SoundLoader {
+
+    soundSubDir = "sounds/"
 
     decodedBufferMap = new Map();
 
@@ -181,7 +188,7 @@ export class SoundLoader {
         console.log(`Loading ${soundsTotal} sounds...`);
 
         for (const key in SoundAsset) {
-            let asset = relativePath + SoundAsset[key];
+            let asset = relativePath + this.soundSubDir + SoundAsset[key];
             let response = await fetch(asset);
             let buffer = await response.arrayBuffer();
             let decodedBuffer = await this.audioContext.decodeAudioData(buffer);
@@ -219,6 +226,8 @@ export var FontAsset = Object.freeze({
 
 export class FontLoader {
 
+    fontSubDir = "fonts/"
+
     fontMap = new Map();
 
     async loadFonts() {
@@ -227,15 +236,13 @@ export class FontLoader {
         console.log(`Loading ${fontsTotal} fonts...`);
 
         for (const key in FontAsset) {
-            let asset = relativePath + FontAsset[key];
+            let asset = relativePath + this.fontSubDir + FontAsset[key];
             let response = await fetch(asset);
             let arrayBuffer = await response.arrayBuffer();
             let buffer = arrayBuffer.transfer();
-            this.fontMap.set(key, buffer); 
+            this.fontMap.set(key, buffer);
         };
     }
-
-
 
     getFont(fontName) {
         return this.fontMap.get(fontName);

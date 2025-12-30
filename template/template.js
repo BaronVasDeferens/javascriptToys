@@ -1,16 +1,11 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion } from "./entity.js";
+import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
 import { RoadManager } from "./roads.js";
 import { Level, LevelManager } from "./levels.js"
 import { SoundLooper, SoundPlayer } from "./sound.js";
 
 
-/**
- * 
- *  IDEAS
- * 
-
- */
+// ------------------------------------- HTML ELEMENTS -------------------------------------
 
 var audioContext = new AudioContext(); // AudioContext must be initialized after interactions
 
@@ -21,22 +16,21 @@ const canvas = document.getElementById('playArea');
 const context = canvas.getContext('2d');
 
 
-// ------------------------------ GAME DETAILS -------------------------------------
+// ------------------------------------- GAME DETAILS -------------------------------------
 
 export const Stage = Object.freeze({
-    AWAITING_INTERACTION: "AWAITING_INTERACTION",
-    INITIALIZING: "INITIALIZING",
     LOAD_START: "LOAD_START",
     LOAD_COMPLETE: "LOAD_COMPLETE",
+    INITIALIZING: "INITIALIZING",
     INSERT_COIN: "INSERT_COIN",
     AWAITING_PLAYER_START: "AWAITING_PLAYER_START",
     GAME_ACTIVE: "GAME_ACTIVE",
     GAME_OVER: "GAME_OVER"
 });
 
-var stage = Stage.AWAITING_INTERACTION;
+var stage;
 
-var timers = [];
+// --- ENTITIES
 
 // TEMPORARY: entities that are not permanent but will persist for long than a single update/rendering cycle
 var entitiesTemporary = [];
@@ -44,10 +38,17 @@ var entitiesTemporary = [];
 // TRANSIENT: entities that will cleared after a single update/rendering cycle.
 var entitiesTransient = [];
 
+// ENEMIES: entities that can harm the player or be destoryed by projectiles. You know-- the baddies.
 var entitiesEnemies = [];
+
+// PROJECTILES (PLAYER): bullets originating from the player which may damage or destroy enemy entities
 var projectilesPlayer = [];
 
-// ------------------------- MAP & BACKGROUND ------------------------------------
+// TIMERS: measures time and executes instructions once or at fixed intervals
+var timers = [];
+
+// --- MAP & BACKGROUND
+
 const tileSize = 64;                            // in pixels
 const tileRows = canvas.height / tileSize;
 const tileCols = canvas.width / tileSize;
@@ -56,73 +57,36 @@ var backgroundImage = new Image();
 
 var gameFont = null;
 
-var frames = 0;
-const renderBegin = Date.now();
-var lastRenderMillis = Date.now();
-
-
-
-
-
-
-// ----------------------------- DEBUGGING ----------------------------------
-
 var debugMode = false;
 
 
-
-
-
-
-
-
-
-
-// ---------------------------- CORE LOGIC -----------------------
+// ------------------------------------- CORE LOGIC -------------------------------------
 
 var setup = function () {
-    render(context);
-}();
-
-function onInitialUserInteraction() {
     updateStage(Stage.LOAD_START);
-    render(context);
     assetManager.loadAssets(() => {
         gameFont = new FontFace("micronian", assetManager.getFont(FontAsset.PRIMARY));
         document.fonts.add(gameFont);
         updateStage(Stage.LOAD_COMPLETE);
     });
-}
+}();
+
 
 function initialize() {
-    console.log("Initializing...");
-    stage = Stage.INITIALIZING;
+    updateStage(Stage.INITIALIZING);
     entitiesEnemies = [];
     entitiesTemporary = [];
     entitiesTransient = [];
     projectilesPlayer = [];
     timers = [];
-
     updateStage(Stage.INSERT_COIN);
 }
 
+
 function beginGame() {
-
     let now = Date.now();
-    let runtimeMillis = now - renderBegin;
-    let delta = now - lastRenderMillis;
-    let framesPerSecond = (frames / (runtimeMillis / 1000));
-
-    lastRenderMillis = now;
-    frames++;
-
-    update(delta);
+    update(now);
     render(context);
-
-    if (debugMode == true) {
-        renderDebug(context, framesPerSecond);
-    }
-
     requestAnimationFrame(beginGame);
 }
 
@@ -131,26 +95,48 @@ function updateStage(newStage) {
 
     if (newStage != stage) {
         stage = newStage;
-        console.log(`stage: ${stage}`);
+        log(`stage: ${stage}`);
 
         switch (stage) {
 
-            case Stage.AWAITING_INTERACTION:
+            case Stage.LOAD_START:
+            case Stage.LOAD_COMPLETE:
+                render(context);
                 break;
 
             case Stage.INITIALIZING:
                 break;
 
-            case Stage.LOAD_COMPLETE:
-                render(context);
-                break;
-
             case Stage.INSERT_COIN:
-
                 projectilesPlayer = [];
                 timers = [];
                 entitiesEnemies = [];
 
+                // !!!!!! ANIMATION TEST !!!!!
+                // Add some varibale speed entities
+
+                for (let i = 1; i < 10; i++) {
+
+                    entitiesTemporary.push(
+                        new EntityFire(
+                            0,
+                            i * 64,
+                            false,
+                            i * 100,
+                            assetManager
+                        )
+                    );
+
+                    entitiesTemporary.push(
+                        new EntityExplosion(
+                            64,
+                            i * 64,
+                            false,
+                            i * 100,
+                            assetManager
+                        )
+                    );
+                }
                 break;
 
             case Stage.GAME_ACTIVE:
@@ -162,25 +148,25 @@ function updateStage(newStage) {
     }
 }
 
+
 function update(delta) {
 
     switch (stage) {
-
-        case Stage.AWAITING_INTERACTION:
-            break;
 
         case Stage.LOAD_START:
         case Stage.LOAD_COMPLETE:
             break;
 
         case Stage.INSERT_COIN:
-            entitiesEnemies.forEach(enemy => {
-                enemy.update(delta);
+            entitiesTemporary.forEach(entity => {
+                entity.update(delta);
             });
             break;
 
         case Stage.GAME_ACTIVE:
-
+            entitiesTemporary.forEach(entity => {
+                entity.update(delta);
+            });
             break;
 
         default:
@@ -196,9 +182,7 @@ function update(delta) {
     timers = timers.filter(timer => {
         return timer.isActive == true
     });
-
 }
-
 
 
 function render(context) {
@@ -208,13 +192,6 @@ function render(context) {
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     switch (stage) {
-
-        case Stage.AWAITING_INTERACTION:
-            context.fillStyle = "#FFFFFF";
-            context.font = "35px micronian";
-            context.fillText("ESRB WARNING", 50, 50);
-            context.fillText("Click to continue...", 50, 100);
-            break;
 
         case Stage.LOAD_START:
             context.fillStyle = "#FFFFFF";
@@ -231,7 +208,6 @@ function render(context) {
 
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
-
             entitiesTemporary.forEach(entity => {
                 entity.render(context);
             });
@@ -239,7 +215,6 @@ function render(context) {
             break;
 
         case Stage.GAME_ACTIVE:
-
             projectilesPlayer.forEach(projectile => {
                 projectile.render(context);
             })
@@ -259,22 +234,24 @@ function render(context) {
             entitiesTransient = [];
 
             renderHUD(context);
-
             break;
     }
 
 }
 
+
 function renderHUD(context) {
 
 }
 
+// --- HELPER METHODS ---
+
 function toggleDebug() {
     debugMode = !debugMode;
     if (debugMode == true) {
-        console.log(`debug: ON`);
+        log(`debug: ON`);
     } else {
-        console.log(`debug: OFF`);
+        log(`debug: OFF`);
     }
 }
 
@@ -298,7 +275,7 @@ function log(msg) {
 }
 
 
-// ------------------------ PLAYER INPUT -----------------------
+// ------------------------------------- PLAYER INPUT -------------------------------------
 
 
 // Mouse DOWN
@@ -306,31 +283,32 @@ document.addEventListener('mousedown', (click) => {
 
     switch (stage) {
 
-        case Stage.AWAITING_INTERACTION:
+        case Stage.INITIALIZING:
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            onInitialUserInteraction();
-            break;
-
-        case Stage.INITIALIZING:
             break;
 
         case Stage.LOAD_COMPLETE:
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            updateStage(Stage.INSERT_COIN);
             initialize();
             beginGame();
             break;
+
         case Stage.INSERT_COIN:
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-
             updateStage(Stage.GAME_ACTIVE);
+            break;
 
+        case Stage.GAME_ACTIVE:
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            soundPlayer.playOneShot(SoundAsset.MACHINEGUN_2);
             break;
     }
 

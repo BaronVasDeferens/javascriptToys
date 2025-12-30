@@ -46,6 +46,22 @@ export class Entity {
     }
 }
 
+export class EntityText extends Entity {
+    
+    constructor(x, y, text, font, textSize, textColor) {
+        super(x, y, null);
+        this.text = text;
+        this.font = font;
+        this.textSize = textSize;
+        this.textColor - textColor;
+    }
+
+    render(context) {
+        context.fillStyle = this.textColor;
+        context.font = this.font
+        context.fillText("Click to continue...", this.x, this.y);
+    }
+}
 
 export class EntityEnemy extends Entity {
 
@@ -156,40 +172,56 @@ export class EntityExplosion {
 
     isAlive = true;
 
-    constructor(entity, dX, dY, imageLoader) {
+    animationRate = 1000 / 16;
+    lastRenderMillis = Date.now();
 
-        this.x = entity.x;
-        this.y = entity.y;
-        this.dX = dX;
-        this.dY = dY;
+    constructor(x, y, randomStartIndex, period, assetManager) {
+
+        this.x = x;
+        this.y = y;
+        this.period = period;
 
         this.imageArray = [
-            imageLoader.getImage(ImageAsset.EXPLOSION_0),
-            imageLoader.getImage(ImageAsset.EXPLOSION_1),
-            imageLoader.getImage(ImageAsset.EXPLOSION_2),
-            imageLoader.getImage(ImageAsset.EXPLOSION_3),
-            imageLoader.getImage(ImageAsset.EXPLOSION_4),
-            imageLoader.getImage(ImageAsset.EXPLOSION_5),
-            imageLoader.getImage(ImageAsset.EXPLOSION_6),
-            imageLoader.getImage(ImageAsset.EXPLOSION_7),
-            imageLoader.getImage(ImageAsset.EXPLOSION_8),
-            imageLoader.getImage(ImageAsset.EXPLOSION_9),
-            imageLoader.getImage(ImageAsset.EXPLOSION_10),
-            imageLoader.getImage(ImageAsset.EXPLOSION_11),
-            imageLoader.getImage(ImageAsset.EXPLOSION_12),
-            imageLoader.getImage(ImageAsset.EXPLOSION_13),
-            imageLoader.getImage(ImageAsset.EXPLOSION_14),
-            imageLoader.getImage(ImageAsset.EXPLOSION_15)
+            assetManager.getImage(ImageAsset.EXPLOSION_0),
+            assetManager.getImage(ImageAsset.EXPLOSION_1),
+            assetManager.getImage(ImageAsset.EXPLOSION_2),
+            assetManager.getImage(ImageAsset.EXPLOSION_3),
+            assetManager.getImage(ImageAsset.EXPLOSION_4),
+            assetManager.getImage(ImageAsset.EXPLOSION_5),
+            assetManager.getImage(ImageAsset.EXPLOSION_6),
+            assetManager.getImage(ImageAsset.EXPLOSION_7),
+            assetManager.getImage(ImageAsset.EXPLOSION_8),
+            assetManager.getImage(ImageAsset.EXPLOSION_9),
+            assetManager.getImage(ImageAsset.EXPLOSION_10),
+            assetManager.getImage(ImageAsset.EXPLOSION_11),
+            assetManager.getImage(ImageAsset.EXPLOSION_12),
+            assetManager.getImage(ImageAsset.EXPLOSION_13),
+            assetManager.getImage(ImageAsset.EXPLOSION_14),
+            assetManager.getImage(ImageAsset.EXPLOSION_15)
         ];
+
+        if (this.period == null) {
+            this.period = 1000;
+        }
+
+        if (randomStartIndex == true) {
+            this.index = this.randomInRange(0, this.imageArray.length)
+        } else {
+            this.index = 0;
+        }
+
+        this.animationRate = this.period / this.imageArray.length;
     }
 
     update(nowMillis) {
+        let deltaMillis = nowMillis - this.lastRenderMillis;
 
-        this.x += this.dX;
-        this.y += this.dY;
-        this.index++;
-        if (this.index >= this.imageArray.length) {
-            this.isAlive = false;
+        let indicies = Math.floor(deltaMillis / this.animationRate)
+
+        if (indicies > 0) {
+            this.index += indicies;
+            this.index = this.index % this.imageArray.length;
+            this.lastRenderMillis = nowMillis;
         }
     }
 
@@ -199,8 +231,129 @@ export class EntityExplosion {
         }
     }
 
+    randomInRange(min, max) {
+        let range = Math.abs(max - min);
+        return Math.floor(Math.random() * range) + min
+    }
 
 }
+
+export class EntityFire {
+
+    index = 0;
+
+    isAlive = true;
+
+    animationRate = 1000 / 16;
+    lastRenderMillis = Date.now();
+
+    constructor(x, y, randomStartIndex, period, assetManager) {
+
+        this.x = x;
+        this.y = y;
+        this.period = period;
+
+        this.imageArray = [
+            assetManager.getImage(ImageAsset.FIRE_0),
+            assetManager.getImage(ImageAsset.FIRE_1),
+            assetManager.getImage(ImageAsset.FIRE_2),
+            assetManager.getImage(ImageAsset.FIRE_3),
+            assetManager.getImage(ImageAsset.FIRE_4),
+            assetManager.getImage(ImageAsset.FIRE_5),
+            assetManager.getImage(ImageAsset.FIRE_6),
+            assetManager.getImage(ImageAsset.FIRE_7),
+            assetManager.getImage(ImageAsset.FIRE_8),
+            assetManager.getImage(ImageAsset.FIRE_9),
+            assetManager.getImage(ImageAsset.FIRE_10),
+            assetManager.getImage(ImageAsset.FIRE_11),
+            assetManager.getImage(ImageAsset.FIRE_12),
+            assetManager.getImage(ImageAsset.FIRE_13),
+            assetManager.getImage(ImageAsset.FIRE_14),
+            assetManager.getImage(ImageAsset.FIRE_15),
+            assetManager.getImage(ImageAsset.FIRE_16),
+            assetManager.getImage(ImageAsset.FIRE_17),
+            assetManager.getImage(ImageAsset.FIRE_18),
+            assetManager.getImage(ImageAsset.FIRE_19),
+            assetManager.getImage(ImageAsset.FIRE_20),
+            assetManager.getImage(ImageAsset.FIRE_21),
+            assetManager.getImage(ImageAsset.FIRE_22),
+            assetManager.getImage(ImageAsset.FIRE_23),
+            assetManager.getImage(ImageAsset.FIRE_24),
+            assetManager.getImage(ImageAsset.FIRE_25),
+            assetManager.getImage(ImageAsset.FIRE_26),
+            assetManager.getImage(ImageAsset.FIRE_27),
+            assetManager.getImage(ImageAsset.FIRE_28),
+            assetManager.getImage(ImageAsset.FIRE_29),
+            assetManager.getImage(ImageAsset.FIRE_30),
+            assetManager.getImage(ImageAsset.FIRE_31),
+            assetManager.getImage(ImageAsset.FIRE_32),
+            assetManager.getImage(ImageAsset.FIRE_33),
+            assetManager.getImage(ImageAsset.FIRE_34),
+            assetManager.getImage(ImageAsset.FIRE_35),
+            assetManager.getImage(ImageAsset.FIRE_36),
+            assetManager.getImage(ImageAsset.FIRE_37),
+            assetManager.getImage(ImageAsset.FIRE_38),
+            assetManager.getImage(ImageAsset.FIRE_39),
+            assetManager.getImage(ImageAsset.FIRE_40),
+            assetManager.getImage(ImageAsset.FIRE_41),
+            assetManager.getImage(ImageAsset.FIRE_42),
+            assetManager.getImage(ImageAsset.FIRE_43),
+            assetManager.getImage(ImageAsset.FIRE_44),
+            assetManager.getImage(ImageAsset.FIRE_45),
+            assetManager.getImage(ImageAsset.FIRE_46),
+            assetManager.getImage(ImageAsset.FIRE_47),
+            assetManager.getImage(ImageAsset.FIRE_48),
+            assetManager.getImage(ImageAsset.FIRE_49),
+            assetManager.getImage(ImageAsset.FIRE_50),
+            assetManager.getImage(ImageAsset.FIRE_51),
+            assetManager.getImage(ImageAsset.FIRE_52),
+            assetManager.getImage(ImageAsset.FIRE_53),
+            assetManager.getImage(ImageAsset.FIRE_54),
+            assetManager.getImage(ImageAsset.FIRE_55),
+            assetManager.getImage(ImageAsset.FIRE_56),
+            assetManager.getImage(ImageAsset.FIRE_57),
+            assetManager.getImage(ImageAsset.FIRE_58),
+            assetManager.getImage(ImageAsset.FIRE_59)
+        ];
+
+        if (this.period == null) {
+            this.period = 1000;
+        }
+
+        if (randomStartIndex == true) {
+            this.index = this.randomInRange(0, this.imageArray.length)
+        } else {
+            this.index = 0;
+        }
+
+        this.animationRate = this.period / this.imageArray.length;
+    }
+
+    update(nowMillis) {
+        let deltaMillis = nowMillis - this.lastRenderMillis;
+
+        let indicies = Math.floor(deltaMillis / this.animationRate)
+
+        if (indicies > 0) {
+            this.index += indicies;
+            this.index = this.index % this.imageArray.length;
+            this.lastRenderMillis = nowMillis;
+        }
+    }
+
+    render(context) {
+        if (this.isAlive == true) {
+            context.drawImage(this.imageArray[this.index], this.x, this.y)
+        }
+    }
+
+    randomInRange(min, max) {
+        let range = Math.abs(max - min);
+        return Math.floor(Math.random() * range) + min
+    }
+
+}
+
 
 
 export class Projectile extends Entity {

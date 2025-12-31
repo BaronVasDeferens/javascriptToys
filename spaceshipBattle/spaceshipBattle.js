@@ -3,17 +3,20 @@ import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile
 import { RoadManager } from "./roads.js";
 import { Level, LevelManager } from "./levels.js"
 import { SoundLooper, SoundPlayer } from "./sound.js";
+import { SceneManager, SceneType } from "./scene.js";
 
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------
 
+const canvas = document.getElementById('playArea');
+const context = canvas.getContext('2d');
 var audioContext = new AudioContext(); // AudioContext must be initialized after interactions
+
+
 
 const assetManager = new AssetManager(audioContext);
 const soundPlayer = new SoundPlayer(assetManager, audioContext);
-
-const canvas = document.getElementById('playArea');
-const context = canvas.getContext('2d');
+const sceneManager = new SceneManager(canvas, assetManager, soundPlayer);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------
@@ -30,35 +33,9 @@ export const Stage = Object.freeze({
 
 var stage;
 
-// --- ENTITIES
-
-// TEMPORARY: entities that are not permanent but will persist for long than a single update/rendering cycle
-var entitiesTemporary = [];
-
-// TRANSIENT: entities that will cleared after a single update/rendering cycle.
-var entitiesTransient = [];
-
-// ENEMIES: entities that can harm the player or be destoryed by projectiles. You know-- the baddies.
-var entitiesEnemies = [];
-
-// PROJECTILES (PLAYER): bullets originating from the player which may damage or destroy enemy entities
-var projectilesPlayer = [];
-
-// TIMERS: measures time and executes instructions once or at fixed intervals
-var timers = [];
-
-// --- MAP & BACKGROUND
-
-const tileSize = 64;                            // in pixels
-const tileRows = canvas.height / tileSize;
-const tileCols = canvas.width / tileSize;
-
-var backgroundImage = new Image();
-
 var gameFont = null;
 
 var debugMode = false;
-
 
 // ------------------------------------- CORE LOGIC -------------------------------------
 
@@ -74,11 +51,6 @@ var setup = function () {
 
 function initialize() {
     updateStage(Stage.INITIALIZING);
-    entitiesEnemies = [];
-    entitiesTemporary = [];
-    entitiesTransient = [];
-    projectilesPlayer = [];
-    timers = [];
     updateStage(Stage.INSERT_COIN);
 }
 
@@ -108,38 +80,11 @@ function updateStage(newStage) {
                 break;
 
             case Stage.INSERT_COIN:
-                projectilesPlayer = [];
-                timers = [];
-                entitiesEnemies = [];
-
-                // !!!!!! ANIMATION TEST !!!!!
-                // Add some varibale speed entities
-
-                for (let i = 1; i < 10; i++) {
-
-                    entitiesTemporary.push(
-                        new EntityFire(
-                            0,
-                            i * 64,
-                            false,
-                            i * 100,
-                            assetManager
-                        )
-                    );
-
-                    entitiesTemporary.push(
-                        new EntityExplosion(
-                            64,
-                            i * 64,
-                            false,
-                            i * 100,
-                            assetManager
-                        )
-                    );
-                }
+                sceneManager.setCurrentSceneType(SceneType.INTRO);
                 break;
 
             case Stage.GAME_ACTIVE:
+                sceneManager.setCurrentSceneType(SceneType.SELECT_ZONE);
                 break;
 
             default:
@@ -151,45 +96,24 @@ function updateStage(newStage) {
 
 function update(delta) {
 
-    switch (stage) {
+    sceneManager.update(delta)
 
+    switch (stage) {
         case Stage.LOAD_START:
         case Stage.LOAD_COMPLETE:
-            break;
-
         case Stage.INSERT_COIN:
-            entitiesTemporary.forEach(entity => {
-                entity.update(delta);
-            });
-            break;
-
         case Stage.GAME_ACTIVE:
-            entitiesTemporary.forEach(entity => {
-                entity.update(delta);
-            });
-            break;
-
         default:
             break;
     }
 
-    // Update timers...
-    timers.forEach(timer => {
-        timer.update(Date.now())
-    });
 
-    // Cull dead timers...
-    timers = timers.filter(timer => {
-        return timer.isActive == true
-    });
 }
 
 
 function render(context) {
 
-    context.fillStyle = "#000000ff";
-    context.globalAlpha = 1.0;
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    sceneManager.render(context);
 
     switch (stage) {
 
@@ -208,35 +132,9 @@ function render(context) {
 
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
-            entitiesTemporary.forEach(entity => {
-                entity.render(context);
-            });
-
-            break;
-
         case Stage.GAME_ACTIVE:
-            projectilesPlayer.forEach(projectile => {
-                projectile.render(context);
-            })
-
-            entitiesEnemies.forEach(enemy => {
-                enemy.render(context);
-            });
-
-            entitiesTemporary.forEach(ent => {
-                ent.render(context);
-            });
-
-            entitiesTransient.forEach(transient => {
-                transient.render(context)
-            });
-
-            entitiesTransient = [];
-
-            renderHUD(context);
             break;
     }
-
 }
 
 
@@ -308,14 +206,19 @@ document.addEventListener('mousedown', (click) => {
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-            soundPlayer.playOneShot(SoundAsset.MACHINEGUN_2);
+
             break;
     }
+
+    sceneManager.processMouseEvent(click);
 
 });
 
 // Mouse MOVE
-document.addEventListener('mousemove', (click) => {
+document.addEventListener('mousemove', (event) => {
+    
+    //sceneManager.processMouseEvent(event);
+    
     switch (stage) {
         default:
             break;
@@ -324,7 +227,7 @@ document.addEventListener('mousemove', (click) => {
 
 // Mouse UP
 document.addEventListener('mouseup', (click) => {
-
+    //sceneManager.processMouseEvent(click);
 });
 
 document.addEventListener('keydown', (event) => {
@@ -338,4 +241,6 @@ document.addEventListener('keydown', (event) => {
         default:
             break;
     }
+
+    //sceneManager.processMouseEvent(click);
 });

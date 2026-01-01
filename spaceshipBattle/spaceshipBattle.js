@@ -210,24 +210,25 @@ document.addEventListener('mousedown', (click) => {
             break;
     }
 
-    sceneManager.processMouseEvent(click);
+    sceneManager.onMouseDown(click);
 
 });
 
 // Mouse MOVE
 document.addEventListener('mousemove', (event) => {
-    
-    //sceneManager.processMouseEvent(event);
-    
+
     switch (stage) {
         default:
             break;
     }
+
+    sceneManager.onMouseMove(event);
+
 });
 
 // Mouse UP
 document.addEventListener('mouseup', (click) => {
-    //sceneManager.processMouseEvent(click);
+    sceneManager.onMouseUp(click);
 });
 
 document.addEventListener('keydown', (event) => {
@@ -242,5 +243,5 @@ document.addEventListener('keydown', (event) => {
             break;
     }
 
-    //sceneManager.processMouseEvent(click);
+    sceneManager.onKeyPressed(click);
 });

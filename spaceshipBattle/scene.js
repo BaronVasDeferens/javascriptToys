@@ -38,12 +38,20 @@ export class SceneManager {
         return this.sceneMap.get(this.currentSceneType);
     }
 
-    processMouseEvent(event) {
-        this.getCurrentScene().processMouseEvent(event);
+    onMouseDown(click) {
+        this.getCurrentScene().onMouseDown(click);
     }
 
-    processKeyboardEvent(event) {
-        this.getCurrentScene().processKeyboardEvent(event);
+    onMouseUp(click) {
+        this.getCurrentScene().onMouseUp(click);
+    }
+
+    onMouseMove(event) {
+        this.getCurrentScene().onMouseMove(event);
+    }
+
+    onKeyPressed(event) {
+        this.getCurrentScene().onKeyPressed(event);
     }
 
     update(delta) {
@@ -81,11 +89,19 @@ export class Scene {
 
     }
 
-    processMouseEvent(event) {
+    onMouseDown(click) {
 
     }
 
-    processKeyboardEvent(event) {
+    onMouseUp(click) {
+
+    }
+
+    onMouseMove(event) {
+
+    }
+
+    onKeyPressed(event) {
 
     }
 
@@ -117,14 +133,6 @@ export class BlankScene extends Scene {
 
     }
 
-    processMouseEvent(event) {
-
-    }
-
-    processKeyboardEvent(event) {
-
-    }
-
     render(context) {
         context.fillStyle = "#000000";
         context.globalAlpha = 1.0;
@@ -150,11 +158,11 @@ export class IntroScene extends Scene {
 
     }
 
-    processMouseEvent(event) {
+    onMouseDown(click) {
         this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_1);
     }
 
-    processKeyboardEvent(event) {
+    onKeyPressed(event) {
 
     }
 
@@ -228,11 +236,11 @@ export class ZoneSelectionScene extends Scene {
         });
     }
 
-    processMouseEvent(event) {
+    onMouseDown(click) {
         this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_2);
     }
 
-    processKeyboardEvent(event) {
+    onKeyPressed(event) {
 
     }
 

@@ -1,6 +1,7 @@
 export class Transition {
 
     isFinished = false;
+    totalRenderTimeMillis = 0;
     progress = 0;
 
     constructor(startScene, endScene, canvas, lengthMillis) {
@@ -22,7 +23,6 @@ export class Transition {
 
 export class ColorWipeTransition extends Transition {
 
-    totalRenderTimeMillis = 0;
 
     constructor(startScene, endScene, canvas, color, lengthMillis) {
         super(startScene, endScene, canvas, lengthMillis);
@@ -31,9 +31,12 @@ export class ColorWipeTransition extends Transition {
 
     update(delta) {
 
-        if (this.isFinished) {
+        if (this.isFinished == true) {
+            // console.log("Color wipe FINISHED");
             return;
         }
+
+        // console.log(`Color wipe UPDATE: ${this.progress}`);
 
         this.totalRenderTimeMillis += delta;
         this.progress = this.totalRenderTimeMillis / this.lengthMillis;
@@ -45,15 +48,23 @@ export class ColorWipeTransition extends Transition {
 
     render(context) {
 
-        if (this.isFinished) {
+        if (this.isFinished == true) {
             return
         }
 
         //context.drawImage(this.startImage, 0, 0);
         this.startScene.render(context);
+        context.globalAlpha = 1.0;
         context.fillStyle = this.color;
         context.fillRect(0, 0, this.canvas.width * this.progress, this.canvas.height * this.progress);
-        context.globalAlpha = 1.0;
+    }
+
+}
+
+export class CurtainTransition extends Transition {
+
+    constructor(fromScene, toScene, canvas, duration) {
+        super(fromScene, toScene, canvas, duration);
     }
 
 }

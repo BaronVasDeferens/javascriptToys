@@ -1,15 +1,15 @@
 import { SoundAsset } from "./assets.js";
 import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
-import { ColorWipeTransition } from "./transition.js";
+import { ColorWipeTransition, Transition } from "./transition.js";
 
 
 export const SceneType = Object.freeze({
-    NO_SCENE: 10,
-    INTRO: 20,
-    SELECT_ZONE: 30,
-    SELECT_SQUAD: 40,
-    FIGHT_BATTLE: 50,
-    AFTER_BATTLE: 60
+    NO_SCENE: "NO_SCENE",
+    INTRO: "INTRO",
+    SELECT_ZONE: "SELECT_ZONE",
+    SELECT_SQUAD: "SELECT_SQUAD",
+    FIGHT_BATTLE: "FIGHT_BATTLE",
+    AFTER_BATTLE: "AFTER_BATTLE",
 });
 
 
@@ -29,20 +29,29 @@ export class SceneManager {
         this.sceneMap.set(SceneType.SELECT_ZONE, new ZoneSelectionScene(canvas, assetManager, soundPlayer));
     }
 
+    initialize() {
+        this.getCurrentScene().onStop();
+        this.currentSceneType = SceneType.NO_SCENE;
+    }
+
     setCurrentSceneType(type) {
 
         if (type != this.currentSceneType) {
+
+            console.log(`scene change: ${this.currentSceneType} -> ${type}`);
 
             // Create a transition
             this.transitions.push(
                 new ColorWipeTransition(
                     this.getCurrentScene(),
-                    null,
+                    this.sceneMap[type],
                     this.canvas,
                     "#c3ff00ff",
                     1000
                 )
             );
+
+            // console.log(`transitions size: ${this.transitions.length}`);
 
             this.getCurrentScene().onStop();
             this.currentSceneType = type;
@@ -55,7 +64,7 @@ export class SceneManager {
     }
 
     onMouseDown(click) {
-        
+
         if (this.transitions.length > 0) {
             return
         }
@@ -64,44 +73,65 @@ export class SceneManager {
     }
 
     onMouseUp(click) {
+
+        if (this.transitions.length > 0) {
+            return
+        }
+
         this.getCurrentScene().onMouseUp(click);
     }
 
     onMouseMove(event) {
+
+        if (this.transitions.length > 0) {
+            return
+        }
+
         this.getCurrentScene().onMouseMove(event);
     }
 
     onKeyPressed(event) {
+
+        if (this.transitions.length > 0) {
+            return
+        }
+
         this.getCurrentScene().onKeyPressed(event);
     }
 
     update(delta) {
+
+        this.getCurrentScene().update(delta);
+
         this.transitions.forEach(transition => {
             transition.update(delta);
         });
 
         this.transitions = this.transitions.filter(transition => {
-            return !transition.isFinished
+            return !(transition.isFinished)
         });
-
-        this.getCurrentScene().update(delta);
     }
 
     render(context) {
-        context.fillStyle = "#000000ff";
-        context.globalAlpha = 1.0;
-        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // context.fillStyle = "#000000ff";
+        // context.globalAlpha = 1.0;
+        // context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        if (this.transitions.length == 0) {
+        if (this.transitions.length > 0) {
+            this.transitions.forEach(transition => {
+                // console.log(`rendering transition ${transition.constructor.name}`)
+                transition.render(context);
+            });
+        } else {
             this.getCurrentScene().render(context);
         }
 
-        this.transitions.forEach(transition => {
-            transition.render(context);
-        });
+
     }
 }
+
+//  ------------------------------------ SCENES ------------------------------------
 
 export class Scene {
 
@@ -171,7 +201,7 @@ export class BlankScene extends Scene {
     }
 
     render(context) {
-        context.fillStyle = "#000000";
+        context.fillStyle = "#ff0000ff";
         context.globalAlpha = 1.0;
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -301,3 +331,4 @@ export class ZoneSelectionScene extends Scene {
     }
 
 }
+

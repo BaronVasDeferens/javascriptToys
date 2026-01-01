@@ -48,12 +48,14 @@ var setup = function () {
         gameFont = new FontFace("micronian", assetManager.getFont(FontAsset.PRIMARY));
         document.fonts.add(gameFont);
         updateStage(Stage.LOAD_COMPLETE);
+        beginGame();
     });
 }();
 
 
 function initialize() {
-    updateStage(Stage.INITIALIZING);
+
+    // TODO: init stuff goes here...
     updateStage(Stage.INSERT_COIN);
 }
 
@@ -75,10 +77,11 @@ function updateStage(newStage) {
 
             case Stage.LOAD_START:
             case Stage.LOAD_COMPLETE:
-                render(context);
+                //render(context);
                 break;
 
             case Stage.INITIALIZING:
+                sceneManager.setCurrentSceneType(SceneType.NO_SCENE);
                 break;
 
             case Stage.INSERT_COIN:
@@ -109,7 +112,7 @@ function update() {
         case Stage.GAME_ACTIVE:
         default:
             break;
-    } 
+    }
 }
 
 
@@ -135,6 +138,9 @@ function render(context) {
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
         case Stage.GAME_ACTIVE:
+            break;
+
+        default:
             break;
     }
 }
@@ -181,34 +187,27 @@ function log(msg) {
 // Mouse DOWN
 document.addEventListener('mousedown', (click) => {
 
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
     switch (stage) {
 
-        case Stage.INITIALIZING:
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+        case Stage.LOAD_COMPLETE:
+            initialize();
             break;
 
-        case Stage.LOAD_COMPLETE:
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            initialize();
-            beginGame();
+        case Stage.INITIALIZING:
             break;
 
         case Stage.INSERT_COIN:
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
             updateStage(Stage.GAME_ACTIVE);
             break;
 
         case Stage.GAME_ACTIVE:
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+            break;
 
+        default:
             break;
     }
 
@@ -235,15 +234,21 @@ document.addEventListener('mouseup', (click) => {
 
 document.addEventListener('keydown', (event) => {
 
+    // console.log(event)
+
     switch (event.key) {
 
+        case 'Escape':
+            initialize();
+            break;
         case 'd':
             toggleDebug();
             break;
+
 
         default:
             break;
     }
 
-    sceneManager.onKeyPressed(click);
+    sceneManager.onKeyPressed(event);
 });

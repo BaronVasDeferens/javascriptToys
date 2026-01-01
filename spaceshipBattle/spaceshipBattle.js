@@ -37,6 +37,9 @@ var gameFont = null;
 
 var debugMode = false;
 
+
+var lastRenderMillis = Date.now();
+
 // ------------------------------------- CORE LOGIC -------------------------------------
 
 var setup = function () {
@@ -56,8 +59,7 @@ function initialize() {
 
 
 function beginGame() {
-    let now = Date.now();
-    update(now);
+    update();
     render(context);
     requestAnimationFrame(beginGame);
 }
@@ -94,9 +96,11 @@ function updateStage(newStage) {
 }
 
 
-function update(delta) {
+function update() {
 
-    sceneManager.update(delta)
+    let delta = Date.now() - lastRenderMillis;
+    lastRenderMillis = Date.now();
+    sceneManager.update(delta);
 
     switch (stage) {
         case Stage.LOAD_START:
@@ -105,9 +109,7 @@ function update(delta) {
         case Stage.GAME_ACTIVE:
         default:
             break;
-    }
-
-
+    } 
 }
 
 

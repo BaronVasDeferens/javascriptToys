@@ -47,7 +47,7 @@ export class Entity {
 }
 
 export class EntityText extends Entity {
-    
+
     constructor(x, y, text, font, textSize, textColor) {
         super(x, y, null);
         this.text = text;
@@ -172,7 +172,7 @@ export class EntityExplosion {
 
     isAlive = true;
 
-    animationRate = 1000 / 16;
+    animationRate = 0;
     lastRenderMillis = Date.now();
 
     constructor(x, y, randomStartIndex, period, assetManager) {
@@ -213,15 +213,13 @@ export class EntityExplosion {
         this.animationRate = this.period / this.imageArray.length;
     }
 
-    update(nowMillis) {
-        let deltaMillis = nowMillis - this.lastRenderMillis;
-
-        let indicies = Math.floor(deltaMillis / this.animationRate)
+    update(delta) {
+        let indicies = Math.floor((Date.now() - this.lastRenderMillis) / this.animationRate)
 
         if (indicies > 0) {
             this.index += indicies;
             this.index = this.index % this.imageArray.length;
-            this.lastRenderMillis = nowMillis;
+            this.lastRenderMillis = Date.now();
         }
     }
 
@@ -329,15 +327,13 @@ export class EntityFire {
         this.animationRate = this.period / this.imageArray.length;
     }
 
-    update(nowMillis) {
-        let deltaMillis = nowMillis - this.lastRenderMillis;
-
-        let indicies = Math.floor(deltaMillis / this.animationRate)
+    update(delta) {
+        let indicies = Math.floor((Date.now() - this.lastRenderMillis) / this.animationRate)
 
         if (indicies > 0) {
             this.index += indicies;
             this.index = this.index % this.imageArray.length;
-            this.lastRenderMillis = nowMillis;
+            this.lastRenderMillis = Date.now();
         }
     }
 

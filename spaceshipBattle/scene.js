@@ -1,5 +1,6 @@
 import { SoundAsset } from "./assets.js";
 import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
+import { ColorWipeTransition } from "./transition.js";
 
 
 export const SceneType = Object.freeze({
@@ -17,6 +18,8 @@ export class SceneManager {
     sceneMap = new Map();
     currentSceneType = SceneType.NO_SCENE;
 
+    transitions = [];
+
     constructor(canvas, assetManager, soundPlayer) {
         this.canvas = canvas;
         this.assetManager = assetManager;
@@ -27,7 +30,20 @@ export class SceneManager {
     }
 
     setCurrentSceneType(type) {
+
         if (type != this.currentSceneType) {
+
+            // Create a transition
+            this.transitions.push(
+                new ColorWipeTransition(
+                    this.getCurrentScene(),
+                    null,
+                    this.canvas,
+                    "#c3ff00ff",
+                    1000
+                )
+            );
+
             this.getCurrentScene().onStop();
             this.currentSceneType = type;
             this.getCurrentScene().onStart();
@@ -39,6 +55,11 @@ export class SceneManager {
     }
 
     onMouseDown(click) {
+        
+        if (this.transitions.length > 0) {
+            return
+        }
+
         this.getCurrentScene().onMouseDown(click);
     }
 
@@ -55,6 +76,14 @@ export class SceneManager {
     }
 
     update(delta) {
+        this.transitions.forEach(transition => {
+            transition.update(delta);
+        });
+
+        this.transitions = this.transitions.filter(transition => {
+            return !transition.isFinished
+        });
+
         this.getCurrentScene().update(delta);
     }
 
@@ -62,7 +91,15 @@ export class SceneManager {
         context.fillStyle = "#000000ff";
         context.globalAlpha = 1.0;
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.getCurrentScene().render(context);
+
+
+        if (this.transitions.length == 0) {
+            this.getCurrentScene().render(context);
+        }
+
+        this.transitions.forEach(transition => {
+            transition.render(context);
+        });
     }
 }
 
@@ -170,6 +207,7 @@ export class IntroScene extends Scene {
         context.fillStyle = "#00ff00";
         context.globalAlpha = 1.0;
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        //this.backgroundImage.src = this.canvas.toDataURL();
     }
 }
 
@@ -258,6 +296,8 @@ export class ZoneSelectionScene extends Scene {
         });
 
         this.entitiesTransient = [];
+
+        //this.backgroundImage.src = this.canvas.toDataURL();
     }
 
 }

@@ -1,6 +1,6 @@
 import { SoundAsset } from "./assets.js";
 import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
-import { ColorWipeTransition, Transition } from "./transition.js";
+import { BlinkEffectTransition, Transition } from "./transition.js";
 
 
 export const SceneType = Object.freeze({
@@ -38,11 +38,9 @@ export class SceneManager {
 
         if (newSceneType != this.currentSceneType) {
 
-            console.log(`scene change: ${this.currentSceneType} -> ${newSceneType}`);
-
             // Create a transition
             this.transitions.push(
-                new ColorWipeTransition(
+                new BlinkEffectTransition(
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),
                     this.canvas,
@@ -216,7 +214,7 @@ export class IntroScene extends Scene {
     }
 
     onMouseDown(click) {
-        this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_1);
+        //this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_1);
     }
 
     onKeyPressed(event) {
@@ -295,7 +293,7 @@ export class ZoneSelectionScene extends Scene {
     }
 
     onMouseDown(click) {
-        this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_2);
+        //this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_2);
     }
 
     onKeyPressed(event) {

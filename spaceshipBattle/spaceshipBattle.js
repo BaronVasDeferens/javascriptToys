@@ -191,6 +191,9 @@ document.addEventListener('mousedown', (click) => {
         audioContext.resume();
     }
 
+    sceneManager.onMouseDown(click);
+
+
     switch (stage) {
 
         case Stage.LOAD_COMPLETE:
@@ -211,8 +214,7 @@ document.addEventListener('mousedown', (click) => {
             break;
     }
 
-    sceneManager.onMouseDown(click);
-
+    // sceneManager.onMouseDown(click);
 });
 
 // Mouse MOVE
@@ -224,7 +226,6 @@ document.addEventListener('mousemove', (event) => {
     }
 
     sceneManager.onMouseMove(event);
-
 });
 
 // Mouse UP
@@ -233,8 +234,6 @@ document.addEventListener('mouseup', (click) => {
 });
 
 document.addEventListener('keydown', (event) => {
-
-    // console.log(event)
 
     switch (event.key) {
 

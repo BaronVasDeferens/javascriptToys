@@ -22,13 +22,16 @@ export class Transition {
 
 }
 
-export class ColorWipeTransition extends Transition {
+export class BlinkEffectTransition extends Transition {
+
+    /*
+        "Covers" the current scene form top to bottom, then "uncovers"
+        the next scene from bottom to top.
+    */
 
     constructor(startScene, endScene, canvas, color, durationMillis) {
         super(startScene, endScene, canvas, durationMillis);
         this.color = color;
-
-        console.log(`transition start: ${this.startScene.constructor.name} -> ${this.endScene.constructor.name}`);
     }
 
     update(delta) {
@@ -54,34 +57,26 @@ export class ColorWipeTransition extends Transition {
         context.globalAlpha = 1.0;
 
         if (this.progress <= .50) {
-            // draw the "in" section
+            // "Cover" the current scene...
             context.fillStyle = this.color;
             context.fillRect(
                 0,
                 0,
-                this.canvas.width * 2 * this.progress,
+                this.canvas.width,
                 this.canvas.height * 2 * this.progress);
         } else {
-            //draw the "out" section
+            //...then "uncover" the next scene.
             this.endScene.render(context);
             context.fillStyle = this.color;
             context.fillRect(
                 0,
                 0,
-                (2 - (this.progress * 2)) * this.canvas.width,
+                this.canvas.width,
                 (2 - (this.progress * 2)) * this.canvas.height,
             );
         }
 
 
-    }
-
-}
-
-export class CurtainTransition extends Transition {
-
-    constructor(fromScene, toScene, canvas, durationMillis) {
-        super(fromScene, toScene, canvas, durationMillis);
     }
 
 }

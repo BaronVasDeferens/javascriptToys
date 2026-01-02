@@ -46,12 +46,10 @@ export class SceneManager {
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),
                     this.canvas,
-                    "#c3ff00ff",
+                    "#000000",
                     500
                 )
             );
-
-            // console.log(`transitions size: ${this.transitions.length}`);
 
             this.getCurrentScene().onStop();
             this.currentSceneType = newSceneType;
@@ -113,21 +111,13 @@ export class SceneManager {
     }
 
     render(context) {
-
-        // context.fillStyle = "#000000ff";
-        // context.globalAlpha = 1.0;
-        // context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
         if (this.transitions.length > 0) {
             this.transitions.forEach(transition => {
-                // console.log(`rendering transition ${transition.constructor.name}`)
                 transition.render(context);
             });
         } else {
             this.getCurrentScene().render(context);
         }
-
-
     }
 }
 

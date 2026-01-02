@@ -51,15 +51,11 @@ export class ColorWipeTransition extends Transition {
             return
         }
 
-
         context.globalAlpha = 1.0;
-        //context.fillStyle = this.color;
 
         if (this.progress <= .50) {
             // draw the "in" section
-            console.log(`progress: ${this.progress} : ${this.canvas.width * 2 * this.progress}`);
-            //context.fillStyle = this.color;
-            context.fillStyle = "#000000";
+            context.fillStyle = this.color;
             context.fillRect(
                 0,
                 0,
@@ -68,8 +64,7 @@ export class ColorWipeTransition extends Transition {
         } else {
             //draw the "out" section
             this.endScene.render(context);
-            context.fillStyle = "#000000";
-            console.log(`progress: ${this.progress} : ${(2 - (this.progress * 2)) * this.canvas.width}`);
+            context.fillStyle = this.color;
             context.fillRect(
                 0,
                 0,

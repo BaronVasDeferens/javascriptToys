@@ -1,14 +1,15 @@
 export class Transition {
 
     isFinished = false;
+    durationMillis = 0;
     totalRenderTimeMillis = 0;
     progress = 0;
 
-    constructor(startScene, endScene, canvas, lengthMillis) {
+    constructor(startScene, endScene, canvas, durationMillis) {
         this.startScene = startScene;
         this.endScene = endScene;
         this.canvas = canvas;
-        this.lengthMillis = lengthMillis;
+        this.durationMillis = durationMillis;
     }
 
     update(delta) {
@@ -23,23 +24,21 @@ export class Transition {
 
 export class ColorWipeTransition extends Transition {
 
-
-    constructor(startScene, endScene, canvas, color, lengthMillis) {
-        super(startScene, endScene, canvas, lengthMillis);
+    constructor(startScene, endScene, canvas, color, durationMillis) {
+        super(startScene, endScene, canvas, durationMillis);
         this.color = color;
+
+        console.log(`transition start: ${this.startScene.constructor.name} -> ${this.endScene.constructor.name}`);
     }
 
     update(delta) {
 
         if (this.isFinished == true) {
-            // console.log("Color wipe FINISHED");
             return;
         }
 
-        // console.log(`Color wipe UPDATE: ${this.progress}`);
-
         this.totalRenderTimeMillis += delta;
-        this.progress = this.totalRenderTimeMillis / this.lengthMillis;
+        this.progress = this.totalRenderTimeMillis / this.durationMillis;
 
         if (this.progress >= 1.0) {
             this.isFinished = true;
@@ -52,19 +51,42 @@ export class ColorWipeTransition extends Transition {
             return
         }
 
-        //context.drawImage(this.startImage, 0, 0);
-        this.startScene.render(context);
+
         context.globalAlpha = 1.0;
-        context.fillStyle = this.color;
-        context.fillRect(0, 0, this.canvas.width * this.progress, this.canvas.height * this.progress);
+        //context.fillStyle = this.color;
+
+        if (this.progress <= .50) {
+            // draw the "in" section
+            console.log(`progress: ${this.progress} : ${this.canvas.width * 2 * this.progress}`);
+            //context.fillStyle = this.color;
+            context.fillStyle = "#000000";
+            context.fillRect(
+                0,
+                0,
+                this.canvas.width * 2 * this.progress,
+                this.canvas.height * 2 * this.progress);
+        } else {
+            //draw the "out" section
+            this.endScene.render(context);
+            context.fillStyle = "#000000";
+            console.log(`progress: ${this.progress} : ${(2 - (this.progress * 2)) * this.canvas.width}`);
+            context.fillRect(
+                0,
+                0,
+                (2 - (this.progress * 2)) * this.canvas.width,
+                (2 - (this.progress * 2)) * this.canvas.height,
+            );
+        }
+
+
     }
 
 }
 
 export class CurtainTransition extends Transition {
 
-    constructor(fromScene, toScene, canvas, duration) {
-        super(fromScene, toScene, canvas, duration);
+    constructor(fromScene, toScene, canvas, durationMillis) {
+        super(fromScene, toScene, canvas, durationMillis);
     }
 
 }

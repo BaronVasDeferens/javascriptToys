@@ -34,27 +34,27 @@ export class SceneManager {
         this.currentSceneType = SceneType.NO_SCENE;
     }
 
-    setCurrentSceneType(type) {
+    setCurrentSceneType(newSceneType) {
 
-        if (type != this.currentSceneType) {
+        if (newSceneType != this.currentSceneType) {
 
-            console.log(`scene change: ${this.currentSceneType} -> ${type}`);
+            console.log(`scene change: ${this.currentSceneType} -> ${newSceneType}`);
 
             // Create a transition
             this.transitions.push(
                 new ColorWipeTransition(
                     this.getCurrentScene(),
-                    this.sceneMap[type],
+                    this.sceneMap.get(newSceneType),
                     this.canvas,
                     "#c3ff00ff",
-                    1000
+                    500
                 )
             );
 
             // console.log(`transitions size: ${this.transitions.length}`);
 
             this.getCurrentScene().onStop();
-            this.currentSceneType = type;
+            this.currentSceneType = newSceneType;
             this.getCurrentScene().onStart();
         }
     }

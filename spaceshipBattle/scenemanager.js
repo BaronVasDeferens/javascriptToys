@@ -36,7 +36,7 @@ export class SceneManager {
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),
                     this.canvas,
-                    "#000000",
+                    "#535353ff",
                     500
                 )
             );

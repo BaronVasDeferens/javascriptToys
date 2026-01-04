@@ -120,15 +120,13 @@ export class IntroScene extends Scene {
             "#ffffffff"
         ]
 
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 150; i++) {
 
             let x = this.randomInRange(0, this.canvas.width);
             let y = this.randomInRange(0, this.canvas.height);
             let size = this.randomInRange(1, 3);
-            let speed = 12 * size;
-            let color = colorIntensity[size];
-
-            console.log(`${size} ${color}`)
+            let speed = 15 * size;
+            let color = colorIntensity[size - 1];
 
             this.stars.push(
                 {
@@ -136,7 +134,7 @@ export class IntroScene extends Scene {
                     y: y,
                     size: size,
                     speed: speed,
-                    color: color
+                    color: color,
                 }
             )
         }
@@ -160,14 +158,12 @@ export class IntroScene extends Scene {
         this.stars.forEach(star => {
 
             let distance = star.speed * (delta / 1000);
-            let newY = (star.y + distance) % this.canvas.height;
-            let newX = star.x;
-            if (newY == 0) {
-                newX = this.randomInRange(9, this.canvas.width);
-            }
+            star.y = (star.y + distance) ;
 
-            star.x = newX
-            star.y = newY;
+            if (star.y > this.canvas.height) {
+                star.y = 0;
+                star.x = this.randomInRange(0, this.canvas.width);
+            }
         })
     }
 

@@ -21,6 +21,7 @@ export class SceneManager {
     }
 
     initialize() {
+        // This method should only be called after the assetManager has been initialized!
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new IntroScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.SELECT_ZONE, new AnimationTestScene(this.canvas, this.assetManager, this.soundPlayer));

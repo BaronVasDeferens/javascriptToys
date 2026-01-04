@@ -111,7 +111,6 @@ export class IntroScene extends Scene {
 
         this.backgroundImage = assetManager.getImage(ImageAsset.INTRO_LOGO);
 
-
         // Set up the starfield...
         let colorIntensity = [
             "#3e6cacff",
@@ -168,7 +167,7 @@ export class IntroScene extends Scene {
     }
 
     onMouseDown(click) {
-        //this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_1);
+        
     }
 
     onKeyPressed(event) {

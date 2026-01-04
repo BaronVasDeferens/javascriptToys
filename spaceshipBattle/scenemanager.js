@@ -1,7 +1,7 @@
 import { SoundAsset } from "./assets.js";
 import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
 import { BlinkEffectTransition, Transition } from "./transition.js";
-import { SceneType, Scene, BlankScene, IntroScene, ZoneSelectionScene } from "./scene.js"
+import { SceneType, Scene, BlankScene, IntroScene, AnimationTestScene } from "./scene.js"
 
 
 
@@ -23,7 +23,7 @@ export class SceneManager {
     initialize() {
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new IntroScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.SELECT_ZONE, new ZoneSelectionScene(this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.SELECT_ZONE, new AnimationTestScene(this.canvas, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {

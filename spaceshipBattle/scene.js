@@ -204,7 +204,7 @@ export class IntroScene extends Scene {
     }
 }
 
-export class ZoneSelectionScene extends Scene {
+export class AnimationTestScene extends Scene {
 
 
     // TEMPORARY: entities that are not permanent but will persist for long than a single update/rendering cycle

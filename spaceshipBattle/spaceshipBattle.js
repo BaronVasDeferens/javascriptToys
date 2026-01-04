@@ -1,8 +1,5 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
-import { RoadManager } from "./roads.js";
-import { Level, LevelManager } from "./levels.js"
-import { SoundLooper, SoundPlayer } from "./sound.js";
+import { SoundPlayer } from "./sound.js";
 import { SceneType } from "./scene.js";
 import { SceneManager } from "./scenemanager.js";
 
@@ -13,11 +10,11 @@ const canvas = document.getElementById('playArea');
 const context = canvas.getContext('2d');
 var audioContext = new AudioContext(); // AudioContext must be initialized after interactions
 
-
+const tileSize = 64;
 
 const assetManager = new AssetManager(audioContext);
 const soundPlayer = new SoundPlayer(assetManager, audioContext);
-const sceneManager = new SceneManager(canvas, assetManager, soundPlayer);
+const sceneManager = new SceneManager(canvas, tileSize, assetManager, soundPlayer);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------
@@ -33,6 +30,8 @@ export const Stage = Object.freeze({
 });
 
 var stage;
+
+
 
 var gameFont = null;
 
@@ -91,7 +90,7 @@ function updateStage(newStage) {
                 break;
 
             case Stage.GAME_ACTIVE:
-                sceneManager.setCurrentSceneType(SceneType.SELECT_ZONE);
+                sceneManager.setCurrentSceneType(SceneType.GRID_TEST);
                 break;
 
             default:

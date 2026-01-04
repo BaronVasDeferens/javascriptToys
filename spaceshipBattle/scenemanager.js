@@ -1,7 +1,5 @@
-import { SoundAsset } from "./assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
-import { BlinkEffectTransition, Transition } from "./transition.js";
-import { SceneType, Scene, BlankScene, IntroScene, AnimationTestScene } from "./scene.js"
+import { BlinkEffectTransition } from "./transition.js";
+import { SceneType,  BlankScene, IntroScene, AnimationTestScene, GridMapScene } from "./scene.js"
 
 
 
@@ -14,8 +12,9 @@ export class SceneManager {
 
     transitions = [];
 
-    constructor(canvas, assetManager, soundPlayer) {
+    constructor(canvas, tileSize, assetManager, soundPlayer) {
         this.canvas = canvas;
+        this.tileSize = tileSize;
         this.assetManager = assetManager;
         this.soundPlayer = soundPlayer;
     }
@@ -24,7 +23,7 @@ export class SceneManager {
         // This method should only be called after the assetManager has been initialized!
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new IntroScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.SELECT_ZONE, new AnimationTestScene(this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.GRID_TEST, new GridMapScene(this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {
@@ -45,7 +44,6 @@ export class SceneManager {
             if (this.getCurrentScene() != null) {
                 this.getCurrentScene().onStop();
             }
-
 
             this.currentSceneType = newSceneType;
 

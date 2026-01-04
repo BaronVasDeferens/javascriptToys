@@ -48,6 +48,9 @@ export var ImageAsset = Object.freeze({
 
     INTRO_LOGO: "logo.png",
 
+    FLOOR: "tiles/grid/floor.png",
+    FLOOR_OBSTRUCTION: "tiles/grid/floor_obstruction.png",
+
     EXPLOSION_0: "tiles/explosion/explosion_0.png",
     EXPLOSION_1: "tiles/explosion/explosion_1.png",
     EXPLOSION_2: "tiles/explosion/explosion_2.png",

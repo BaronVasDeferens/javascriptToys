@@ -1,6 +1,6 @@
-import { ImageAsset, SoundAsset } from "./assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
-import { BlinkEffectTransition, Transition } from "./transition.js";
+import { ImageAsset } from "./assets.js";
+import { EntityExplosion, EntityFire } from "./entity.js";
+import { GridMap } from "./gridmap.js";
 
 
 //  ------------------------------------ SCENES ------------------------------------
@@ -8,6 +8,7 @@ import { BlinkEffectTransition, Transition } from "./transition.js";
 export const SceneType = Object.freeze({
     NO_SCENE: "NO_SCENE",
     INTRO: "INTRO",
+    GRID_TEST: "GRID_TEST",
     SELECT_ZONE: "SELECT_ZONE",
     SELECT_SQUAD: "SELECT_SQUAD",
     FIGHT_BATTLE: "FIGHT_BATTLE",
@@ -157,7 +158,7 @@ export class IntroScene extends Scene {
         this.stars.forEach(star => {
 
             let distance = star.speed * (delta / 1000);
-            star.y = (star.y + distance) ;
+            star.y = (star.y + distance);
 
             if (star.y > this.canvas.height) {
                 star.y = 0;
@@ -167,7 +168,7 @@ export class IntroScene extends Scene {
     }
 
     onMouseDown(click) {
-        
+
     }
 
     onKeyPressed(event) {
@@ -185,7 +186,7 @@ export class IntroScene extends Scene {
             context.fillStyle = star.color;
 
             if (star.size == 1) {
-                context.fillRect (star.x, star.y, 1, 1);
+                context.fillRect(star.x, star.y, 1, 1);
             } else {
                 context.beginPath();
                 context.arc(
@@ -201,6 +202,30 @@ export class IntroScene extends Scene {
 
         context.drawImage(this.backgroundImage, 0, 0);
     }
+}
+
+export class GridMapScene extends Scene {
+
+    gridMap = null;
+
+    constructor(tileSize, canvas, assetManager, soundPlayer) {
+        super(SceneType.GRID_TEST, canvas, assetManager, soundPlayer);
+        
+        this.tileSize = tileSize;
+        this.gridMap = new GridMap(
+            tileSize,
+            canvas,
+            assetManager
+        )
+    }
+
+    render(context) {
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.gridMap.render(context);
+    }
+
 }
 
 export class AnimationTestScene extends Scene {
@@ -293,4 +318,5 @@ export class AnimationTestScene extends Scene {
     }
 
 }
+
 

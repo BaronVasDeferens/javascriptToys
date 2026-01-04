@@ -46,7 +46,7 @@ export class AssetManager {
 
 export var ImageAsset = Object.freeze({
 
-    INTRO_LOGO: "images/logo.png",
+    INTRO_LOGO: "logo.png",
 
     EXPLOSION_0: "tiles/explosion/explosion_0.png",
     EXPLOSION_1: "tiles/explosion/explosion_1.png",
@@ -129,7 +129,7 @@ export var ImageAsset = Object.freeze({
 
 export class ImageLoader {
 
-    imageSubDir = "/"
+    imageSubDir = "images/"
 
     imageMap = new Map();
 

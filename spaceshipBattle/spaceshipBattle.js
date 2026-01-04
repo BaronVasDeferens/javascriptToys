@@ -3,7 +3,8 @@ import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile
 import { RoadManager } from "./roads.js";
 import { Level, LevelManager } from "./levels.js"
 import { SoundLooper, SoundPlayer } from "./sound.js";
-import { SceneManager, SceneType } from "./scene.js";
+import { SceneType } from "./scene.js";
+import { SceneManager } from "./scenemanager.js";
 
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------
@@ -47,6 +48,7 @@ var setup = function () {
     assetManager.loadAssets(() => {
         gameFont = new FontFace("micronian", assetManager.getFont(FontAsset.PRIMARY));
         document.fonts.add(gameFont);
+        sceneManager.initialize();
         updateStage(Stage.LOAD_COMPLETE);
         beginGame();
     });

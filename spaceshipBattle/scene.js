@@ -1,7 +1,9 @@
-import { SoundAsset } from "./assets.js";
+import { ImageAsset, SoundAsset } from "./assets.js";
 import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, EntityFire, EntityText } from "./entity.js";
 import { BlinkEffectTransition, Transition } from "./transition.js";
 
+
+//  ------------------------------------ SCENES ------------------------------------
 
 export const SceneType = Object.freeze({
     NO_SCENE: "NO_SCENE",
@@ -13,113 +15,6 @@ export const SceneType = Object.freeze({
 });
 
 
-export class SceneManager {
-
-    sceneMap = new Map();
-    currentSceneType = SceneType.NO_SCENE;
-
-    transitions = [];
-
-    constructor(canvas, assetManager, soundPlayer) {
-        this.canvas = canvas;
-        this.assetManager = assetManager;
-        this.soundPlayer = soundPlayer;
-        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(canvas, assetManager, soundPlayer));
-        this.sceneMap.set(SceneType.INTRO, new IntroScene(canvas, assetManager, soundPlayer));
-        this.sceneMap.set(SceneType.SELECT_ZONE, new ZoneSelectionScene(canvas, assetManager, soundPlayer));
-    }
-
-    initialize() {
-        this.getCurrentScene().onStop();
-        this.currentSceneType = SceneType.NO_SCENE;
-    }
-
-    setCurrentSceneType(newSceneType) {
-
-        if (newSceneType != this.currentSceneType) {
-
-            // Create a transition
-            this.transitions.push(
-                new BlinkEffectTransition(
-                    this.getCurrentScene(),
-                    this.sceneMap.get(newSceneType),
-                    this.canvas,
-                    "#000000",
-                    500
-                )
-            );
-
-            this.getCurrentScene().onStop();
-            this.currentSceneType = newSceneType;
-            this.getCurrentScene().onStart();
-        }
-    }
-
-    getCurrentScene() {
-        return this.sceneMap.get(this.currentSceneType);
-    }
-
-    onMouseDown(click) {
-
-        if (this.transitions.length > 0) {
-            return
-        }
-
-        this.getCurrentScene().onMouseDown(click);
-    }
-
-    onMouseUp(click) {
-
-        if (this.transitions.length > 0) {
-            return
-        }
-
-        this.getCurrentScene().onMouseUp(click);
-    }
-
-    onMouseMove(event) {
-
-        if (this.transitions.length > 0) {
-            return
-        }
-
-        this.getCurrentScene().onMouseMove(event);
-    }
-
-    onKeyPressed(event) {
-
-        if (this.transitions.length > 0) {
-            return
-        }
-
-        this.getCurrentScene().onKeyPressed(event);
-    }
-
-    update(delta) {
-
-        this.getCurrentScene().update(delta);
-
-        this.transitions.forEach(transition => {
-            transition.update(delta);
-        });
-
-        this.transitions = this.transitions.filter(transition => {
-            return !(transition.isFinished)
-        });
-    }
-
-    render(context) {
-        if (this.transitions.length > 0) {
-            this.transitions.forEach(transition => {
-                transition.render(context);
-            });
-        } else {
-            this.getCurrentScene().render(context);
-        }
-    }
-}
-
-//  ------------------------------------ SCENES ------------------------------------
 
 export class Scene {
 
@@ -170,6 +65,8 @@ export class Scene {
 
 }
 
+
+
 export class BlankScene extends Scene {
 
     constructor(canvas, assetManager, soundPlayer) {
@@ -189,16 +86,66 @@ export class BlankScene extends Scene {
     }
 
     render(context) {
-        context.fillStyle = "#ff0000ff";
+        context.fillStyle = "#000000";
         context.globalAlpha = 1.0;
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 }
 
+
+
+/**
+ * INTRO SCENE
+ * 
+ * Re-rendered PNG over a moving starfield
+ */
+
+
 export class IntroScene extends Scene {
 
+    stars = [];
+
     constructor(canvas, assetManager, soundPlayer) {
+
         super(SceneType.INTRO, canvas, assetManager, soundPlayer);
+
+        this.backgroundImage = assetManager.getImage(ImageAsset.INTRO_LOGO);
+
+
+        // Set up the starfield...
+        let colorIntensity = [
+            "#3e6cacff",
+            "#719fdfff",
+            "#e3eeffff",
+            "#ffffffff"
+        ]
+
+        for (let i = 0; i < 100; i++) {
+
+            let x = this.randomInRange(0, this.canvas.width);
+            let y = this.randomInRange(0, this.canvas.height);
+            let size = this.randomInRange(1, 3);
+            let speed = 12 * size;
+            let color = colorIntensity[size];
+
+            console.log(`${size} ${color}`)
+
+            this.stars.push(
+                {
+                    x: x,
+                    y: y,
+                    size: size,
+                    speed: speed,
+                    color: color
+                }
+            )
+        }
+
+    }
+
+    randomInRange(min, max) {
+        let range = Math.abs(max - min);
+        return Math.floor(Math.random() * max) + min;
     }
 
     onStart() {
@@ -210,7 +157,18 @@ export class IntroScene extends Scene {
     }
 
     update(delta) {
+        this.stars.forEach(star => {
 
+            let distance = star.speed * (delta / 1000);
+            let newY = (star.y + distance) % this.canvas.height;
+            let newX = star.x;
+            if (newY == 0) {
+                newX = this.randomInRange(9, this.canvas.width);
+            }
+
+            star.x = newX
+            star.y = newY;
+        })
     }
 
     onMouseDown(click) {
@@ -222,10 +180,31 @@ export class IntroScene extends Scene {
     }
 
     render(context) {
-        context.fillStyle = "#00ff00";
-        context.globalAlpha = 1.0;
+
+        context.fillStyle = "#000000";
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        //this.backgroundImage.src = this.canvas.toDataURL();
+
+
+        this.stars.forEach(star => {
+
+            context.fillStyle = star.color;
+
+            if (star.size == 1) {
+                context.fillRect (star.x, star.y, 1, 1);
+            } else {
+                context.beginPath();
+                context.arc(
+                    star.x,
+                    star.y,
+                    star.size / 2,
+                    0,
+                    2 * Math.PI
+                );
+                context.fill();
+            }
+        });
+
+        context.drawImage(this.backgroundImage, 0, 0);
     }
 }
 

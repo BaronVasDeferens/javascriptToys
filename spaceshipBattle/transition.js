@@ -25,12 +25,17 @@ export class Transition {
 
 }
 
-export class BlinkEffectTransition extends Transition {
 
-    /*
-        "Covers" the current scene form top to bottom, then "uncovers"
-        the next scene from bottom to top.
-    */
+
+
+
+
+/**
+ * BLINK EFFECT TRANSITION
+ * "Covers" the current scene form top to bottom, then "uncovers"
+ * the next scene from bottom to top.
+ */
+export class BlinkEffectTransition extends Transition {
 
     constructor(startScene, endScene, canvas, color, durationMillis) {
         super(startScene, endScene, canvas, durationMillis);
@@ -136,8 +141,6 @@ export class CheckerboardTransition extends Transition {
             this.progress = 0.01;
         }
 
-        // console.log(`${delta} ${this.durationMillis} ${this.totalRenderTimeMillis} ${this.progress}`)
-
         if (this.progress >= 1.0) {
             this.isFinished = true;
         } else {
@@ -163,7 +166,7 @@ export class CheckerboardTransition extends Transition {
             this.endScene.render(context);
         }
 
-        context.fillStyle =this.color;
+        context.fillStyle = this.color;
         this.gridSectionsStart.forEach(square => {
             context.fillRect(square.x * this.tileSize, square.y * this.tileSize, this.tileSize, this.tileSize);
         });

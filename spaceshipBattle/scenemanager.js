@@ -130,6 +130,15 @@ export class SceneManager {
         this.getCurrentScene().onKeyPressed(event);
     }
 
+    onVisibilityStateChanged(state) {
+       
+        if (this.getCurrentScene() == null) {
+            return;
+        }
+
+        this.getCurrentScene().onVisibilityStateChanged(state);
+    }
+
     update(delta) {
 
         if (this.getCurrentScene() == null) {

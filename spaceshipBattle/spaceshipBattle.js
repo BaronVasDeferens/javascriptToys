@@ -252,3 +252,7 @@ document.addEventListener('keydown', (event) => {
 
     sceneManager.onKeyPressed(event);
 });
+
+document.addEventListener('visibilitychange', () => {
+    sceneManager.onVisibilityStateChanged(document.visibilityState)
+});

@@ -56,6 +56,10 @@ export class Scene {
 
     }
 
+    onVisibilityStateChanged(state) {
+
+    }
+
     update(delta) {
 
     }
@@ -112,9 +116,9 @@ export class StarfieldIntroScene extends Scene {
     }
 
     initializeStarfield() {
-        
+
         this.stars = [];
-        
+
         // Set up the starfield...
         let colorIntensity = [
             "#3e6cacff",
@@ -153,7 +157,22 @@ export class StarfieldIntroScene extends Scene {
     }
 
     onStop() {
+        this.stars = [];
+    }
 
+    onVisibilityStateChanged(state) {
+        switch (state) {
+            case 'visible':
+                this.onStart();
+                break;
+
+            case 'hidden':
+                this.onStop();
+                break;
+
+            default:
+                break;
+        }
     }
 
     update(delta) {

@@ -1,5 +1,5 @@
-import { BlinkEffectTransition, CheckerboardTransition } from "./transition.js";
-import { SceneType,  BlankScene, IntroScene, AnimationTestScene, GridMapScene } from "./scene.js"
+import { BlinkEffectTransition, CheckerboardTransition, FadeTransition } from "./transition.js";
+import { SceneType, BlankScene, IntroScene, AnimationTestScene, GridMapScene } from "./scene.js"
 
 
 
@@ -41,13 +41,20 @@ export class SceneManager {
                 //     500
                 // )
 
-                new CheckerboardTransition(
+                // new CheckerboardTransition(
+                //     this.getCurrentScene(),
+                //     this.sceneMap.get(newSceneType),
+                //     this.canvas,
+                //     500,
+                //     this.tileSize / 16,
+                //     "#272727ff"
+                // )
+
+                new FadeTransition(
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),
                     this.canvas,
                     500,
-                    this.tileSize / 16,
-                    "#272727ff"
                 )
 
             );

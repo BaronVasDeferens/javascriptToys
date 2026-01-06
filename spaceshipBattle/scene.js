@@ -96,22 +96,25 @@ export class BlankScene extends Scene {
 
 
 /**
- * INTRO SCENE
+ * STARFIELD INTRO SCENE
  * 
  * Re-rendered PNG over a moving starfield
  */
 
 
-export class IntroScene extends Scene {
+export class StarfieldIntroScene extends Scene {
 
     stars = [];
 
     constructor(canvas, assetManager, soundPlayer) {
-
         super(SceneType.INTRO, canvas, assetManager, soundPlayer);
-
         this.backgroundImage = assetManager.getImage(ImageAsset.INTRO_LOGO);
+    }
 
+    initializeStarfield() {
+        
+        this.stars = [];
+        
         // Set up the starfield...
         let colorIntensity = [
             "#3e6cacff",
@@ -138,7 +141,6 @@ export class IntroScene extends Scene {
                 }
             )
         }
-
     }
 
     randomInRange(min, max) {
@@ -147,7 +149,7 @@ export class IntroScene extends Scene {
     }
 
     onStart() {
-
+        this.initializeStarfield();
     }
 
     onStop() {

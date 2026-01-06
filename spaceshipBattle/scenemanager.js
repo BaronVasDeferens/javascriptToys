@@ -1,5 +1,5 @@
 import { BlinkEffectTransition, CheckerboardTransition, FadeTransition } from "./transition.js";
-import { SceneType, BlankScene, IntroScene, AnimationTestScene, GridMapScene } from "./scene.js"
+import { SceneType, BlankScene, AnimationTestScene, GridMapScene, StarfieldIntroScene } from "./scene.js"
 
 
 
@@ -23,7 +23,7 @@ export class SceneManager {
         // !!! IMPORTANT !!!
         // This method should only be called after the assetManager has been initialized!
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.INTRO, new IntroScene(this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.GRID_TEST, new GridMapScene(this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
     }
 

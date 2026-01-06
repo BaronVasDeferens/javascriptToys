@@ -111,4 +111,18 @@ export class GridMap {
             }
         })[0];
     }
+
+    getGridSquareAtClick(click) {
+        // columns: x
+        // rows : y
+
+        let column = Math.floor(click.x / this.tileSize);
+        let row = Math.floor(click.y / this.tileSize);
+
+        if (column > this.cols || row > this.rows) {
+            return;
+        }
+
+        return this.gridSquares[column].find(sq => sq.y === row);
+    }
 }

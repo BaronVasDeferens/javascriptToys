@@ -1,5 +1,5 @@
 import { ImageAsset } from "./assets.js";
-import { EntityExplosion, EntityFire } from "./entity.js";
+import { EntityBasic, EntityExplosion, EntityFire } from "./entity.js";
 import { GridMap } from "./gridmap.js";
 
 
@@ -204,19 +204,51 @@ export class IntroScene extends Scene {
     }
 }
 
+
+/**
+ * GRID MAP SCENE
+ * Movement and combat on a grid-based battlefield
+ */
 export class GridMapScene extends Scene {
 
     gridMap = null;
+    entities = [];
+
+    GamePhase = Object.freeze({
+        IDLE: "IDLE",
+        PLAYER_ENTITY_SELECTED: "PLAYER_ENTITY_SELECTED"
+    });
+
+    phase = this.GamePhase.IDLE;
+
+    selectedEntity = null;
+    selectedEntityGhost = null;
 
     constructor(tileSize, canvas, assetManager, soundPlayer) {
         super(SceneType.GRID_TEST, canvas, assetManager, soundPlayer);
-        
+
         this.tileSize = tileSize;
         this.gridMap = new GridMap(
             tileSize,
             canvas,
             assetManager
         )
+
+        for (let i = 0; i < 5; i++) {
+            this.entities.push(
+                new EntityBasic(
+                    this.randomInRange(tileSize, this.canvas.width - tileSize),
+                    this.randomInRange(tileSize, this.canvas.height - tileSize),
+                    assetManager
+                )
+            );
+        }
+
+    }
+
+    randomInRange(min, max) {
+        let range = Math.abs(max - min);
+        return Math.floor(Math.random() * range) + min
     }
 
     render(context) {
@@ -224,6 +256,71 @@ export class GridMapScene extends Scene {
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.gridMap.render(context);
+        this.entities.forEach(entity => {
+            entity.render(context);
+        });
+
+        if (this.selectedEntityGhost != null) {
+            this.selectedEntityGhost.render(context);
+        }
+    }
+
+    onMouseDown(click) {
+
+        if (this.phase == this.GamePhase.IDLE && this.selectedEntity == null) {
+            // find the entity under the mouse click
+            let candidate = this.entities.filter(entity => {
+                return entity.wasClicked(click)
+            })[0];
+
+            if (candidate != null) {
+                this.phase = this.GamePhase.PLAYER_ENTITY_SELECTED;
+                this.selectedEntity = candidate;
+                console.log(`Selected entity: ${candidate.x} ${candidate.y}`);
+                this.selectedEntityGhost = new EntityBasic(click.offsetX, click.offsetY, this.assetManager);
+                this.selectedEntity.setAlpha(0.25);
+            }
+        }
+    }
+
+    onMouseUp(click) {
+
+        switch (this.phase) {
+            case this.GamePhase.IDLE:
+                break;
+
+            case this.GamePhase.PLAYER_ENTITY_SELECTED:
+                this.selectedEntity.x = this.selectedEntityGhost.x;
+                this.selectedEntity.y = this.selectedEntityGhost.y;
+                this.selectedEntity.setAlpha(1.0);
+                this.selectedEntity = null;
+                this.selectedEntityGhost = null;
+                this.phase = this.GamePhase.IDLE;
+                break;
+        }
+
+
+    }
+
+    onMouseMove(event) {
+
+        switch (this.phase) {
+
+            case this.GamePhase.IDLE:
+                break;
+
+            case this.GamePhase.PLAYER_ENTITY_SELECTED:
+                this.selectedEntityGhost.x = event.offsetX;
+                this.selectedEntityGhost.y = event.offsetY;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    onKeyPressed(event) {
+
     }
 
 }

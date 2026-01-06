@@ -3,13 +3,15 @@ import { ImageAsset, SoundAsset } from "./assets.js";
 
 
 export class Entity {
+
     x = 0;
     y = 0;
+
     image = null;
     alpha = 1.0;
 
     deltaX = 0;             // pixels per second
-    deltaY = 64;             // pixels per second
+    deltaY = 0;             // pixels per second
 
     isOffScreen = false;
     isAlive = true;
@@ -20,6 +22,25 @@ export class Entity {
         this.image = image;
         this.imageHeight = image.height;
         this.imageWidth = image.width;
+    }
+
+    wasClicked(click) {
+        let x = click.offsetX;
+        let y = click.offsetY;
+
+        if (x > this.x && x < this.x + this.image.width) {
+            if (y > this.y && y < this.y + this.image.height) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    setAlpha(alpha) {
+        this.alpha = alpha;
     }
 
     setSpeedDelta(dX, dY) {
@@ -46,6 +67,14 @@ export class Entity {
     }
 }
 
+
+export class EntityBasic extends Entity {
+
+    constructor(x, y, assetManager) {
+        super(x, y, assetManager.getImage(ImageAsset.DINOSAUR_1))
+    }
+
+}
 
 
 export class EntityExplosion {

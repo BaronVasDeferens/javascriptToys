@@ -202,7 +202,9 @@ export class FadeTransition extends Transition {
     }
 
     render(context) {
+
         context.globalAlpha = 1.0;
+        
         if (this.progress < 0.50) {
             this.startScene.render(context);
             this.alpha = 2 * this.progress;
@@ -210,8 +212,6 @@ export class FadeTransition extends Transition {
             this.endScene.render(context);
             this.alpha = (1 - this.progress) * 2;
         }
-
-        console.log(`${this.progress} : ${this.alpha}`)
 
         context.globalAlpha = this.alpha;
         context.fillStyle = "#000000"

@@ -1,5 +1,5 @@
 import { ImageAsset } from "./assets.js";
-import { EntityBasic, EntityExplosion, EntityFire } from "./entity.js";
+import { Entity, EntityExplosion, EntityFire } from "./entity.js";
 import { GridMap } from "./gridmap.js";
 
 
@@ -101,8 +101,7 @@ export class BlankScene extends Scene {
 
 /**
  * STARFIELD INTRO SCENE
- * 
- * Re-rendered PNG over a moving starfield
+ * A moving starfield and graphic logo
  */
 
 
@@ -255,21 +254,38 @@ export class GridMapScene extends Scene {
             assetManager
         )
 
-        for (let i = 0; i < 5; i++) {
+        let creaturesImages = [
+            ImageAsset.DINOSAUR_1,
+            ImageAsset.DINOSAUR_2,
+            ImageAsset.ALIEN_1,
+            ImageAsset.ALIEN_2,
+            ImageAsset.ALIEN_3
+        ];
+        
+        this.shuffleArray(creaturesImages);
+
+        creaturesImages.forEach(imageAssetId => {
             this.entities.push(
-                new EntityBasic(
+                new Entity(
                     this.randomInRange(tileSize, this.canvas.width - tileSize),
                     this.randomInRange(tileSize, this.canvas.height - tileSize),
-                    assetManager
+                    assetManager.getImage(imageAssetId)
                 )
-            );
-        }
+            )
+        });
 
     }
 
     randomInRange(min, max) {
         let range = Math.abs(max - min);
         return Math.floor(Math.random() * range) + min
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
     }
 
     render(context) {
@@ -297,8 +313,8 @@ export class GridMapScene extends Scene {
             if (candidate != null) {
                 this.phase = this.GamePhase.PLAYER_ENTITY_SELECTED;
                 this.selectedEntity = candidate;
-                console.log(`Selected entity: ${candidate.x} ${candidate.y}`);
-                this.selectedEntityGhost = new EntityBasic(click.offsetX, click.offsetY, this.assetManager);
+                let coords = this.selectedEntity.getCenteredCoordsOnMouse(click);
+                this.selectedEntityGhost = new Entity(coords.x, coords.y, this.selectedEntity.image);
                 this.selectedEntity.setAlpha(0.25);
             }
         }
@@ -331,8 +347,9 @@ export class GridMapScene extends Scene {
                 break;
 
             case this.GamePhase.PLAYER_ENTITY_SELECTED:
-                this.selectedEntityGhost.x = event.offsetX;
-                this.selectedEntityGhost.y = event.offsetY;
+                let coords = this.selectedEntity.getCenteredCoordsOnMouse(event);
+                this.selectedEntityGhost.x = coords.x;
+                this.selectedEntityGhost.y = coords.y;
                 break;
 
             default:

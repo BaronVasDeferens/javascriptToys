@@ -1,4 +1,4 @@
-import { EntityBasic } from "./entity.js";
+
 
 
 
@@ -204,7 +204,7 @@ export class FadeTransition extends Transition {
     render(context) {
 
         context.globalAlpha = 1.0;
-        
+
         if (this.progress < 0.50) {
             this.startScene.render(context);
             this.alpha = 2 * this.progress;

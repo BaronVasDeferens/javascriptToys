@@ -55,6 +55,13 @@ export class Entity {
             && (otherEntity.y <= this.y + this.imageHeight)
     }
 
+    getCenteredCoordsOnMouse(event) {
+        return {
+            x: event.offsetX - (this.image.width / 2),
+            y: event.offsetY - (this.image.height / 2)
+        }
+    }
+
     update(delta) {
         this.x += (delta / 1000) * this.deltaX;
         this.y += (delta / 1000) * this.deltaY;
@@ -65,15 +72,6 @@ export class Entity {
         context.drawImage(this.image, this.x, this.y);
         context.globalAlpha = 1.0;
     }
-}
-
-
-export class EntityBasic extends Entity {
-
-    constructor(x, y, assetManager) {
-        super(x, y, assetManager.getImage(ImageAsset.DINOSAUR_1))
-    }
-
 }
 
 

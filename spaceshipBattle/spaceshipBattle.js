@@ -241,10 +241,14 @@ document.addEventListener('keydown', (event) => {
         case 'Escape':
             initialize();
             break;
-        case 'd':
-            toggleDebug();
+
+        case 's':
+            sceneManager.getCurrentScene().gridMap.clearConnections();
             break;
 
+        case 'd':
+            sceneManager.getCurrentScene().gridMap.computeConnections();
+            break;
 
         default:
             break;

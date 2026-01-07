@@ -245,6 +245,7 @@ export class GridMapScene extends Scene {
     selectedEntityGhost = null;
 
     constructor(tileSize, canvas, assetManager, soundPlayer) {
+
         super(SceneType.GRID_TEST, canvas, assetManager, soundPlayer);
 
         this.tileSize = tileSize;
@@ -252,7 +253,7 @@ export class GridMapScene extends Scene {
             tileSize,
             canvas,
             assetManager
-        )
+        );
 
         let creaturesImages = [
             ImageAsset.DINOSAUR_1,

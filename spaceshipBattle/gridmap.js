@@ -37,7 +37,7 @@ export class GridSquare {
         }
     }
 
-    getCenter() {
+    getCenterCoords() {
         let xCenter = (this.x * this.size) + (this.size / 2);
         let yCenter = (this.y * this.size) + (this.size / 2);
         return { x: xCenter, y: yCenter };
@@ -94,12 +94,145 @@ export class GridMap {
         this.allSquares = this.gridSquares.flat(arr => {
             arr.flat();
         }).flat();
+
+        this.clearConnections();
+
     }
+
+
+    clearConnections() {
+        this.connections = [];
+    }
+
+    computeConnections() {
+
+        let shuffledGrids = this.gridSquares.flat(arr => {
+            arr.flat();
+        }).flat();
+
+        this.shuffleArray(shuffledGrids);
+
+        this.connections = [];
+
+        while (shuffledGrids.length > 0) {
+
+            let start = shuffledGrids.pop();
+
+            for (let i = 0; i < 3; i++) {
+
+                let neighbors = this.getAdjacentSquares(start, true);
+                this.shuffleArray(neighbors);
+                let candidate = neighbors.pop();
+
+                let startCenter = start.getCenterCoords()
+                let endCenter = candidate.getCenterCoords();
+
+                this.connections.push(
+                    {
+                        x1: startCenter.x,
+                        y1: startCenter.y,
+                        x2: endCenter.x,
+                        y2: endCenter.y
+                    }
+                )
+
+                let index = neighbors.indexOf(candidate);
+                if (index > -1) {
+                    neighbors.splice(index, 1);
+                }
+
+                index = shuffledGrids.indexOf(candidate);
+                if (index > -1) {
+                    shuffledGrids.splice(index, 1);
+                }
+
+                start = candidate;
+            }
+
+        }
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    getAdjacentSquares(center, includeDiagonals) {
+
+        if (includeDiagonals == null) {
+            includeDiagonals = false;
+        }
+
+        let neighbors = [];
+
+        if (center.x + 1 < this.cols && this.gridSquares[center.x + 1][center.y] != undefined) {
+            neighbors.push(this.gridSquares[center.x + 1][center.y]);
+        }
+
+        if (center.x - 1 >= 0 && this.gridSquares[center.x - 1][center.y] != undefined) {
+            neighbors.push(this.gridSquares[center.x - 1][center.y]);
+        }
+
+        if (center.y + 1 < this.rows && this.gridSquares[center.x][center.y + 1] != undefined) {
+            neighbors.push(this.gridSquares[center.x][center.y + 1]);
+        }
+
+        if (center.y - 1 >= 0 && this.gridSquares[center.x][center.y - 1] != undefined) {
+            neighbors.push(this.gridSquares[center.x][center.y - 1]);
+        }
+
+        if (includeDiagonals == true) {
+
+            if (center.x + 1 < this.cols
+                && center.y + 1 < this.rows
+                && this.gridSquares[center.x + 1][center.y + 1] != undefined
+            ) {
+                neighbors.push(this.gridSquares[center.x + 1][center.y + 1]);
+            }
+
+            if (center.x - 1 >= 0
+                && center.y + 1 < this.rows
+                && this.gridSquares[center.x - 1][center.y + 1] != undefined) {
+                neighbors.push(this.gridSquares[center.x - 1][center.y + 1]);
+            }
+
+            if (center.x + 1 < this.cols
+                && center.y - 1 >= 0
+                && this.gridSquares[center.x + 1][center.y - 1] != undefined) {
+                neighbors.push(this.gridSquares[center.x + 1][center.y - 1]);
+            }
+
+            if (center.x - 1 >= 0
+                && center.y - 1 >= 0
+                && this.gridSquares[center.x - 1][center.y - 1] != undefined) {
+                neighbors.push(this.gridSquares[center.x][center.y - 1]);
+            }
+        }
+
+        return neighbors;
+    }
+
 
     render(context) {
         this.allSquares.forEach(square => {
             square.render(context);
         })
+
+        this.connections.forEach(connection => {
+            context.strokeStyle = "#FF0000";
+            context.lineWidth = 1.0;
+            context.globalAlpha = 1.0;
+            context.save();
+            context.beginPath();
+            context.moveTo(connection.x1, connection.y1);
+            context.lineTo(connection.x2, connection.y2);
+            context.stroke();
+            context.restore();
+            context.globalAlpha = 1.0;
+        })
+
     }
 
     getGridSquare(col, row) {

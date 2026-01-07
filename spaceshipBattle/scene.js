@@ -220,7 +220,12 @@ export class StarfieldIntroScene extends Scene {
             }
         });
 
-        context.drawImage(this.backgroundImage, 0, 0);
+        context.drawImage(
+            this.backgroundImage,
+            (this.canvas.width / 2) - (this.backgroundImage.width / 2),
+            (this.canvas.height / 2) - (this.backgroundImage.height / 2)
+
+        );
     }
 }
 

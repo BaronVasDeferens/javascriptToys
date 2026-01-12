@@ -1,4 +1,5 @@
 import { ImageAsset } from "./assets.js";
+import { MovementDriver } from "./driver.js";
 import { Entity, EntityExplosion, EntityFire } from "./entity.js";
 import { GridMap } from "./gridmap.js";
 
@@ -239,6 +240,8 @@ export class GridMapScene extends Scene {
     gridMap = null;
     entities = [];
 
+    drivers = [];
+
     GamePhase = Object.freeze({
         IDLE: "IDLE",
         PLAYER_ENTITY_SELECTED: "PLAYER_ENTITY_SELECTED"
@@ -267,7 +270,7 @@ export class GridMapScene extends Scene {
             ImageAsset.ALIEN_2,
             ImageAsset.ALIEN_3
         ];
-        
+
         this.shuffleArray(creaturesImages);
 
         creaturesImages.forEach(imageAssetId => {
@@ -293,6 +296,18 @@ export class GridMapScene extends Scene {
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
+
+
+    update(deltaMillis) {
+        if (this.drivers.length > 0) {
+            this.drivers[0].update(deltaMillis);
+        }
+
+        this.drivers = this.drivers.filter(driver => {
+            return !driver.isFinished
+        });
+    }
+
 
     render(context) {
         context.fillStyle = "#000000";
@@ -333,12 +348,28 @@ export class GridMapScene extends Scene {
                 break;
 
             case this.GamePhase.PLAYER_ENTITY_SELECTED:
-                this.selectedEntity.x = this.selectedEntityGhost.x;
-                this.selectedEntity.y = this.selectedEntityGhost.y;
+
+                // Place the selected entity...
                 this.selectedEntity.setAlpha(1.0);
+                this.drivers.push(
+
+                    new MovementDriver(
+                        this.selectedEntity,
+                        this.selectedEntityGhost.x,
+                        this.selectedEntityGhost.y,
+                        1000,
+                        function () {
+                            console.log("Done!")
+                        }
+                    )
+                )
+
                 this.selectedEntity = null;
-                this.selectedEntityGhost = null;
+                this.selectedEntityGhost = null
                 this.phase = this.GamePhase.IDLE;
+                break;
+
+            default:
                 break;
         }
 

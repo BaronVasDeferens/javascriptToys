@@ -105,8 +105,15 @@ export class BlankScene extends Scene {
  * A moving starfield and graphic logo
  */
 
-
 export class StarfieldIntroScene extends Scene {
+
+    // Set up the starfield...
+    colorIntensity = [
+        "#3e6cacff",
+        "#719fdfff",
+        "#e3eeffff",
+        "#ffffffff"
+    ];
 
     stars = [];
 
@@ -119,37 +126,41 @@ export class StarfieldIntroScene extends Scene {
 
         this.stars = [];
 
-        // Set up the starfield...
-        let colorIntensity = [
-            "#3e6cacff",
-            "#719fdfff",
-            "#e3eeffff",
-            "#ffffffff"
-        ]
 
-        for (let i = 0; i < 150; i++) {
-
-            let x = this.randomInRange(0, this.canvas.width);
-            let y = this.randomInRange(0, this.canvas.height);
-            let size = this.randomInRange(1, 3);
-            let speed = 15 * size;
-            let color = colorIntensity[size - 1];
-
+        // "Hyperspace" stars (Star Trek viewport style)
+        for (let i = 0; i < 300; i++) {
             this.stars.push(
-                {
-                    x: x,
-                    y: y,
-                    size: size,
-                    speed: speed,
-                    color: color,
-                }
+                this.createStar()
             )
+        };
+    }
+
+    createStar() {
+
+        let screenCenterX = this.canvas.width / 2;
+        let screenCenterY = this.canvas.height / 2;
+
+        let deltaX = this.randomInRange(-20, 20);
+        let deltaY = this.randomInRange(-20, 20);
+
+        let size = this.randomInRange(1, 3);
+        let speed = 30 * size;
+        let color = this.colorIntensity[size - 1];
+
+        return {
+            x: screenCenterX,
+            y: screenCenterY,
+            size: size,
+            speed: speed,
+            deltaX: deltaX,
+            deltaY: deltaY,
+            color: color
         }
     }
 
     randomInRange(min, max) {
         let range = Math.abs(max - min);
-        return Math.floor(Math.random() * max) + min;
+        return Math.floor(Math.random() * range) + min;
     }
 
     onStart() {
@@ -176,16 +187,29 @@ export class StarfieldIntroScene extends Scene {
     }
 
     update(delta) {
+
+        // "Hyperspace" stars
         this.stars.forEach(star => {
 
-            let distance = star.speed * (delta / 1000);
-            star.y = (star.y + distance);
+            star.x += star.deltaX * (delta / 1000) * star.size;
+            star.y += star.deltaY * (delta / 1000) * star.size;
 
-            if (star.y > this.canvas.height) {
-                star.y = 0;
-                star.x = this.randomInRange(0, this.canvas.width);
+            // Remove any star that has exited the viewport and add a new one
+            if (
+                star.x < 0
+                || star.x > this.canvas.width
+                || star.y < 0
+                || star.y > this.canvas.height) {
+
+                let index = this.stars.indexOf(star);
+                if (index > -1) {
+                    this.stars.splice(index, 1);
+                }
+
+                this.stars.push(this.createStar());
             }
-        })
+
+        });
     }
 
     onMouseDown(click) {
@@ -225,7 +249,6 @@ export class StarfieldIntroScene extends Scene {
             this.backgroundImage,
             (this.canvas.width / 2) - (this.backgroundImage.width / 2),
             (this.canvas.height / 2) - (this.backgroundImage.height / 2)
-
         );
     }
 }

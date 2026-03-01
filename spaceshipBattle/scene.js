@@ -144,7 +144,7 @@ export class StarfieldIntroScene extends Scene {
         let deltaY = this.randomInRange(-20, 20);
 
         let size = this.randomInRange(1, 3);
-        let speed = 30 * size;
+        let speed = 10 * size;
         let color = this.colorIntensity[size - 1];
 
         return {
@@ -191,8 +191,8 @@ export class StarfieldIntroScene extends Scene {
         // "Hyperspace" stars
         this.stars.forEach(star => {
 
-            star.x += star.deltaX * (delta / 1000) * star.size;
-            star.y += star.deltaY * (delta / 1000) * star.size;
+            star.x += star.deltaX * (delta / 1000) * star.speed;
+            star.y += star.deltaY * (delta / 1000) * star.speed;
 
             // Remove any star that has exited the viewport and add a new one
             if (

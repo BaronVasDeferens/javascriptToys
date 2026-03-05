@@ -126,7 +126,6 @@ export class StarfieldIntroScene extends Scene {
 
         this.stars = [];
 
-
         // "Hyperspace" stars (Star Trek viewport style)
         for (let i = 0; i < 300; i++) {
             this.stars.push(
@@ -140,12 +139,12 @@ export class StarfieldIntroScene extends Scene {
         let screenCenterX = this.canvas.width / 2;
         let screenCenterY = this.canvas.height / 2;
 
+        let size = this.randomInRange(1, 3);
+        let speed = 5 * size;
+        let color = this.colorIntensity[size - 1];
+
         let deltaX = this.randomInRange(-20, 20);
         let deltaY = this.randomInRange(-20, 20);
-
-        let size = this.randomInRange(1, 3);
-        let speed = 30 * size;
-        let color = this.colorIntensity[size - 1];
 
         return {
             x: screenCenterX,
@@ -188,11 +187,10 @@ export class StarfieldIntroScene extends Scene {
 
     update(delta) {
 
-        // "Hyperspace" stars
         this.stars.forEach(star => {
 
-            star.x += star.deltaX * (delta / 1000) * star.size;
-            star.y += star.deltaY * (delta / 1000) * star.size;
+            star.x += (star.speed * star.deltaX) * (delta / 1000);
+            star.y += (star.speed * star.deltaY) * (delta / 1000);
 
             // Remove any star that has exited the viewport and add a new one
             if (

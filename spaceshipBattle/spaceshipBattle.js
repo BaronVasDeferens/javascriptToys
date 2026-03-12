@@ -90,7 +90,7 @@ function updateStage(newStage) {
                 break;
 
             case Stage.GAME_ACTIVE:
-                sceneManager.setCurrentSceneType(SceneType.GRID_TEST);
+                sceneManager.setCurrentSceneType(SceneType.MAZE_SCENE);
                 break;
 
             default:
@@ -240,14 +240,6 @@ document.addEventListener('keydown', (event) => {
 
         case 'Escape':
             initialize();
-            break;
-
-        case 's':
-            sceneManager.getCurrentScene().gridMap.clearConnections();
-            break;
-
-        case 'd':
-            sceneManager.getCurrentScene().gridMap.computeConnections();
             break;
 
         default:

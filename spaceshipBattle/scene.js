@@ -14,6 +14,7 @@ export const SceneType = Object.freeze({
     SELECT_SQUAD: "SELECT_SQUAD",
     FIGHT_BATTLE: "FIGHT_BATTLE",
     AFTER_BATTLE: "AFTER_BATTLE",
+    MAZE_SCENE: "MAZE_SCENE"
 });
 
 

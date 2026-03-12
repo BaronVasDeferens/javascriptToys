@@ -1,5 +1,6 @@
 import { BlinkEffectTransition, CheckerboardTransition, FadeTransition } from "./transition.js";
 import { SceneType, BlankScene, AnimationTestScene, GridMapScene, StarfieldIntroScene } from "./scene.js"
+import { MazeScene } from "./maze_scene.js";
 
 
 
@@ -24,7 +25,7 @@ export class SceneManager {
         // This method should only be called after the assetManager has been initialized!
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.GRID_TEST, new GridMapScene(this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(20, 20, this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {

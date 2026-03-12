@@ -27,8 +27,6 @@ export class MazeScene extends Scene {
         this.mazeWindowWidth = canvas.width / tileSize;
         this.mazeWindowHeight = canvas.height / tileSize;
 
-        console.log(`${tileSize} ${this.mazeWindowWidth} ${this.mazeWindowHeight}`);
-
         this.initialize();
     }
 
@@ -146,12 +144,8 @@ export class MazeScene extends Scene {
                     // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
                     if (this.player.y < this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
                         
-                        console.log("A")
-
                         if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeRows) {
-                           
-                            console.log("B")
-                            
+                                                      
                             this.mazeWindowY--;
                             if (this.mazeWindowY < 0) {
                                 this.mazeWindowY = 0;
@@ -191,10 +185,11 @@ export class MazeScene extends Scene {
                 break;
 
             default:
-                console.log(event.key);
+                console.log(`unrecognized key: ${event.key}`);
+                break;
         }
 
-        console.log(`pxy: (${this.player.x}, ${this.player.y})  mwX: ${this.mazeWindowX} mwY: ${this.mazeWindowY}`)
+        // console.log(`pxy: (${this.player.x}, ${this.player.y})  mwX: ${this.mazeWindowX} mwY: ${this.mazeWindowY}`)
 
     }
 

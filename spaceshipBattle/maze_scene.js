@@ -8,9 +8,11 @@ export class MazeScene extends Scene {
 
     mazeArray = [];
     allRooms = [];
+    visibleRooms = [];
+    eventList = [];
 
-    mazeWindowWidth = 7;              // Number of maze squares visible on screen at any time
-    mazeWindowHeight = 7;
+    mazeWindowWidth = 0;              // Number of maze squares visible on screen at any time
+    mazeWindowHeight = 0;
     mazeWindowX = 0;                // array position/s of maze window
     mazeWindowY = 0;
 
@@ -37,7 +39,7 @@ export class MazeScene extends Scene {
             this.mazeArray[i] = new Array(this.mazeCols);
 
             for (let j = 0; j < this.mazeCols; j++) {
-                let room = new MazeRoom(i, j, false);
+                let room = new MazeRoom(i, j, this.tileSize, false);
                 this.allRooms.push(room);
                 this.mazeArray[i][j] = room;
             }
@@ -45,10 +47,16 @@ export class MazeScene extends Scene {
 
         this.createMaze();
 
+        for (let n = 0; n < 50; n++) {
+            this.eventList.push(
+                new MazeEvent(() => { console.log(`hey ${n}`) }, "#000000")
+            );
+        }
+        this.distributeEventsAcrossMap();
     }
 
     onStart() {
-
+        this.computeVisibleRooms();
     }
 
     onStop() {
@@ -76,7 +84,7 @@ export class MazeScene extends Scene {
             case "a":
             case "ArrowLeft":
                 maybeRoom = this.getRoom(this.player.y, this.player.x - 1);
-                if (maybeRoom.open == true) {
+                if (maybeRoom.isOpen == true) {
 
                     this.player.x--;
                     if (this.player.x < 0) {
@@ -84,13 +92,13 @@ export class MazeScene extends Scene {
                     }
 
                     //turnsMade++;
-                    //maybeRoom.triggerEvent();
+                    maybeRoom.triggerEventIfPresent();
 
                     // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
                     if (this.player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
-                                        
+
                         if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
-                            
+
                             this.mazeWindowX--;
                             if (this.mazeWindowX < 0) {
                                 this.mazeWindowX = 0;
@@ -98,21 +106,22 @@ export class MazeScene extends Scene {
                         }
                     }
                 }
+                this.computeVisibleRooms();
                 break;
 
             case "d":
             case "ArrowRight":
                 maybeRoom = this.getRoom(this.player.y, this.player.x + 1);
-                if (maybeRoom.open == true) {
+                if (maybeRoom.isOpen == true) {
 
                     this.player.x++;
-                
+
                     if (this.player.x >= this.mazeCols) {
                         this.player.x = this.mazeCols - 1;
                     }
 
                     //turnsMade++;
-                    //maybeRoom.triggerEvent();
+                    maybeRoom.triggerEventIfPresent();
 
                     // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
                     if (this.player.x > this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
@@ -126,12 +135,13 @@ export class MazeScene extends Scene {
                         }
                     }
                 }
+                this.computeVisibleRooms();
                 break;
 
             case "w":
             case "ArrowUp":
                 maybeRoom = this.getRoom(this.player.y - 1, this.player.x);
-                if (maybeRoom.open == true) {
+                if (maybeRoom.isOpen == true) {
 
                     this.player.y--;
                     if (this.player.y < 0) {
@@ -139,13 +149,13 @@ export class MazeScene extends Scene {
                     }
 
                     // turnsMade++;
-                    // maybeRoom.triggerEvent();
+                    maybeRoom.triggerEventIfPresent();
 
                     // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
                     if (this.player.y < this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
-                        
+
                         if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeRows) {
-                                                      
+
                             this.mazeWindowY--;
                             if (this.mazeWindowY < 0) {
                                 this.mazeWindowY = 0;
@@ -153,12 +163,13 @@ export class MazeScene extends Scene {
                         }
                     }
                 }
+                this.computeVisibleRooms();
                 break;
 
             case "s":
             case "ArrowDown":
                 maybeRoom = this.getRoom(this.player.y + 1, this.player.x);
-                if (maybeRoom.open == true) {
+                if (maybeRoom.isOpen == true) {
 
                     this.player.y++;
                     if (this.player.y >= this.mazeRows) {
@@ -166,7 +177,7 @@ export class MazeScene extends Scene {
                     }
 
                     // turnsMade++;
-                    // maybeRoom.triggerEvent();
+                    maybeRoom.triggerEventIfPresent();
 
                     // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
                     if (this.player.y > this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
@@ -174,14 +185,13 @@ export class MazeScene extends Scene {
                         if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeWindowHeight) {
 
                             this.mazeWindowY++;
-
                             if (this.mazeWindowY >= this.mazeRows - this.mazeWindowHeight) {
                                 this.mazeWindowY = this.mazeRows - this.mazeWindowHeight;
                             }
                         }
                     }
                 }
-
+                this.computeVisibleRooms();
                 break;
 
             default:
@@ -193,6 +203,10 @@ export class MazeScene extends Scene {
 
     }
 
+    computeVisibleRooms() {
+        this.visibleRooms = this.getMazeSubsection(this.mazeWindowY, this.mazeWindowX, this.mazeWindowWidth, this.mazeWindowHeight);
+    }
+
     onVisibilityStateChanged(state) {
 
     }
@@ -202,30 +216,14 @@ export class MazeScene extends Scene {
     }
 
     render(context) {
-        context.fillStyle = "#00FF00";
+        context.fillStyle = "#000000";
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawWindowedMaze(context);
-    }
 
-    drawWindowedMaze(context) {
-
-        let subRooms = this.getMazeSubsection(this.mazeWindowY, this.mazeWindowX, this.mazeWindowWidth, this.mazeWindowHeight);
-
-        subRooms.forEach(room => {
-
-            if (room.open) {
-                context.fillStyle = "#606060";
-            } else {
-                context.fillStyle = "#000000";
-            }
-
-            context.fillRect(
-                (room.col - this.mazeWindowX) * this.tileSize,
-                (room.row - this.mazeWindowY) * this.tileSize,
-                this.tileSize,
-                this.tileSize);
+        this.visibleRooms.forEach(room => {
+            room.render(context, this.mazeWindowX, this.mazeWindowY);
         });
 
+        // Render player token
         context.fillStyle = "#6E0000";
         context.fillRect(
             (this.player.x - this.mazeWindowX) * this.tileSize + (this.tileSize / 4),
@@ -233,6 +231,7 @@ export class MazeScene extends Scene {
             (this.tileSize / 2),
             (this.tileSize / 2)
         );
+
     }
 
     getRandomRoom() {
@@ -288,22 +287,22 @@ export class MazeScene extends Scene {
         let diag = this.getRoom(room.row - 1, room.col - 1);
 
         if (diag !== undefined) {
-            if (diag.open) { return true; }
+            if (diag.isOpen) { return true; }
         }
 
         diag = getRoom(room.row - 1, room.col + 1);
         if (diag !== undefined) {
-            if (diag.open) { return true; }
+            if (diag.isOpen) { return true; }
         }
 
         diag = getRoom(room.row + 1, room.col - 1);
         if (diag !== undefined) {
-            if (diag.open) { return true; }
+            if (diag.isOpen) { return true; }
         }
 
         diag = getRoom(room.row + 1, room.col + 1);
         if (diag !== undefined) {
-            if (diag.open) { return true; }
+            if (diag.isOpen) { return true; }
         }
 
         return false;
@@ -318,7 +317,7 @@ export class MazeScene extends Scene {
         // Define the "start room" and adjacent rooms...
         let startRoom = this.getRandomRoom();
         console.log("START " + startRoom.row + "," + startRoom.col);
-        startRoom.open = true;
+        startRoom.setIsOpen(true)
         inMaze.push(startRoom);
         reachable.push(startRoom);
 
@@ -350,13 +349,13 @@ export class MazeScene extends Scene {
 
             if (!inMaze.includes(newRoom)) {
 
-                // Disqualify any room whose diagonal is already open
+                // Disqualify any room whose diagonal is already isOpen
                 //                if (areDiagonalsOpen(newRoom)) {
                 //                    console.log("skipping " + newRoom.row + "," + newRoom.col);
                 //                    continue;
                 //                }
 
-                newRoom.open = true;
+                newRoom.setIsOpen(true);
                 inMaze.push(newRoom);
 
                 this.getAdjacentRooms(newRoom.row, newRoom.col).forEach(function (r) {
@@ -413,21 +412,18 @@ export class MazeScene extends Scene {
         return subRooms;
     }
 
+    distributeEventsAcrossMap() {
+        let rooms = this.allRooms.filter(room => { return room.isOpen == true });
+        this.shuffleArray(rooms);
+        let index = 0;
+        this.eventList.forEach(event => {
+            let room = rooms[index];
+            room.setEvent(event);
+            index++;
+        });
+    }
 }
 
-
-class MazeRoom {
-
-    row = 0;
-    col = 0;
-    isOpen = false;
-
-    constructor(row, col, isOpen) {
-        this.row = row;
-        this.col = col;
-        this.isOpen = isOpen;
-    }
-};
 
 class Player {
     x = 0;
@@ -438,3 +434,116 @@ class Player {
         this.y = y;
     }
 };
+
+class MazeRoom {
+
+    row = 0;
+    col = 0;
+    roomSize = 64;
+    isOpen = false;
+
+    event = null;
+
+    constructor(row, col, roomSize, isOpen) {
+        this.row = row;
+        this.col = col;
+        this.roomSize = roomSize;
+        this.setIsOpen(isOpen);
+    }
+
+    setIsOpen(isOpen) {
+        this.isOpen = isOpen;
+
+        if (this.isOpen == true) {
+            this.color = "#606060";
+        } else {
+            this.color = "#000000";
+        }
+    }
+
+    setEvent(event) {
+        this.event = event;
+        this.event.setRoom(this);
+    }
+
+    triggerEventIfPresent() {
+        if (this.event != null) {
+            this.event.triggerEvent();
+        }
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        // Draw a border
+        context.strokeStyle = "#000000"
+        context.strokeRect(
+            (this.col - mazeWindowX) * this.roomSize,
+            (this.row - mazeWindowY) * this.roomSize,
+            this.roomSize,
+            this.roomSize)
+
+        // Draw the room
+        context.fillStyle = this.color;
+        context.fillRect(
+            (this.col - mazeWindowX) * this.roomSize,
+            (this.row - mazeWindowY) * this.roomSize,
+            this.roomSize,
+            this.roomSize
+        );
+
+        if (this.event != null) {
+            this.event.render(context, mazeWindowX, mazeWindowY);
+        }
+    }
+
+};
+
+class MazeEvent {
+
+    onTrigger = null;
+    color = "#FF0000"
+    room = null;
+
+    isOneShot = true;
+    isActive = true;
+
+    constructor(onTrigger, color) {
+        this.onTrigger = onTrigger;
+        this.color = color;
+    }
+
+    setRoom(room) {
+        this.room = room;
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (this.isActive == false) {
+            return;
+        }
+
+        context.fillStyle = this.color;
+        context.lineWidth = 1.0;
+        context.beginPath();
+        context.ellipse(
+            ((this.room.col - mazeWindowX) * this.room.roomSize) + this.room.roomSize / 2,
+            ((this.room.row - mazeWindowY) * this.room.roomSize) + this.room.roomSize / 2,
+            this.room.roomSize / 4, this.room.roomSize / 4,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+    }
+
+    triggerEvent() {
+        if (this.isActive == true) {
+            this.onTrigger();
+            if (this.isOneShot == true) {
+                this.isActive = false;
+            }
+        }
+       
+    }
+
+
+}

@@ -1,6 +1,7 @@
 import { Scene, SceneType } from "./scene.js";
 import { ImageAsset } from "../assets.js";
 import { Entity } from "../entity.js"
+import { MovementDriver } from "../driver.js"
 
 /**
  * GRID MAP SCENE

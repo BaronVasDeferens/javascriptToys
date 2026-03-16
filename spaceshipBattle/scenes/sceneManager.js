@@ -27,7 +27,7 @@ export class SceneManager {
         // This method should only be called after the assetManager has been initialized!
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(50, 50, this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(this, 50, 50, this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.GRID_DRAGGER, new GridDraggerScene(this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
     }
 
@@ -130,19 +130,17 @@ export class SceneManager {
             return
         }
 
-            switch (event.key) {
+        switch (event.key) {
 
-        case 'Escape':
-            
-            break;
+            case 'Escape':
+                this.setCurrentSceneType(SceneType.MAZE_SCENE);
+                break;
 
-        default:
-            this.getCurrentScene().onKeyPressed(event);
-            break;
-    }
+            default:
+                this.getCurrentScene().onKeyPressed(event);
+                break;
+        }
 
-
-        
     }
 
     onVisibilityStateChanged(state) {

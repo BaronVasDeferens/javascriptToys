@@ -18,10 +18,11 @@ export class MazeScene extends Scene {
 
     player = new Player(2, 2);
 
-    constructor(mazeRows, mazeCols, tileSize, canvas, assetManager, soundPlayer) {
+    constructor(sceneManager, mazeRows, mazeCols, tileSize, canvas, assetManager, soundPlayer) {
 
         super(SceneType.MAZE_SCENE, canvas, assetManager, soundPlayer);
 
+        this.sceneManager = sceneManager;
         this.mazeRows = mazeRows;
         this.mazeCols = mazeCols;
         this.tileSize = tileSize;
@@ -50,7 +51,10 @@ export class MazeScene extends Scene {
         // CREATE EVENTS
         for (let n = 0; n < 50; n++) {
             this.eventList.push(
-                new MazeEvent(() => { console.log(`hey ${n}`) }, "#000000")
+                new MazeEvent(() => { 
+                    this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
+                }, 
+                "#000000")
             );
         }
 

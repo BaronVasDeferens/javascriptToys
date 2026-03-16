@@ -1,7 +1,7 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
 import { SoundPlayer } from "./sound.js";
 import { SceneType } from "./scenes/scene.js";
-import { SceneManager } from "./scenes/sceneManager.js";
+import { SceneManager } from "./scenes/scenemanager.js"
 
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------

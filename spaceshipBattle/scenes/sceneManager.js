@@ -1,8 +1,10 @@
-import { BlinkEffectTransition, CheckerboardTransition, FadeTransition } from "./transition.js";
-import { SceneType, BlankScene, AnimationTestScene, GridMapScene, StarfieldIntroScene } from "./scene.js"
-import { MazeScene } from "./maze_scene.js";
+import { BlinkEffectTransition, CheckerboardTransition, FadeTransition } from "../transition.js";
+import { Scene, SceneType } from "./scene.js"
 
-
+import { BlankScene } from "./blank.js";
+import { MazeScene } from "./maze.js";
+import { StarfieldIntroScene } from "./starfield.js"
+import { GridDraggerScene } from "./gridDragger.js";
 
 
 
@@ -26,6 +28,7 @@ export class SceneManager {
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvas, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(50, 50, this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.GRID_DRAGGER, new GridDraggerScene(this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {
@@ -123,16 +126,27 @@ export class SceneManager {
             return;
         }
 
-
         if (this.transitions.length > 0) {
             return
         }
 
-        this.getCurrentScene().onKeyPressed(event);
+            switch (event.key) {
+
+        case 'Escape':
+            
+            break;
+
+        default:
+            this.getCurrentScene().onKeyPressed(event);
+            break;
+    }
+
+
+        
     }
 
     onVisibilityStateChanged(state) {
-       
+
         if (this.getCurrentScene() == null) {
             return;
         }

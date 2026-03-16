@@ -1,7 +1,7 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
 import { SoundPlayer } from "./sound.js";
-import { SceneType } from "./scene.js";
-import { SceneManager } from "./scenemanager.js";
+import { SceneType } from "./scenes/scene.js";
+import { SceneManager } from "./scenes/sceneManager.js";
 
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------
@@ -36,7 +36,6 @@ var stage;
 var gameFont = null;
 
 var debugMode = false;
-
 
 var lastRenderMillis = Date.now();
 
@@ -147,10 +146,6 @@ function render(context) {
 }
 
 
-function renderHUD(context) {
-
-}
-
 // --- HELPER METHODS ---
 
 function toggleDebug() {
@@ -235,17 +230,6 @@ document.addEventListener('mouseup', (click) => {
 });
 
 document.addEventListener('keydown', (event) => {
-
-    switch (event.key) {
-
-        case 'Escape':
-            initialize();
-            break;
-
-        default:
-            break;
-    }
-
     sceneManager.onKeyPressed(event);
 });
 

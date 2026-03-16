@@ -1,5 +1,6 @@
-import { BlinkEffectTransition, CheckerboardTransition, FadeTransition } from "../transition.js";
-import { Scene, SceneType } from "./scene.js"
+import { FadeTransition } from "../transitions/fade.js";
+import { CheckerboardTransition } from "../transitions/checkerboard.js";
+import { SceneType } from "./scene.js"
 
 import { BlankScene } from "./blank.js";
 import { MazeScene } from "./maze.js";
@@ -37,6 +38,7 @@ export class SceneManager {
 
             // Create a transition
             this.transitions.push(
+                
                 // new BlinkEffectTransition(
                 //     this.getCurrentScene(),
                 //     this.sceneMap.get(newSceneType),
@@ -50,7 +52,7 @@ export class SceneManager {
                 //     this.sceneMap.get(newSceneType),
                 //     this.canvas,
                 //     500,
-                //     this.tileSize / 16,
+                //     this.tileSize,
                 //     "#272727ff"
                 // )
 

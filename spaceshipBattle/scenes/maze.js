@@ -1,3 +1,4 @@
+import { MovementDriver, MazeEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 
 
@@ -16,7 +17,9 @@ export class MazeScene extends Scene {
     mazeWindowX = 0;                // array position/s of maze window
     mazeWindowY = 0;
 
-    player = new Player(2, 2);
+    player = null;
+
+    movementDrivers = [];
 
     constructor(sceneManager, mazeRows, mazeCols, tileSize, canvas, assetManager, soundPlayer) {
 
@@ -51,15 +54,20 @@ export class MazeScene extends Scene {
         // CREATE EVENTS
         for (let n = 0; n < 50; n++) {
             this.eventList.push(
-                new MazeEvent(() => { 
+                new MazeEvent(() => {
                     this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
-                }, 
-                "#000000")
+                },
+                    "#000000")
             );
         }
 
+        this.player = new Player(2, 2, this.tileSize);
+
+
         // SCATTER EVENTS RANDOMLY ACROSS MAZE
         this.distributeEventsAcrossMap();
+
+        this.movementDrivers = [];
     }
 
     onStart() {
@@ -84,34 +92,55 @@ export class MazeScene extends Scene {
 
     onKeyPressed(event) {
 
-        let potentialRoom = null;
+        var potentialRoom = null;
 
         switch (event.key) {
 
             case "a":
             case "ArrowLeft":
                 potentialRoom = this.getRoom(this.player.y, this.player.x - 1);
-                if (potentialRoom.isOpen == true) {
+                if (potentialRoom != null && potentialRoom.isOpen == true) {
 
-                    this.player.x--;
-                    if (this.player.x < 0) {
-                        this.player.x = 0;
-                    }
+                    console.log("PUSH")
 
-                    //turnsMade++;
-                    potentialRoom.triggerEventIfPresent();
+                    this.movementDrivers.push(
 
-                    // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                    if (this.player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
+                        new MazeEntityMovementDriver(
+                            this.player,
+                            this.player.x - 1,
+                            this.player.y,
+                            potentialRoom,
+                            150,
 
-                        if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
+                            function (player, potentialRoom) {
 
-                            this.mazeWindowX--;
-                            if (this.mazeWindowX < 0) {
-                                this.mazeWindowX = 0;
+                                player.x = potentialRoom.col;
+                                player.y = potentialRoom.row;
+
+                                if (player.x < 0) {
+                                    player.x = 0;
+                                }
+
+                                //turnsMade++;
+                                potentialRoom.triggerEventIfPresent();
+
+                                console.log(`${JSON.stringify(player)}`)
+
+                                // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+                                // if (player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
+
+                                //     if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
+
+                                //         this.mazeWindowX--;
+                                //         if (this.mazeWindowX < 0) {
+                                //             this.mazeWindowX = 0;
+                                //         }
+                                //     }
+                                // }
                             }
-                        }
-                    }
+                        )
+                    )
+
                 }
                 this.computeVisibleRooms();
                 break;
@@ -220,6 +249,14 @@ export class MazeScene extends Scene {
 
     update(delta) {
 
+        let driver = this.movementDrivers[0];
+        if (driver != null) {
+            if (driver.isFinished == true) {
+                this.movementDrivers.shift()
+            } else {
+                driver.update(delta)
+            }
+        }
     }
 
     render(context) {
@@ -231,13 +268,7 @@ export class MazeScene extends Scene {
         });
 
         // Render player token
-        context.fillStyle = "#6E0000";
-        context.fillRect(
-            (this.player.x - this.mazeWindowX) * this.tileSize + (this.tileSize / 4),
-            (this.player.y - this.mazeWindowY) * this.tileSize + (this.tileSize / 4),
-            (this.tileSize / 2),
-            (this.tileSize / 2)
-        );
+        this.player.render(context, this.mazeWindowX, this.mazeWindowY)
 
     }
 
@@ -433,12 +464,26 @@ export class MazeScene extends Scene {
 
 
 class Player {
+
     x = 0;
     y = 0;
 
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    color = "#6E0000";
+
+    constructor(mazeCol, mazeRow, tileSize) {
+        this.x = mazeCol;
+        this.y = mazeRow;
+        this.tileSize = tileSize;
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+        context.fillStyle = this.color;
+        context.fillRect(
+            (this.x - mazeWindowX) * this.tileSize + (this.tileSize / 4),
+            (this.y - mazeWindowY) * this.tileSize + (this.tileSize / 4),
+            (this.tileSize / 2),
+            (this.tileSize / 2)
+        );
     }
 };
 
@@ -549,7 +594,7 @@ class MazeEvent {
                 this.isActive = false;
             }
         }
-       
+
     }
 
 

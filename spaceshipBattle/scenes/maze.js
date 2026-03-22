@@ -111,123 +111,121 @@ export class MazeScene extends Scene {
                             this.player.y,
                             potentialRoom,
                             150,
+                            () => {
+                                this.player.x = potentialRoom.col;
+                                this.player.y = potentialRoom.row;
+                                console.log(JSON.stringify(this.player));
 
-                            function (player, potentialRoom) {
-
-                                player.x = potentialRoom.col;
-                                player.y = potentialRoom.row;
-
-                                if (player.x < 0) {
-                                    player.x = 0;
+                                if (this.player.x < 0) {
+                                    this.player.x = 0;
                                 }
 
-                                //turnsMade++;
+
                                 potentialRoom.triggerEventIfPresent();
-
-                                console.log(`${JSON.stringify(player)}`)
-
-                                // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                                // if (player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
-
-                                //     if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
-
-                                //         this.mazeWindowX--;
-                                //         if (this.mazeWindowX < 0) {
-                                //             this.mazeWindowX = 0;
-                                //         }
-                                //     }
-                                // }
+                                this.centerWindowOnPlayer();
+                                this.computeVisibleRooms();
                             }
                         )
                     )
 
                 }
-                this.computeVisibleRooms();
+
                 break;
 
             case "d":
             case "ArrowRight":
                 potentialRoom = this.getRoom(this.player.y, this.player.x + 1);
-                if (potentialRoom.isOpen == true) {
+                if (potentialRoom != null && potentialRoom.isOpen == true) {
 
-                    this.player.x++;
+                    this.movementDrivers.push(
 
-                    if (this.player.x >= this.mazeCols) {
-                        this.player.x = this.mazeCols - 1;
-                    }
+                        new MazeEntityMovementDriver(
+                            this.player,
+                            this.player.x + 1,
+                            this.player.y,
+                            potentialRoom,
+                            150,
+                            () => {
+                                this.player.x = potentialRoom.col;
+                                this.player.y = potentialRoom.row;
 
-                    //turnsMade++;
-                    potentialRoom.triggerEventIfPresent();
+                                if (this.player.x >= this.mazeCols) {
+                                    this.player.x = this.mazeCols - 1;
+                                }
 
-                    // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                    if (this.player.x > this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
 
-                        if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
+                                potentialRoom.triggerEventIfPresent();
+                                this.centerWindowOnPlayer();
+                                this.computeVisibleRooms();
 
-                            this.mazeWindowX++;
-                            if (this.mazeWindowX >= this.mazeCols - this.mazeWindowWidth) {
-                                this.mazeWindowX = this.mazeCols - this.mazeWindowWidth;
                             }
-                        }
-                    }
+                        )
+                    )
                 }
-                this.computeVisibleRooms();
+
                 break;
 
             case "w":
             case "ArrowUp":
                 potentialRoom = this.getRoom(this.player.y - 1, this.player.x);
-                if (potentialRoom.isOpen == true) {
+                if (potentialRoom != null && potentialRoom.isOpen == true) {
 
-                    this.player.y--;
-                    if (this.player.y < 0) {
-                        this.player.y = 0;
-                    }
 
-                    // turnsMade++;
-                    potentialRoom.triggerEventIfPresent();
+                    this.movementDrivers.push(
 
-                    // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
-                    if (this.player.y < this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
+                        new MazeEntityMovementDriver(
+                            this.player,
+                            this.player.x,
+                            this.player.y - 1,
+                            potentialRoom,
+                            150,
+                            () => {
+                                this.player.x = potentialRoom.col;
+                                this.player.y = potentialRoom.row;
 
-                        if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeRows) {
+                                if (this.player.y < 0) {
+                                    this.player.y = 0;
+                                }
 
-                            this.mazeWindowY--;
-                            if (this.mazeWindowY < 0) {
-                                this.mazeWindowY = 0;
+
+                                potentialRoom.triggerEventIfPresent();
+                                this.centerWindowOnPlayer();
+                                this.computeVisibleRooms();
                             }
-                        }
-                    }
+                        )
+                    )
                 }
-                this.computeVisibleRooms();
                 break;
 
             case "s":
             case "ArrowDown":
                 potentialRoom = this.getRoom(this.player.y + 1, this.player.x);
-                if (potentialRoom.isOpen == true) {
+                if (potentialRoom != null && potentialRoom.isOpen == true) {
 
-                    this.player.y++;
-                    if (this.player.y >= this.mazeRows) {
-                        this.player.y = this.mazeRows - 1;
-                    }
 
-                    // turnsMade++;
-                    potentialRoom.triggerEventIfPresent();
+                    this.movementDrivers.push(
 
-                    // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
-                    if (this.player.y > this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
+                        new MazeEntityMovementDriver(
+                            this.player,
+                            this.player.x,
+                            this.player.y + 1,
+                            potentialRoom,
+                            150,
+                            () => {
+                                this.player.x = potentialRoom.col;
+                                this.player.y = potentialRoom.row;
 
-                        if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeWindowHeight) {
+                                if (this.player.y >= this.mazeRows) {
+                                    this.player.y = this.mazeRows - 1;
+                                }
 
-                            this.mazeWindowY++;
-                            if (this.mazeWindowY >= this.mazeRows - this.mazeWindowHeight) {
-                                this.mazeWindowY = this.mazeRows - this.mazeWindowHeight;
+                                potentialRoom.triggerEventIfPresent();
+                                this.centerWindowOnPlayer();
+                                this.computeVisibleRooms();
                             }
-                        }
-                    }
+                        )
+                    )
                 }
-                this.computeVisibleRooms();
                 break;
 
             default:
@@ -241,6 +239,53 @@ export class MazeScene extends Scene {
 
     computeVisibleRooms() {
         this.visibleRooms = this.getMazeSubsection(this.mazeWindowY, this.mazeWindowX, this.mazeWindowWidth, this.mazeWindowHeight);
+    }
+
+    centerWindowOnPlayer() {
+        // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+        if (this.player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
+            if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
+                this.mazeWindowX--;
+                if (this.mazeWindowX < 0) {
+                    this.mazeWindowX = 0;
+                }
+            }
+        }
+
+        // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+        if (this.player.x > this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
+            if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
+
+                this.mazeWindowX++;
+                if (this.mazeWindowX >= this.mazeCols - this.mazeWindowWidth) {
+                    this.mazeWindowX = this.mazeCols - this.mazeWindowWidth;
+                }
+            }
+        }
+
+        // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
+        if (this.player.y < this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
+
+            if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeRows) {
+
+                this.mazeWindowY--;
+                if (this.mazeWindowY < 0) {
+                    this.mazeWindowY = 0;
+                }
+            }
+        }
+
+        // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
+        if (this.player.y > this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
+
+            if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeWindowHeight) {
+
+                this.mazeWindowY++;
+                if (this.mazeWindowY >= this.mazeRows - this.mazeWindowHeight) {
+                    this.mazeWindowY = this.mazeRows - this.mazeWindowHeight;
+                }
+            }
+        }
     }
 
     onVisibilityStateChanged(state) {

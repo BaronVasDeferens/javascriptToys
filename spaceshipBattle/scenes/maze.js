@@ -19,6 +19,8 @@ export class MazeScene extends Scene {
 
     player = null;
 
+    movementRateDefaultMillis = 100;      // time to traverse from one grid section to the next 
+
     movementDrivers = [];
 
     constructor(sceneManager, mazeCols, mazeRows, tileSize, canvas, assetManager, soundPlayer) {
@@ -77,8 +79,6 @@ export class MazeScene extends Scene {
             }
         }).filter(room => { return (room.isOpen == true) && (room.event == null) })[0];
 
-        console.log(`playerStartRoom: ${JSON.stringify(playerStartRoom)}`);
-
         this.player = new Player(
             playerStartRoom.col,
             playerStartRoom.row,
@@ -117,16 +117,13 @@ export class MazeScene extends Scene {
                 potentialRoom = this.getRoom(this.player.y, this.player.x - 1);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
-                    console.log("PUSH")
-
                     this.movementDrivers.push(
-
                         new MazeEntityMovementDriver(
                             this.player,
                             this.player.x - 1,
                             this.player.y,
                             potentialRoom,
-                            150,
+                            this.movementRateDefaultMillis,
                             () => {
                                 // onUpdate
                             },
@@ -156,16 +153,14 @@ export class MazeScene extends Scene {
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
-
                         new MazeEntityMovementDriver(
                             this.player,
                             this.player.x + 1,
                             this.player.y,
                             potentialRoom,
-                            150,
+                            this.movementRateDefaultMillis,
                             () => {
                                 // onUpdate
-
                             },
                             () => {
                                 // onComplete
@@ -194,16 +189,14 @@ export class MazeScene extends Scene {
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
-
                         new MazeEntityMovementDriver(
                             this.player,
                             this.player.x,
                             this.player.y - 1,
                             potentialRoom,
-                            150,
+                            this.movementRateDefaultMillis,
                             () => {
                                 // onUpdate
-
                             },
                             () => {
                                 // onComplete
@@ -229,16 +222,14 @@ export class MazeScene extends Scene {
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
-
                         new MazeEntityMovementDriver(
                             this.player,
                             this.player.x,
                             this.player.y + 1,
                             potentialRoom,
-                            150,
+                            this.movementRateDefaultMillis,
                             () => {
                                 // onUpdate
-
                             },
                             () => {
                                 // onComplete
@@ -262,8 +253,6 @@ export class MazeScene extends Scene {
                 console.log(`unrecognized key: ${event.key}`);
                 break;
         }
-
-        // console.log(`pxy: (${this.player.x}, ${this.player.y})  mwX: ${this.mazeWindowX} mwY: ${this.mazeWindowY}`)
 
     }
 
@@ -319,7 +308,6 @@ export class MazeScene extends Scene {
     }
 
     update(delta) {
-
         let driver = this.movementDrivers[0];
         if (driver != null) {
             if (driver.isFinished == true) {

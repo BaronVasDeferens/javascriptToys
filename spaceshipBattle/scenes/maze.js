@@ -277,28 +277,30 @@ export class MazeScene extends Scene {
          */
 
         let playerRoom = this.getRoom(this.player.y, this.player.x);
-        let visibilityMap = this.eventList.map(evt => {
-            let eventRoom = evt.room;
-            let result = {
-                event: evt,
-                isVisible: this.calculateLineOfSight(playerRoom, eventRoom)
-            }
-
-            let playerCenter = playerRoom.getCenter();
-            let targetCenter = eventRoom.getCenter();
-
-            this.lineOfSightLines.push(
-                {
-                    startX: playerCenter.x,
-                    startY: playerCenter.y,
-                    endX: targetCenter.x,
-                    endY: targetCenter.y,
-                    isVisible: result.isVisible
+        let visibilityMap = this.eventList
+            .filter(evt => { return evt.isActive == true })
+            .map(evt => {
+                let eventRoom = evt.room;
+                let result = {
+                    event: evt,
+                    isVisible: this.calculateLineOfSight(playerRoom, eventRoom)
                 }
-            )
 
-            return result;
-        });
+                let playerCenter = playerRoom.getCenter();
+                let targetCenter = eventRoom.getCenter();
+
+                this.lineOfSightLines.push(
+                    {
+                        startX: playerCenter.x,
+                        startY: playerCenter.y,
+                        endX: targetCenter.x,
+                        endY: targetCenter.y,
+                        isVisible: result.isVisible
+                    }
+                )
+
+                return result;
+            });
 
         return visibilityMap;
     }

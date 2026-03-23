@@ -24,7 +24,7 @@ export class MazeScene extends Scene {
 
     movementDrivers = [];
 
-
+    debugShowLineOfSight = false;
     lineOfSightLines = [];
 
     constructor(sceneManager, mazeCols, mazeRows, tileSize, canvas, assetManager, soundPlayer) {
@@ -253,6 +253,11 @@ export class MazeScene extends Scene {
                 }
                 break;
 
+            case 'l':
+                // Los sight lines on/off
+                this.debugShowLineOfSight = !this.debugShowLineOfSight;
+                break;
+    
             default:
                 console.log(`unrecognized key: ${event.key}`);
                 break;
@@ -448,22 +453,23 @@ export class MazeScene extends Scene {
         this.player.render(context, this.mazeWindowX, this.mazeWindowY)
 
         // render LOS
-        this.lineOfSightLines.forEach(line => {
-            if (line.isVisible == true) {
-                context.strokeStyle = "#00FF00";
-            } else {
-                context.strokeStyle = "#FF0000";
-            }
+        if (this.debugShowLineOfSight == true) {
+            this.lineOfSightLines.forEach(line => {
+                if (line.isVisible == true) {
+                    context.strokeStyle = "#00FF00";
+                } else {
+                    context.strokeStyle = "#FF0000";
+                }
 
-            context.lineWidth = this.lineWidth;
-            context.save();
-            context.beginPath();
-            context.moveTo(line.startX, line.startY);
-            context.lineTo(line.endX, line.endY);
-            context.stroke();
-            context.restore();
-        })
-
+                context.lineWidth = 1.0;
+                context.save();
+                context.beginPath();
+                context.moveTo(line.startX, line.startY);
+                context.lineTo(line.endX, line.endY);
+                context.stroke();
+                context.restore();
+            })
+        }
     }
 
     getRandomRoom() {

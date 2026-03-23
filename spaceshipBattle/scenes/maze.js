@@ -21,7 +21,7 @@ export class MazeScene extends Scene {
 
     movementDrivers = [];
 
-    constructor(sceneManager, mazeRows, mazeCols, tileSize, canvas, assetManager, soundPlayer) {
+    constructor(sceneManager, mazeCols, mazeRows, tileSize, canvas, assetManager, soundPlayer) {
 
         super(SceneType.MAZE_SCENE, canvas, assetManager, soundPlayer);
 
@@ -38,6 +38,8 @@ export class MazeScene extends Scene {
 
     initialize() {
 
+        this.movementDrivers = [];
+
         // CREATE ROOMS
         for (let i = 0; i < this.mazeRows; i++) {
             this.mazeArray[i] = new Array(this.mazeCols);
@@ -52,7 +54,7 @@ export class MazeScene extends Scene {
         this.createMaze();
 
         // CREATE EVENTS
-        for (let n = 0; n < 50; n++) {
+        for (let n = 0; n < 5; n++) {
             this.eventList.push(
                 new MazeEvent(() => {
                     this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
@@ -61,13 +63,27 @@ export class MazeScene extends Scene {
             );
         }
 
-        this.player = new Player(2, 2, this.tileSize);
-
-
         // SCATTER EVENTS RANDOMLY ACROSS MAZE
         this.distributeEventsAcrossMap();
 
-        this.movementDrivers = [];
+        // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
+        let playerStartRoom = this.allRooms.sort((a, b) => {
+            if ((a.x + a.y) < (b.x + b.y)) {
+                return -1;
+            } else if ((a.x + a.y) > (b.x + b.y)) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }).filter(room => { return (room.isOpen == true) && (room.event == null) })[0];
+
+        console.log(`playerStartRoom: ${JSON.stringify(playerStartRoom)}`);
+
+        this.player = new Player(
+            playerStartRoom.col,
+            playerStartRoom.row,
+            this.tileSize
+        );
     }
 
     onStart() {
@@ -177,7 +193,6 @@ export class MazeScene extends Scene {
                 potentialRoom = this.getRoom(this.player.y - 1, this.player.x);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
-
                     this.movementDrivers.push(
 
                         new MazeEntityMovementDriver(
@@ -212,7 +227,6 @@ export class MazeScene extends Scene {
             case "ArrowDown":
                 potentialRoom = this.getRoom(this.player.y + 1, this.player.x);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
-
 
                     this.movementDrivers.push(
 

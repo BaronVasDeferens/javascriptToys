@@ -1,3 +1,4 @@
+import { SoundAsset } from "../assets.js";
 import { MovementDriver, MazeEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 
@@ -23,6 +24,9 @@ export class MazeScene extends Scene {
 
     movementDrivers = [];
 
+
+    lineOfSightLines = [];
+
     constructor(sceneManager, mazeCols, mazeRows, tileSize, canvas, assetManager, soundPlayer) {
 
         super(SceneType.MAZE_SCENE, canvas, assetManager, soundPlayer);
@@ -41,6 +45,7 @@ export class MazeScene extends Scene {
     initialize() {
 
         this.movementDrivers = [];
+        this.lineOfSightLines = [];
 
         // CREATE ROOMS
         for (let i = 0; i < this.mazeRows; i++) {
@@ -87,7 +92,7 @@ export class MazeScene extends Scene {
     }
 
     onStart() {
-        this.computeVisibleRooms();
+        this.computeMazeWindow();
     }
 
     onStop() {
@@ -138,11 +143,10 @@ export class MazeScene extends Scene {
 
                                 potentialRoom.triggerEventIfPresent();
                                 this.centerWindowOnPlayer();
-                                this.computeVisibleRooms();
+                                this.computeMazeWindow();
                             }
                         )
                     )
-
                 }
 
                 break;
@@ -173,7 +177,7 @@ export class MazeScene extends Scene {
 
                                 potentialRoom.triggerEventIfPresent();
 
-                                this.computeVisibleRooms();
+                                this.computeMazeWindow();
                                 this.centerWindowOnPlayer();
 
                             }
@@ -209,7 +213,7 @@ export class MazeScene extends Scene {
 
                                 potentialRoom.triggerEventIfPresent();
                                 this.centerWindowOnPlayer();
-                                this.computeVisibleRooms();
+                                this.computeMazeWindow();
                             }
                         )
                     )
@@ -242,7 +246,7 @@ export class MazeScene extends Scene {
 
                                 potentialRoom.triggerEventIfPresent();
                                 this.centerWindowOnPlayer();
-                                this.computeVisibleRooms();
+                                this.computeMazeWindow();
                             }
                         )
                     )
@@ -256,8 +260,120 @@ export class MazeScene extends Scene {
 
     }
 
-    computeVisibleRooms() {
+    computeMazeWindow() {
         this.visibleRooms = this.getMazeSubsection(this.mazeWindowY, this.mazeWindowX, this.mazeWindowWidth, this.mazeWindowHeight);
+        this.computeEntityVisibility();
+    }
+
+    computeEntityVisibility() {
+
+        this.lineOfSightLines = [];
+
+        /**
+         * Computes line of sight (LOS) to other things in the maze.
+         * From the player's position, draw lines to each event and entity.
+         * If any such line crosss through a grid square that is block (open == false),
+         * then no LOS can be established to that entity/event.
+         */
+
+        let playerRoom = this.getRoom(this.player.y, this.player.x);
+        let visibilityMap = this.eventList.map(evt => {
+            let eventRoom = evt.room;
+            let result = {
+                event: evt,
+                isVisible: this.calculateLineOfSight(playerRoom, eventRoom)
+            }
+
+            let playerCenter = playerRoom.getCenter();
+            let targetCenter = eventRoom.getCenter();
+
+            this.lineOfSightLines.push(
+                {
+                    startX: playerCenter.x,
+                    startY: playerCenter.y,
+                    endX: targetCenter.x,
+                    endY: targetCenter.y,
+                    isVisible: result.isVisible
+                }
+            )
+
+            return result;
+        });
+
+        return visibilityMap;
+    }
+
+    calculateLineOfSight(origin, target) {
+
+        /**
+         * Draw a line of sight (LOS) from the center of one grid square (origin) to the another (target).
+         * Next, "sub-sample" points from the line at regular intervals and find any squares that contain
+         * the those points.
+         * 
+         * Returns TRUE if there exists LOS between the two squares;
+         * FALSE if obstructed
+         */
+
+        let pathSquares = new Set();
+
+        let rise = target.row - origin.row;                     // vertical difference: rise
+        let run = target.col - origin.col;                      // horizontal difference: run
+        let theta = Math.atan(Math.abs(rise) / Math.abs(run));
+
+        let deltaX = Math.cos(theta) * (this.tileSize / 4);
+        if (run < 0 && deltaX > 0) {
+            deltaX = deltaX * -1;
+        }
+
+        let deltaY = Math.sin(theta) * (this.tileSize / 4);
+        if (rise < 0 && deltaY > 0) {
+            deltaY = deltaY * -1;
+        }
+
+        let candidate = origin;
+
+        let zPoint = {
+            x: candidate.getCenter().x + deltaX,
+            y: candidate.getCenter().y + deltaY
+        };
+
+        while (candidate != target) {
+
+            zPoint = {
+                x: zPoint.x + deltaX,
+                y: zPoint.y + deltaY
+            };
+
+            let nextSquare = this.findMazeRoomAtPoint(zPoint);
+
+            if (nextSquare == null) {
+                break;
+            }
+
+            if (candidate != target && candidate != origin) {
+                pathSquares.add(candidate);
+            }
+
+            candidate = nextSquare;
+        }
+
+        return Array.from(pathSquares).every(room => { return room.isOpen == true })
+    }
+
+    findMazeRoomAtPoint(event) {
+
+        // columns: x
+        // rows : y
+
+        let column = Math.floor(event.x / this.tileSize);
+        let row = Math.floor(event.y / this.tileSize);
+
+        if (column > this.mazeCols || row > this.mazeRows) {
+            return;
+        }
+
+        let target = this.mazeArray[row].find(sq => sq.col === column);
+        return target;
     }
 
     centerWindowOnPlayer() {
@@ -328,6 +444,23 @@ export class MazeScene extends Scene {
 
         // Render player token
         this.player.render(context, this.mazeWindowX, this.mazeWindowY)
+
+        // render LOS
+        this.lineOfSightLines.forEach(line => {
+            if (line.isVisible == true) {
+                context.strokeStyle = "#00FF00";
+            } else {
+                context.strokeStyle = "#FF0000";
+            }
+
+            context.lineWidth = this.lineWidth;
+            context.save();
+            context.beginPath();
+            context.moveTo(line.startX, line.startY);
+            context.lineTo(line.endX, line.endY);
+            context.stroke();
+            context.restore();
+        })
 
     }
 
@@ -581,6 +714,12 @@ class MazeRoom {
         if (this.event != null) {
             this.event.triggerEvent();
         }
+    }
+
+    getCenter() {
+        let xCenter = (this.col * this.roomSize) + (this.roomSize / 2);
+        let yCenter = (this.row * this.roomSize) + (this.roomSize / 2);
+        return { x: xCenter, y: yCenter };
     }
 
     render(context, mazeWindowX, mazeWindowY) {

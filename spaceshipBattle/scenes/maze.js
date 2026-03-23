@@ -112,14 +112,16 @@ export class MazeScene extends Scene {
                             potentialRoom,
                             150,
                             () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
                                 this.player.x = potentialRoom.col;
                                 this.player.y = potentialRoom.row;
-                                console.log(JSON.stringify(this.player));
 
                                 if (this.player.x < 0) {
                                     this.player.x = 0;
                                 }
-
 
                                 potentialRoom.triggerEventIfPresent();
                                 this.centerWindowOnPlayer();
@@ -146,6 +148,11 @@ export class MazeScene extends Scene {
                             potentialRoom,
                             150,
                             () => {
+                                // onUpdate
+
+                            },
+                            () => {
+                                // onComplete
                                 this.player.x = potentialRoom.col;
                                 this.player.y = potentialRoom.row;
 
@@ -153,10 +160,10 @@ export class MazeScene extends Scene {
                                     this.player.x = this.mazeCols - 1;
                                 }
 
-
                                 potentialRoom.triggerEventIfPresent();
-                                this.centerWindowOnPlayer();
+
                                 this.computeVisibleRooms();
+                                this.centerWindowOnPlayer();
 
                             }
                         )
@@ -180,13 +187,17 @@ export class MazeScene extends Scene {
                             potentialRoom,
                             150,
                             () => {
+                                // onUpdate
+
+                            },
+                            () => {
+                                // onComplete
                                 this.player.x = potentialRoom.col;
                                 this.player.y = potentialRoom.row;
 
                                 if (this.player.y < 0) {
                                     this.player.y = 0;
                                 }
-
 
                                 potentialRoom.triggerEventIfPresent();
                                 this.centerWindowOnPlayer();
@@ -212,6 +223,11 @@ export class MazeScene extends Scene {
                             potentialRoom,
                             150,
                             () => {
+                                // onUpdate
+
+                            },
+                            () => {
+                                // onComplete
                                 this.player.x = potentialRoom.col;
                                 this.player.y = potentialRoom.row;
 
@@ -242,6 +258,7 @@ export class MazeScene extends Scene {
     }
 
     centerWindowOnPlayer() {
+
         // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
         if (this.player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
             if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
@@ -255,7 +272,6 @@ export class MazeScene extends Scene {
         // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
         if (this.player.x > this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
             if (this.mazeWindowX >= 0 && this.mazeWindowX < this.mazeCols) {
-
                 this.mazeWindowX++;
                 if (this.mazeWindowX >= this.mazeCols - this.mazeWindowWidth) {
                     this.mazeWindowX = this.mazeCols - this.mazeWindowWidth;
@@ -265,9 +281,7 @@ export class MazeScene extends Scene {
 
         // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
         if (this.player.y < this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
-
             if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeRows) {
-
                 this.mazeWindowY--;
                 if (this.mazeWindowY < 0) {
                     this.mazeWindowY = 0;
@@ -277,9 +291,7 @@ export class MazeScene extends Scene {
 
         // Only move the window if the player's y position is at least 1/2 of the mazeWindowSize
         if (this.player.y > this.mazeWindowY + Math.floor(this.mazeWindowHeight / 2)) {
-
             if (this.mazeWindowY >= 0 && this.mazeWindowY < this.mazeWindowHeight) {
-
                 this.mazeWindowY++;
                 if (this.mazeWindowY >= this.mazeRows - this.mazeWindowHeight) {
                     this.mazeWindowY = this.mazeRows - this.mazeWindowHeight;

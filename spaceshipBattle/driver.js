@@ -45,12 +45,13 @@ export class MazeEntityMovementDriver {
     progress = 0;
     totalTimeMillis = 0;
 
-    constructor(entity, destinationX, destinationY, destinationRoom, durationMillis, onComplete) {
+    constructor(entity, destinationX, destinationY, destinationRoom, durationMillis, onUpdate, onComplete) {
         this.entity = entity;
         this.destinationX = destinationX;
         this.destinationY = destinationY;
         this.destinationRoom = destinationRoom;
         this.durationMillis = durationMillis;
+        this.onUpdate = onUpdate;
         this.onComplete = onComplete;
 
         this.totalDistanceX = (this.destinationX - this.entity.x);
@@ -64,6 +65,8 @@ export class MazeEntityMovementDriver {
         if (this.isFinished == true) {
             return;
         }
+
+        this.onUpdate();
 
         this.totalTimeMillis += deltaMillis;
         //let percentUpdate = this.totalTimeMillis / this.durationMillis;

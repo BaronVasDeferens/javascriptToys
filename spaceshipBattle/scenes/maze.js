@@ -148,8 +148,8 @@ export class MazeScene extends Scene {
                                 }
 
                                 potentialRoom.triggerEventIfPresent();
-                                this.centerWindowOnPlayer();
-                                //this.computeMazeWindow();
+                                //this.centerWindowOnPlayer();
+                                this.computeMazeWindow();
                             }
                         )
                     )

@@ -58,8 +58,6 @@ export class MazeEntityMovementDriver {
         this.totalDistanceY = (this.destinationY - this.entity.y);
         this.speedX = this.totalDistanceX / this.durationMillis;
         this.speedY = this.totalDistanceY / this.durationMillis;
-
-        console.log(`mvdrv: ${this.destinationX} ${this.destinationY}`)
     }
 
     update(deltaMillis) {

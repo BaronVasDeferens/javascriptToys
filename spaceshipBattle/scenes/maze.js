@@ -692,7 +692,6 @@ class Player {
         this.col = this.room.col;
         this.x = this.col * this.tileSize;
         this.y = this.row * this.tileSize;
-        console.log(`room set r/c:${this.row} ${this.col}`)
     }
 
     render(context) {

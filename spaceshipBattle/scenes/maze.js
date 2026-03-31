@@ -2,6 +2,7 @@ import { SoundAsset } from "../assets.js";
 import { MovementDriver, MazeEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Entity } from "../entity/entity.js";
+import { EnemyEntity } from "../entity/entity_enemy.js";
 
 
 
@@ -14,6 +15,7 @@ export class MazeScene extends Scene {
     visibleRooms = [];
     eventList = [];
 
+    numEnemyEntities = 5;
     entitiesEnemy = [];
 
     mazeWindowWidth = 0;              // Number of maze squares visible on screen at any time
@@ -93,6 +95,14 @@ export class MazeScene extends Scene {
                 return 0;
             }
         }).filter(room => { return (room.isOpen == true) && (room.event == null) })[0];
+
+
+        // Create enemy entities
+        for (let n = 0; n < this.numEnemyEntities; n++) {
+            this.entitiesEnemy.push(new MazeMonster(this.tileSize));
+            this.distributeAcrossOpenRooms(this.entitiesEnemy);
+        }
+
 
         this.player = new Player(
             playerStartRoom,
@@ -455,6 +465,11 @@ export class MazeScene extends Scene {
             room.render(context, this.mazeWindowX, this.mazeWindowY);
         });
 
+        // Render enemies
+        this.entitiesEnemy.forEach( monster => {
+            monster.render(context, this.mazeWindowX, this.mazeWindowY);
+        })
+
         // Render player token
         this.player.render(context, this.mazeWindowX, this.mazeWindowY)
 
@@ -670,6 +685,7 @@ export class MazeScene extends Scene {
                 room.setEvent(object);
             } else if (object instanceof MazeMonster) {
                 room.setOccupant(object);
+                object.setRoom(room);
             }
         });
     }
@@ -802,15 +818,14 @@ class MazeMonster {
     room = null;
     color = "#00FF00"
 
-    constructor(room, tileSize) {
-        this.room = room;
+    constructor(tileSize) {
         this.tileSize = tileSize;
-        this.x = this.room.col * this.tileSize;
-        this.y = this.room.row * this.tileSize;
     }
 
     setRoom(room) {
         this.room = room;
+        this.x = this.room.col * this.tileSize;
+        this.y = this.room.row * this.tileSize;
     }
 
     render(context, mazeWindowX, mazeWindowY) {

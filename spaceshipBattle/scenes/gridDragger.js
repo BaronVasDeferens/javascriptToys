@@ -1,6 +1,6 @@
 import { Scene, SceneType } from "./scene.js";
 import { ImageAsset } from "../assets.js";
-import { Entity } from "../entity.js"
+import { Entity } from "../entity/entity.js"
 import { MovementDriver } from "../driver.js"
 
 /**

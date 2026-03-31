@@ -1,6 +1,7 @@
 import { SoundAsset } from "../assets.js";
 import { MovementDriver, MazeEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
+import { Entity } from "../entity/entity.js";
 
 
 
@@ -12,6 +13,8 @@ export class MazeScene extends Scene {
     allRooms = [];
     visibleRooms = [];
     eventList = [];
+
+    entitiesEnemy = [];
 
     mazeWindowWidth = 0;              // Number of maze squares visible on screen at any time
     mazeWindowHeight = 0;
@@ -44,8 +47,15 @@ export class MazeScene extends Scene {
 
     initialize() {
 
+        this.eventList = [];
+
         this.movementDrivers = [];
         this.lineOfSightLines = [];
+
+        this.entitiesEnemy = [];
+
+        this.allRooms = [];
+        this.mazeArray = [];
 
         // CREATE ROOMS
         for (let i = 0; i < this.mazeRows; i++) {
@@ -64,7 +74,7 @@ export class MazeScene extends Scene {
         for (let n = 0; n < 5; n++) {
             this.eventList.push(
                 new MazeEvent(() => {
-                    this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
+                    // this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
                 },
                     "#000000")
             );
@@ -85,8 +95,7 @@ export class MazeScene extends Scene {
         }).filter(room => { return (room.isOpen == true) && (room.event == null) })[0];
 
         this.player = new Player(
-            playerStartRoom.col,
-            playerStartRoom.row,
+            playerStartRoom,
             this.tileSize
         );
     }
@@ -119,14 +128,12 @@ export class MazeScene extends Scene {
 
             case "a":
             case "ArrowLeft":
-                potentialRoom = this.getRoom(this.player.y, this.player.x - 1);
+                potentialRoom = this.getRoom(this.player.row, this.player.col - 1);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
                         new MazeEntityMovementDriver(
                             this.player,
-                            this.player.x - 1,
-                            this.player.y,
                             potentialRoom,
                             this.movementRateDefaultMillis,
                             () => {
@@ -134,8 +141,7 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.player.x = potentialRoom.col;
-                                this.player.y = potentialRoom.row;
+                                this.player.setRoom(potentialRoom);
 
                                 if (this.player.x < 0) {
                                     this.player.x = 0;
@@ -143,7 +149,7 @@ export class MazeScene extends Scene {
 
                                 potentialRoom.triggerEventIfPresent();
                                 this.centerWindowOnPlayer();
-                                this.computeMazeWindow();
+                                //this.computeMazeWindow();
                             }
                         )
                     )
@@ -153,14 +159,12 @@ export class MazeScene extends Scene {
 
             case "d":
             case "ArrowRight":
-                potentialRoom = this.getRoom(this.player.y, this.player.x + 1);
+                potentialRoom = this.getRoom(this.player.row, this.player.col + 1);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
                         new MazeEntityMovementDriver(
                             this.player,
-                            this.player.x + 1,
-                            this.player.y,
                             potentialRoom,
                             this.movementRateDefaultMillis,
                             () => {
@@ -168,17 +172,16 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.player.x = potentialRoom.col;
-                                this.player.y = potentialRoom.row;
+                                this.player.setRoom(potentialRoom);
 
-                                if (this.player.x >= this.mazeCols) {
-                                    this.player.x = this.mazeCols - 1;
-                                }
+                                // if (this.player.x >= this.mazeCols) {
+                                //     this.player.x = this.mazeCols - 1;
+                                // }
 
                                 potentialRoom.triggerEventIfPresent();
 
                                 this.computeMazeWindow();
-                                this.centerWindowOnPlayer();
+                                //this.centerWindowOnPlayer();
 
                             }
                         )
@@ -189,14 +192,12 @@ export class MazeScene extends Scene {
 
             case "w":
             case "ArrowUp":
-                potentialRoom = this.getRoom(this.player.y - 1, this.player.x);
+                potentialRoom = this.getRoom(this.player.row - 1, this.player.col);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
                         new MazeEntityMovementDriver(
                             this.player,
-                            this.player.x,
-                            this.player.y - 1,
                             potentialRoom,
                             this.movementRateDefaultMillis,
                             () => {
@@ -204,15 +205,14 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.player.x = potentialRoom.col;
-                                this.player.y = potentialRoom.row;
+                                this.player.setRoom(potentialRoom);
 
-                                if (this.player.y < 0) {
-                                    this.player.y = 0;
-                                }
+                                // if (this.player.y < 0) {
+                                //     this.player.y = 0;
+                                // }
 
                                 potentialRoom.triggerEventIfPresent();
-                                this.centerWindowOnPlayer();
+                                //this.centerWindowOnPlayer();
                                 this.computeMazeWindow();
                             }
                         )
@@ -222,14 +222,12 @@ export class MazeScene extends Scene {
 
             case "s":
             case "ArrowDown":
-                potentialRoom = this.getRoom(this.player.y + 1, this.player.x);
+                potentialRoom = this.getRoom(this.player.row + 1, this.player.col);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
 
                     this.movementDrivers.push(
                         new MazeEntityMovementDriver(
                             this.player,
-                            this.player.x,
-                            this.player.y + 1,
                             potentialRoom,
                             this.movementRateDefaultMillis,
                             () => {
@@ -237,15 +235,14 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.player.x = potentialRoom.col;
-                                this.player.y = potentialRoom.row;
+                                this.player.setRoom(potentialRoom);
 
-                                if (this.player.y >= this.mazeRows) {
-                                    this.player.y = this.mazeRows - 1;
-                                }
+                                // if (this.player.y >= this.mazeRows) {
+                                //     this.player.y = this.mazeRows - 1;
+                                // }
 
                                 potentialRoom.triggerEventIfPresent();
-                                this.centerWindowOnPlayer();
+                                //this.centerWindowOnPlayer();
                                 this.computeMazeWindow();
                             }
                         )
@@ -257,7 +254,16 @@ export class MazeScene extends Scene {
                 // Los sight lines on/off
                 this.debugShowLineOfSight = !this.debugShowLineOfSight;
                 break;
-    
+
+            case 'Escape':
+
+                console.log("init?");
+
+                this.initialize();
+                this.computeMazeWindow();
+
+                break;
+
             default:
                 console.log(`unrecognized key: ${event.key}`);
                 break;
@@ -281,7 +287,7 @@ export class MazeScene extends Scene {
          * then no LOS can be established to that entity/event.
          */
 
-        let playerRoom = this.getRoom(this.player.y, this.player.x);
+        let playerRoom = this.player.room;
         let visibilityMap = this.eventList
             .filter(evt => { return evt.isActive == true })
             .map(evt => {
@@ -667,20 +673,33 @@ class Player {
 
     x = 0;
     y = 0;
+    tileSize = 64;
 
     color = "#6E0000";
 
-    constructor(mazeCol, mazeRow, tileSize) {
-        this.x = mazeCol;
-        this.y = mazeRow;
+    room = null;
+
+    constructor(room, tileSize) {
+        this.setRoom(room);
         this.tileSize = tileSize;
+
+        console.log(`(${this.x}, ${this.y}) r:${this.row} c:${this.col}`)
     }
 
-    render(context, mazeWindowX, mazeWindowY) {
+    setRoom(room) {
+        this.room = room;
+        this.row = this.room.row;
+        this.col = this.room.col;
+        this.x = this.col * this.tileSize;
+        this.y = this.row * this.tileSize;
+        console.log(`room set r/c:${this.row} ${this.col}`)
+    }
+
+    render(context) {
         context.fillStyle = this.color;
         context.fillRect(
-            (this.x - mazeWindowX) * this.tileSize + (this.tileSize / 4),
-            (this.y - mazeWindowY) * this.tileSize + (this.tileSize / 4),
+            this.x + (this.tileSize / 4),
+            this.y + (this.tileSize / 4),
             (this.tileSize / 2),
             (this.tileSize / 2)
         );
@@ -692,7 +711,10 @@ class MazeRoom {
     row = 0;
     col = 0;
     roomSize = 64;
-    isOpen = false;
+    isOpen = false;         // Whether this room can be occupied
+
+    occupant = null;
+    isOccupied = false;
 
     event = null;
 
@@ -716,6 +738,15 @@ class MazeRoom {
     setEvent(event) {
         this.event = event;
         this.event.setRoom(this);
+    }
+
+    setOccupant(entity) {
+        this.occupant = entity;
+        if (this.occupant != null) {
+            this.isOccupied = true;
+        } else {
+            this.isOccupied = false;
+        }
     }
 
     triggerEventIfPresent() {
@@ -755,6 +786,43 @@ class MazeRoom {
     }
 
 };
+
+class MazeMonster {
+
+    x = 0;
+    y = 0;
+    tileSize = 64;
+
+    room = null;
+    color = "#00FF00"
+
+    constructor(room, tileSize) {
+        this.room = room;
+        this.tileSize = tileSize;
+        this.x = this.room.col * this.tileSize;
+        this.y = this.room.row * this.tileSize;
+    }
+
+    setRoom(room) {
+        this.room = room;
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        context.fillStyle = this.color;
+        context.lineWidth = 1.0;
+        context.beginPath();
+        context.ellipse(
+            ((this.room.col - mazeWindowX) * this.room.roomSize) + this.room.roomSize / 2,
+            ((this.room.row - mazeWindowY) * this.room.roomSize) + this.room.roomSize / 2,
+            this.room.roomSize / 4, this.room.roomSize / 4,
+            2 * Math.PI,
+            2 * Math.PI,
+            false);
+        context.fill();
+    }
+
+}
 
 class MazeEvent {
 

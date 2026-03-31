@@ -45,10 +45,10 @@ export class MazeEntityMovementDriver {
     progress = 0;
     totalTimeMillis = 0;
 
-    constructor(entity, destinationX, destinationY, destinationRoom, durationMillis, onUpdate, onComplete) {
+    constructor(entity, destinationRoom, durationMillis, onUpdate, onComplete) {
         this.entity = entity;
-        this.destinationX = destinationX;
-        this.destinationY = destinationY;
+        this.destinationX = destinationRoom.col * destinationRoom.roomSize;
+        this.destinationY = destinationRoom.row * destinationRoom.roomSize;
         this.destinationRoom = destinationRoom;
         this.durationMillis = durationMillis;
         this.onUpdate = onUpdate;
@@ -58,6 +58,8 @@ export class MazeEntityMovementDriver {
         this.totalDistanceY = (this.destinationY - this.entity.y);
         this.speedX = this.totalDistanceX / this.durationMillis;
         this.speedY = this.totalDistanceY / this.durationMillis;
+
+        console.log(`mvdrv: ${this.destinationX} ${this.destinationY}`)
     }
 
     update(deltaMillis) {

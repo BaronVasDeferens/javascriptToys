@@ -134,10 +134,6 @@ export class SceneManager {
 
         switch (event.key) {
 
-            case 'Escape':
-                this.setCurrentSceneType(SceneType.MAZE_SCENE);
-                break;
-
             default:
                 this.getCurrentScene().onKeyPressed(event);
                 break;

@@ -81,7 +81,7 @@ export class MazeScene extends Scene {
         }
 
         // SCATTER EVENTS RANDOMLY ACROSS MAZE
-        this.distributeEventsAcrossMap();
+        this.distributeAcrossOpenRooms(this.eventList);
 
         // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
@@ -656,14 +656,21 @@ export class MazeScene extends Scene {
         return subRooms;
     }
 
-    distributeEventsAcrossMap() {
-        let rooms = this.allRooms.filter(room => { return room.isOpen == true });
-        this.shuffleArray(rooms);
-        let index = 0;
-        this.eventList.forEach(event => {
-            let room = rooms[index];
-            room.setEvent(event);
-            index++;
+    distributeAcrossOpenRooms(objects) {
+
+        let availableRooms = this.allRooms.filter(room => {
+            return room.isOpen == true && room.isOccupied == false;
+        });
+
+        this.shuffleArray(availableRooms);
+
+        objects.forEach(object => {
+            let room = availableRooms.pop();
+            if (object instanceof MazeEvent) {
+                room.setEvent(object);
+            } else if (object instanceof MazeMonster) {
+                room.setOccupant(object);
+            }
         });
     }
 }

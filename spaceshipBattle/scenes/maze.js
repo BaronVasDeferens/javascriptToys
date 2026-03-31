@@ -1,4 +1,4 @@
-import { SoundAsset } from "../assets.js";
+import { ImageAsset, SoundAsset } from "../assets.js";
 import { MovementDriver, MazeEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Entity } from "../entity/entity.js";
@@ -99,7 +99,7 @@ export class MazeScene extends Scene {
 
         // Create enemy entities
         for (let n = 0; n < this.numEnemyEntities; n++) {
-            this.entitiesEnemy.push(new MazeMonster(this.tileSize));
+            this.entitiesEnemy.push(new MazeMonster(this.tileSize, this.assetManager));
             this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
 
@@ -151,7 +151,7 @@ export class MazeScene extends Scene {
             case "w":
             case "ArrowUp":
                 potentialRoom = this.getRoom(this.player.row - 1, this.player.col);
-                 this.moveEntityToRoom(this.player, potentialRoom);
+                this.moveEntityToRoom(this.player, potentialRoom);
                 break;
 
             case "s":
@@ -735,13 +735,12 @@ class MazeMonster {
 
     x = 0;
     y = 0;
-    tileSize = 64;
-
+    image = null;
     room = null;
-    color = "#00FF00"
 
-    constructor(tileSize) {
+    constructor(tileSize, assetManager) {
         this.tileSize = tileSize;
+        this.image = assetManager.getImage(ImageAsset.MONSTER_4);
     }
 
     setRoom(room) {
@@ -751,18 +750,11 @@ class MazeMonster {
     }
 
     render(context, mazeWindowX, mazeWindowY) {
-
-        context.fillStyle = this.color;
-        context.lineWidth = 1.0;
-        context.beginPath();
-        context.ellipse(
-            ((this.room.col - mazeWindowX) * this.room.roomSize) + this.room.roomSize / 2,
-            ((this.room.row - mazeWindowY) * this.room.roomSize) + this.room.roomSize / 2,
-            this.room.roomSize / 4, this.room.roomSize / 4,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
+        context.drawImage(
+            this.image,
+            this.x + ((this.tileSize - this.image.width) / 2),
+            this.y + ((this.tileSize - this,this.image.height) / 2)
+        );
     }
 
 }

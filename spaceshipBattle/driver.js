@@ -1,3 +1,32 @@
+export class Driver {
+
+    isFinished = false;
+    totalTimeMillis = 0;
+
+    constructor(durationMillis, onUpdate, onComplete) {
+        this.durationMillis = durationMillis;
+        this.onUpdate = onUpdate;
+        this.onComplete = onComplete;
+    }
+
+    update(deltaMillis) {
+
+        if (this.isFinished == true) {
+            return;
+        }
+
+        this.onUpdate();
+
+        this.totalTimeMillis += deltaMillis;
+
+        if (this.totalTimeMillis >= this.durationMillis) {
+            this.isFinished = true;
+            this.onComplete();
+        }
+    }
+
+}
+
 export class MovementDriver {
 
     isFinished = false;
@@ -39,21 +68,17 @@ export class MovementDriver {
 
 }
 
-export class MazeEntityMovementDriver {
+export class MazeEntityMovementDriver extends Driver {
 
-    isFinished = false;
     progress = 0;
-    totalTimeMillis = 0;
 
     constructor(entity, destinationRoom, durationMillis, onUpdate, onComplete) {
+        super(durationMillis, onUpdate, onComplete);
         this.entity = entity;
         this.destinationX = destinationRoom.col * destinationRoom.roomSize;
         this.destinationY = destinationRoom.row * destinationRoom.roomSize;
         this.destinationRoom = destinationRoom;
-        this.durationMillis = durationMillis;
-        this.onUpdate = onUpdate;
-        this.onComplete = onComplete;
-
+        
         this.totalDistanceX = (this.destinationX - this.entity.x);
         this.totalDistanceY = (this.destinationY - this.entity.y);
         this.speedX = this.totalDistanceX / this.durationMillis;

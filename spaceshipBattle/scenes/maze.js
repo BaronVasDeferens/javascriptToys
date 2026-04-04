@@ -38,10 +38,10 @@ export class MazeScene extends Scene {
 
     player = null;
 
-    movementRateDefaultMillis = 150;      // time to traverse from one grid section to the next 
+    movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
 
     stateDrivers = [];                      // each state driver is processed in the order in which
-                                            // they are received (queue) during the update cycle
+    // they are received (queue) during the update cycle
 
     debugShowLineOfSight = false;
     lineOfSightLines = [];
@@ -66,7 +66,7 @@ export class MazeScene extends Scene {
             console.log(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
             this.currentGameSequence = newSequence;
 
-            switch(newSequence) {
+            switch (newSequence) {
 
                 case GameSequence.INITIALIZING:
                     break;
@@ -82,8 +82,8 @@ export class MazeScene extends Scene {
                     this.stateDrivers.push(
                         new Driver(
                             0,
-                            () => {},
-                            () => { 
+                            () => { },
+                            () => {
                                 this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
                                 this.computeEntityVisibility()
                             }
@@ -188,8 +188,8 @@ export class MazeScene extends Scene {
     onKeyPressed(event) {
 
         var potentialRoom = null;
-        
-        if(this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
+
+        if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
             return;
         }
 
@@ -407,10 +407,31 @@ export class MazeScene extends Scene {
     computeEnemyMoves() {
         this.entitiesEnemy.forEach(monster => {
             if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
-                let neighbors = this.getAdjacentRooms(monster.room.row, monster.room.col)
-                this.shuffleArray(neighbors);
-                let neighbor = neighbors[0];
-                this.moveEntityToRoom(monster, neighbor, () => {});
+                let neighbors =
+                    this.getAdjacentRooms(monster.room.row, monster.room.col)
+                        .filter(room => { return room.isOpen == true });
+
+                var neighbor = null;
+
+                if (neighbors.length >= 2) {
+
+                    neighbor = neighbors.sort((a, b) => {
+                        let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
+                        let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
+                        if (distA > distB) {
+                            return 1;
+                        } else if (distA < distB) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    })[0];
+
+                } else {
+                    neighbor = neighbors[0];
+                }
+
+                this.moveEntityToRoom(monster, neighbor, () => { });
             }
         })
     }

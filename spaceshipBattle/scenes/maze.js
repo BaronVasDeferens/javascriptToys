@@ -155,9 +155,10 @@ export class MazeScene extends Scene {
             this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
 
-
+        // CREATE PLAYER
         this.player = new Player(
             playerStartRoom,
+            this.assetManager,
             this.tileSize
         );
 
@@ -770,16 +771,25 @@ class Player {
     x = 0;
     y = 0;
     tileSize = 64;
+    offsetX = 0;
+    offsetY = 0;
 
-    color = "#6E0000";
-
+    image = null;
     room = null;
 
-    constructor(room, tileSize) {
+    constructor(room, assetManager, tileSize) {
         this.setRoom(room);
+        this.image = assetManager.getImage(ImageAsset.WIZARD_1);
         this.tileSize = tileSize;
 
-        console.log(`(${this.x}, ${this.y}) r:${this.row} c:${this.col}`)
+        if (this.image.width < this.tileSize) {
+            this.offsetX = Math.floor((this.tileSize - this.image.width) / 2);
+        }
+
+        if (this.image.height < this.tileSize) {
+            this.offsetY = Math.floor((this.tileSize - this.image.height) / 2);
+        }
+
     }
 
     setRoom(room) {
@@ -791,13 +801,7 @@ class Player {
     }
 
     render(context) {
-        context.fillStyle = this.color;
-        context.fillRect(
-            this.x + (this.tileSize / 4),
-            this.y + (this.tileSize / 4),
-            (this.tileSize / 2),
-            (this.tileSize / 2)
-        );
+        context.drawImage(this.image, this.x + this.offsetX, this.y + this.offsetY);
     }
 };
 

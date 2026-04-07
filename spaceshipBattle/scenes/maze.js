@@ -409,11 +409,18 @@ export class MazeScene extends Scene {
     }
 
     computeEnemyMoves() {
+
+        // Ineligible rooms will be those that another monster has set it's sights on
+        // TODO: ...but make the room that a monster is LEAVING elibible to the next monster
+        let ineligibleRooms = [];
+
+
         this.entitiesEnemy.forEach(monster => {
             if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
                 let neighbors =
                     this.getAdjacentRooms(monster.room.row, monster.room.col)
-                        .filter(room => { return room.isOpen == true });
+                        .filter(room => { return room.isOpen == true })
+                        .filter( room => { return ineligibleRooms.indexOf(room) == -1});
 
                 var neighbor = null;
 
@@ -437,6 +444,7 @@ export class MazeScene extends Scene {
                     neighbor = neighbors[0];
                 }
 
+                ineligibleRooms.push(neighbor);
                 this.moveEntityToRoom(monster, neighbor, 50, () => { });
             }
         })

@@ -895,7 +895,7 @@ class MazeMonster {
 
     constructor(tileSize, assetManager) {
         this.tileSize = tileSize;
-        this.image = assetManager.getImage(ImageAsset.MONSTER_4);
+        this.image = assetManager.getImage(ImageAsset.GOBLIN_3);
     }
 
     setRoom(room) {

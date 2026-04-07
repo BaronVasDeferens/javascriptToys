@@ -31,9 +31,9 @@ export class MazeScene extends Scene {
     numEnemyEntities = 5;
     entitiesEnemy = [];
 
-    mazeWindowWidth = 0;              // Number of maze squares visible on screen at any time
+    mazeWindowWidth = 0;                    // Number of maze squares visible on screen at any time
     mazeWindowHeight = 0;
-    mazeWindowX = 0;                // array position/s of maze window
+    mazeWindowX = 0;                        // array position/s of maze window
     mazeWindowY = 0;
 
     player = null;
@@ -43,6 +43,8 @@ export class MazeScene extends Scene {
     stateDrivers = [];                      // each state driver is processed in the order in which
     // they are received (queue) during the update cycle
 
+
+    debugMode = false;
     debugShowLineOfSight = false;
     lineOfSightLines = [];
 
@@ -63,7 +65,11 @@ export class MazeScene extends Scene {
 
     updateGameSequence(newSequence) {
         if (this.currentGameSequence != newSequence) {
-            console.log(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
+
+            if (this.debugMode == true) {
+                console.log(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
+            }
+
             this.currentGameSequence = newSequence;
 
             switch (newSequence) {
@@ -124,7 +130,7 @@ export class MazeScene extends Scene {
         // SET UP MAZE
         this.createMaze();
 
-        // CREATE EVENTS
+        // CREATE and PLACE EVENTS
         for (let n = 0; n < 5; n++) {
             this.eventList.push(
                 new MazeEvent(() => {
@@ -134,9 +140,17 @@ export class MazeScene extends Scene {
             );
         }
 
-        // SCATTER EVENTS RANDOMLY ACROSS MAZE
+
         this.distributeAcrossOpenRooms(this.eventList);
 
+
+        // CREATE nad PLACE ENEMIES
+        for (let n = 0; n < this.numEnemyEntities; n++) {
+            this.entitiesEnemy.push(new MazeMonster(this.tileSize, this.assetManager));
+            this.distributeAcrossOpenRooms(this.entitiesEnemy);
+        }
+
+        // CREATE and PLACE PLAYER
         // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.x + a.y) < (b.x + b.y)) {
@@ -148,14 +162,6 @@ export class MazeScene extends Scene {
             }
         }).filter(room => { return (room.isOpen == true) && (room.event == null) })[0];
 
-
-        // Create enemy entities
-        for (let n = 0; n < this.numEnemyEntities; n++) {
-            this.entitiesEnemy.push(new MazeMonster(this.tileSize, this.assetManager));
-            this.distributeAcrossOpenRooms(this.entitiesEnemy);
-        }
-
-        // CREATE PLAYER
         this.player = new Player(
             playerStartRoom,
             this.assetManager,
@@ -163,7 +169,6 @@ export class MazeScene extends Scene {
         );
 
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT)
-
     }
 
     onStart() {
@@ -266,7 +271,9 @@ export class MazeScene extends Scene {
 
             case 'l':
                 // Los sight lines on/off
+                this.debugMode = !this.debugMode;
                 this.debugShowLineOfSight = !this.debugShowLineOfSight;
+                console.log(`debug: ${this.debugMode}`);
                 break;
 
             case 'Escape':
@@ -421,7 +428,7 @@ export class MazeScene extends Scene {
                 let neighbors =
                     this.getAdjacentRooms(monster.room.row, monster.room.col)
                         .filter(room => { return room.isOpen == true })
-                        .filter( room => { return ineligibleRooms.indexOf(room) == -1});
+                        .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
 
                 var neighbor = null;
 

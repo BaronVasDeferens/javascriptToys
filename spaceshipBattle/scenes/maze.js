@@ -203,6 +203,7 @@ export class MazeScene extends Scene {
                     this.moveEntityToRoom(
                         this.player,
                         potentialRoom,
+                        this.movementRateDefaultMillis,
                         () => {
                             this.computeMazeWindow();
                             this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
@@ -219,6 +220,7 @@ export class MazeScene extends Scene {
                     this.moveEntityToRoom(
                         this.player,
                         potentialRoom,
+                        this.movementRateDefaultMillis,
                         () => {
                             this.computeMazeWindow();
                             this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
@@ -235,6 +237,7 @@ export class MazeScene extends Scene {
                     this.moveEntityToRoom(
                         this.player,
                         potentialRoom,
+                        this.movementRateDefaultMillis,
                         () => {
                             this.computeMazeWindow();
                             this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
@@ -251,6 +254,7 @@ export class MazeScene extends Scene {
                     this.moveEntityToRoom(
                         this.player,
                         potentialRoom,
+                        this.movementRateDefaultMillis,
                         () => {
                             this.computeMazeWindow();
                             this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
@@ -276,7 +280,7 @@ export class MazeScene extends Scene {
 
     }
 
-    moveEntityToRoom(entity, room, onComplete) {
+    moveEntityToRoom(entity, room, rate, onComplete) {
         if (entity != null
             && room != null
             && room.isOpen == true
@@ -288,7 +292,7 @@ export class MazeScene extends Scene {
                 new MazeEntityMovementDriver(
                     entity,
                     room,
-                    this.movementRateDefaultMillis,
+                    rate,
                     () => {
                         // onUpdate
                     },
@@ -431,7 +435,7 @@ export class MazeScene extends Scene {
                     neighbor = neighbors[0];
                 }
 
-                this.moveEntityToRoom(monster, neighbor, () => { });
+                this.moveEntityToRoom(monster, neighbor, 50, () => { });
             }
         })
     }
@@ -453,6 +457,13 @@ export class MazeScene extends Scene {
     }
 
     centerWindowOnPlayer() {
+
+        /*
+            This is a relic leftover from when the maze was larger than the window could render.
+            This function helped the maze window to scroll, keeping the payer in the center of
+            the screen, or allow them to traverse to the edges.
+        */
+
 
         // Only move the window if the player's x position is at least 1/2 of the mazeWindowSize
         if (this.player.x < this.mazeWindowX + Math.floor(this.mazeWindowWidth / 2)) {
@@ -526,7 +537,7 @@ export class MazeScene extends Scene {
         // Render player token
         this.player.render(context, this.mazeWindowX, this.mazeWindowY)
 
-        // render LOS
+        // Render LOS
         if (this.debugShowLineOfSight == true) {
             this.lineOfSightLines.forEach(line => {
                 if (line.isVisible == true) {

@@ -419,7 +419,7 @@ export class MazeScene extends Scene {
 
                 if (neighbors.length >= 2) {
 
-                    neighbor = neighbors.sort((a, b) => {
+                    let neighborsSortedByDistance = neighbors.sort((a, b) => {
                         let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
                         let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
                         if (distA > distB) {
@@ -429,7 +429,9 @@ export class MazeScene extends Scene {
                         } else {
                             return 0;
                         }
-                    })[0];
+                    });
+
+                    neighbor = neighborsSortedByDistance[0];
 
                 } else {
                     neighbor = neighbors[0];

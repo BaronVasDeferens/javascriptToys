@@ -6,15 +6,19 @@ import { SceneManager } from "./scenes/scenemanager.js"
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------
 
-const canvas = document.getElementById('playArea');
-const context = canvas.getContext('2d');
+const canvasPrimary = document.getElementById('primary');
+const contextPrimary = canvasPrimary.getContext('2d');
+
+const canvasSecondary = document.getElementById('secondary');
+const contextSecondary = canvasSecondary.getContext('2d');
+
 var audioContext = new AudioContext(); // AudioContext must be initialized after interactions
 
 const tileSize = 64;
 
 const assetManager = new AssetManager(audioContext);
 const soundPlayer = new SoundPlayer(assetManager, audioContext);
-const sceneManager = new SceneManager(canvas, tileSize, assetManager, soundPlayer);
+const sceneManager = new SceneManager(canvasPrimary, tileSize, assetManager, soundPlayer);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------
@@ -47,6 +51,10 @@ var setup = function () {
         gameFont = new FontFace("micronian", assetManager.getFont(FontAsset.PRIMARY));
         document.fonts.add(gameFont);
         sceneManager.initialize();
+
+
+
+
         updateStage(Stage.LOAD_COMPLETE);
         beginGame();
     });
@@ -62,7 +70,7 @@ function initialize() {
 
 function beginGame() {
     update();
-    render(context);
+    render(contextPrimary);
     requestAnimationFrame(beginGame);
 }
 
@@ -138,13 +146,14 @@ function render(context) {
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
         case Stage.GAME_ACTIVE:
+            contextSecondary.fillStyle = "#000000"
+            contextSecondary.fillRect(0, 0, canvasSecondary.clientWidth, canvasSecondary.height);
             break;
 
         default:
             break;
     }
 }
-
 
 // --- HELPER METHODS ---
 
@@ -180,8 +189,8 @@ function log(msg) {
 // ------------------------------------- PLAYER INPUT -------------------------------------
 
 
-// Mouse DOWN
-document.addEventListener('mousedown', (click) => {
+// Mouse DOWN (primary canvas)
+canvasPrimary.addEventListener('mousedown', (click) => {
 
     if (audioContext.state === 'suspended') {
         audioContext.resume();
@@ -213,8 +222,13 @@ document.addEventListener('mousedown', (click) => {
     // sceneManager.onMouseDown(click);
 });
 
-// Mouse MOVE
-document.addEventListener('mousemove', (event) => {
+// Mouse DOWN (Secondary)
+canvasSecondary.addEventListener('mousedown', event => {
+    
+})
+
+// Mouse MOVE (Primary)
+canvasPrimary.addEventListener('mousemove', (event) => {
 
     switch (stage) {
         default:
@@ -224,11 +238,22 @@ document.addEventListener('mousemove', (event) => {
     sceneManager.onMouseMove(event);
 });
 
-// Mouse UP
-document.addEventListener('mouseup', (click) => {
+// Mouse MOVE (Secondary)
+canvasSecondary.addEventListener('mousemove', (event) => {
+
+});
+
+// Mouse UP (Primary)
+canvasPrimary.addEventListener('mouseup', (click) => {
     sceneManager.onMouseUp(click);
 });
 
+// Mouse UP (Secondary)
+canvasSecondary.addEventListener('mouseup', (click) => {
+   
+});
+
+// Key listener: GLOBAL
 document.addEventListener('keydown', (event) => {
     sceneManager.onKeyPressed(event);
 });

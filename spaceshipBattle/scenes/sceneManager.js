@@ -16,8 +16,9 @@ export class SceneManager {
 
     transitions = [];
 
-    constructor(canvas, tileSize, assetManager, soundPlayer) {
-        this.canvas = canvas;
+    constructor(canvasPrimary, canvasSecondary, tileSize, assetManager, soundPlayer) {
+        this.canvasPrimary = canvasPrimary;
+        this.canvasSecondary = canvasSecondary;
         this.tileSize = tileSize;
         this.assetManager = assetManager;
         this.soundPlayer = soundPlayer;
@@ -26,10 +27,10 @@ export class SceneManager {
     initialize() {
         // !!! IMPORTANT !!!
         // This method should only be called after the assetManager has been initialized!
-        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(this, 15, 10, this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.GRID_DRAGGER, new GridDraggerScene(this.tileSize, this.canvas, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(this, 15, 10, this.tileSize, this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.GRID_DRAGGER, new GridDraggerScene(this.tileSize, this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {
@@ -59,7 +60,7 @@ export class SceneManager {
                 new FadeTransition(
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),
-                    this.canvas,
+                    this.canvasPrimary,
                     500,
                 )
 
@@ -95,6 +96,10 @@ export class SceneManager {
         this.getCurrentScene().onMouseDown(click);
     }
 
+    onMouseDownSecondary(event) {
+        this.getCurrentScene().onMouseDownSecondary(event);
+    }
+
     onMouseUp(click) {
 
         if (this.getCurrentScene() == null) {
@@ -120,6 +125,10 @@ export class SceneManager {
         }
 
         this.getCurrentScene().onMouseMove(event);
+    }
+
+    onMouseMoveSecondary(event) {
+        this.getCurrentScene().onMouseMoveSecondary(event);
     }
 
     onKeyPressed(event) {
@@ -167,7 +176,7 @@ export class SceneManager {
         });
     }
 
-    render(context) {
+    render(contextPrimary, contextSecondary) {
 
         if (this.getCurrentScene() == null) {
             return;
@@ -175,10 +184,10 @@ export class SceneManager {
 
         if (this.transitions.length > 0) {
             this.transitions.forEach(transition => {
-                transition.render(context);
+                transition.render(contextPrimary, contextSecondary);
             });
         } else {
-            this.getCurrentScene().render(context);
+            this.getCurrentScene().render(contextPrimary, contextSecondary);
         }
     }
 }

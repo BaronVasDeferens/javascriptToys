@@ -26,22 +26,22 @@ export class FadeTransition extends Transition {
         }
     }
 
-    render(context) {
+    render(contextPrimary, contextSecondary) {
 
-        context.globalAlpha = 1.0;
+        contextPrimary.globalAlpha = 1.0;
 
         if (this.progress < 0.50) {
-            this.startScene.render(context);
+            this.startScene.render(contextPrimary, contextSecondary);
             this.alpha = 2 * this.progress;
         } else {
-            this.endScene.render(context);
+            this.endScene.render(contextPrimary, contextSecondary);
             this.alpha = (1 - this.progress) * 2;
         }
 
-        context.globalAlpha = this.alpha;
-        context.fillStyle = "#000000"
-        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        context.globalAlpha = 1.0;
+        contextPrimary.globalAlpha = this.alpha;
+        contextPrimary.fillStyle = "#000000"
+        contextPrimary.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        contextPrimary.globalAlpha = 1.0;
     }
 
 }

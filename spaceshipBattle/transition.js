@@ -16,7 +16,7 @@ export class Transition {
 
     }
 
-    render(context) {
+    render(contextPrimary, contextSecondary) {
 
     }
 

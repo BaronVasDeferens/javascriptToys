@@ -18,8 +18,8 @@ export class StarfieldIntroScene extends Scene {
 
     stars = [];
 
-    constructor(canvas, assetManager, soundPlayer) {
-        super(SceneType.INTRO, canvas, assetManager, soundPlayer);
+    constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+        super(SceneType.INTRO, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
         this.backgroundImage = assetManager.getImage(ImageAsset.INTRO_LOGO);
     }
 
@@ -37,8 +37,8 @@ export class StarfieldIntroScene extends Scene {
 
     createStar() {
 
-        let screenCenterX = this.canvas.width / 2;
-        let screenCenterY = this.canvas.height / 2;
+        let screenCenterX = this.canvasPrimary.width / 2;
+        let screenCenterY = this.canvasPrimary.height / 2;
 
         let size = this.randomInRange(1, 3);
         let speed = 5 * size;
@@ -96,9 +96,9 @@ export class StarfieldIntroScene extends Scene {
             // Remove any star that has exited the viewport and add a new one
             if (
                 star.x < 0
-                || star.x > this.canvas.width
+                || star.x > this.canvasPrimary.width
                 || star.y < 0
-                || star.y > this.canvas.height) {
+                || star.y > this.canvasPrimary.height) {
 
                 let index = this.stars.indexOf(star);
                 if (index > -1) {
@@ -122,7 +122,7 @@ export class StarfieldIntroScene extends Scene {
     render(context) {
 
         context.fillStyle = "#000000";
-        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        context.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
 
         this.stars.forEach(star => {
@@ -146,8 +146,8 @@ export class StarfieldIntroScene extends Scene {
 
         context.drawImage(
             this.backgroundImage,
-            (this.canvas.width / 2) - (this.backgroundImage.width / 2),
-            (this.canvas.height / 2) - (this.backgroundImage.height / 2)
+            (this.canvasPrimary.width / 2) - (this.backgroundImage.width / 2),
+            (this.canvasPrimary.height / 2) - (this.backgroundImage.height / 2)
         );
     }
 }

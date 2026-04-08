@@ -3,6 +3,7 @@ import { MovementDriver, MazeEntityMovementDriver, Driver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Entity } from "../entity/entity.js";
 import { EnemyEntity } from "../entity/entity_enemy.js";
+import { SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 
 // "My name is Master Slave"
 // WAGON MASTER
@@ -40,25 +41,25 @@ export class MazeScene extends Scene {
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
 
-    stateDrivers = [];                      // each state driver is processed in the order in which
-    // they are received (queue) during the update cycle
+    stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
+    spellZoneComponents = [];
 
     debugMode = false;
     debugShowLineOfSight = false;
     lineOfSightLines = [];
 
-    constructor(sceneManager, mazeCols, mazeRows, tileSize, canvas, assetManager, soundPlayer) {
+    constructor(sceneManager, mazeCols, mazeRows, tileSize, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
 
-        super(SceneType.MAZE_SCENE, canvas, assetManager, soundPlayer);
+        super(SceneType.MAZE_SCENE, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
 
         this.sceneManager = sceneManager;
         this.mazeRows = mazeRows;
         this.mazeCols = mazeCols;
         this.tileSize = tileSize;
 
-        this.mazeWindowWidth = canvas.width / tileSize;
-        this.mazeWindowHeight = canvas.height / tileSize;
+        this.mazeWindowWidth = canvasPrimary.width / tileSize;
+        this.mazeWindowHeight = canvasPrimary.height / tileSize;
 
         this.initialize();
     }
@@ -108,6 +109,8 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.INITIALIZING)
 
         this.eventList = [];
+
+        this.spellZoneComponents = [];
 
         this.movementDrivers = [];
         this.lineOfSightLines = [];
@@ -168,7 +171,42 @@ export class MazeScene extends Scene {
             this.tileSize
         );
 
-        this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT)
+
+        // Populate spell ZONE COMPONENTS
+        this.spellZoneComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.CROSS_SMALL,
+                this.canvasSecondary,
+                0,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellZoneComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.COLUMN_FULL,
+                this.canvasSecondary,
+                64,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellZoneComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.ROW_FULL,
+                this.canvasSecondary,
+                128,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
 
     onStart() {
@@ -183,12 +221,27 @@ export class MazeScene extends Scene {
 
     }
 
+    onMouseDownSecondary(click) {
+
+        let clickTarget = this.spellZoneComponents.filter( card => {
+            return card.containsPoint(click)
+        })[0];
+
+        if (clickTarget != null) {
+            console.log(clickTarget.spellZone)
+        }
+    }
+
     onMouseUp(click) {
 
     }
 
     onMouseMove(event) {
 
+    }
+
+    onMouseMoveSecondary(event) {
+        
     }
 
     onKeyPressed(event) {
@@ -539,40 +592,45 @@ export class MazeScene extends Scene {
         }
     }
 
-    render(context) {
-        context.fillStyle = "#000000";
-        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    render(contextPrimary, contextSecondary) {
+        contextPrimary.fillStyle = "#000000";
+        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
         this.visibleRooms.forEach(room => {
-            room.render(context, this.mazeWindowX, this.mazeWindowY);
+            room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         });
 
         // Render enemies
         this.entitiesEnemy.forEach(monster => {
-            monster.render(context, this.mazeWindowX, this.mazeWindowY);
+            monster.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         })
 
         // Render player token
-        this.player.render(context, this.mazeWindowX, this.mazeWindowY)
+        this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
 
         // Render LOS
         if (this.debugShowLineOfSight == true) {
             this.lineOfSightLines.forEach(line => {
                 if (line.isVisible == true) {
-                    context.strokeStyle = "#00FF00";
+                    contextPrimary.strokeStyle = "#00FF00";
                 } else {
-                    context.strokeStyle = "#FF0000";
+                    contextPrimary.strokeStyle = "#FF0000";
                 }
 
-                context.lineWidth = 1.0;
-                context.save();
-                context.beginPath();
-                context.moveTo(line.startX, line.startY);
-                context.lineTo(line.endX, line.endY);
-                context.stroke();
-                context.restore();
+                contextPrimary.lineWidth = 1.0;
+                contextPrimary.save();
+                contextPrimary.beginPath();
+                contextPrimary.moveTo(line.startX, line.startY);
+                contextPrimary.lineTo(line.endX, line.endY);
+                contextPrimary.stroke();
+                contextPrimary.restore();
             })
         }
+
+        // Render the secondary canvas
+        this.spellZoneComponents.forEach(component => {
+            component.render(contextSecondary);
+        });
     }
 
     getRandomRoom() {

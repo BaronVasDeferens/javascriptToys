@@ -1,7 +1,7 @@
 import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
 import { SoundPlayer } from "./sound.js";
 import { SceneType } from "./scenes/scene.js";
-import { SceneManager } from "./scenes/scenemanager.js"
+import { SceneManager } from "./scenes/sceneManager.js";
 
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------
@@ -18,7 +18,7 @@ const tileSize = 64;
 
 const assetManager = new AssetManager(audioContext);
 const soundPlayer = new SoundPlayer(assetManager, audioContext);
-const sceneManager = new SceneManager(canvasPrimary, tileSize, assetManager, soundPlayer);
+const sceneManager = new SceneManager(canvasPrimary, canvasSecondary, tileSize, assetManager, soundPlayer);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------
@@ -52,9 +52,6 @@ var setup = function () {
         document.fonts.add(gameFont);
         sceneManager.initialize();
 
-
-
-
         updateStage(Stage.LOAD_COMPLETE);
         beginGame();
     });
@@ -70,7 +67,7 @@ function initialize() {
 
 function beginGame() {
     update();
-    render(contextPrimary);
+    render(contextPrimary, contextSecondary);
     requestAnimationFrame(beginGame);
 }
 
@@ -124,30 +121,28 @@ function update() {
 }
 
 
-function render(context) {
+function render(contextPrimary, contextSecondary) {
 
-    sceneManager.render(context);
+    sceneManager.render(contextPrimary, contextSecondary);
 
     switch (stage) {
 
         case Stage.LOAD_START:
-            context.fillStyle = "#FFFFFF";
-            context.font = "35px micronian";
-            context.fillText("LOADING...", 50, 50);
+            contextPrimary.fillStyle = "#FFFFFF";
+            contextPrimary.font = "35px micronian";
+            contextPrimary.fillText("LOADING...", 50, 50);
             break;
 
         case Stage.LOAD_COMPLETE:
-            context.fillStyle = "#FFFFFF";
-            context.font = "35px micronian";
-            context.fillText("LOADING...COMPLETE", 50, 50);
-            context.fillText("Click to continue...", 50, 100);
+            contextPrimary.fillStyle = "#FFFFFF";
+            contextPrimary.font = "35px micronian";
+            contextPrimary.fillText("LOADING...COMPLETE", 50, 50);
+            contextPrimary.fillText("Click to continue...", 50, 100);
             break;
 
         case Stage.INITIALIZING:
         case Stage.INSERT_COIN:
         case Stage.GAME_ACTIVE:
-            contextSecondary.fillStyle = "#000000"
-            contextSecondary.fillRect(0, 0, canvasSecondary.clientWidth, canvasSecondary.height);
             break;
 
         default:
@@ -224,7 +219,7 @@ canvasPrimary.addEventListener('mousedown', (click) => {
 
 // Mouse DOWN (Secondary)
 canvasSecondary.addEventListener('mousedown', event => {
-    
+    sceneManager.onMouseDownSecondary(event);
 })
 
 // Mouse MOVE (Primary)
@@ -240,7 +235,7 @@ canvasPrimary.addEventListener('mousemove', (event) => {
 
 // Mouse MOVE (Secondary)
 canvasSecondary.addEventListener('mousemove', (event) => {
-
+    sceneManager.onMouseMoveSecondary(event);
 });
 
 // Mouse UP (Primary)
@@ -250,7 +245,7 @@ canvasPrimary.addEventListener('mouseup', (click) => {
 
 // Mouse UP (Secondary)
 canvasSecondary.addEventListener('mouseup', (click) => {
-   
+
 });
 
 // Key listener: GLOBAL

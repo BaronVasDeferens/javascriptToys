@@ -19,9 +19,10 @@ export class Scene {
 
     backgroundImage = new Image();
 
-    constructor(sceneType, canvas, assetManager, soundPlayer) {
+    constructor(sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
         this.sceneType = sceneType;
-        this.canvas = canvas;
+        this.canvasPrimary = canvasPrimary;
+        this.canvasSecondary = canvasSecondary;
         this.assetManager = assetManager;
         this.soundPlayer = soundPlayer;
     }
@@ -42,11 +43,19 @@ export class Scene {
 
     }
 
+    onMouseDownSecondary(event) {
+        
+    }
+
     onMouseUp(click) {
 
     }
 
     onMouseMove(event) {
+
+    }
+
+    onMouseMoveSecondary(event) {
 
     }
 
@@ -62,7 +71,7 @@ export class Scene {
 
     }
 
-    render(context) {
+    render(contextPrimary, contextSecondary) {
 
     }
 

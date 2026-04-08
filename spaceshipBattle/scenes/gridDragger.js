@@ -24,14 +24,14 @@ export class GridDraggerScene extends Scene {
     selectedEntity = null;
     selectedEntityGhost = null;
 
-    constructor(tileSize, canvas, assetManager, soundPlayer) {
+    constructor(tileSize, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
 
-        super(SceneType.GRID_DRAGGER, canvas, assetManager, soundPlayer);
+        super(SceneType.GRID_DRAGGER, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
 
         this.tileSize = tileSize;
         this.gridMap = new GridMap(
             tileSize,
-            canvas,
+            canvasPrimary,
             assetManager
         );
 
@@ -48,8 +48,8 @@ export class GridDraggerScene extends Scene {
         creaturesImages.forEach(imageAssetId => {
             this.entities.push(
                 new Entity(
-                    this.randomInRange(tileSize, this.canvas.width - tileSize),
-                    this.randomInRange(tileSize, this.canvas.height - tileSize),
+                    this.randomInRange(tileSize, this.canvasPrimary.width - tileSize),
+                    this.randomInRange(tileSize, this.canvasPrimary.height - tileSize),
                     assetManager.getImage(imageAssetId)
                 )
             )
@@ -83,7 +83,7 @@ export class GridDraggerScene extends Scene {
 
     render(context) {
         context.fillStyle = "#000000";
-        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        context.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
         this.gridMap.render(context);
         this.entities.forEach(entity => {

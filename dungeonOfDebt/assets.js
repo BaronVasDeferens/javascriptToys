@@ -53,6 +53,7 @@ export var ImageAsset = Object.freeze({
 
     WIZARD_1: "entity/wizard_1.png",
 
+    SPELL_CANCEL: "spells/cancel.png",
     SPELL_ZONE_CROSS: "spells/cross_small.png",
     SPELL_ZONE_COLUMN: "spells/column_full.png",
     SPELL_ZONE_ROW: "spells/row_full.png",

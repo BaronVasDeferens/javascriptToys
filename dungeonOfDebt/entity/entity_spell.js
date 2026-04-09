@@ -2,7 +2,8 @@ import { ImageAsset } from "../assets.js";
 
 
 export const SpellZone = Object.freeze({
-    CROSS_SMALL: 0,
+    CANCEL: 0,
+    CROSS_SMALL: 2,
     COLUMN_FULL: 5,
     ROW_FULL: 7
 });
@@ -25,6 +26,10 @@ export class SpellZoneComponentCard {
         this.spellZone = spellZone;
 
         switch (spellZone) {
+
+            case SpellZone.CANCEL:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CANCEL);
+                break;
             case SpellZone.CROSS_SMALL:
                 this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_CROSS);
                 break;
@@ -39,7 +44,7 @@ export class SpellZoneComponentCard {
 
     containsPoint(click) {
 
-        if( click.offsetX >= this.x
+        if (click.offsetX >= this.x
             && click.offsetX <= this.x + this.tileSize
             && click.offsetY >= this.y
             && click.offsetY <= this.y + this.tileSize

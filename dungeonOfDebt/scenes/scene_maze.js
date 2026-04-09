@@ -1,5 +1,5 @@
 import { ImageAsset } from "../assets.js";
-import {  MazeEntityMovementDriver, Driver } from "../driver.js";
+import { MazeEntityMovementDriver, Driver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 
@@ -42,6 +42,8 @@ export class MazeScene extends Scene {
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
     spellZoneComponents = [];
+
+    highlightedGridSquares = [];
 
     debugMode = false;
     debugShowLineOfSight = false;
@@ -107,14 +109,12 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.INITIALIZING)
 
         this.eventList = [];
-
         this.spellZoneComponents = [];
-
+        this.highlightedGridSquares = [];
         this.movementDrivers = [];
         this.lineOfSightLines = [];
 
         this.entitiesEnemy = [];
-
         this.allRooms = [];
         this.mazeArray = [];
 
@@ -195,6 +195,17 @@ export class MazeScene extends Scene {
 
         this.spellZoneComponents.push(
             new SpellZoneComponentCard(
+                SpellZone.CANCEL,
+                this.canvasSecondary,
+                64,
+                64,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellZoneComponents.push(
+            new SpellZoneComponentCard(
                 SpellZone.ROW_FULL,
                 this.canvasSecondary,
                 128,
@@ -221,12 +232,23 @@ export class MazeScene extends Scene {
 
     onMouseDownSecondary(click) {
 
-        let clickTarget = this.spellZoneComponents.filter( card => {
+        let clickTarget = this.spellZoneComponents.filter(card => {
             return card.containsPoint(click)
         })[0];
 
         if (clickTarget != null) {
-            console.log(clickTarget.spellZone)
+
+            switch (clickTarget.constructor) {
+
+                case SpellZoneComponentCard:
+                    this.handleZoneSection(clickTarget)
+                    break;
+
+                default:
+                    console.log(`dunno: ${clickTarget}`)
+                    break;
+            }
+
         }
     }
 
@@ -239,7 +261,7 @@ export class MazeScene extends Scene {
     }
 
     onMouseMoveSecondary(event) {
-        
+
     }
 
     onKeyPressed(event) {
@@ -338,6 +360,98 @@ export class MazeScene extends Scene {
         }
 
     }
+
+
+
+    /**
+     * Triggered when the user clicks on a SpellZone card to select an area of effect. 
+     */
+    handleZoneSection(zoneCard) {
+
+        let rooms = [];
+        let room = null;
+
+        switch (zoneCard.spellZone) {
+
+            case SpellZone.CANCEL:
+                // Do nothing-- the highlighted rooms array will be emptied at the end of this method
+                break;
+
+            case SpellZone.COLUMN_FULL:
+
+                // Rooms ABOVE player
+                room = this.getRoom(this.player.room.row - 1, this.player.room.col);
+                while (room != null) {
+                    rooms.push(room)
+                    room = this.getRoom(room.row - 1, room.col);
+                }
+
+                // Rooms BELOW player
+                room = this.getRoom(this.player.room.row + 1, this.player.room.col);
+                while (room != null) {
+                    rooms.push(room)
+                    room = this.getRoom(room.row + 1, room.col);
+                }
+                break;
+
+            case SpellZone.ROW_FULL:
+
+                // Rooms TO RIGHT of player
+                room = this.getRoom(this.player.room.row, this.player.room.col + 1);
+                while (room != null) {
+                    rooms.push(room)
+                    room = this.getRoom(room.row, room.col + 1);
+                }
+
+                // Rooms TO LEFT of player
+                room = this.getRoom(this.player.room.row, this.player.room.col - 1);
+                while (room != null) {
+                    rooms.push(room)
+                    room = this.getRoom(room.row, room.col - 1);
+                }
+                break;
+
+            case SpellZone.CROSS_SMALL:
+                rooms.push(this.getRoom(this.player.room.row - 1, this.player.room.col));
+                rooms.push(this.getRoom(this.player.room.row + 1, this.player.room.col));
+                rooms.push(this.getRoom(this.player.room.row, this.player.room.col + 1));
+                rooms.push(this.getRoom(this.player.room.row, this.player.room.col - 1));
+                break;
+
+            default:
+                break;
+        }
+
+        this.highlightedGridSquares = [];
+
+        rooms
+            .filter(rm => { return rm != null })
+            .forEach(highlightedRoom => {
+                this.highlightedGridSquares.push(
+                    {
+                        x: highlightedRoom.col,
+                        y: highlightedRoom.row,
+                        tileSize: this.tileSize,
+                        render: function (context) {
+                            context.fillStyle = "#FF0000";
+                            context.globalAlpha = 0.5;
+                            context.fillRect(
+                                this.x * this.tileSize,
+                                this.y * this.tileSize,
+                                this.tileSize,
+                                this.tileSize
+                            )
+                            context.globalAlpha = 1.0;
+                        }
+
+                    }
+                )
+            });
+
+    }
+
+
+
 
     moveEntityToRoom(entity, room, rate, onComplete) {
         if (entity != null
@@ -625,10 +739,16 @@ export class MazeScene extends Scene {
             })
         }
 
+        // Render highlighted squares
+        this.highlightedGridSquares.forEach(sq => {
+            sq.render(contextPrimary);
+        });
+
         // Render the secondary canvas
         this.spellZoneComponents.forEach(component => {
             component.render(contextSecondary);
         });
+
     }
 
     getRandomRoom() {

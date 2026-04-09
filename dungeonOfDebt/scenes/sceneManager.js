@@ -1,11 +1,8 @@
-import { FadeTransition } from "../transitions/fade.js";
-import { CheckerboardTransition } from "../transitions/checkerboard.js";
+import { FadeTransition } from "../transitions/transition_fade.js";
 import { SceneType } from "./scene.js"
-
-import { BlankScene } from "./blank.js";
-import { MazeScene } from "./maze.js";
+import { BlankScene } from "./scene_blank.js";
+import { MazeScene } from "./scene_maze.js";
 import { StarfieldIntroScene } from "./starfield.js"
-import { GridDraggerScene } from "./gridDragger.js";
 
 
 
@@ -30,7 +27,6 @@ export class SceneManager {
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.INTRO, new StarfieldIntroScene(this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
         this.sceneMap.set(SceneType.MAZE_SCENE, new MazeScene(this, 15, 10, this.tileSize, this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.GRID_DRAGGER, new GridDraggerScene(this.tileSize, this.canvasPrimary, this.canvasSecondary, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {
@@ -40,23 +36,6 @@ export class SceneManager {
             // Create a transition
             this.transitions.push(
                 
-                // new BlinkEffectTransition(
-                //     this.getCurrentScene(),
-                //     this.sceneMap.get(newSceneType),
-                //     this.canvas,
-                //     "#535353ff",
-                //     500
-                // )
-
-                // new CheckerboardTransition(
-                //     this.getCurrentScene(),
-                //     this.sceneMap.get(newSceneType),
-                //     this.canvas,
-                //     500,
-                //     this.tileSize,
-                //     "#272727ff"
-                // )
-
                 new FadeTransition(
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),

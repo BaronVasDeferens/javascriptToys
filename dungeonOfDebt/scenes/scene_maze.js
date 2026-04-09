@@ -1,8 +1,6 @@
-import { ImageAsset, SoundAsset } from "../assets.js";
-import { MovementDriver, MazeEntityMovementDriver, Driver } from "../driver.js";
+import { ImageAsset } from "../assets.js";
+import {  MazeEntityMovementDriver, Driver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
-import { Entity } from "../entity/entity.js";
-import { EnemyEntity } from "../entity/entity_enemy.js";
 import { SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 
 // "My name is Master Slave"

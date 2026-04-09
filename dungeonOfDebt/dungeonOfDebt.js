@@ -1,5 +1,4 @@
-import { AssetManager, FontAsset, ImageAsset, SoundAsset } from "./assets.js";
-import { SoundPlayer } from "./sound.js";
+import { AssetManager, FontAsset } from "./assets.js";
 import { SceneType } from "./scenes/scene.js";
 import { SceneManager } from "./scenes/sceneManager.js";
 
@@ -17,8 +16,7 @@ var audioContext = new AudioContext(); // AudioContext must be initialized after
 const tileSize = 64;
 
 const assetManager = new AssetManager(audioContext);
-const soundPlayer = new SoundPlayer(assetManager, audioContext);
-const sceneManager = new SceneManager(canvasPrimary, canvasSecondary, tileSize, assetManager, soundPlayer);
+const sceneManager = new SceneManager(canvasPrimary, canvasSecondary, tileSize, assetManager, null);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------
@@ -34,8 +32,6 @@ export const Stage = Object.freeze({
 });
 
 var stage;
-
-
 
 var gameFont = null;
 

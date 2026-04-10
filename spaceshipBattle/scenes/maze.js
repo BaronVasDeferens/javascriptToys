@@ -133,16 +133,15 @@ export class MazeScene extends Scene {
         // SET UP MAZE
         this.createMaze();
 
-        // CREATE and PLACE EVENTS
+        // CREATE and PLACE TREASURES
         for (let n = 0; n < 5; n++) {
-            this.eventList.push(
-                new MazeEvent(() => {
-                    // this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
-                },
-                    "#000000")
-            );
+            // this.eventList.push(
+            //     new TreasureCollectableEvent(
+            //         () => { console.log('cha-ching') },
+            //         this.assetManager
+            //     )
+            // );
         }
-
 
         this.distributeAcrossOpenRooms(this.eventList);
 
@@ -223,7 +222,7 @@ export class MazeScene extends Scene {
 
     onMouseDownSecondary(click) {
 
-        let clickTarget = this.spellZoneComponents.filter( card => {
+        let clickTarget = this.spellZoneComponents.filter(card => {
             return card.containsPoint(click)
         })[0];
 
@@ -241,7 +240,7 @@ export class MazeScene extends Scene {
     }
 
     onMouseMoveSecondary(event) {
-        
+
     }
 
     onKeyPressed(event) {
@@ -593,6 +592,7 @@ export class MazeScene extends Scene {
     }
 
     render(contextPrimary, contextSecondary) {
+
         contextPrimary.fillStyle = "#000000";
         contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
@@ -820,8 +820,9 @@ export class MazeScene extends Scene {
 
         objects.forEach(object => {
             let room = availableRooms.pop();
-            if (object instanceof MazeEvent) {
+            if (object instanceof TreasureCollectableEvent) {
                 room.setEvent(object);
+                object.setRoom(room);
             } else if (object instanceof MazeMonster) {
                 room.setOccupant(object);
                 object.setRoom(room);
@@ -982,15 +983,13 @@ class MazeMonster {
 class MazeEvent {
 
     onTrigger = null;
-    color = "#FF0000"
     room = null;
 
     isOneShot = true;
     isActive = true;
 
-    constructor(onTrigger, color) {
+    constructor(onTrigger) {
         this.onTrigger = onTrigger;
-        this.color = color;
     }
 
     setRoom(room) {
@@ -1003,7 +1002,7 @@ class MazeEvent {
             return;
         }
 
-        context.fillStyle = this.color;
+        context.fillStyle = "#FF0000";
         context.lineWidth = 1.0;
         context.beginPath();
         context.ellipse(
@@ -1025,6 +1024,21 @@ class MazeEvent {
         }
 
     }
+}
 
+class TreasureCollectableEvent extends MazeEvent {
+
+    constructor(onTrigger, assetManager) {
+        super(onTrigger);
+        this.image = assetManager.getImage(ImageAsset.TREASURE_CHEST_LARGE)
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+        context.drawImage(
+            this.image,
+            this.room.col * this.room.roomSize,
+            this.room.row * this.room.roomSize
+        )
+    }
 
 }

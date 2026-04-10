@@ -57,6 +57,9 @@ export var ImageAsset = Object.freeze({
     SPELL_ZONE_COLUMN: "spells/column_full.png",
     SPELL_ZONE_ROW: "spells/row_full.png",
 
+    TREASURE_CHEST_LARGE: "entity/chest_large.png",
+    TRAESURE_CHEST_SMALL: "entity/chest_small.png",
+
     GOBLIN_1: "entity/goblin_1.png",
     GOBLIN_2: "entity/goblin_2.png",
     GOBLIN_3: "entity/goblin_3.png",

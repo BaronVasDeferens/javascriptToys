@@ -52,6 +52,9 @@ export var ImageAsset = Object.freeze({
     FLOOR_OBSTRUCTION: "tiles/grid/floor_obstruction.png",
 
     WIZARD_1: "entity/wizard_1.png",
+    
+    TREASURE_CHEST_LARGE: "entity/chest_large.png",
+    TRAESURE_CHEST_SMALL: "entity/chest_small.png",
 
     SPELL_CANCEL: "spells/cancel.png",
     SPELL_ZONE_CROSS: "spells/cross_small.png",

@@ -134,10 +134,10 @@ export class MazeScene extends Scene {
         // CREATE and PLACE EVENTS
         for (let n = 0; n < 5; n++) {
             this.eventList.push(
-                new MazeEvent(() => {
-                    // this.sceneManager.setCurrentSceneType(SceneType.GRID_DRAGGER)
-                },
-                    "#000000")
+                new TreasureCollectableEvent(
+                    () => { console.log('cha-ching!'); },
+                    this.assetManager
+                )
             );
         }
 
@@ -1144,5 +1144,24 @@ class MazeEvent {
 
     }
 
+
+}
+
+class TreasureCollectableEvent extends MazeEvent {
+
+    constructor(onTrigger, assetManager) {
+        super(onTrigger);
+        this.image = assetManager.getImage(ImageAsset.TRAESURE_CHEST_SMALL)
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+        if (this.isActive == true) {
+            context.drawImage(
+                this.image,
+                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2 
+            )
+        }
+    }
 
 }

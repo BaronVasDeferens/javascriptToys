@@ -1,7 +1,7 @@
 import { ImageAsset } from "../assets.js";
 import { MazeEntityMovementDriver, Driver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
-import { SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
+import { SpellEffect, SpellEffectComponentCard, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 
 // "My name is Master Slave"
 // WAGON MASTER
@@ -41,7 +41,9 @@ export class MazeScene extends Scene {
 
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
-    spellZoneComponents = [];
+    spellCardComponents = [];
+    selectedSpellZone = null;
+    selectedSpellEffect = null;
 
     highlightedGridSquares = [];
 
@@ -109,7 +111,7 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.INITIALIZING)
 
         this.eventList = [];
-        this.spellZoneComponents = [];
+        this.spellCardComponents = [];
         this.highlightedGridSquares = [];
         this.movementDrivers = [];
         this.lineOfSightLines = [];
@@ -170,10 +172,11 @@ export class MazeScene extends Scene {
         );
 
 
-        // Populate spell ZONE COMPONENTS
-        this.spellZoneComponents.push(
+        // Populate spell ZONE cards
+        this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
+                () => { this.onSpellZoneSected(SpellZone.CROSS_SMALL) },
                 this.canvasSecondary,
                 0,
                 0,
@@ -182,9 +185,10 @@ export class MazeScene extends Scene {
             )
         );
 
-        this.spellZoneComponents.push(
+        this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.COLUMN_FULL,
+                () => { this.onSpellZoneSected(SpellZone.COLUMN_FULL) },
                 this.canvasSecondary,
                 64,
                 0,
@@ -193,9 +197,10 @@ export class MazeScene extends Scene {
             )
         );
 
-        this.spellZoneComponents.push(
+        this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CANCEL,
+                () => { this.onSpellZoneSected(SpellZone.CANCEL) },
                 this.canvasSecondary,
                 64,
                 64,
@@ -204,9 +209,10 @@ export class MazeScene extends Scene {
             )
         );
 
-        this.spellZoneComponents.push(
+        this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.ROW_FULL,
+                () => { this.onSpellZoneSected(SpellZone.ROW_FULL) },
                 this.canvasSecondary,
                 128,
                 0,
@@ -214,6 +220,56 @@ export class MazeScene extends Scene {
                 this.assetManager
             )
         );
+
+        // Spell EFFECT cards
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.BLAZE,
+                () => { this.onSpellEffectSelected(SpellEffect.BLAZE) },
+                this.canvasSecondary,
+                256,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.FREEZE,
+                () => { this.onSpellEffectSelected(SpellEffect.FREEZE) },
+                this.canvasSecondary,
+                320,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.CANCEL,
+                () => { this.onSpellEffectSelected(SpellEffect.CANCEL) },
+                this.canvasSecondary,
+                320,
+                64,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.PHASE,
+                () => { this.onSpellEffectSelected(SpellEffect.PHASE) },
+                this.canvasSecondary,
+                384,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
 
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
@@ -232,23 +288,12 @@ export class MazeScene extends Scene {
 
     onMouseDownSecondary(click) {
 
-        let clickTarget = this.spellZoneComponents.filter(card => {
+        let clickTarget = this.spellCardComponents.filter(card => {
             return card.containsPoint(click)
         })[0];
 
         if (clickTarget != null) {
-
-            switch (clickTarget.constructor) {
-
-                case SpellZoneComponentCard:
-                    this.handleZoneSection(clickTarget)
-                    break;
-
-                default:
-                    console.log(`dunno: ${clickTarget}`)
-                    break;
-            }
-
+            clickTarget.onClick();
         }
     }
 
@@ -366,15 +411,25 @@ export class MazeScene extends Scene {
     /**
      * Triggered when the user clicks on a SpellZone card to select an area of effect. 
      */
-    handleZoneSection(zoneCard) {
+    onSpellZoneSected(spellZone) {
+
+        // TODO: consider limiting spell effects such that they cannot pass through walls...?
 
         let rooms = [];
         let room = null;
 
-        switch (zoneCard.spellZone) {
+        if (this.selectedSpellZone == null) {
+            this.selectedSpellZone = spellZone;
+        } else {
+            this.selectedSpellZone = null;
+            this.highlightedGridSquares = [];
+            return;
+        }
+
+        switch (spellZone) {
 
             case SpellZone.CANCEL:
-                // Do nothing-- the highlighted rooms array will be emptied at the end of this method
+                this.selectedSpellZone = null;
                 break;
 
             case SpellZone.COLUMN_FULL:
@@ -450,6 +505,20 @@ export class MazeScene extends Scene {
 
     }
 
+
+    onSpellEffectSelected(spellEffect) {
+
+        // TODO: consider enforcing the sequence: ZONE => EFFECT => DURATION/STRENGTH
+
+        if (this.selectedSpellEffect == null) {
+            this.selectedSpellEffect = spellEffect;
+            console.log(`effect: ${spellEffect}`)
+        } else {
+            this.selectedSpellEffect = null;
+            console.log(`effect: cancelled`)
+            return;
+        }
+    }
 
 
 
@@ -745,9 +814,13 @@ export class MazeScene extends Scene {
         });
 
         // Render the secondary canvas
-        this.spellZoneComponents.forEach(component => {
+        this.spellCardComponents.forEach(component => {
             component.render(contextSecondary);
         });
+
+        this.spellCardComponents.forEach(component => {
+            component.render(contextSecondary);
+        })
 
     }
 
@@ -1159,7 +1232,7 @@ class TreasureCollectableEvent extends MazeEvent {
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2 
+                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
             )
         }
     }

@@ -57,9 +57,14 @@ export var ImageAsset = Object.freeze({
     TRAESURE_CHEST_SMALL: "entity/chest_small.png",
 
     SPELL_CANCEL: "spells/cancel.png",
+
     SPELL_ZONE_CROSS: "spells/cross_small.png",
     SPELL_ZONE_COLUMN: "spells/column_full.png",
     SPELL_ZONE_ROW: "spells/row_full.png",
+
+    SPELL_CARD_BLAZE: "spells/spell_blaze.png",
+    SPELL_CARD_FREEZE: "spells/spell_freeze.png",
+    SPELL_CARD_PHASE: "spells/spell_phase.png",
 
     GOBLIN_1: "entity/goblin_1.png",
     GOBLIN_2: "entity/goblin_2.png",

@@ -415,18 +415,22 @@ export class MazeScene extends Scene {
 
         // TODO: consider limiting spell effects such that they cannot pass through walls...?
 
+        this.highlightedGridSquares = [];
+
         let rooms = [];
         let room = null;
 
         if (this.selectedSpellZone == null) {
             this.selectedSpellZone = spellZone;
         } else {
-            this.selectedSpellZone = null;
-            this.highlightedGridSquares = [];
-            return;
+            if (this.selectedSpellZone == spellZone || spellZone == SpellZone.CANCEL) {
+                this.selectedSpellZone = null;
+            } else {
+                this.selectedSpellZone = spellZone;
+            }
         }
 
-        switch (spellZone) {
+        switch (this.selectedSpellZone) {
 
             case SpellZone.CANCEL:
                 this.selectedSpellZone = null;
@@ -477,8 +481,6 @@ export class MazeScene extends Scene {
                 break;
         }
 
-        this.highlightedGridSquares = [];
-
         rooms
             .filter(rm => { return rm != null })
             .forEach(highlightedRoom => {
@@ -502,25 +504,24 @@ export class MazeScene extends Scene {
                     }
                 )
             });
-
     }
-
 
     onSpellEffectSelected(spellEffect) {
 
         // TODO: consider enforcing the sequence: ZONE => EFFECT => DURATION/STRENGTH
 
-        if (this.selectedSpellEffect == null) {
+        if (this.selectedSpellEffect == null && spellEffect != SpellEffect.CANCEL) {
             this.selectedSpellEffect = spellEffect;
-            console.log(`effect: ${spellEffect}`)
         } else {
-            this.selectedSpellEffect = null;
-            console.log(`effect: cancelled`)
-            return;
+            if (this.selectedSpellEffect == spellEffect || spellEffect == SpellEffect.CANCEL) {
+                this.selectedSpellEffect = null;
+            } else {
+                this.selectedSpellEffect = spellEffect;
+            }
         }
+
+        console.log(`spell effect: ${this.selectedSpellEffect}`);
     }
-
-
 
     moveEntityToRoom(entity, room, rate, onComplete) {
         if (entity != null

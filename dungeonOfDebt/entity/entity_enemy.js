@@ -13,18 +13,20 @@ export class EnemyEntity extends Entity {
     x = 0;
     y = 0;
 
+    imageAsset = ImageAsset.MONSTER_EYE_SMALL;
+
     image = null;
     overlayImage = null;
 
     room = null;
 
-    spellEffects = new Set();
+    spellEffects = new Map();
 
     constructor(tileSize, assetManager) {
         super(0, 0, tileSize);
         this.tileSize = tileSize;
         this.assetManager = assetManager;
-        this.image = assetManager.getImage(ImageAsset.MONSTER_EYE_SMALL);
+        this.image = assetManager.getImage(this.imageAsset);
     }
 
     setRoom(room) {
@@ -38,8 +40,9 @@ export class EnemyEntity extends Entity {
         this.y = this.room.row * this.tileSize;
     }
 
-    addSpellEffect(effect) {
-        this.spellEffects.add(effect);
+    addSpellEffect(effect, turns) {
+
+        this.spellEffects.set(effect, turns);
 
         switch (effect) {
 
@@ -53,11 +56,34 @@ export class EnemyEntity extends Entity {
     }
 
     removeSpellEffect(effect) {
-        this.spellEffects.remove(effect);
+        this.spellEffects.delete(effect);
+        if (this.spellEffects.size == 0) {
+            this.overlayImage = null;
+        }
     }
 
     clearAllSpellEffects() {
         this.spellEffects.clear();
+    }
+
+    onTurnConclusion() {
+
+        let expiredEffects = new Set();
+        let keys = this.spellEffects.keys()
+
+        keys.forEach(key => {
+            let current = this.spellEffects.get(key) - 1;
+            this.spellEffects.set(key, current);
+
+            if (current <= 0) {
+                expiredEffects.add(key)
+            }
+        });
+
+        expiredEffects.forEach(key => {
+            this.removeSpellEffect(key);
+        })
+
     }
 
     render(context, mazeWindowX, mazeWindowY) {

@@ -70,45 +70,6 @@ export class MazeScene extends Scene {
         this.initialize();
     }
 
-    updateGameSequence(newSequence) {
-        if (this.currentGameSequence != newSequence) {
-
-            if (this.debugMode == true) {
-                console.log(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
-            }
-
-            this.currentGameSequence = newSequence;
-
-            switch (newSequence) {
-
-                case GameSequence.INITIALIZING:
-                    break;
-
-                case GameSequence.PLAYER_AWAITING_MOVEMENT:
-                    break;
-
-                case GameSequence.PLAYER_MOVING:
-                    break;
-
-                case GameSequence.ENEMY_PLOTTING_MOVEMENT:
-                    this.computeEnemyMoves();
-                    this.stateDrivers.push(
-                        new Driver(
-                            0,
-                            () => { },
-                            () => {
-                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
-                                this.computeEntityVisibility()
-                            }
-                        )
-                    )
-                    break;
-
-                case GameSequence.ENEMY_MOVING:
-                    break;
-            }
-        }
-    }
 
     initialize() {
 
@@ -343,6 +304,46 @@ export class MazeScene extends Scene {
 
     }
 
+    updateGameSequence(newSequence) {
+        if (this.currentGameSequence != newSequence) {
+
+            if (this.debugMode == true) {
+                console.log(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
+            }
+
+            this.currentGameSequence = newSequence;
+
+            switch (newSequence) {
+
+                case GameSequence.INITIALIZING:
+                    break;
+
+                case GameSequence.PLAYER_AWAITING_MOVEMENT:
+                    break;
+
+                case GameSequence.PLAYER_MOVING:
+                    break;
+
+                case GameSequence.ENEMY_PLOTTING_MOVEMENT:
+                    this.computeEnemyMoves();
+                    this.stateDrivers.push(
+                        new Driver(
+                            0,
+                            () => { },
+                            () => {
+                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                this.computeEntityVisibility()
+                            }
+                        )
+                    )
+                    break;
+
+                case GameSequence.ENEMY_MOVING:
+                    break;
+            }
+        }
+    }
+
     onStart() {
         this.computeMazeWindow();
     }
@@ -400,6 +401,7 @@ export class MazeScene extends Scene {
                             this.movementRateDefaultMillis,
                             () => {
                                 this.computeMazeWindow();
+                                this.concludePlayerTurn();
                                 this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
                             }
                         ))
@@ -418,6 +420,7 @@ export class MazeScene extends Scene {
                             this.movementRateDefaultMillis,
                             () => {
                                 this.computeMazeWindow();
+                                this.concludePlayerTurn();
                                 this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
                             }
                         )
@@ -437,6 +440,7 @@ export class MazeScene extends Scene {
                             this.movementRateDefaultMillis,
                             () => {
                                 this.computeMazeWindow();
+                                this.concludePlayerTurn();
                                 this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
                             }
                         )
@@ -456,6 +460,7 @@ export class MazeScene extends Scene {
                             this.movementRateDefaultMillis,
                             () => {
                                 this.computeMazeWindow();
+                                this.concludePlayerTurn();
                                 this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
                             }
                         )
@@ -622,7 +627,7 @@ export class MazeScene extends Scene {
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
-                            gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE)
+                            gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5)
                         }
                     });
 
@@ -660,8 +665,6 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
         }
     }
-
-
 
     moveEntityToRoom(entity, room, rate, onComplete) {
 
@@ -919,7 +922,11 @@ export class MazeScene extends Scene {
 
     }
 
-
+    concludePlayerTurn() {
+        this.entitiesEnemy.forEach(enemy => {
+            enemy.onTurnConclusion();
+        })
+    }
 
     getRandomRoom() {
         var index = Math.floor(Math.random() * 1000 % (this.mazeRows * this.mazeCols));

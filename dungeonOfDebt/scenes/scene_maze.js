@@ -1,5 +1,5 @@
 import { ImageAsset } from "../assets.js";
-import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectDriver } from "../driver.js";
+import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { EnemyEntity } from "../entity/entity_enemy.js";
@@ -634,7 +634,7 @@ export class MazeScene extends Scene {
 
                     // Apply a driver to flash reduce the opacity of the spell effect overlay
                     this.stateDrivers.push(
-                        new SpellEffectDriver(
+                        new SpellEffectOverlayDriver(
                             this.spellEffectOverlay,
                             500,
                             () => {

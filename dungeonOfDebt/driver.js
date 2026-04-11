@@ -102,7 +102,7 @@ export class MultiEntityMovementDriver {
 
 }
 
-export class SpellEffectDriver extends Driver {
+export class SpellEffectOverlayDriver extends Driver {
 
     alpha = 1.0;
 

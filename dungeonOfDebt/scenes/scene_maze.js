@@ -2,6 +2,7 @@ import { ImageAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
+import { EnemyEntity } from "../entity/entity_enemy.js";
 
 // "My name is Master Slave"
 // WAGON MASTER
@@ -37,7 +38,7 @@ export class MazeScene extends Scene {
 
     player = null;
 
-    movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
+    movementRateDefaultMillis = 50;         // time to traverse from one grid section to the next 
 
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
@@ -147,9 +148,9 @@ export class MazeScene extends Scene {
         this.distributeAcrossOpenRooms(this.eventList);
 
 
-        // CREATE nad PLACE ENEMIES
+        // ENEMIES
         for (let n = 0; n < this.numEnemyEntities; n++) {
-            this.entitiesEnemy.push(new MazeMonster(this.tileSize, this.assetManager));
+            this.entitiesEnemy.push(new EnemyEntity(this.tileSize, this.assetManager));
             this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
 
@@ -1034,7 +1035,7 @@ export class MazeScene extends Scene {
             let room = availableRooms.pop();
             if (object instanceof MazeEvent) {
                 room.setEvent(object);
-            } else if (object instanceof MazeMonster) {
+            } else if (object instanceof EnemyEntity) {
                 room.setOccupant(object);
                 object.setRoom(room);
             }
@@ -1162,34 +1163,6 @@ class MazeRoom {
     }
 
 };
-
-class MazeMonster {
-
-    x = 0;
-    y = 0;
-    image = null;
-    room = null;
-
-    constructor(tileSize, assetManager) {
-        this.tileSize = tileSize;
-        this.image = assetManager.getImage(ImageAsset.GOBLIN_3);
-    }
-
-    setRoom(room) {
-        this.room = room;
-        this.x = this.room.col * this.tileSize;
-        this.y = this.room.row * this.tileSize;
-    }
-
-    render(context, mazeWindowX, mazeWindowY) {
-        context.drawImage(
-            this.image,
-            this.x + ((this.tileSize - this.image.width) / 2),
-            this.y + ((this.tileSize - this, this.image.height) / 2)
-        );
-    }
-
-}
 
 class MazeEvent {
 

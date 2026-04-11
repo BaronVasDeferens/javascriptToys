@@ -18,10 +18,6 @@ export const SpellEffect = Object.freeze({
 });
 
 
-
-
-
-
 export class ComponentCard {
 
     image = null;

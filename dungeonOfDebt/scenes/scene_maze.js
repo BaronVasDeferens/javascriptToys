@@ -537,7 +537,9 @@ export class MazeScene extends Scene {
         if (this.selectedSpellZone != null
             && this.selectedSpellEffect != null) {
 
-            console.log(`casting: ${this.selectedSpellEffect}`)
+            if (this.debugMode == true) {
+                console.log(`casting: ${this.getSpellEffectName(this.selectedSpellEffect)}`)
+            }
 
             switch (this.selectedSpellEffect) {
 
@@ -546,7 +548,6 @@ export class MazeScene extends Scene {
                     // Apply a FREEZE effect to every entity in the selected squares
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
-                        console.log(gridSquare)
                         if (gridSquare.occupant != null) {
                             gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE)
                         }
@@ -1071,10 +1072,13 @@ export class MazeScene extends Scene {
             if (object instanceof MazeEvent) {
                 room.setEvent(object);
             } else if (object instanceof EnemyEntity) {
-                room.setOccupant(object);
                 object.setRoom(room);
             }
         });
+    }
+
+    getSpellEffectName(effect) {
+        return Object.keys(SpellEffect).find(k => SpellEffect[k] === effect);
     }
 }
 

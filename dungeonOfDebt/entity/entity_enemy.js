@@ -28,6 +28,10 @@ export class EnemyEntity extends Entity {
     }
 
     setRoom(room) {
+        if (this.room != null) {
+            this.room.occupant = null;
+        }
+
         this.room = room;
         this.room.occupant = this;
         this.x = this.room.col * this.tileSize;

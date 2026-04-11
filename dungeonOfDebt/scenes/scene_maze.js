@@ -1,5 +1,5 @@
 import { ImageAsset } from "../assets.js";
-import { MazeEntityMovementDriver, Driver } from "../driver.js";
+import { EntityMovementDriver, Driver, MultiEntityMovementDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 
@@ -172,7 +172,7 @@ export class MazeScene extends Scene {
         );
 
 
-        // Populate spell ZONE cards
+        // Spell ZONE cards
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
@@ -270,7 +270,6 @@ export class MazeScene extends Scene {
             )
         );
 
-
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
 
@@ -324,15 +323,16 @@ export class MazeScene extends Scene {
                 potentialRoom = this.getRoom(this.player.row, this.player.col - 1);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.moveEntityToRoom(
-                        this.player,
-                        potentialRoom,
-                        this.movementRateDefaultMillis,
-                        () => {
-                            this.computeMazeWindow();
-                            this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                        }
-                    );
+                    this.stateDrivers.push(
+                        this.moveEntityToRoom(
+                            this.player,
+                            potentialRoom,
+                            this.movementRateDefaultMillis,
+                            () => {
+                                this.computeMazeWindow();
+                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+                            }
+                        ))
                 }
                 break;
 
@@ -341,14 +341,16 @@ export class MazeScene extends Scene {
                 potentialRoom = this.getRoom(this.player.row, this.player.col + 1);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.moveEntityToRoom(
-                        this.player,
-                        potentialRoom,
-                        this.movementRateDefaultMillis,
-                        () => {
-                            this.computeMazeWindow();
-                            this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                        }
+                    this.stateDrivers.push(
+                        this.moveEntityToRoom(
+                            this.player,
+                            potentialRoom,
+                            this.movementRateDefaultMillis,
+                            () => {
+                                this.computeMazeWindow();
+                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+                            }
+                        )
                     );
                 }
                 break;
@@ -358,14 +360,16 @@ export class MazeScene extends Scene {
                 potentialRoom = this.getRoom(this.player.row - 1, this.player.col);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.moveEntityToRoom(
-                        this.player,
-                        potentialRoom,
-                        this.movementRateDefaultMillis,
-                        () => {
-                            this.computeMazeWindow();
-                            this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                        }
+                    this.stateDrivers.push(
+                        this.moveEntityToRoom(
+                            this.player,
+                            potentialRoom,
+                            this.movementRateDefaultMillis,
+                            () => {
+                                this.computeMazeWindow();
+                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+                            }
+                        )
                     );
                 }
                 break;
@@ -375,14 +379,16 @@ export class MazeScene extends Scene {
                 potentialRoom = this.getRoom(this.player.row + 1, this.player.col);
                 if (potentialRoom != null && potentialRoom.isOpen == true) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.moveEntityToRoom(
-                        this.player,
-                        potentialRoom,
-                        this.movementRateDefaultMillis,
-                        () => {
-                            this.computeMazeWindow();
-                            this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                        }
+                    this.stateDrivers.push(
+                        this.moveEntityToRoom(
+                            this.player,
+                            potentialRoom,
+                            this.movementRateDefaultMillis,
+                            () => {
+                                this.computeMazeWindow();
+                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+                            }
+                        )
                     );
                 }
                 break;
@@ -524,6 +530,7 @@ export class MazeScene extends Scene {
     }
 
     moveEntityToRoom(entity, room, rate, onComplete) {
+
         if (entity != null
             && room != null
             && room.isOpen == true
@@ -531,22 +538,23 @@ export class MazeScene extends Scene {
             //&& this.movementDrivers.length == 0
         ) {
 
-            this.stateDrivers.push(
-                new MazeEntityMovementDriver(
-                    entity,
-                    room,
-                    rate,
-                    () => {
-                        // onUpdate
-                    },
-                    () => {
-                        // onComplete
-                        entity.setRoom(room);
-                        room.triggerEventIfPresent();
-                        onComplete();
-                    }
-                )
+            return new EntityMovementDriver(
+                entity,
+                room,
+                rate,
+                () => {
+                    // onUpdate
+                },
+                () => {
+                    // onComplete
+                    entity.setRoom(room);
+                    room.triggerEventIfPresent();
+                    onComplete();
+                }
             )
+
+        } else {
+            return null
         }
     }
 
@@ -656,7 +664,7 @@ export class MazeScene extends Scene {
         // Ineligible rooms will be those that another monster has set it's sights on
         // TODO: ...but make the room that a monster is LEAVING elibible to the next monster
         let ineligibleRooms = [];
-
+        let drivers = [];
 
         this.entitiesEnemy.forEach(monster => {
             if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
@@ -688,9 +696,21 @@ export class MazeScene extends Scene {
                 }
 
                 ineligibleRooms.push(neighbor);
-                this.moveEntityToRoom(monster, neighbor, 50, () => { });
+                drivers.push(
+                    this.moveEntityToRoom(monster, neighbor, 50, () => { })
+                );
             }
-        })
+        });
+
+
+        this.stateDrivers.push(
+            new MultiEntityMovementDriver(
+                drivers,
+                () => {},
+                () => { console.log(`multiDriver done`) }
+            )
+        );
+
     }
 
     findMazeRoomAtPoint(event) {

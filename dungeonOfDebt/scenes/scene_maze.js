@@ -744,7 +744,7 @@ export class MazeScene extends Scene {
             new MultiEntityMovementDriver(
                 drivers,
                 () => { },
-                () => { console.log(`multiDriver done`) }
+                () => { }
             )
         );
 

@@ -493,15 +493,15 @@ export class MazeScene extends Scene {
             .forEach(highlightedRoom => {
                 this.highlightedGridSquares.push(
                     {
-                        x: highlightedRoom.col,
-                        y: highlightedRoom.row,
+                        col: highlightedRoom.col,
+                        row: highlightedRoom.row,
                         tileSize: this.tileSize,
                         render: function (context) {
                             context.fillStyle = "#FF0000";
                             context.globalAlpha = 0.5;
                             context.fillRect(
-                                this.x * this.tileSize,
-                                this.y * this.tileSize,
+                                this.col * this.tileSize,
+                                this.row * this.tileSize,
                                 this.tileSize,
                                 this.tileSize
                             )
@@ -528,6 +528,39 @@ export class MazeScene extends Scene {
         }
 
         console.log(`spell effect: ${this.selectedSpellEffect}`);
+
+        this.resolveSpellCasting();
+    }
+
+    resolveSpellCasting() {
+
+        if (this.selectedSpellZone != null
+            && this.selectedSpellEffect != null) {
+
+            console.log(`casting: ${this.selectedSpellEffect}`)
+
+            switch (this.selectedSpellEffect) {
+
+                case SpellEffect.FREEZE:
+
+                    // Apply a FREEZE effect to every entity in the selected squares
+                    this.highlightedGridSquares.forEach(sq => {
+                        let gridSquare = this.getRoom(sq.row, sq.col);
+                        console.log(gridSquare)
+                        if (gridSquare.occupant != null) {
+                            gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE)
+                        }
+                    })
+                    break;
+
+                default:
+                    break;
+            }
+
+            this.selectedSpellEffect = null;
+            this.selectedSpellZone = null;
+            this.highlightedGridSquares = [];
+        }
     }
 
     moveEntityToRoom(entity, room, rate, onComplete) {
@@ -667,47 +700,49 @@ export class MazeScene extends Scene {
         let ineligibleRooms = [];
         let drivers = [];
 
-        this.entitiesEnemy.forEach(monster => {
-            if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
-                let neighbors =
-                    this.getAdjacentRooms(monster.room.row, monster.room.col)
-                        .filter(room => { return room.isOpen == true })
-                        .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
+        this.entitiesEnemy
+            .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
+            .forEach(monster => {
+                if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
+                    let neighbors =
+                        this.getAdjacentRooms(monster.room.row, monster.room.col)
+                            .filter(room => { return room.isOpen == true })
+                            .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
 
-                var neighbor = null;
+                    var neighbor = null;
 
-                if (neighbors.length >= 2) {
+                    if (neighbors.length >= 2) {
 
-                    let neighborsSortedByDistance = neighbors.sort((a, b) => {
-                        let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
-                        let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
-                        if (distA > distB) {
-                            return 1;
-                        } else if (distA < distB) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    });
+                        let neighborsSortedByDistance = neighbors.sort((a, b) => {
+                            let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
+                            let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
+                            if (distA > distB) {
+                                return 1;
+                            } else if (distA < distB) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        });
 
-                    neighbor = neighborsSortedByDistance[0];
+                        neighbor = neighborsSortedByDistance[0];
 
-                } else {
-                    neighbor = neighbors[0];
+                    } else {
+                        neighbor = neighbors[0];
+                    }
+
+                    ineligibleRooms.push(neighbor);
+                    drivers.push(
+                        this.moveEntityToRoom(monster, neighbor, 50, () => { })
+                    );
                 }
-
-                ineligibleRooms.push(neighbor);
-                drivers.push(
-                    this.moveEntityToRoom(monster, neighbor, 50, () => { })
-                );
-            }
-        });
+            });
 
 
         this.stateDrivers.push(
             new MultiEntityMovementDriver(
                 drivers,
-                () => {},
+                () => { },
                 () => { console.log(`multiDriver done`) }
             )
         );

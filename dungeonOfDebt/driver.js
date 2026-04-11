@@ -1,3 +1,6 @@
+
+
+
 export class Driver {
 
     isFinished = false;
@@ -91,10 +94,38 @@ export class MultiEntityMovementDriver {
 
         //console.log(`${deltaMillis} :: ${this.totalTimeMillis} / ${this.durationMillis} = ${percentUpdate}`)
 
-        if (this.drivers.every( driver => { return driver.isFinished == true})  ) {
+        if (this.drivers.every(driver => { return driver.isFinished == true })) {
             this.isFinished = true;
             this.onComplete();
         }
     }
+
+}
+
+export class SpellEffectDriver extends Driver {
+
+    alpha = 1.0;
+
+    constructor(overlay, durationMillis, onUpdate, onComplete) {
+        super(durationMillis, onUpdate, onComplete);
+        this.overlay = overlay;
+    }
+
+    update(deltaMillis) {
+
+        if (this.isFinished == true) {
+            return;
+        }
+
+        this.overlay.alpha -= (deltaMillis / this.durationMillis);
+
+        this.totalTimeMillis += deltaMillis;
+
+        if (this.totalTimeMillis >= this.durationMillis) {
+            this.isFinished = true;
+            this.onComplete();
+        }
+    }
+
 
 }

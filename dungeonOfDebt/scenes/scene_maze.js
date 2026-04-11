@@ -1,7 +1,7 @@
 import { ImageAsset } from "../assets.js";
-import { EntityMovementDriver, Driver, MultiEntityMovementDriver } from "../driver.js";
+import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
-import { SpellEffect, SpellEffectComponentCard, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
+import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { EnemyEntity } from "../entity/entity_enemy.js";
 
 // "My name is Master Slave"
@@ -10,10 +10,11 @@ import { EnemyEntity } from "../entity/entity_enemy.js";
 const GameSequence = Object.freeze(
     {
         "INITIALIZING": 0,
-        "PLAYER_AWAITING_MOVEMENT": 1,
-        "PLAYER_MOVING": 2,
-        "ENEMY_PLOTTING_MOVEMENT": 3,
-        "ENEMY_MOVING": 4
+        "PLAYER_AWAITING_MOVEMENT": 10,
+        "PLAYER_MOVING": 20,
+        "SPECIAL_EFFECT_ANIMATING": 21,
+        "ENEMY_PLOTTING_MOVEMENT": 30,
+        "ENEMY_MOVING": 40
     }
 );
 
@@ -47,6 +48,8 @@ export class MazeScene extends Scene {
     selectedSpellEffect = null;
 
     highlightedGridSquares = [];
+
+    spellEffectOverlay = null;              // if not null, render this item last
 
     debugMode = false;
     debugShowLineOfSight = false;
@@ -274,6 +277,72 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
 
+    update(delta) {
+        let driver = this.stateDrivers[0];
+        if (driver != null) {
+            if (driver.isFinished == true) {
+                this.stateDrivers.shift()
+            } else {
+                driver.update(delta)
+            }
+        }
+    }
+
+    render(contextPrimary, contextSecondary) {
+        contextPrimary.fillStyle = "#000000";
+        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
+
+        this.visibleRooms.forEach(room => {
+            room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
+        });
+
+        // Render enemies
+        this.entitiesEnemy.forEach(monster => {
+            monster.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
+        })
+
+        // Render player token
+        this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
+
+        // Render LOS
+        if (this.debugShowLineOfSight == true) {
+            this.lineOfSightLines.forEach(line => {
+                if (line.isVisible == true) {
+                    contextPrimary.strokeStyle = "#00FF00";
+                } else {
+                    contextPrimary.strokeStyle = "#FF0000";
+                }
+
+                contextPrimary.lineWidth = 1.0;
+                contextPrimary.save();
+                contextPrimary.beginPath();
+                contextPrimary.moveTo(line.startX, line.startY);
+                contextPrimary.lineTo(line.endX, line.endY);
+                contextPrimary.stroke();
+                contextPrimary.restore();
+            })
+        }
+
+        // Render highlighted squares
+        this.highlightedGridSquares.forEach(sq => {
+            sq.render(contextPrimary);
+        });
+
+        if (this.spellEffectOverlay != null) {
+            this.spellEffectOverlay.render(contextPrimary);
+        }
+
+        // Render the secondary canvas
+        this.spellCardComponents.forEach(component => {
+            component.render(contextSecondary);
+        });
+
+        this.spellCardComponents.forEach(component => {
+            component.render(contextSecondary);
+        });
+
+    }
+
     onStart() {
         this.computeMazeWindow();
     }
@@ -492,6 +561,10 @@ export class MazeScene extends Scene {
             .filter(rm => { return rm != null })
             .forEach(highlightedRoom => {
                 this.highlightedGridSquares.push(
+
+                    // Add an anonymous object which can be both rendered and
+                    // traced back to a specific Room via (row, col)
+
                     {
                         col: highlightedRoom.col,
                         row: highlightedRoom.row,
@@ -545,13 +618,37 @@ export class MazeScene extends Scene {
 
                 case SpellEffect.FREEZE:
 
-                    // Apply a FREEZE effect to every entity in the selected squares
+                    // Apply a FREEZE effect (ice cube) to every entity in the selected squares
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
                             gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE)
                         }
-                    })
+                    });
+
+                    // Create a spell effect overlay to flash the screen during this spell effect
+                    this.spellEffectOverlay = new SpellEffectOverlay(
+                        this.canvasPrimary,
+                        "#00a9FF"
+                    );
+
+                    // Apply a driver to flash reduce the opacity of the spell effect overlay
+                    this.stateDrivers.push(
+                        new SpellEffectDriver(
+                            this.spellEffectOverlay,
+                            500,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                this.spellEffectOverlay = null;
+                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                            }
+                        )
+                    )
+
+                    this.updateGameSequence(GameSequence.SPECIAL_EFFECT_ANIMATING);
                     break;
 
                 default:
@@ -563,6 +660,8 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
         }
     }
+
+
 
     moveEntityToRoom(entity, room, rate, onComplete) {
 
@@ -820,67 +919,7 @@ export class MazeScene extends Scene {
 
     }
 
-    update(delta) {
-        let driver = this.stateDrivers[0];
-        if (driver != null) {
-            if (driver.isFinished == true) {
-                this.stateDrivers.shift()
-            } else {
-                driver.update(delta)
-            }
-        }
-    }
 
-    render(contextPrimary, contextSecondary) {
-        contextPrimary.fillStyle = "#000000";
-        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
-
-        this.visibleRooms.forEach(room => {
-            room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
-        });
-
-        // Render enemies
-        this.entitiesEnemy.forEach(monster => {
-            monster.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
-        })
-
-        // Render player token
-        this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
-
-        // Render LOS
-        if (this.debugShowLineOfSight == true) {
-            this.lineOfSightLines.forEach(line => {
-                if (line.isVisible == true) {
-                    contextPrimary.strokeStyle = "#00FF00";
-                } else {
-                    contextPrimary.strokeStyle = "#FF0000";
-                }
-
-                contextPrimary.lineWidth = 1.0;
-                contextPrimary.save();
-                contextPrimary.beginPath();
-                contextPrimary.moveTo(line.startX, line.startY);
-                contextPrimary.lineTo(line.endX, line.endY);
-                contextPrimary.stroke();
-                contextPrimary.restore();
-            })
-        }
-
-        // Render highlighted squares
-        this.highlightedGridSquares.forEach(sq => {
-            sq.render(contextPrimary);
-        });
-
-        // Render the secondary canvas
-        this.spellCardComponents.forEach(component => {
-            component.render(contextSecondary);
-        });
-
-        this.spellCardComponents.forEach(component => {
-            component.render(contextSecondary);
-        })
-
-    }
 
     getRandomRoom() {
         var index = Math.floor(Math.random() * 1000 % (this.mazeRows * this.mazeCols));

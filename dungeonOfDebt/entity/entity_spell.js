@@ -102,6 +102,29 @@ export class SpellEffectComponentCard extends ComponentCard {
 
 
 
+export class SpellEffectOverlay {
+
+    alpha = 1.0;
+
+    constructor(canvas, color) {
+        this.canvas = canvas;
+        this.color = color;
+    }
+
+    update(deltaMillis) {
+
+    }
+
+    render(context) {
+        context.globalAlpha = this.alpha;
+        context.fillStyle = this.color;
+        context.fillRect(0,0, this.canvas.width, this.canvas.height)
+        context.globalAlpha = 1.0;
+    }
+
+}
+
+
 
 export class Spell {
 

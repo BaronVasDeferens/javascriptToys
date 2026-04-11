@@ -1,8 +1,8 @@
 import { Entity } from "./entity.js";
 import { ImageAsset } from "../assets.js";
-import { SpellEffect } from "./entity_spell.js";
+import { Spell, SpellEffect } from "./entity_spell.js";
 
-const MonsterBehavior = Object.freeze({
+export const MonsterBehavior = Object.freeze({
     RANDOM: 10,                     // Moves to a random adjacent square
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
     CHASE_OMNISCIENT: 30            // Moves toward the player regardless of LOS
@@ -14,6 +14,7 @@ export class EnemyEntity extends Entity {
     y = 0;
 
     imageAsset = ImageAsset.MONSTER_EYE_SMALL;
+    behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
 
     image = null;
     overlayImage = null;
@@ -96,11 +97,15 @@ export class EnemyEntity extends Entity {
 
 
         if (this.overlayImage != null) {
+
+            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
             context.drawImage(
                 this.overlayImage,
                 this.x + ((this.tileSize - this.overlayImage.width) / 2),
                 this.y + ((this.tileSize - this.overlayImage.height) / 2)
             )
+
+            context.globalAlpha = 1.0;
         }
 
     }

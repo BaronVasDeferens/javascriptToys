@@ -2,7 +2,7 @@ import { ImageAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { EnemyEntity } from "../entity/entity_enemy.js";
+import { EnemyEntity, MonsterBehavior } from "../entity/entity_enemy.js";
 
 // "My name is Master Slave"
 // WAGON MASTER
@@ -627,7 +627,7 @@ export class MazeScene extends Scene {
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
-                            gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5)
+                            gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
                         }
                     });
 
@@ -664,6 +664,75 @@ export class MazeScene extends Scene {
             this.selectedSpellZone = null;
             this.highlightedGridSquares = [];
         }
+    }
+
+    computeEnemyMoves() {
+
+        // Ineligible rooms will be those that another monster has set its sights on
+        // TODO: ...but make the room that a monster is LEAVING elibible to the next monster
+        let ineligibleRooms = [];
+        let drivers = [];
+
+        this.entitiesEnemy
+            .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
+            .forEach(monster => {
+
+                switch (monster.behavior) {
+                    
+                    case MonsterBehavior.CHASE_LINE_OF_SIGHT:
+
+                        if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
+                            let neighbors =
+                                this.getAdjacentRooms(monster.room.row, monster.room.col)
+                                    .filter(room => { return room.isOpen == true })
+                                    .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
+
+                            let neighbor = null;
+
+                            if (neighbors.length >= 2) {
+
+                                let neighborsSortedByDistance = neighbors.sort((a, b) => {
+                                    let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
+                                    let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
+                                    if (distA > distB) {
+                                        return 1;
+                                    } else if (distA < distB) {
+                                        return -1;
+                                    } else {
+                                        return 0;
+                                    }
+                                });
+
+                                neighbor = neighborsSortedByDistance[0];
+
+                            } else {
+                                neighbor = neighbors[0];
+                            }
+
+                            ineligibleRooms.push(neighbor);
+                            drivers.push(
+                                this.moveEntityToRoom(monster, neighbor, 50, () => { })
+                            );
+                        }
+
+                        break;
+
+                    default:
+                        break;
+                }
+
+
+            });
+
+        // Place all monster movements into a single multi-entity driver
+        this.stateDrivers.push(
+            new MultiEntityMovementDriver(
+                drivers,
+                () => { },
+                () => { }
+            )
+        );
+
     }
 
     moveEntityToRoom(entity, room, rate, onComplete) {
@@ -796,61 +865,7 @@ export class MazeScene extends Scene {
             .every(room => { return room.isOpen == true })
     }
 
-    computeEnemyMoves() {
 
-        // Ineligible rooms will be those that another monster has set it's sights on
-        // TODO: ...but make the room that a monster is LEAVING elibible to the next monster
-        let ineligibleRooms = [];
-        let drivers = [];
-
-        this.entitiesEnemy
-            .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
-            .forEach(monster => {
-                if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
-                    let neighbors =
-                        this.getAdjacentRooms(monster.room.row, monster.room.col)
-                            .filter(room => { return room.isOpen == true })
-                            .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
-
-                    var neighbor = null;
-
-                    if (neighbors.length >= 2) {
-
-                        let neighborsSortedByDistance = neighbors.sort((a, b) => {
-                            let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
-                            let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
-                            if (distA > distB) {
-                                return 1;
-                            } else if (distA < distB) {
-                                return -1;
-                            } else {
-                                return 0;
-                            }
-                        });
-
-                        neighbor = neighborsSortedByDistance[0];
-
-                    } else {
-                        neighbor = neighbors[0];
-                    }
-
-                    ineligibleRooms.push(neighbor);
-                    drivers.push(
-                        this.moveEntityToRoom(monster, neighbor, 50, () => { })
-                    );
-                }
-            });
-
-
-        this.stateDrivers.push(
-            new MultiEntityMovementDriver(
-                drivers,
-                () => { },
-                () => { }
-            )
-        );
-
-    }
 
     findMazeRoomAtPoint(event) {
 

@@ -48,6 +48,11 @@ export class ComponentCard {
 
 }
 
+/**
+ * Spell Zone Component Card
+ * A clickable UI element which allows the user to specify a zone (set of squares)
+ * for a spell effect
+ */
 export class SpellZoneComponentCard extends ComponentCard {
 
     constructor(spellZone, onClick, canvas, x, y, tileSize, assetManager) {
@@ -73,6 +78,10 @@ export class SpellZoneComponentCard extends ComponentCard {
     }
 }
 
+/**
+ * Spell Effect Component Card
+ * A clickable UI element which represents a spell effect (e.g. freeze) 
+ */
 export class SpellEffectComponentCard extends ComponentCard {
 
     spellEffect = null;
@@ -101,7 +110,11 @@ export class SpellEffectComponentCard extends ComponentCard {
 }
 
 
-
+/**
+ * Spell Effect Overlay
+ * Draws color over the top of the specified canvas.
+ * Driven by the SpellEffectOverlayDriver (see drivers.js)
+ */
 export class SpellEffectOverlay {
 
     alpha = 1.0;

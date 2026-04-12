@@ -72,7 +72,6 @@ export class MazeScene extends Scene {
         this.initialize();
     }
 
-
     initialize() {
 
         this.updateGameSequence(GameSequence.INITIALIZING)
@@ -238,9 +237,6 @@ export class MazeScene extends Scene {
 
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
-
-
-
 
     update(delta) {
         let driver = this.stateDrivers[0];
@@ -636,13 +632,6 @@ export class MazeScene extends Scene {
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
-
-
-
-                            console.log(gridSquare.occupant.constructor)
-
-
-
                             gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
                         }
                     });

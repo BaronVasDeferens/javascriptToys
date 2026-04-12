@@ -1251,6 +1251,9 @@ class MazeRoom {
     }
 
     setOccupant(entity) {
+
+        // !!! be sure to call entity.setRoom() BUT NOT FROM HERE (unless you have infinite compute, RAM, and time)
+
         this.occupant = entity;
         if (this.occupant != null) {
             this.isOccupied = true;
@@ -1313,6 +1316,7 @@ class MazeEvent {
     }
 
     setRoom(room) {
+        // !!! be sure to call room.setOccupant() BUT NOT FROM HERE (unless you have infinite compute, RAM, and time)
         this.room = room;
     }
 
@@ -1336,7 +1340,7 @@ class MazeEvent {
     }
 
     addSpellEffect(effect) {
-        
+
     }
 
     triggerEvent() {

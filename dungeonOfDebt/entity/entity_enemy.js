@@ -36,7 +36,6 @@ export class EnemyEntity extends Entity {
         }
 
         this.room = room;
-        this.room.occupant = this;
         this.x = this.room.col * this.tileSize;
         this.y = this.room.row * this.tileSize;
     }

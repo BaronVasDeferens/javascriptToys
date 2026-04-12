@@ -5,7 +5,9 @@ import { Spell, SpellEffect } from "./entity_spell.js";
 export const MonsterBehavior = Object.freeze({
     RANDOM: 10,                     // Moves to a random adjacent square
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
-    CHASE_OMNISCIENT: 30            // Moves toward the player regardless of LOS
+    CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
+    FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
+    FLEE_OMNISICIENT: 50            // Moves away from the player regardless of LOS
 })
 
 export class EnemyEntity extends Entity {

@@ -4,6 +4,8 @@ import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { EnemyEntity, MonsterBehavior } from "../entity/entity_enemy.js";
 
+
+
 // "My name is Master Slave"
 // WAGON MASTER
 
@@ -570,6 +572,7 @@ export class MazeScene extends Scene {
 
         rooms
             .filter(rm => { return rm != null })
+            //.filter(rm => { return (rm.row != this.player.room.row) && (rm.col != this.player.room.col) })
             .forEach(highlightedRoom => {
                 this.highlightedGridSquares.push(
 
@@ -633,6 +636,13 @@ export class MazeScene extends Scene {
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
+
+
+
+                            console.log(gridSquare.occupant.constructor)
+
+
+
                             gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
                         }
                     });
@@ -704,6 +714,48 @@ export class MazeScene extends Scene {
                             let neighbors =
                                 this.getAdjacentRooms(monster.room.row, monster.room.col)
                                     .filter(room => { return room.isOpen == true })
+                                    .filter(room => { return room === this.player.room || !ineligibleRooms.includes(room) });
+
+                            let neighbor = null;
+
+                            if (neighbors.length >= 2) {
+
+                                let neighborsSortedByDistance = neighbors.sort((a, b) => {
+
+                                    let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
+                                    let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
+
+                                    if (distA > distB) {
+                                        return 1;
+                                    } else if (distA < distB) {
+                                        return -1;
+                                    } else {
+                                        return 0;
+                                    }
+
+                                });
+
+                                neighbor = neighborsSortedByDistance[0];
+
+                            } else {
+                                neighbor = neighbors[0];
+                            }
+
+                            if (neighbor != null) {
+                                ineligibleRooms.push(neighbor);
+                                let movementDriver = this.moveEntityToRoom(monster, neighbor, 50, () => { });
+                                drivers.push(movementDriver);
+                            }
+                        }
+
+                        break;
+
+                    case MonsterBehavior.FLEE_LINE_OF_SIGHT:
+
+                        if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
+                            let neighbors =
+                                this.getAdjacentRooms(monster.room.row, monster.room.col)
+                                    .filter(room => { return room.isOpen == true })
                                     .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
 
                             let neighbor = null;
@@ -714,9 +766,9 @@ export class MazeScene extends Scene {
                                     let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
                                     let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
                                     if (distA > distB) {
-                                        return 1;
-                                    } else if (distA < distB) {
                                         return -1;
+                                    } else if (distA < distB) {
+                                        return 1;
                                     } else {
                                         return 0;
                                     }
@@ -729,11 +781,9 @@ export class MazeScene extends Scene {
                             }
 
                             ineligibleRooms.push(neighbor);
-                            drivers.push(
-                                this.moveEntityToRoom(monster, neighbor, 50, () => { })
-                            );
+                            let movementDriver = this.moveEntityToRoom(monster, neighbor, 50, () => { });
+                            drivers.push(movementDriver);
                         }
-
                         break;
 
                     default:
@@ -759,8 +809,7 @@ export class MazeScene extends Scene {
         if (entity != null
             && room != null
             && room.isOpen == true
-            //&& room.isOccupied == false
-            //&& this.movementDrivers.length == 0
+
         ) {
 
             return new EntityMovementDriver(
@@ -772,6 +821,7 @@ export class MazeScene extends Scene {
                 },
                 () => {
                     // onComplete
+                    entity.room.setOccupant(null);
                     entity.setRoom(room);
                     room.setOccupant(entity);
                     room.triggerEventIfPresent();
@@ -1149,7 +1199,9 @@ export class MazeScene extends Scene {
         this.shuffleArray(availableRooms);
 
         objects.forEach(object => {
+
             let room = availableRooms.pop();
+
             if (object instanceof MazeEvent) {
                 room.setEvent(object);
                 object.setRoom(room);
@@ -1194,6 +1246,10 @@ class Player {
     }
 
     setRoom(room) {
+        if (this.room != null) {
+            this.room.setOccupant(null);
+        }
+        
         this.room = room;
         this.row = this.room.row;
         this.col = this.room.col;
@@ -1246,7 +1302,6 @@ class MazeRoom {
 
     setEvent(event) {
         this.event = event;
-        this.isEmpty = this.isOpen && this.isOccupied && this.event == null;
         this.computeEmptiness();
     }
 

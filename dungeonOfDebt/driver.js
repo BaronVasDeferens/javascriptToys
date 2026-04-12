@@ -74,7 +74,7 @@ export class EntityMovementDriver extends Driver {
 export class MultiEntityMovementDriver {
 
     progress = 0;
-    driver = [];
+    drivers = [];
 
     constructor(drivers, onUpdate, onComplete) {
         this.drivers = drivers;

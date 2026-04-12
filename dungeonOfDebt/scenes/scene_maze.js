@@ -102,12 +102,11 @@ export class MazeScene extends Scene {
         for (let n = 0; n < 5; n++) {
             this.eventList.push(
                 new TreasureCollectableEvent(
-                    () => { console.log('cha-ching!'); },
+                    () => { console.log(`chest ${n} collected`); },
                     this.assetManager
                 )
             );
         }
-
 
         this.distributeAcrossOpenRooms(this.eventList);
 
@@ -128,7 +127,7 @@ export class MazeScene extends Scene {
             } else {
                 return 0;
             }
-        }).filter(room => { return (room.isOpen == true) && (room.event == null) })[0];
+        }).filter(room => { return room.isEmpty == true })[0];
 
         this.player = new Player(
             playerStartRoom,
@@ -238,6 +237,9 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
 
+
+
+
     update(delta) {
         let driver = this.stateDrivers[0];
         if (driver != null) {
@@ -343,6 +345,10 @@ export class MazeScene extends Scene {
             }
         }
     }
+
+
+
+
 
     onStart() {
         this.computeMazeWindow();
@@ -657,6 +663,19 @@ export class MazeScene extends Scene {
                     break;
 
                 default:
+
+                    console.log("player:")
+                    console.log(this.player)
+
+                    console.log("entities:")
+                    console.log(this.entitiesEnemy)
+
+                    console.log("events:")
+                    console.log(this.eventList)
+
+                    console.log("highlights:")
+                    console.log(this.highlightedGridSquares)
+
                     break;
             }
 
@@ -678,7 +697,7 @@ export class MazeScene extends Scene {
             .forEach(monster => {
 
                 switch (monster.behavior) {
-                    
+
                     case MonsterBehavior.CHASE_LINE_OF_SIGHT:
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
@@ -754,6 +773,7 @@ export class MazeScene extends Scene {
                 () => {
                     // onComplete
                     entity.setRoom(room);
+                    room.setOccupant(entity);
                     room.triggerEventIfPresent();
                     onComplete();
                 }
@@ -1123,7 +1143,7 @@ export class MazeScene extends Scene {
     distributeAcrossOpenRooms(objects) {
 
         let availableRooms = this.allRooms.filter(room => {
-            return room.isOpen == true && room.isOccupied == false;
+            return room.isEmpty == true
         });
 
         this.shuffleArray(availableRooms);
@@ -1132,7 +1152,9 @@ export class MazeScene extends Scene {
             let room = availableRooms.pop();
             if (object instanceof MazeEvent) {
                 room.setEvent(object);
+                object.setRoom(room);
             } else if (object instanceof EnemyEntity) {
+                room.setOccupant(object);
                 object.setRoom(room);
             }
         });
@@ -1157,6 +1179,7 @@ class Player {
 
     constructor(room, assetManager, tileSize) {
         this.setRoom(room);
+        room.setOccupant(this);
         this.image = assetManager.getImage(ImageAsset.WIZARD_1);
         this.tileSize = tileSize;
 
@@ -1188,22 +1211,31 @@ class MazeRoom {
     row = 0;
     col = 0;
     roomSize = 64;
+
     isOpen = false;         // Whether this room can be occupied
 
-    occupant = null;
     isOccupied = false;
+    occupant = null;
 
     event = null;
+
+    isEmpty = true;
 
     constructor(row, col, roomSize, isOpen) {
         this.row = row;
         this.col = col;
         this.roomSize = roomSize;
         this.setIsOpen(isOpen);
+        this.computeEmptiness();
+    }
+
+    computeEmptiness() {
+        this.isEmpty = (this.isOpen == true) && (this.isOccupied == false) && (this.event == null);
     }
 
     setIsOpen(isOpen) {
         this.isOpen = isOpen;
+        this.computeEmptiness();
 
         if (this.isOpen == true) {
             this.color = "#606060";
@@ -1214,7 +1246,8 @@ class MazeRoom {
 
     setEvent(event) {
         this.event = event;
-        this.event.setRoom(this);
+        this.isEmpty = this.isOpen && this.isOccupied && this.event == null;
+        this.computeEmptiness();
     }
 
     setOccupant(entity) {
@@ -1224,6 +1257,7 @@ class MazeRoom {
         } else {
             this.isOccupied = false;
         }
+        this.computeEmptiness();
     }
 
     triggerEventIfPresent() {
@@ -1299,6 +1333,10 @@ class MazeEvent {
             2 * Math.PI,
             false);
         context.fill();
+    }
+
+    addSpellEffect(effect) {
+        
     }
 
     triggerEvent() {

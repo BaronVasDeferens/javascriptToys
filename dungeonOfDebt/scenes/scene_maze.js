@@ -38,7 +38,7 @@ export class MazeScene extends Scene {
     visibleRooms = [];
     eventList = [];
 
-    numEnemyEntities = 3;
+    numEnemyEntities = 9;
     entitiesEnemy = [];
 
     mazeWindowWidth = 0;                    // Number of maze squares visible on screen at any time
@@ -789,7 +789,7 @@ export class MazeScene extends Scene {
             && destination.isOpen == true
         ) {
 
-            // check player pushing ice cubes
+            // CHECK FOR SLIDING ICE CUBES
             if (entity == this.player && destination.occupant != null && destination.occupant.isFrozen == true) {
 
                 console.log("calculating push...")
@@ -813,7 +813,6 @@ export class MazeScene extends Scene {
                     rate * 10,
                     () => {
                         // onUpdate
-                        console.log("sliding")
                     },
                     () => {
                         // onCompleted

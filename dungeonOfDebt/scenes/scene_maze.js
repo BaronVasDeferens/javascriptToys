@@ -720,10 +720,6 @@ export class MazeScene extends Scene {
         let vacatedRooms = new Set();
         let drivers = [];
 
-        console.log("computing enemy moves...")
-        console.log("player pos:")
-        console.log(this.player.room)
-
         this.entitiesEnemy
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
             .forEach(monster => {
@@ -732,32 +728,41 @@ export class MazeScene extends Scene {
 
                     case MonsterBehavior.CHASE_LINE_OF_SIGHT:
 
+                     /**
+                             * CHASE_LINE_OF_SIGHT: 
+                             * Monsters should...
+                             *      determine whether it can see the player
+                             *      seek to occupy the player's space, or occupy nearest space closest to the player
+                             *      should NOT occupy the same space as another monster
+                             *      should consider not moving if it is the optimal move
+                             *      choose randomly between two equivalent potential moves
+                             */
+
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
 
                             let destination = null;
 
-                            /*
-                                This pathfinding logic is admittedly kinda trash, but it's good enough for now
-                            */
-                            let neighbors = this.getAdjacentRooms(monster.room)
+                            let neighborsRaw = this.getAdjacentRooms(monster.room)
                                 .concat(monster.room)
+                                .map(room => {
+                                    room.distance = Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col);
+                                    return room
+                                });
+
+                            let neighborsFiltered = neighborsRaw
                                 .filter(room => { return room.isOpen == true })
                                 .filter(room => {
-                                    if (room.isOccupied == true) {
-                                        return vacatedRooms.has(room) || room.occupant instanceof Player
+                                    if (room.occupant != null) {
+                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof Player)
                                     } else {
                                         return true
                                     }
                                 })
-                                .filter(room => { return !ineligibleRooms.has(room) })
+                                .filter(room => { return ineligibleRooms.has(room) == false })
 
-                            let neighborsByDistance = neighbors.map(room => {
-                                room.distance = Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col);
-                                return room
-                            });
+                            let minimalDistance = Math.min(...neighborsFiltered.map(rm => { return rm.distance }));
 
-                            let minimalDistance = Math.min(...neighborsByDistance.map(rm => { return rm.distance }));
-                            let closest = neighborsByDistance.filter(room => { return room.distance == minimalDistance });
+                            let closest = neighborsFiltered.filter(room => { return room.distance == minimalDistance });
                             destination = closest[Math.floor(Math.random() * closest.length)];
 
                             if (destination != null) {
@@ -854,10 +859,13 @@ export class MazeScene extends Scene {
 
                 let sliderEntity = destination.occupant
 
+                // Compute a constant time for the slide-- 50ms per room
+                let distance = Math.abs(destination.row - endpoint.row) + Math.abs(destination.col - endpoint.col);
+
                 icecubePush = new EntityMovementDriver(
                     sliderEntity,
                     endpoint,
-                    rate * 10,
+                    this.movementRateDefaultMillis * distance,
                     () => {
                         // onUpdate
                     },
@@ -1263,7 +1271,6 @@ export class MazeScene extends Scene {
         adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.LEFT));
         adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.RIGHT));
         return adjacentRooms.filter(rm => { return rm != null })
-
     }
 
     getRandomRoom() {
@@ -1307,7 +1314,7 @@ export class MazeScene extends Scene {
     }
 }
 
-    // -------------------------------------- CLASSES --------------------------------------
+// -------------------------------------- CLASSES --------------------------------------
 
 
 class Player {

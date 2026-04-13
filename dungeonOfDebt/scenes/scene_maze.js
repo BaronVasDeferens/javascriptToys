@@ -706,6 +706,9 @@ export class MazeScene extends Scene {
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
 
+                        
+                            let destination = null;
+
                             let neighbors = this.getAdjacentRooms(monster.room.row, monster.room.col)
                                 .concat(monster.room)
                                 .filter(room => { return room.isOpen == true })
@@ -718,20 +721,6 @@ export class MazeScene extends Scene {
                                 })
                                 .filter(room => { return !ineligibleRooms.has(room) })
 
-
-
-
-                            console.log("vacated")
-                            console.log(vacatedRooms)
-                            console.log("ineligible")
-                            console.log(ineligibleRooms)
-                            console.log("neighbors")
-                            console.log(neighbors)
-
-                            console.log("---------------------------------------------------")
-
-                            let destination = null;
-
                             if (neighbors.length >= 2) {
 
                                 let neighborsSortedByDistance = neighbors
@@ -741,9 +730,6 @@ export class MazeScene extends Scene {
                                         return room
                                     }).sort((a, b) => {
 
-                                        // let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
-                                        // let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
-
                                         if (a.distance < b.distance) {
                                             return -1;
                                         } else if (a.distance > b.distance) {
@@ -751,13 +737,12 @@ export class MazeScene extends Scene {
                                         } else {
                                             return 0;
                                         }
-
                                     });
 
                                 let minimalDistance = Math.min(...neighborsSortedByDistance.map(rm => { return rm.distance }));
                                 let closest = neighborsSortedByDistance.filter(room => { return room.distance == minimalDistance });
                                 destination = closest[Math.floor(Math.random() * closest.length)];
-                                
+
                             } else {
                                 destination = neighbors[0];
                             }

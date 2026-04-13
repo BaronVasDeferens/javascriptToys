@@ -31,7 +31,7 @@ export class MazeScene extends Scene {
     visibleRooms = [];
     eventList = [];
 
-    numEnemyEntities = 5;
+    numEnemyEntities = 7;
     entitiesEnemy = [];
 
     mazeWindowWidth = 0;                    // Number of maze squares visible on screen at any time
@@ -688,8 +688,13 @@ export class MazeScene extends Scene {
 
         // Ineligible rooms will be those that another monster has set its sights on
         // TODO: ...but make the room that a monster is LEAVING elibible to the next monster
-        let ineligibleRooms = [];
+        let ineligibleRooms = new Set();
+        let vacatedRooms = new Set();
         let drivers = [];
+
+        console.log("computing enemy moves...")
+        console.log("player pos:")
+        console.log(this.player.room)
 
         this.entitiesEnemy
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
@@ -700,39 +705,68 @@ export class MazeScene extends Scene {
                     case MonsterBehavior.CHASE_LINE_OF_SIGHT:
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
-                            let neighbors =
-                                this.getAdjacentRooms(monster.room.row, monster.room.col)
-                                    .filter(room => { return room.isOpen == true })
-                                    .filter(room => { return room === this.player.room || !ineligibleRooms.includes(room) });
 
-                            let neighbor = null;
+                            let neighbors = this.getAdjacentRooms(monster.room.row, monster.room.col)
+                                .concat(monster.room)
+                                .filter(room => { return room.isOpen == true })
+                                .filter(room => {
+                                    if (room.isOccupied == true) {
+                                        return vacatedRooms.has(room) || room.occupant instanceof Player
+                                    } else {
+                                        return true
+                                    }
+                                })
+                                .filter(room => { return !ineligibleRooms.has(room) })
+
+
+
+
+                            console.log("vacated")
+                            console.log(vacatedRooms)
+                            console.log("ineligible")
+                            console.log(ineligibleRooms)
+                            console.log("neighbors")
+                            console.log(neighbors)
+
+                            console.log("---------------------------------------------------")
+
+                            let destination = null;
 
                             if (neighbors.length >= 2) {
 
-                                let neighborsSortedByDistance = neighbors.sort((a, b) => {
+                                let neighborsSortedByDistance = neighbors
+                                    .map(room => {
+                                        let distance = Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col);
+                                        room.distance = distance;
+                                        return room
+                                    }).sort((a, b) => {
 
-                                    let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
-                                    let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
+                                        // let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
+                                        // let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
 
-                                    if (distA > distB) {
-                                        return 1;
-                                    } else if (distA < distB) {
-                                        return -1;
-                                    } else {
-                                        return 0;
-                                    }
+                                        if (a.distance < b.distance) {
+                                            return -1;
+                                        } else if (a.distance > b.distance) {
+                                            return 1;
+                                        } else {
+                                            return 0;
+                                        }
 
-                                });
+                                    });
 
-                                neighbor = neighborsSortedByDistance[0];
-
+                                let minimalDistance = Math.min(...neighborsSortedByDistance.map(rm => { return rm.distance }));
+                                let closest = neighborsSortedByDistance.filter(room => { return room.distance == minimalDistance });
+                                destination = closest[Math.floor(Math.random() * closest.length)];
+                                
                             } else {
-                                neighbor = neighbors[0];
+                                destination = neighbors[0];
                             }
 
-                            if (neighbor != null) {
-                                ineligibleRooms.push(neighbor);
-                                let movementDriver = this.moveEntityToRoom(monster, neighbor, 50, () => { });
+                            if (destination != null) {
+                                ineligibleRooms.add(destination);
+                                vacatedRooms.add(monster.room);
+                                vacatedRooms.delete(destination)
+                                let movementDriver = this.moveEntityToRoom(monster, destination, 50, () => { });
                                 drivers.push(movementDriver);
                             }
                         }
@@ -1238,7 +1272,7 @@ class Player {
         if (this.room != null) {
             this.room.setOccupant(null);
         }
-        
+
         this.room = room;
         this.row = this.room.row;
         this.col = this.room.col;

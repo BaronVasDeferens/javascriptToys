@@ -24,6 +24,7 @@ export class EnemyEntity extends Entity {
     room = null;
 
     spellEffects = new Map();
+    isFrozen = false;
 
     constructor(tileSize, assetManager) {
         super(0, 0, tileSize);
@@ -50,6 +51,7 @@ export class EnemyEntity extends Entity {
 
             case SpellEffect.FREEZE:
                 this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
+                this.isFrozen = true;
                 break;
 
             default:
@@ -59,6 +61,17 @@ export class EnemyEntity extends Entity {
 
     removeSpellEffect(effect) {
         this.spellEffects.delete(effect);
+
+        switch(effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = false;
+                break;
+                
+            default:
+                break;
+        }
+
         if (this.spellEffects.size == 0) {
             this.overlayImage = null;
         }

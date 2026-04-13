@@ -20,6 +20,13 @@ const GameSequence = Object.freeze(
     }
 );
 
+const Direction = Object.freeze({
+    UP: { rowOffset: -1, colOffset: 0 },
+    DOWN: { rowOffset: 1, colOffset: 0 },
+    LEFT: { rowOffset: 0, colOffset: -1 },
+    RIGHT: { rowOffset: 0, colOffset: 1 }
+});
+
 export class MazeScene extends Scene {
 
     currentGameSequence = GameSequence.INITIALIZING;
@@ -31,7 +38,7 @@ export class MazeScene extends Scene {
     visibleRooms = [];
     eventList = [];
 
-    numEnemyEntities = 7;
+    numEnemyEntities = 3;
     entitiesEnemy = [];
 
     mazeWindowWidth = 0;                    // Number of maze squares visible on screen at any time
@@ -385,7 +392,7 @@ export class MazeScene extends Scene {
 
     onKeyPressed(event) {
 
-        var potentialRoom = null;
+        var driver = null;
 
         if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
             return;
@@ -395,80 +402,54 @@ export class MazeScene extends Scene {
 
             case "a":
             case "ArrowLeft":
-                potentialRoom = this.getRoom(this.player.row, this.player.col - 1);
-                if (potentialRoom != null && potentialRoom.isOpen == true) {
+
+                driver = this.createMovementDriverByDirection(this.player, Direction.LEFT, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.stateDrivers.push(
-                        this.moveEntityToRoom(
-                            this.player,
-                            potentialRoom,
-                            this.movementRateDefaultMillis,
-                            () => {
-                                this.computeMazeWindow();
-                                this.concludePlayerTurn();
-                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                            }
-                        ))
+                    this.stateDrivers.push(driver);
                 }
                 break;
 
             case "d":
             case "ArrowRight":
-                potentialRoom = this.getRoom(this.player.row, this.player.col + 1);
-                if (potentialRoom != null && potentialRoom.isOpen == true) {
+                driver = this.createMovementDriverByDirection(this.player, Direction.RIGHT, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.stateDrivers.push(
-                        this.moveEntityToRoom(
-                            this.player,
-                            potentialRoom,
-                            this.movementRateDefaultMillis,
-                            () => {
-                                this.computeMazeWindow();
-                                this.concludePlayerTurn();
-                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                            }
-                        )
-                    );
+                    this.stateDrivers.push(driver);
                 }
                 break;
 
             case "w":
             case "ArrowUp":
-                potentialRoom = this.getRoom(this.player.row - 1, this.player.col);
-                if (potentialRoom != null && potentialRoom.isOpen == true) {
+                driver = this.createMovementDriverByDirection(this.player, Direction.UP, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.stateDrivers.push(
-                        this.moveEntityToRoom(
-                            this.player,
-                            potentialRoom,
-                            this.movementRateDefaultMillis,
-                            () => {
-                                this.computeMazeWindow();
-                                this.concludePlayerTurn();
-                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                            }
-                        )
-                    );
+                    this.stateDrivers.push(driver);
                 }
                 break;
 
             case "s":
             case "ArrowDown":
-                potentialRoom = this.getRoom(this.player.row + 1, this.player.col);
-                if (potentialRoom != null && potentialRoom.isOpen == true) {
+                driver = this.createMovementDriverByDirection(this.player, Direction.DOWN, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
-                    this.stateDrivers.push(
-                        this.moveEntityToRoom(
-                            this.player,
-                            potentialRoom,
-                            this.movementRateDefaultMillis,
-                            () => {
-                                this.computeMazeWindow();
-                                this.concludePlayerTurn();
-                                this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-                            }
-                        )
-                    );
+                    this.stateDrivers.push(driver);
                 }
                 break;
 
@@ -706,10 +687,12 @@ export class MazeScene extends Scene {
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
 
-                        
                             let destination = null;
 
-                            let neighbors = this.getAdjacentRooms(monster.room.row, monster.room.col)
+                            /*
+                                This pathfinding logic is admittedly kinda trash, but it's good enough for now
+                            */
+                            let neighbors = this.getAdjacentRooms(monster.room)
                                 .concat(monster.room)
                                 .filter(room => { return room.isOpen == true })
                                 .filter(room => {
@@ -721,31 +704,14 @@ export class MazeScene extends Scene {
                                 })
                                 .filter(room => { return !ineligibleRooms.has(room) })
 
-                            if (neighbors.length >= 2) {
+                            let neighborsByDistance = neighbors.map(room => {
+                                room.distance = Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col);
+                                return room
+                            });
 
-                                let neighborsSortedByDistance = neighbors
-                                    .map(room => {
-                                        let distance = Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col);
-                                        room.distance = distance;
-                                        return room
-                                    }).sort((a, b) => {
-
-                                        if (a.distance < b.distance) {
-                                            return -1;
-                                        } else if (a.distance > b.distance) {
-                                            return 1;
-                                        } else {
-                                            return 0;
-                                        }
-                                    });
-
-                                let minimalDistance = Math.min(...neighborsSortedByDistance.map(rm => { return rm.distance }));
-                                let closest = neighborsSortedByDistance.filter(room => { return room.distance == minimalDistance });
-                                destination = closest[Math.floor(Math.random() * closest.length)];
-
-                            } else {
-                                destination = neighbors[0];
-                            }
+                            let minimalDistance = Math.min(...neighborsByDistance.map(rm => { return rm.distance }));
+                            let closest = neighborsByDistance.filter(room => { return room.distance == minimalDistance });
+                            destination = closest[Math.floor(Math.random() * closest.length)];
 
                             if (destination != null) {
                                 ineligibleRooms.add(destination);
@@ -762,7 +728,7 @@ export class MazeScene extends Scene {
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
                             let neighbors =
-                                this.getAdjacentRooms(monster.room.row, monster.room.col)
+                                this.getAdjacentRooms(monster.room)
                                     .filter(room => { return room.isOpen == true })
                                     .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
 
@@ -812,17 +778,19 @@ export class MazeScene extends Scene {
 
     }
 
-    moveEntityToRoom(entity, room, rate, onComplete) {
+    createMovementDriverByDirection(entity, direction, rate, onComplete) {
+        let destination = this.getAdjacentRoomByDirection(entity.room, direction);
 
         if (entity != null
-            && room != null
-            && room.isOpen == true
-
+            && destination != null
+            && destination.isOpen == true
         ) {
+
+            // TODO: check for ice scoots
 
             return new EntityMovementDriver(
                 entity,
-                room,
+                destination,
                 rate,
                 () => {
                     // onUpdate
@@ -830,9 +798,38 @@ export class MazeScene extends Scene {
                 () => {
                     // onComplete
                     entity.room.setOccupant(null);
-                    entity.setRoom(room);
-                    room.setOccupant(entity);
-                    room.triggerEventIfPresent();
+                    entity.setRoom(destination);
+                    destination.setOccupant(entity);
+                    destination.triggerEventIfPresent();
+                    onComplete();
+                }
+            )
+
+        } else {
+            return null
+        }
+    }
+
+    moveEntityToRoom(entity, destination, rate, onComplete) {
+
+        if (entity != null
+            && destination != null
+            && destination.isOpen == true
+        ) {
+
+            return new EntityMovementDriver(
+                entity,
+                destination,
+                rate,
+                () => {
+                    // onUpdate
+                },
+                () => {
+                    // onComplete
+                    entity.room.setOccupant(null);
+                    entity.setRoom(destination);
+                    destination.setOccupant(entity);
+                    destination.triggerEventIfPresent();
                     onComplete();
                 }
             )
@@ -1016,9 +1013,42 @@ export class MazeScene extends Scene {
     }
 
     concludePlayerTurn() {
+
         this.entitiesEnemy.forEach(enemy => {
             enemy.onTurnConclusion();
-        })
+        });
+
+        this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+    }
+
+
+
+
+
+    getRoom(row, col) {
+        try {
+            return this.mazeArray[row][col];
+        } catch (e) {
+            return null;
+        }
+    }
+
+    getAdjacentRoomByDirection(room, direction) {
+        try {
+            return this.mazeArray[room.row + direction.rowOffset][room.col + direction.colOffset];
+        } catch (e) {
+            return null;
+        }
+    }
+
+    getAdjacentRooms(room) {
+        let adjacentRooms = new Array();
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.UP));
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.DOWN));
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.LEFT));
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.RIGHT));
+        return adjacentRooms.filter(rm => { return rm != null })
+
     }
 
     getRandomRoom() {
@@ -1026,40 +1056,8 @@ export class MazeScene extends Scene {
         return this.allRooms[index]
     }
 
-    getRoom(row, col) {
-        try {
-            return this.mazeArray[row][col];
-        } catch (e) {
-            return undefined;
-        }
-    }
 
-    getAdjacentRooms(row, col) {
 
-        let adjacentRooms = new Array();
-
-        let up = this.getRoom(row, col - 1);
-        if (up !== undefined) {
-            adjacentRooms.push(up);
-        }
-
-        let down = this.getRoom(row, col + 1);
-        if (down !== undefined) {
-            adjacentRooms.push(down);
-        }
-
-        let left = this.getRoom(row - 1, col);
-        if (left !== undefined) {
-            adjacentRooms.push(left);
-        }
-
-        let right = this.getRoom(row + 1, col);
-        if (right !== undefined) {
-            adjacentRooms.push(right);
-        }
-
-        return adjacentRooms;
-    }
 
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -1107,7 +1105,7 @@ export class MazeScene extends Scene {
         inMaze.push(startRoom);
         reachable.push(startRoom);
 
-        let adjacentRooms = this.getAdjacentRooms(startRoom.row, startRoom.col);
+        let adjacentRooms = this.getAdjacentRooms(startRoom);
         adjacentRooms.forEach(function (r) {
             frontier.push(r);
             reachable.push(r);
@@ -1125,7 +1123,7 @@ export class MazeScene extends Scene {
             //            if (getAdjacentRooms(newRoom.row, newRoom.col).length == 0)
             //                continue;
 
-            if (this.getAdjacentRooms(newRoom.row, newRoom.col).every(function (r) {
+            if (this.getAdjacentRooms(newRoom).every(function (r) {
                 if (reachable.includes(r)) {
                     return true;
                 }
@@ -1144,7 +1142,7 @@ export class MazeScene extends Scene {
                 newRoom.setIsOpen(true);
                 inMaze.push(newRoom);
 
-                this.getAdjacentRooms(newRoom.row, newRoom.col).forEach(function (r) {
+                this.getAdjacentRooms(newRoom).forEach(function (r) {
                     if (!frontier.includes(r)) {
                         frontier.push(r);
 

@@ -779,16 +779,53 @@ export class MazeScene extends Scene {
     }
 
     createMovementDriverByDirection(entity, direction, rate, onComplete) {
+
         let destination = this.getAdjacentRoomByDirection(entity.room, direction);
+
+        let icecubePush = null;
 
         if (entity != null
             && destination != null
             && destination.isOpen == true
         ) {
 
-            // TODO: check for ice scoots
+            // check player pushing ice cubes
+            if (entity == this.player && destination.occupant != null && destination.occupant.isFrozen == true) {
 
-            return new EntityMovementDriver(
+                console.log("calculating push...")
+
+                // Find the "end point" of the push
+                let endpoint = destination;
+                while (endpoint != null && endpoint.isOpen == true) {
+                    let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
+                    if (candidate != null && candidate.isOpen == true) {
+                        endpoint = candidate;
+                    } else {
+                        break;
+                    }
+                }
+
+                let sliderEntity = destination.occupant
+
+                icecubePush = new EntityMovementDriver(
+                    sliderEntity,
+                    endpoint,
+                    rate * 10,
+                    () => {
+                        // onUpdate
+                        console.log("sliding")
+                    },
+                    () => {
+                        // onCompleted
+                        sliderEntity.setRoom(endpoint);
+                        endpoint.setOccupant(sliderEntity);
+                        onComplete();
+                    }
+                )
+
+            }
+
+            let primaryDriver = new EntityMovementDriver(
                 entity,
                 destination,
                 rate,
@@ -804,6 +841,19 @@ export class MazeScene extends Scene {
                     onComplete();
                 }
             )
+
+            let allDrivers = [
+                primaryDriver,
+                icecubePush]
+                .filter(drv => { return drv != null });
+
+            return new MultiEntityMovementDriver(
+                allDrivers,
+                () => { },
+                () => { }
+            )
+
+
 
         } else {
             return null

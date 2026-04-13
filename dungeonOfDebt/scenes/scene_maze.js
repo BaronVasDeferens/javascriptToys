@@ -5,9 +5,12 @@ import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, S
 import { EnemyEntity, MonsterBehavior } from "../entity/entity_enemy.js";
 
 
-
-// "My name is Master Slave"
-// WAGON MASTER
+/**
+ * DUNGEON of DEBT
+ * Version 2
+ * 2026 Scott C West
+ * 
+ */
 
 const GameSequence = Object.freeze(
     {
@@ -16,7 +19,8 @@ const GameSequence = Object.freeze(
         "PLAYER_MOVING": 20,
         "SPECIAL_EFFECT_ANIMATING": 21,
         "ENEMY_PLOTTING_MOVEMENT": 30,
-        "ENEMY_MOVING": 40
+        "ENEMY_MOVING": 40,
+        "GAME_OVER": 99999
     }
 );
 
@@ -245,6 +249,9 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
     }
 
+    // -------------------------------------- MAIN LOOP --------------------------------------
+
+
     update(delta) {
         let driver = this.stateDrivers[0];
         if (driver != null) {
@@ -264,15 +271,15 @@ export class MazeScene extends Scene {
             room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         });
 
+        // Render player
+        this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
+
         // Render enemies
         this.entitiesEnemy.forEach(monster => {
             monster.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         })
 
-        // Render player token
-        this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
-
-        // Render LOS
+        // Render LOS (in debug)
         if (this.debugShowLineOfSight == true) {
             this.lineOfSightLines.forEach(line => {
                 if (line.isVisible == true) {
@@ -296,6 +303,7 @@ export class MazeScene extends Scene {
             sq.render(contextPrimary);
         });
 
+        // Spell effect overaly (screen flash)
         if (this.spellEffectOverlay != null) {
             this.spellEffectOverlay.render(contextPrimary);
         }
@@ -305,6 +313,7 @@ export class MazeScene extends Scene {
             component.render(contextSecondary);
         });
 
+        // Render UI elements
         this.spellCardComponents.forEach(component => {
             component.render(contextSecondary);
         });
@@ -338,7 +347,7 @@ export class MazeScene extends Scene {
                             0,
                             () => { },
                             () => {
-                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                this.updateSequenceOrGameOver(GameSequence.PLAYER_AWAITING_MOVEMENT);
                                 this.computeEntityVisibility()
                             }
                         )
@@ -347,13 +356,33 @@ export class MazeScene extends Scene {
 
                 case GameSequence.ENEMY_MOVING:
                     break;
+
+                case GameSequence.GAME_OVER:
+                    console.log("GAME OVER YEAH")
+                    break;
             }
         }
     }
 
+    concludePlayerTurn() {
 
+        this.entitiesEnemy.forEach(enemy => {
+            enemy.onTurnConclusion();
+        });
 
+        this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+    }
 
+    updateSequenceOrGameOver(sequence) {
+        let gameOver = this.entitiesEnemy.some(ent => { return ent.room == this.player.room });
+        if (gameOver == true) {
+            this.updateGameSequence(GameSequence.GAME_OVER)
+        } else {
+            this.updateGameSequence(sequence)
+        }
+    }
+
+    // -------------------------------------- SCENE STUFF --------------------------------------
 
     onStart() {
         this.computeMazeWindow();
@@ -394,14 +423,15 @@ export class MazeScene extends Scene {
 
         var driver = null;
 
-        if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
-            return;
-        }
 
         switch (event.key) {
 
             case "a":
             case "ArrowLeft":
+
+                if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
+                    return;
+                }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.LEFT, this.movementRateDefaultMillis, () => {
                     this.computeMazeWindow();
@@ -416,6 +446,11 @@ export class MazeScene extends Scene {
 
             case "d":
             case "ArrowRight":
+
+                if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
+                    return;
+                }
+
                 driver = this.createMovementDriverByDirection(this.player, Direction.RIGHT, this.movementRateDefaultMillis, () => {
                     this.computeMazeWindow();
                     this.concludePlayerTurn();
@@ -429,6 +464,11 @@ export class MazeScene extends Scene {
 
             case "w":
             case "ArrowUp":
+
+                if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
+                    return;
+                }
+
                 driver = this.createMovementDriverByDirection(this.player, Direction.UP, this.movementRateDefaultMillis, () => {
                     this.computeMazeWindow();
                     this.concludePlayerTurn();
@@ -442,6 +482,11 @@ export class MazeScene extends Scene {
 
             case "s":
             case "ArrowDown":
+
+                if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
+                    return;
+                }
+
                 driver = this.createMovementDriverByDirection(this.player, Direction.DOWN, this.movementRateDefaultMillis, () => {
                     this.computeMazeWindow();
                     this.concludePlayerTurn();
@@ -472,7 +517,7 @@ export class MazeScene extends Scene {
 
     }
 
-
+    // -------------------------------------- MAGIC STUFF --------------------------------------
 
     /**
      * Triggered when the user clicks on a SpellZone card to select an area of effect. 
@@ -664,6 +709,8 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
         }
     }
+
+    // -------------------------------------- MOVEMENT STUFF --------------------------------------
 
     computeEnemyMoves() {
 
@@ -888,10 +935,7 @@ export class MazeScene extends Scene {
         }
     }
 
-    computeMazeWindow() {
-        this.visibleRooms = this.getMazeSubsection(this.mazeWindowY, this.mazeWindowX, this.mazeWindowWidth, this.mazeWindowHeight);
-        this.computeEntityVisibility();
-    }
+    // -------------------------------------- LINE OF SIGHT and WINDOWING STUFF --------------------------------------
 
     computeEntityVisibility() {
 
@@ -989,7 +1033,10 @@ export class MazeScene extends Scene {
             .every(room => { return room.isOpen == true })
     }
 
-
+    computeMazeWindow() {
+        this.visibleRooms = this.getMazeSubsection(this.mazeWindowY, this.mazeWindowX, this.mazeWindowWidth, this.mazeWindowHeight);
+        this.computeEntityVisibility();
+    }
 
     findMazeRoomAtPoint(event) {
 
@@ -1061,85 +1108,7 @@ export class MazeScene extends Scene {
 
     }
 
-    concludePlayerTurn() {
-
-        this.entitiesEnemy.forEach(enemy => {
-            enemy.onTurnConclusion();
-        });
-
-        this.updateGameSequence(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-    }
-
-
-
-
-
-    getRoom(row, col) {
-        try {
-            return this.mazeArray[row][col];
-        } catch (e) {
-            return null;
-        }
-    }
-
-    getAdjacentRoomByDirection(room, direction) {
-        try {
-            return this.mazeArray[room.row + direction.rowOffset][room.col + direction.colOffset];
-        } catch (e) {
-            return null;
-        }
-    }
-
-    getAdjacentRooms(room) {
-        let adjacentRooms = new Array();
-        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.UP));
-        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.DOWN));
-        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.LEFT));
-        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.RIGHT));
-        return adjacentRooms.filter(rm => { return rm != null })
-
-    }
-
-    getRandomRoom() {
-        var index = Math.floor(Math.random() * 1000 % (this.mazeRows * this.mazeCols));
-        return this.allRooms[index]
-    }
-
-
-
-
-    shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    areDiagonalsOpen(room) {
-
-        let diag = this.getRoom(room.row - 1, room.col - 1);
-
-        if (diag !== undefined) {
-            if (diag.isOpen) { return true; }
-        }
-
-        diag = getRoom(room.row - 1, room.col + 1);
-        if (diag !== undefined) {
-            if (diag.isOpen) { return true; }
-        }
-
-        diag = getRoom(room.row + 1, room.col - 1);
-        if (diag !== undefined) {
-            if (diag.isOpen) { return true; }
-        }
-
-        diag = getRoom(room.row + 1, room.col + 1);
-        if (diag !== undefined) {
-            if (diag.isOpen) { return true; }
-        }
-
-        return false;
-    }
+    // -------------------------------------- MAZE and ROOM STUFF --------------------------------------
 
     createMaze() {
 
@@ -1208,6 +1177,32 @@ export class MazeScene extends Scene {
         }
     }
 
+    areDiagonalsOpen(room) {
+
+        let diag = this.getRoom(room.row - 1, room.col - 1);
+
+        if (diag !== undefined) {
+            if (diag.isOpen) { return true; }
+        }
+
+        diag = getRoom(room.row - 1, room.col + 1);
+        if (diag !== undefined) {
+            if (diag.isOpen) { return true; }
+        }
+
+        diag = getRoom(room.row + 1, room.col - 1);
+        if (diag !== undefined) {
+            if (diag.isOpen) { return true; }
+        }
+
+        diag = getRoom(room.row + 1, room.col + 1);
+        if (diag !== undefined) {
+            if (diag.isOpen) { return true; }
+        }
+
+        return false;
+    }
+
     getMazeSubsection(row, col, width, height) {
 
         //size = size - 1;
@@ -1245,6 +1240,46 @@ export class MazeScene extends Scene {
         return subRooms;
     }
 
+    getRoom(row, col) {
+        try {
+            return this.mazeArray[row][col];
+        } catch (e) {
+            return null;
+        }
+    }
+
+    getAdjacentRoomByDirection(room, direction) {
+        try {
+            return this.mazeArray[room.row + direction.rowOffset][room.col + direction.colOffset];
+        } catch (e) {
+            return null;
+        }
+    }
+
+    getAdjacentRooms(room) {
+        let adjacentRooms = new Array();
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.UP));
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.DOWN));
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.LEFT));
+        adjacentRooms.push(this.getAdjacentRoomByDirection(room, Direction.RIGHT));
+        return adjacentRooms.filter(rm => { return rm != null })
+
+    }
+
+    getRandomRoom() {
+        var index = Math.floor(Math.random() * 1000 % (this.mazeRows * this.mazeCols));
+        return this.allRooms[index]
+    }
+
+    // -------------------------------------- UTILITIES and STUFF --------------------------------------
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
     distributeAcrossOpenRooms(objects) {
 
         let availableRooms = this.allRooms.filter(room => {
@@ -1271,6 +1306,8 @@ export class MazeScene extends Scene {
         return Object.keys(SpellEffect).find(k => SpellEffect[k] === effect);
     }
 }
+
+    // -------------------------------------- CLASSES --------------------------------------
 
 
 class Player {

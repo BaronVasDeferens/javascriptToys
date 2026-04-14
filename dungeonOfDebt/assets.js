@@ -58,9 +58,11 @@ export var ImageAsset = Object.freeze({
 
     SPELL_CANCEL: "spells/cancel.png",
 
-    SPELL_ZONE_CROSS: "spells/cross_small.png",
-    SPELL_ZONE_COLUMN: "spells/column_full.png",
-    SPELL_ZONE_ROW: "spells/row_full.png",
+    SPELL_ZONE_CROSS: "spells/zone_cross_small.png",
+    SPELL_ZONE_CROSS_INVERTED: "spells/zone_cross_inverted.png",
+    SPELL_ZONE_COLUMN: "spells/zone_column_full.png",
+    SPELL_ZONE_ROW: "spells/zone_row_full.png",
+    SPELL_ZONE_WIZARD_ONLY: "spells/zone_wizard_only.png",
 
     SPELL_CARD_BLAZE: "spells/spell_blaze.png",
     SPELL_CARD_FREEZE: "spells/spell_freeze.png",

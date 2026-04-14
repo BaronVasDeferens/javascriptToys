@@ -12,73 +12,13 @@ export const MonsterBehavior = Object.freeze({
 
 export class EnemyEntity extends Entity {
 
-    x = 0;
-    y = 0;
-
     imageAsset = ImageAsset.MONSTER_EYE_SMALL;
     behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
 
-    image = null;
-    overlayImage = null;
-
-    room = null;
-
-    spellEffects = new Map();
-    isFrozen = false;
-
-    constructor(tileSize, assetManager) {
-        super(0, 0, tileSize);
-        this.tileSize = tileSize;
-        this.assetManager = assetManager;
+    constructor(tileSize, imageAsset, assetManager) {
+        super(tileSize, assetManager);
+        this.imageAsset = imageAsset;
         this.image = assetManager.getImage(this.imageAsset);
-    }
-
-    setRoom(room) {
-        if (this.room != null) {
-            this.room.occupant = null;
-        }
-
-        this.room = room;
-        this.x = this.room.col * this.tileSize;
-        this.y = this.room.row * this.tileSize;
-    }
-
-    addSpellEffect(effect, turns) {
-
-        this.spellEffects.set(effect, turns);
-
-        switch (effect) {
-
-            case SpellEffect.FREEZE:
-                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
-                this.isFrozen = true;
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    removeSpellEffect(effect) {
-        this.spellEffects.delete(effect);
-
-        switch(effect) {
-
-            case SpellEffect.FREEZE:
-                this.isFrozen = false;
-                break;
-                
-            default:
-                break;
-        }
-
-        if (this.spellEffects.size == 0) {
-            this.overlayImage = null;
-        }
-    }
-
-    clearAllSpellEffects() {
-        this.spellEffects.clear();
     }
 
     onTurnConclusion() {
@@ -122,6 +62,16 @@ export class EnemyEntity extends Entity {
             context.globalAlpha = 1.0;
         }
 
+    }
+}
+
+export class MonsterPinkSeeker extends EnemyEntity {
+
+    imageAsset = ImageAsset.MONSTER_EYE_SMALL;
+    behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_EYE_SMALL, assetManager);
     }
 
 }

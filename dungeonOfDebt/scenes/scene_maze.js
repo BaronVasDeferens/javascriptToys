@@ -2,8 +2,8 @@ import { ImageAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { EnemyEntity, MonsterBehavior } from "../entity/entity_enemy.js";
-
+import { EnemyEntity, MonsterBehavior, MonsterPinkSeeker } from "../entity/entity_enemy.js";
+import { PlayerEntity } from "../entity/entity_player.js"
 
 /**
  * DUNGEON of DEBT
@@ -125,7 +125,7 @@ export class MazeScene extends Scene {
 
         // ENEMIES
         for (let n = 0; n < this.numEnemyEntities; n++) {
-            this.entitiesEnemy.push(new EnemyEntity(this.tileSize, this.assetManager));
+            this.entitiesEnemy.push(new MonsterPinkSeeker(this.tileSize, this.assetManager));
             this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
 
@@ -141,14 +141,14 @@ export class MazeScene extends Scene {
             }
         }).filter(room => { return room.isEmpty == true })[0];
 
-        this.player = new Player(
+        this.player = new PlayerEntity(
             playerStartRoom,
-            this.assetManager,
-            this.tileSize
+            this.tileSize,
+            this.assetManager
         );
 
 
-        // Spell ZONE cards
+        // ------------------- Spell ZONE cards
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
@@ -156,6 +156,18 @@ export class MazeScene extends Scene {
                 this.canvasSecondary,
                 0,
                 0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.CROSS_INVERTED,
+                () => { this.onSpellZoneSected(SpellZone.CROSS_INVERTED) },
+                this.canvasSecondary,
+                0,
+                64,
                 this.tileSize,
                 this.assetManager
             )
@@ -197,7 +209,19 @@ export class MazeScene extends Scene {
             )
         );
 
-        // Spell EFFECT cards
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.SELF_TARGET,
+                () => { this.onSpellZoneSected(SpellZone.SELF_TARGET) },
+                this.canvasSecondary,
+                128,
+                64,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        //  ---------------------- Spell EFFECT cards
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.BLAZE,
@@ -588,6 +612,18 @@ export class MazeScene extends Scene {
                 rooms.push(this.getRoom(this.player.room.row, this.player.room.col - 1));
                 break;
 
+
+            case SpellZone.CROSS_INVERTED:
+                rooms.push(this.getRoom(this.player.room.row - 1, this.player.room.col - 1));
+                rooms.push(this.getRoom(this.player.room.row - 1, this.player.room.col + 1));
+                rooms.push(this.getRoom(this.player.room.row + 1, this.player.room.col - 1));
+                rooms.push(this.getRoom(this.player.room.row + 1, this.player.room.col + 1));
+                break;
+
+            case SpellZone.SELF_TARGET:
+                rooms.push(this.player.room);
+                break;
+
             default:
                 break;
         }
@@ -728,15 +764,15 @@ export class MazeScene extends Scene {
 
                     case MonsterBehavior.CHASE_LINE_OF_SIGHT:
 
-                     /**
-                             * CHASE_LINE_OF_SIGHT: 
-                             * Monsters should...
-                             *      determine whether it can see the player
-                             *      seek to occupy the player's space, or occupy nearest space closest to the player
-                             *      should NOT occupy the same space as another monster
-                             *      should consider not moving if it is the optimal move
-                             *      choose randomly between two equivalent potential moves
-                             */
+                        /**
+                                * CHASE_LINE_OF_SIGHT: 
+                                * Monsters should...
+                                *      determine whether it can see the player
+                                *      seek to occupy the player's space, or occupy nearest space closest to the player
+                                *      should NOT occupy the same space as another monster
+                                *      should consider not moving if it is the optimal move
+                                *      choose randomly between two equivalent potential moves
+                                */
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
 
@@ -753,7 +789,7 @@ export class MazeScene extends Scene {
                                 .filter(room => { return room.isOpen == true })
                                 .filter(room => {
                                     if (room.occupant != null) {
-                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof Player)
+                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity )
                                     } else {
                                         return true
                                     }
@@ -1315,51 +1351,6 @@ export class MazeScene extends Scene {
 }
 
 // -------------------------------------- CLASSES --------------------------------------
-
-
-class Player {
-
-    x = 0;
-    y = 0;
-    tileSize = 64;
-    offsetX = 0;
-    offsetY = 0;
-
-    image = null;
-    room = null;
-
-    constructor(room, assetManager, tileSize) {
-        this.setRoom(room);
-        room.setOccupant(this);
-        this.image = assetManager.getImage(ImageAsset.WIZARD_1);
-        this.tileSize = tileSize;
-
-        if (this.image.width < this.tileSize) {
-            this.offsetX = Math.floor((this.tileSize - this.image.width) / 2);
-        }
-
-        if (this.image.height < this.tileSize) {
-            this.offsetY = Math.floor((this.tileSize - this.image.height) / 2);
-        }
-
-    }
-
-    setRoom(room) {
-        if (this.room != null) {
-            this.room.setOccupant(null);
-        }
-
-        this.room = room;
-        this.row = this.room.row;
-        this.col = this.room.col;
-        this.x = this.col * this.tileSize;
-        this.y = this.row * this.tileSize;
-    }
-
-    render(context) {
-        context.drawImage(this.image, this.x + this.offsetX, this.y + this.offsetY);
-    }
-};
 
 class MazeRoom {
 

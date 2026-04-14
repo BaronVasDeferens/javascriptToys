@@ -4,17 +4,18 @@ import { ImageAsset } from "../assets.js";
 export const SpellZone = Object.freeze({
     CANCEL: 0,
     CROSS_SMALL: 2,
-    // TODO: INVERTED CROSS
+    CROSS_INVERTED: 4,
     COLUMN_FULL: 5,
-    ROW_FULL: 7
-    // TODO: LINE_OF_SIGHT
+    ROW_FULL: 6,
+    SELF_TARGET: 7
+    // TODO: LINE_OF_SIGHT?
 });
 
 export const SpellEffect = Object.freeze({
     CANCEL: 0,
     FREEZE: 2,
-    BLAZE : 3,
-    PHASE : 4,
+    BLAZE: 3,
+    PHASE: 4,
 });
 
 
@@ -68,11 +69,17 @@ export class SpellZoneComponentCard extends ComponentCard {
             case SpellZone.CROSS_SMALL:
                 this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_CROSS);
                 break;
+            case SpellZone.CROSS_INVERTED:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_CROSS_INVERTED);
+                break;
             case SpellZone.COLUMN_FULL:
                 this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_COLUMN);
                 break;
             case SpellZone.ROW_FULL:
                 this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_ROW);
+                break;
+            case SpellZone.SELF_TARGET:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_WIZARD_ONLY);
                 break;
         }
     }
@@ -131,7 +138,7 @@ export class SpellEffectOverlay {
     render(context) {
         context.globalAlpha = this.alpha;
         context.fillStyle = this.color;
-        context.fillRect(0,0, this.canvas.width, this.canvas.height)
+        context.fillRect(0, 0, this.canvas.width, this.canvas.height)
         context.globalAlpha = 1.0;
     }
 

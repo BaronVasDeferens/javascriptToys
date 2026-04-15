@@ -88,12 +88,6 @@ export var ImageAsset = Object.freeze({
     MONSTER_5: "entity/monster_5.png",
     MONSTER_6: "entity/monster_6.png",
 
-    DINOSAUR_1: "entity/dino_1.png",
-    DINOSAUR_2: "entity/dino_2.png",
-    ALIEN_1: "entity/alien_1.png",
-    ALIEN_2: "entity/alien_2.png",
-    ALIEN_3: "entity/alien_3.png",
-
     EXPLOSION_0: "tiles/explosion/explosion_0.png",
     EXPLOSION_1: "tiles/explosion/explosion_1.png",
     EXPLOSION_2: "tiles/explosion/explosion_2.png",

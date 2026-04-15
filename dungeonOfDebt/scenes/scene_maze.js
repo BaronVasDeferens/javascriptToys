@@ -704,7 +704,7 @@ export class MazeScene extends Scene {
                         "#00a9FF"
                     );
 
-                    // Apply a driver to flash reduce the opacity of the spell effect overlay
+                    // Flash! A spell is cast! 
                     this.stateDrivers.push(
                         new SpellEffectOverlayDriver(
                             this.spellEffectOverlay,
@@ -724,19 +724,6 @@ export class MazeScene extends Scene {
                     break;
 
                 default:
-
-                    console.log("player:")
-                    console.log(this.player)
-
-                    console.log("entities:")
-                    console.log(this.entitiesEnemy)
-
-                    console.log("events:")
-                    console.log(this.eventList)
-
-                    console.log("highlights:")
-                    console.log(this.highlightedGridSquares)
-
                     break;
             }
 
@@ -789,7 +776,7 @@ export class MazeScene extends Scene {
                                 .filter(room => { return room.isOpen == true })
                                 .filter(room => {
                                     if (room.occupant != null) {
-                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity )
+                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
                                     } else {
                                         return true
                                     }
@@ -877,7 +864,24 @@ export class MazeScene extends Scene {
             && destination.isOpen == true
         ) {
 
-            // CHECK FOR SLIDING ICE CUBES
+            let primaryDriver = new EntityMovementDriver(
+                entity,
+                destination,
+                rate,
+                () => {
+                    // onUpdate
+                },
+                () => {
+                    // onComplete
+                    entity.room.setOccupant(null);
+                    entity.setRoom(destination);
+                    destination.setOccupant(entity);
+                    destination.triggerEventIfPresent();
+                }
+            )
+
+            // SLIDING ICE CUBES
+            // The player can push a frozen enemy out into an adjacent space
             if (entity == this.player && destination.occupant != null && destination.occupant.isFrozen == true) {
 
                 console.log("calculating push...")
@@ -909,41 +913,19 @@ export class MazeScene extends Scene {
                         // onCompleted
                         sliderEntity.setRoom(endpoint);
                         endpoint.setOccupant(sliderEntity);
-                        onComplete();
                     }
                 )
-
             }
 
-            let primaryDriver = new EntityMovementDriver(
-                entity,
-                destination,
-                rate,
-                () => {
-                    // onUpdate
-                },
-                () => {
-                    // onComplete
-                    entity.room.setOccupant(null);
-                    entity.setRoom(destination);
-                    destination.setOccupant(entity);
-                    destination.triggerEventIfPresent();
-                    onComplete();
-                }
-            )
-
-            let allDrivers = [
-                primaryDriver,
-                icecubePush]
-                .filter(drv => { return drv != null });
+            let allDrivers = [ primaryDriver, icecubePush].filter(drv => { return drv != null });
 
             return new MultiEntityMovementDriver(
                 allDrivers,
                 () => { },
-                () => { }
+                () => {
+                    onComplete();       // Be sure to only call this ONCE, else each sub-driver will call it, too.
+                }
             )
-
-
 
         } else {
             return null

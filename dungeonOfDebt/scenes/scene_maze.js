@@ -110,11 +110,12 @@ export class MazeScene extends Scene {
         // SET UP MAZE
         this.createMaze();
 
-        // CREATE and PLACE EVENTS
+        // EVENTS
         for (let n = 0; n < 5; n++) {
+
             this.eventList.push(
                 new TreasureCollectableEvent(
-                    () => { console.log(`chest ${n} collected`); },
+                    () => { console.log(`cha-CHING ${n}`) },
                     this.assetManager
                 )
             );
@@ -129,7 +130,7 @@ export class MazeScene extends Scene {
             this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
 
-        // CREATE and PLACE PLAYER
+        // PLAYER
         // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.x + a.y) < (b.x + b.y)) {
@@ -876,11 +877,11 @@ export class MazeScene extends Scene {
                     entity.room.setOccupant(null);
                     entity.setRoom(destination);
                     destination.setOccupant(entity);
-                    destination.triggerEventIfPresent();
+                    destination.triggerEventIfPresent(entity);
                 }
             )
 
-            // SLIDING ICE CUBES
+            // SPACIAL CASE: SLIDING ICE CUBES
             // The player can push a frozen enemy out into an adjacent space
             if (entity == this.player && destination.occupant != null && destination.occupant.isFrozen == true) {
 
@@ -890,7 +891,7 @@ export class MazeScene extends Scene {
                 let endpoint = destination;
                 while (endpoint != null && endpoint.isOpen == true) {
                     let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
-                    if (candidate != null && candidate.isOpen == true) {
+                    if (candidate != null && candidate.isOpen == true && candidate.occupant == null) {
                         endpoint = candidate;
                     } else {
                         break;
@@ -917,7 +918,7 @@ export class MazeScene extends Scene {
                 )
             }
 
-            let allDrivers = [ primaryDriver, icecubePush].filter(drv => { return drv != null });
+            let allDrivers = [primaryDriver, icecubePush].filter(drv => { return drv != null });
 
             return new MultiEntityMovementDriver(
                 allDrivers,
@@ -1390,9 +1391,9 @@ class MazeRoom {
         this.computeEmptiness();
     }
 
-    triggerEventIfPresent() {
+    triggerEventIfPresent(entity) {
         if (this.event != null) {
-            this.event.triggerEvent();
+            this.event.triggerEvent(entity);
         }
     }
 
@@ -1470,16 +1471,9 @@ class MazeEvent {
 
     }
 
-    triggerEvent() {
-        if (this.isActive == true) {
-            this.onTrigger();
-            if (this.isOneShot == true) {
-                this.isActive = false;
-            }
-        }
+    triggerEvent(entity) {
 
     }
-
 
 }
 
@@ -1488,6 +1482,15 @@ class TreasureCollectableEvent extends MazeEvent {
     constructor(onTrigger, assetManager) {
         super(onTrigger);
         this.image = assetManager.getImage(ImageAsset.TRAESURE_CHEST_SMALL)
+    }
+
+    triggerEvent(entity) {
+        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+            this.onTrigger();
+            if (this.isOneShot == true) {
+                this.isActive = false;
+            }
+        }
     }
 
     render(context, mazeWindowX, mazeWindowY) {

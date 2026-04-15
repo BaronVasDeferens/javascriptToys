@@ -2,7 +2,7 @@ import { ImageAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { EnemyEntity, MonsterBehavior, MonsterPinkSeeker } from "../entity/entity_enemy.js";
+import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider } from "../entity/entity_enemy.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 
 /**
@@ -125,8 +125,11 @@ export class MazeScene extends Scene {
 
 
         // ENEMIES
+
+        this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager))
+
         for (let n = 0; n < this.numEnemyEntities; n++) {
-            this.entitiesEnemy.push(new MonsterPinkSeeker(this.tileSize, this.assetManager));
+            this.entitiesEnemy.push(new MonsterSpider(this.tileSize, this.assetManager));
             this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
 
@@ -149,7 +152,7 @@ export class MazeScene extends Scene {
         );
 
 
-        // ------------------- Spell ZONE cards
+        // Spell ZONE cards
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
@@ -222,7 +225,7 @@ export class MazeScene extends Scene {
             )
         );
 
-        //  ---------------------- Spell EFFECT cards
+        // Spell EFFECT cards
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.BLAZE,
@@ -666,14 +669,13 @@ export class MazeScene extends Scene {
         if (this.selectedSpellEffect == null && spellEffect != SpellEffect.CANCEL) {
             this.selectedSpellEffect = spellEffect;
         } else {
+            // Double-selcting the same effect CLEARS the effect
             if (this.selectedSpellEffect == spellEffect || spellEffect == SpellEffect.CANCEL) {
                 this.selectedSpellEffect = null;
             } else {
                 this.selectedSpellEffect = spellEffect;
             }
         }
-
-        console.log(`spell effect: ${this.selectedSpellEffect}`);
 
         this.resolveSpellCasting();
     }
@@ -798,6 +800,26 @@ export class MazeScene extends Scene {
                             }
                         }
 
+                        break;
+
+                    case MonsterBehavior.RANDOM:
+
+                        let destination = null;
+
+                        let neighbors = this.getAdjacentRooms(monster.room)
+                            .concat(monster.room)
+                            .filter(room => { return room.isOpen == true })
+                            .filter(room => { return ineligibleRooms.has(room) == false })
+
+                        destination = neighbors[Math.floor(Math.random() * neighbors.length)];
+
+                        if (destination != null) {
+                            ineligibleRooms.add(destination);
+                            vacatedRooms.add(monster.room);
+                            vacatedRooms.delete(destination)
+                            let movementDriver = this.moveEntityToRoom(monster, destination, 50, () => { });
+                            drivers.push(movementDriver);
+                        }
                         break;
 
                     case MonsterBehavior.FLEE_LINE_OF_SIGHT:
@@ -1321,7 +1343,7 @@ export class MazeScene extends Scene {
             if (object instanceof MazeEvent) {
                 room.setEvent(object);
                 object.setRoom(room);
-            } else if (object instanceof EnemyEntity) {
+            } else if (object instanceof MonsterEntity) {
                 room.setOccupant(object);
                 object.setRoom(room);
             }
@@ -1502,5 +1524,4 @@ class TreasureCollectableEvent extends MazeEvent {
             )
         }
     }
-
 }

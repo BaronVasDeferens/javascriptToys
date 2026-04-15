@@ -3,6 +3,7 @@ import { ImageAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
 
 export const MonsterBehavior = Object.freeze({
+    NONE: 0,
     RANDOM: 10,                     // Moves to a random adjacent square
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
     CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
@@ -10,10 +11,10 @@ export const MonsterBehavior = Object.freeze({
     FLEE_OMNISICIENT: 50            // Moves away from the player regardless of LOS
 })
 
-export class EnemyEntity extends Entity {
+export class MonsterEntity extends Entity {
 
     imageAsset = ImageAsset.MONSTER_EYE_SMALL;
-    behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
+    behavior = MonsterBehavior.NONE;
 
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
@@ -65,7 +66,7 @@ export class EnemyEntity extends Entity {
     }
 }
 
-export class MonsterPinkSeeker extends EnemyEntity {
+export class MonsterPinkEye extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_EYE_SMALL;
     behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
@@ -74,4 +75,14 @@ export class MonsterPinkSeeker extends EnemyEntity {
         super(tileSize, ImageAsset.MONSTER_EYE_SMALL, assetManager);
     }
 
+}
+
+export class MonsterSpider extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_SPIDER_1;
+    behavior = MonsterBehavior.RANDOM;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_SPIDER_1, assetManager);
+    }
 }

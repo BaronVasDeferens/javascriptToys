@@ -110,6 +110,9 @@ export class MazeScene extends Scene {
         // SET UP MAZE
         this.createMaze();
 
+        // Print the rooms onto a re-usable background image...
+        this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms)
+
         // EVENTS
         for (let n = 0; n < 5; n++) {
 
@@ -292,12 +295,14 @@ export class MazeScene extends Scene {
     }
 
     render(contextPrimary, contextSecondary) {
-        contextPrimary.fillStyle = "#000000";
-        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
+        // contextPrimary.fillStyle = "#000000";
+        // contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
-        this.visibleRooms.forEach(room => {
-            room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
-        });
+        // this.visibleRooms.forEach(room => {
+        //     room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
+        // });
+
+        contextPrimary.drawImage(this.backgroundImage, 0, 0);
 
         // Render player
         this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
@@ -1226,6 +1231,19 @@ export class MazeScene extends Scene {
         }
     }
 
+    printToImage(canvas, image, renderables) {
+        console.log("print to image...");
+        let context = canvas.getContext("2d");
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        renderables.forEach(renderMe => {
+            renderMe.render(context, 0, 0);
+        });
+
+        image.src = canvas.toDataURL();
+    }
+
     areDiagonalsOpen(room) {
 
         let diag = this.getRoom(room.row - 1, room.col - 1);
@@ -1382,6 +1400,11 @@ class MazeRoom {
 
     computeEmptiness() {
         this.isEmpty = (this.isOpen == true) && (this.isOccupied == false) && (this.event == null);
+        if (this.isOpen == true) {
+            this.color = "#606060";
+        } else {
+            this.color = "#000000";
+        }
     }
 
     setIsOpen(isOpen) {

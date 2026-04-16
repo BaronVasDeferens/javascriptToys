@@ -304,6 +304,11 @@ export class MazeScene extends Scene {
 
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
 
+        // Render events
+        this.eventList.forEach( evt => {
+            evt.render(contextPrimary, 0, 0)
+        })
+
         // Render player
         this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
 
@@ -1466,10 +1471,6 @@ class MazeRoom {
             this.roomSize,
             this.roomSize
         );
-
-        if (this.event != null) {
-            this.event.render(context, mazeWindowX, mazeWindowY);
-        }
     }
 
 };

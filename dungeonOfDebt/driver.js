@@ -5,6 +5,7 @@ export class Driver {
 
     isFinished = false;
     totalTimeMillis = 0;
+    percentComplete = 0.00;
 
     constructor(durationMillis, onUpdate, onComplete) {
         this.durationMillis = durationMillis;
@@ -18,9 +19,10 @@ export class Driver {
             return;
         }
 
-        this.onUpdate();
-
         this.totalTimeMillis += deltaMillis;
+        this.percentComplete = this.totalTimeMillis / this.durationMillis;
+
+        this.onUpdate(this.percentComplete);
 
         if (this.totalTimeMillis >= this.durationMillis) {
             this.isFinished = true;
@@ -125,6 +127,38 @@ export class SpellEffectOverlayDriver extends Driver {
             this.isFinished = true;
             this.onComplete();
         }
+    }
+}
+
+export class ImageUpdateDriver {
+
+    totalTimeMillis = 0;
+    isFinished = false;
+
+    opacity = 1.0;
+
+    constructor(image, durationMillis, onComplete) {
+        this.image = image;
+        this.durationMillis = durationMillis;
+        this.onComplete = onComplete;
+    }
+
+    update(updateMillis) {
+
+        if (this.isFinished == true) {
+            return;
+        }
+
+        this.totalTimeMillis += updateMillis;
+
+        this.opacity = this.totalTimeMillis / this.durationMillis;
+        this.image.style.filter = `brightness(${this.opacity})`;
+
+        if (this.totalTimeMillis >= this.durationMillis) {
+            this.isFinished = true;
+            this.onComplete();
+        }
+
     }
 
 

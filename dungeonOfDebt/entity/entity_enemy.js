@@ -14,6 +14,8 @@ export const MonsterBehavior = Object.freeze({
 export class MonsterEntity extends Entity {
 
     imageAsset = ImageAsset.MONSTER_EYE_SMALL;
+    imageOpacity = 1.0;
+
     behavior = MonsterBehavior.NONE;
 
     constructor(tileSize, imageAsset, assetManager) {
@@ -44,12 +46,12 @@ export class MonsterEntity extends Entity {
 
     render(context, mazeWindowX, mazeWindowY) {
 
+        context.globalAlpha = this.imageOpacity;
         context.drawImage(
             this.image,
             this.x + ((this.tileSize - this.image.width) / 2),
             this.y + ((this.tileSize - this.image.height) / 2)
         );
-
 
         if (this.overlayImage != null) {
 
@@ -59,9 +61,9 @@ export class MonsterEntity extends Entity {
                 this.x + ((this.tileSize - this.overlayImage.width) / 2),
                 this.y + ((this.tileSize - this.overlayImage.height) / 2)
             )
-
-            context.globalAlpha = 1.0;
         }
+
+        context.globalAlpha = 1.0;
 
     }
 }

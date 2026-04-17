@@ -3,6 +3,9 @@ import { ImageAsset } from "../assets.js";
 
 export class PlayerEntity extends Entity {
 
+    image = null;
+    imageAlpha = 1.0;
+
     offsetX = 0;
     offsetY = 0;
 
@@ -26,6 +29,8 @@ export class PlayerEntity extends Entity {
     }
 
     render(context) {
+        context.globalAlpha = this.imageAlpha;
         context.drawImage(this.image, this.x + this.offsetX, this.y + this.offsetY);
+        context.globalAlpha = 1.0;
     }
 };

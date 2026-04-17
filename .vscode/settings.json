@@ -1,2 +1,11 @@
 {
+    "workbench.colorTheme": "Dark Modern",
+    "security.workspace.trust.untrustedFiles": "open",
+    "git.confirmSync": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "git.enableSmartCommit": true,
+    "editor.suggestOnTriggerCharacters": true,
+    "js.suggest.completeFunctionCalls": true,
+    "js/ts.implicitProjectConfig.strictNullChecks": true,
+    "editor.inlayHints.enabled": "on"
 }

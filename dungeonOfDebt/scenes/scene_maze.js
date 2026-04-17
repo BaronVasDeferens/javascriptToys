@@ -1,5 +1,5 @@
 import { ImageAsset } from "../assets.js";
-import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver } from "../driver.js";
+import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider } from "../entity/entity_enemy.js";
@@ -36,6 +36,7 @@ export class MazeScene extends Scene {
     currentGameSequence = GameSequence.INITIALIZING;
 
     backgroundImage = new Image();
+    backgroundOpacity = 1.0;
 
     mazeArray = [];
     allRooms = [];
@@ -90,12 +91,14 @@ export class MazeScene extends Scene {
         this.eventList = [];
         this.spellCardComponents = [];
         this.highlightedGridSquares = [];
-        this.movementDrivers = [];
+        this.stateDrivers = [];
         this.lineOfSightLines = [];
 
         this.entitiesEnemy = [];
         this.allRooms = [];
         this.mazeArray = [];
+
+        this.backgroundOpacity = 1.0;
 
         // CREATE ROOMS
         for (let i = 0; i < this.mazeRows; i++) {
@@ -111,7 +114,10 @@ export class MazeScene extends Scene {
         this.createMaze();
 
         // Print the rooms onto a re-usable background image...
-        this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms)
+        this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms);
+        let contextPrimary = this.canvasPrimary.getContext('2d');
+        contextPrimary.fillStyle = "#00000";
+        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height)
 
         // EVENTS
         for (let n = 0; n < 5; n++) {
@@ -128,7 +134,6 @@ export class MazeScene extends Scene {
 
 
         // ENEMIES
-
         this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager))
 
         for (let n = 0; n < this.numEnemyEntities; n++) {
@@ -295,17 +300,16 @@ export class MazeScene extends Scene {
     }
 
     render(contextPrimary, contextSecondary) {
-        // contextPrimary.fillStyle = "#000000";
-        // contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
-        // this.visibleRooms.forEach(room => {
-        //     room.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
-        // });
+        contextPrimary.fillStyle = "#000000";
+        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
+        contextPrimary.globalAlpha = this.backgroundOpacity;
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
+        contextPrimary.globalAlpha = 1.0;
 
         // Render events
-        this.eventList.forEach( evt => {
+        this.eventList.forEach(evt => {
             evt.render(contextPrimary, 0, 0)
         })
 
@@ -412,9 +416,41 @@ export class MazeScene extends Scene {
     }
 
     updateSequenceOrGameOver(sequence) {
-        let gameOver = this.entitiesEnemy.some(ent => { return ent.room == this.player.room });
+
+        if (this.currentGameSequence == GameSequence.GAME_OVER) {
+            return;
+        }
+
+        let fatalEntity = this.entitiesEnemy.filter(ent => { return ent.room == this.player.room })[0];
+        let gameOver = fatalEntity != null;
+
         if (gameOver == true) {
+
+            // GAME OVER DRIVER
+            // Fade out the background and all but the fatal entity and player
+
+            this.entitiesEnemy
+                .filter(ent => { return (ent != fatalEntity) })
+                .forEach(ent => { ent.imageOpacity = 0.0; })
+
+            this.eventList
+                .forEach(evt => { evt.imageOpacity = 0.0; })
+
+            this.stateDrivers.push(
+                new Driver(
+                    1000,
+                    (pctComplete) => {
+                        if (pctComplete <= 1.0) {
+                            let opacity = 1 - pctComplete;
+                            this.backgroundOpacity = opacity;
+                        }
+                    },
+                    () => { console.log("DONE") }
+                )
+            )
+
             this.updateGameSequence(GameSequence.GAME_OVER)
+
         } else {
             this.updateGameSequence(sequence)
         }
@@ -431,7 +467,9 @@ export class MazeScene extends Scene {
     }
 
     onMouseDown(click) {
-
+        if (this.currentGameSequence == GameSequence.GAME_OVER) {
+            this.initialize();
+        }
     }
 
     onMouseDownSecondary(click) {
@@ -1479,6 +1517,7 @@ class MazeEvent {
 
     onTrigger = null;
     color = "#FF0000"
+
     room = null;
 
     isOneShot = true;
@@ -1525,9 +1564,12 @@ class MazeEvent {
 
 class TreasureCollectableEvent extends MazeEvent {
 
+    image = null;
+    imageOpacity = 1.0;
+
     constructor(onTrigger, assetManager) {
         super(onTrigger);
-        this.image = assetManager.getImage(ImageAsset.TRAESURE_CHEST_SMALL)
+        this.image = assetManager.getImage(ImageAsset.TRAESURE_CHEST_SMALL);
     }
 
     triggerEvent(entity) {
@@ -1541,11 +1583,14 @@ class TreasureCollectableEvent extends MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
         if (this.isActive == true) {
+            context.globalAlpha = this.imageOpacity;
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
                 (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
             )
+
         }
+        context.imageOpacity = 1.0;
     }
 }

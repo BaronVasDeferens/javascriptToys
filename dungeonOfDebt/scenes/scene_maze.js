@@ -431,7 +431,10 @@ export class MazeScene extends Scene {
 
             this.entitiesEnemy
                 .filter(ent => { return (ent != fatalEntity) })
-                .forEach(ent => { ent.imageOpacity = 0.0; })
+                .forEach(ent => {
+                    ent.imageOpacity = 0.0;
+                    ent.overlayImage = null;
+                })
 
             this.eventList
                 .forEach(evt => { evt.imageOpacity = 0.0; })

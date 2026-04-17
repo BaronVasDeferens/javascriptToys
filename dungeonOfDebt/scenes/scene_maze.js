@@ -52,6 +52,8 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
+    levelCurrent = 1;
+    levelMax = 9;
 
     movementRateDefaultMillis = 50;         // time to traverse from one grid section to the next 
 
@@ -87,6 +89,8 @@ export class MazeScene extends Scene {
     initialize() {
 
         this.updateGameSequence(GameSequence.INITIALIZING)
+
+        this.setLevel(this.levelCurrent);
 
         this.selectedSpellZone = null;
         this.selectedSpellEffect = null;
@@ -137,10 +141,14 @@ export class MazeScene extends Scene {
 
 
         // ENEMIES
-        this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-        for (let n = 0; n < this.numEnemyEntities; n++) {
+        for (let n = 0; n < this.levelCurrent; n++) {
+            this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+        }
+
+        for (let n = 0; n < this.levelMax - this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterSpider(this.tileSize, this.assetManager));
         }
+
         this.distributeAcrossOpenRooms(this.entitiesEnemy);
 
         // PLAYER
@@ -407,6 +415,11 @@ export class MazeScene extends Scene {
         }
     }
 
+    setLevel(level) {
+        console.log(`level: ${this.levelCurrent}`);
+        this.levelCurrent = level;
+    }
+
     concludePlayerTurn() {
 
         this.entitiesEnemy.forEach(enemy => {
@@ -444,12 +457,15 @@ export class MazeScene extends Scene {
                 new Driver(
                     1000,
                     (pctComplete) => {
+                        // onUpdate
                         if (pctComplete <= 1.0) {
                             let opacity = 1 - pctComplete;
                             this.backgroundOpacity = opacity;
                         }
                     },
-                    () => { console.log("DONE") }
+                    () => {
+                        // onComplete 
+                    }
                 )
             )
 
@@ -583,6 +599,19 @@ export class MazeScene extends Scene {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
+                break;
+
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+                this.setLevel(Number.parseInt(event.key));
+                this.initialize();
                 break;
 
             case 'l':
@@ -1226,7 +1255,6 @@ export class MazeScene extends Scene {
 
         // Define the "start room" and adjacent rooms...
         let startRoom = this.getRandomRoom();
-        console.log("START " + startRoom.row + "," + startRoom.col);
         startRoom.setIsOpen(true)
         inMaze.push(startRoom);
         reachable.push(startRoom);

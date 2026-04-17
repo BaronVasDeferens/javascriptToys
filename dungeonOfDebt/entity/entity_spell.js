@@ -18,6 +18,11 @@ export const SpellEffect = Object.freeze({
     PHASE: 4,
 });
 
+/*
+    spell ideas
+        break apart walls
+        light (maze is dark otherwise, monstyers harder to see)
+*/
 
 export class ComponentCard {
 

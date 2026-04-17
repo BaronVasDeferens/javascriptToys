@@ -120,6 +120,13 @@ export class MazeScene extends Scene {
         // SET UP MAZE
         this.createMaze();
 
+        // Remove some tiles
+        let closedRooms = this.allRooms.filter( room => { return room.isOpen == false });
+        this.shuffleArray(closedRooms);
+        for (let n = 0; n < this.levelCurrent + 3; n++) {
+            closedRooms[n].setIsOpen(true);
+        }
+            
         // Print the rooms onto a re-usable background image...
         this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms);
         let contextPrimary = this.canvasPrimary.getContext('2d');
@@ -1314,7 +1321,6 @@ export class MazeScene extends Scene {
     }
 
     printToImage(canvas, image, renderables) {
-        console.log("print to image...");
         let context = canvas.getContext("2d");
         context.fillStyle = "#000000";
         context.fillRect(0, 0, canvas.width, canvas.height);

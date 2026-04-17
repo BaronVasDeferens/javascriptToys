@@ -88,6 +88,9 @@ export class MazeScene extends Scene {
 
         this.updateGameSequence(GameSequence.INITIALIZING)
 
+        this.selectedSpellZone = null;
+        this.selectedSpellEffect = null;
+
         this.eventList = [];
         this.spellCardComponents = [];
         this.highlightedGridSquares = [];
@@ -134,12 +137,11 @@ export class MazeScene extends Scene {
 
 
         // ENEMIES
-        this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager))
-
+        this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         for (let n = 0; n < this.numEnemyEntities; n++) {
             this.entitiesEnemy.push(new MonsterSpider(this.tileSize, this.assetManager));
-            this.distributeAcrossOpenRooms(this.entitiesEnemy);
         }
+        this.distributeAcrossOpenRooms(this.entitiesEnemy);
 
         // PLAYER
         // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
@@ -286,7 +288,6 @@ export class MazeScene extends Scene {
     }
 
     // -------------------------------------- MAIN LOOP --------------------------------------
-
 
     update(delta) {
         let driver = this.stateDrivers[0];
@@ -452,6 +453,9 @@ export class MazeScene extends Scene {
                 )
             )
 
+            this.selectedSpellZone = null;
+            this.selectedSpellEffect = null;
+            this.highlightedGridSquares = [];
             this.updateGameSequence(GameSequence.GAME_OVER)
 
         } else {
@@ -476,6 +480,10 @@ export class MazeScene extends Scene {
     }
 
     onMouseDownSecondary(click) {
+
+        if (this.currentGameSequence != GameSequence.PLAYER_AWAITING_MOVEMENT) {
+            return;
+        }
 
         let clickTarget = this.spellCardComponents.filter(card => {
             return card.containsPoint(click)

@@ -126,8 +126,8 @@ export class MazeScene extends Scene {
         contextPrimary.fillStyle = "#00000";
         contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height)
 
-        // EVENTS
-        for (let n = 0; n < 5; n++) {
+        // TREASURES
+        for (let n = 0; n < this.levelCurrent + 4; n++) {
 
             this.eventList.push(
                 new TreasureCollectableEvent(

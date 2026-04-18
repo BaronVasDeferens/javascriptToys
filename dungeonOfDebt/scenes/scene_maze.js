@@ -1,9 +1,10 @@
-import { ImageAsset } from "../assets.js";
+import { ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider } from "../entity/entity_enemy.js";
 import { PlayerEntity } from "../entity/entity_player.js"
+import { SoundPlayer } from "../sound.js";
 
 /**
  * DUNGEON of DEBT
@@ -59,6 +60,10 @@ export class MazeScene extends Scene {
 
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
+    audioContext = new AudioContext();      // AudioContext must be initialized after interactions
+
+    soundPlayer = null;
+
     spellCardComponents = [];
     selectedSpellZone = null;
     selectedSpellEffect = null;
@@ -91,6 +96,8 @@ export class MazeScene extends Scene {
         this.updateGameSequence(GameSequence.INITIALIZING)
 
         this.setLevel(this.levelCurrent);
+
+        this.soundPlayer = new SoundPlayer(this.assetManager, this.audioContext)
 
         this.selectedSpellZone = null;
         this.selectedSpellEffect = null;
@@ -549,6 +556,7 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
+                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -567,6 +575,7 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
+                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -585,6 +594,7 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
+                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -603,6 +613,7 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
+                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }

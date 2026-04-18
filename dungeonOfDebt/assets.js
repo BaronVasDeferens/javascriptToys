@@ -111,8 +111,7 @@ export class ImageLoader {
  */
 
 export var SoundAsset = Object.freeze({
-    MACHINEGUN_1: "machinegun_1.wav",
-    MACHINEGUN_2: "machinegun_2.wav",
+    WIZARD_WALK: "wizard_walk.wav"
 });
 
 

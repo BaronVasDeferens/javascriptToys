@@ -111,7 +111,8 @@ export class ImageLoader {
  */
 
 export var SoundAsset = Object.freeze({
-    WIZARD_WALK: "wizard_walk.wav"
+    WIZARD_WALK: "wizard_walk.wav",
+    WIZARD_CAST_SPELL: "wizard_cast_spell.wav"
 });
 
 

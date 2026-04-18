@@ -11,6 +11,15 @@ import { SoundPlayer } from "../sound.js";
  * Version 2
  * 2026 Scott C West
  * 
+ * 
+ * 
+ * IDEAS
+ *      - wizard's actual mission is to find and shake down monsters that owe HIM money
+ * 
+ *      - 
+ * 
+ * 
+ * 
  */
 
 const GameSequence = Object.freeze(
@@ -836,6 +845,7 @@ export class MazeScene extends Scene {
                     break;
             }
 
+            this.soundPlayer.playOneShot(SoundAsset.WIZARD_CAST_SPELL);
             this.selectedSpellEffect = null;
             this.selectedSpellZone = null;
             this.highlightedGridSquares = [];

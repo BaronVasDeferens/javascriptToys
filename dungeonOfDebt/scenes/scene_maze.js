@@ -197,7 +197,7 @@ export class MazeScene extends Scene {
         this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
 
         // -------- USER INTERFACE ----------
-        
+
         // Zone cards
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
@@ -642,7 +642,17 @@ export class MazeScene extends Scene {
             case "7":
             case "8":
             case "9":
-                this.setLevel(Number.parseInt(event.key));
+            case "0":
+                this.processSpellHotkey(Number.parseInt(event.key));
+                break;
+
+            case "+":
+                this.levelCurrent += 1;
+                this.initialize();
+                break;
+
+            case "-":
+                this.levelCurrent -= 1;
                 this.initialize();
                 break;
 
@@ -855,6 +865,10 @@ export class MazeScene extends Scene {
             this.selectedSpellZone = null;
             this.highlightedGridSquares = [];
         }
+    }
+
+    processSpellHotkey(number) {
+        
     }
 
     // -------------------------------------- MOVEMENT STUFF --------------------------------------
@@ -1467,7 +1481,7 @@ export class MazeScene extends Scene {
         });
 
         if (avoidPlayerLos == true) {
-            availableRooms = availableRooms.filter( room => {
+            availableRooms = availableRooms.filter(room => {
                 return this.calculateLineOfSight(room, this.player.room) == false
             })
         }

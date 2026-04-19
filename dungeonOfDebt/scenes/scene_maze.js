@@ -123,7 +123,9 @@ export class MazeScene extends Scene {
 
         this.backgroundOpacity = 1.0;
 
-        // CREATE ROOMS
+
+        // --------- ROOMS and MAZE ---------
+        // Create rooms....
         for (let i = 0; i < this.mazeRows; i++) {
             this.mazeArray[i] = new Array(this.mazeCols);
             for (let j = 0; j < this.mazeCols; j++) {
@@ -133,48 +135,23 @@ export class MazeScene extends Scene {
             }
         }
 
-        // SET UP MAZE
+        // Arrange the maze...
         this.createMaze();
 
-        // Remove some tiles
-        let closedRooms = this.allRooms.filter( room => { return room.isOpen == false });
+        // Remove some tiles...
+        let closedRooms = this.allRooms.filter(room => { return room.isOpen == false });
         this.shuffleArray(closedRooms);
         for (let n = 0; n < this.levelCurrent + 3; n++) {
             closedRooms[n].setIsOpen(true);
         }
-            
+
         // Print the rooms onto a re-usable background image...
         this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms);
         let contextPrimary = this.canvasPrimary.getContext('2d');
         contextPrimary.fillStyle = "#00000";
         contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height)
 
-        // TREASURES
-        for (let n = 0; n < this.levelCurrent + 4; n++) {
-
-            this.eventList.push(
-                new TreasureCollectableEvent(
-                    () => { console.log(`cha-CHING ${n}`) },
-                    this.assetManager
-                )
-            );
-        }
-
-        this.distributeAcrossOpenRooms(this.eventList);
-
-
-        // ENEMIES
-        for (let n = 0; n < this.levelCurrent; n++) {
-            this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-        }
-
-        for (let n = 0; n < this.levelMax - this.levelCurrent; n++) {
-            this.entitiesEnemy.push(new MonsterSpider(this.tileSize, this.assetManager));
-        }
-
-        this.distributeAcrossOpenRooms(this.entitiesEnemy);
-
-        // PLAYER
+        // -------- PLAYER ---------
         // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.x + a.y) < (b.x + b.y)) {
@@ -191,6 +168,32 @@ export class MazeScene extends Scene {
             this.tileSize,
             this.assetManager
         );
+
+        // ------- TREASURES -------
+        for (let n = 0; n < this.levelCurrent + 4; n++) {
+
+            this.eventList.push(
+                new TreasureCollectableEvent(
+                    () => { console.log(`cha-CHING ${n}`) },
+                    this.assetManager
+                )
+            );
+        }
+
+        this.distributeAcrossOpenRooms(this.eventList);
+
+        // -------- ENEMIES ---------
+        for (let n = 0; n < this.levelCurrent; n++) {
+            this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+        }
+
+        for (let n = 0; n < this.levelMax - this.levelCurrent; n++) {
+            this.entitiesEnemy.push(new MonsterSpider(this.tileSize, this.assetManager));
+        }
+
+        this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
+
+
 
 
         // Spell ZONE cards
@@ -1455,17 +1458,29 @@ export class MazeScene extends Scene {
         }
     }
 
-    distributeAcrossOpenRooms(objects) {
+    distributeAcrossOpenRooms(objects, avoidPlayerLos) {
 
         let availableRooms = this.allRooms.filter(room => {
             return room.isEmpty == true
         });
+
+        if (avoidPlayerLos == true) {
+            availableRooms = availableRooms.filter( room => {
+                return this.calculateLineOfSight(room, this.player.room) == false
+            })
+        }
 
         this.shuffleArray(availableRooms);
 
         objects.forEach(object => {
 
             let room = availableRooms.pop();
+
+            // There may not be enough rooms outside of the player's LoS...
+            if (room == null) {
+                console.error("Not enough avialable rooms!");
+                return
+            }
 
             if (object instanceof MazeEvent) {
                 room.setEvent(object);

@@ -30,6 +30,7 @@ const GameSequence = Object.freeze(
         "SPECIAL_EFFECT_ANIMATING": 21,
         "ENEMY_PLOTTING_MOVEMENT": 30,
         "ENEMY_MOVING": 40,
+        "WAIT_FOR_DRIVER": 50,
         "GAME_OVER": 99999
     }
 );
@@ -78,8 +79,6 @@ export class MazeScene extends Scene {
     selectedSpellEffect = null;
 
     highlightedGridSquares = [];
-
-    spellEffectOverlay = null;              // if not null, render this item last
 
     debugMode = false;
     debugShowLineOfSight = false;
@@ -320,7 +319,16 @@ export class MazeScene extends Scene {
             )
         );
 
-        this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+
+
+
+
+
+
+        this.fadeIn(() => {
+            this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+        });
+
     }
 
     // -------------------------------------- MAIN LOOP --------------------------------------
@@ -382,10 +390,12 @@ export class MazeScene extends Scene {
             sq.render(contextPrimary);
         });
 
-        // Spell effect overaly (screen flash)
-        if (this.spellEffectOverlay != null) {
-            this.spellEffectOverlay.render(contextPrimary);
+        // Render the overlays
+        let driverCurrent = this.stateDrivers[0];
+        if( driverCurrent instanceof OverlayDriver) {
+            driverCurrent.overlay.render(contextPrimary);
         }
+  
 
         // Render the secondary canvas
         this.spellCardComponents.forEach(component => {
@@ -647,13 +657,21 @@ export class MazeScene extends Scene {
                 break;
 
             case "+":
-                this.levelCurrent += 1;
-                this.initialize();
+                this.fadeOut(() => {
+                    this.levelCurrent += 1;
+                    this.initialize();
+                    this.computeMazeWindow();
+                });
+
                 break;
 
             case "-":
-                this.levelCurrent -= 1;
-                this.initialize();
+                this.fadeOut(() => {
+                    this.levelCurrent -= 1;
+                    this.initialize();
+                    this.computeMazeWindow();
+                });
+
                 break;
 
             case 'l':
@@ -664,8 +682,11 @@ export class MazeScene extends Scene {
                 break;
 
             case 'Escape':
-                this.initialize();
-                this.computeMazeWindow();
+                this.fadeOut(() => {
+                    this.initialize();
+                    this.computeMazeWindow();
+                });
+
                 break;
 
             default:
@@ -832,7 +853,7 @@ export class MazeScene extends Scene {
                     });
 
                     // Create a spell effect overlay to flash the screen during this spell effect
-                    this.spellEffectOverlay = new SpellEffectOverlay(
+                    let spellEffectOverlay = new SpellEffectOverlay(
                         this.canvasPrimary,
                         "#00a9FF"
                     );
@@ -840,7 +861,7 @@ export class MazeScene extends Scene {
                     // Flash! A spell is cast! 
                     this.stateDrivers.push(
                         new OverlayDriver(
-                            this.spellEffectOverlay,
+                            spellEffectOverlay,
                             1.0,
                             0.0,
                             500,
@@ -849,7 +870,6 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.spellEffectOverlay = null;
                                 this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
                             }
                         )
@@ -1468,6 +1488,54 @@ export class MazeScene extends Scene {
     }
 
     // -------------------------------------- UTILITIES and STUFF --------------------------------------
+
+    fadeIn(onComplete) {
+
+        let spellEffectOverlay = new SpellEffectOverlay(
+            this.canvasPrimary,
+            "#000000"
+        );
+
+        this.stateDrivers.push(
+            new OverlayDriver(
+                spellEffectOverlay,
+                1.0,
+                0.0,
+                500,
+                () => {
+                    // onUpdate
+                },
+                () => {
+                    // onComplete
+                    onComplete();
+                }
+            )
+        )
+    }
+
+    fadeOut(onComplete) {
+
+        let spellEffectOverlay = new SpellEffectOverlay(
+            this.canvasPrimary,
+            "#000000"
+        );
+
+        this.stateDrivers.push(
+            new OverlayDriver(
+                spellEffectOverlay,
+                0.0,
+                1.0,
+                500,
+                () => {
+                    // onUpdate
+                },
+                () => {
+                    // onComplete
+                    onComplete();
+                }
+            )
+        )
+    }
 
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {

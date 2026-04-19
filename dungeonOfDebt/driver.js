@@ -112,6 +112,7 @@ export class OverlayDriver extends Driver {
         super(durationMillis, onUpdate, onComplete);
         this.overlay = overlay;
         this.coefficient = alphaEnd - alphaStart;
+        console.log("starting overlay: " + this.coefficient)
     }
 
     update(deltaMillis) {
@@ -120,9 +121,19 @@ export class OverlayDriver extends Driver {
             return;
         }
 
-        this.overlay.alpha = ((deltaMillis / this.durationMillis) * this.coefficient);
-
         this.totalTimeMillis += deltaMillis;
+
+        if (this.coefficient < 0) {
+            this.overlay.alpha = 1 - (this.totalTimeMillis / this.durationMillis);
+        } else {
+            this.overlay.alpha = (this.totalTimeMillis / this.durationMillis);
+        }
+
+        if (this.overlay.alpha < 0) {
+            this.overlay.alpha = 0.0;
+        } else if (this.overlay.alpha > 1) {
+            this.overlay.alpha = 1;
+        }
 
         if (this.totalTimeMillis >= this.durationMillis) {
             this.isFinished = true;

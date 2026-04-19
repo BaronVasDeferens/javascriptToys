@@ -1,5 +1,5 @@
 import { ImageAsset, SoundAsset } from "../assets.js";
-import { EntityMovementDriver, Driver, MultiEntityMovementDriver, SpellEffectOverlayDriver, ImageUpdateDriver } from "../driver.js";
+import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider } from "../entity/entity_enemy.js";
@@ -839,8 +839,10 @@ export class MazeScene extends Scene {
 
                     // Flash! A spell is cast! 
                     this.stateDrivers.push(
-                        new SpellEffectOverlayDriver(
+                        new OverlayDriver(
                             this.spellEffectOverlay,
+                            1.0,
+                            0.0,
                             500,
                             () => {
                                 // onUpdate
@@ -868,7 +870,7 @@ export class MazeScene extends Scene {
     }
 
     processSpellHotkey(number) {
-        
+
     }
 
     // -------------------------------------- MOVEMENT STUFF --------------------------------------

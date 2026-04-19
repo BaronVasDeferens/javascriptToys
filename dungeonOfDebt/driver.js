@@ -104,13 +104,14 @@ export class MultiEntityMovementDriver {
 
 }
 
-export class SpellEffectOverlayDriver extends Driver {
+export class OverlayDriver extends Driver {
 
-    alpha = 1.0;
+    coefficient = -1;
 
-    constructor(overlay, durationMillis, onUpdate, onComplete) {
+    constructor(overlay, alphaStart, alphaEnd, durationMillis, onUpdate, onComplete) {
         super(durationMillis, onUpdate, onComplete);
         this.overlay = overlay;
+        this.coefficient = alphaEnd - alphaStart;
     }
 
     update(deltaMillis) {
@@ -119,7 +120,7 @@ export class SpellEffectOverlayDriver extends Driver {
             return;
         }
 
-        this.overlay.alpha -= (deltaMillis / this.durationMillis);
+        this.overlay.alpha = ((deltaMillis / this.durationMillis) * this.coefficient);
 
         this.totalTimeMillis += deltaMillis;
 

@@ -125,6 +125,7 @@ export class MazeScene extends Scene {
 
 
         // --------- ROOMS and MAZE ---------
+
         // Create rooms....
         for (let i = 0; i < this.mazeRows; i++) {
             this.mazeArray[i] = new Array(this.mazeCols);
@@ -151,7 +152,9 @@ export class MazeScene extends Scene {
         contextPrimary.fillStyle = "#00000";
         contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height)
 
-        // -------- PLAYER ---------
+        // -------- ENTITIES ---------
+
+        // Player
         // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.x + a.y) < (b.x + b.y)) {
@@ -169,7 +172,7 @@ export class MazeScene extends Scene {
             this.assetManager
         );
 
-        // ------- TREASURES -------
+        // Treasures...
         for (let n = 0; n < this.levelCurrent + 4; n++) {
 
             this.eventList.push(
@@ -182,7 +185,7 @@ export class MazeScene extends Scene {
 
         this.distributeAcrossOpenRooms(this.eventList);
 
-        // -------- ENEMIES ---------
+        // Monsters...
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         }
@@ -193,10 +196,9 @@ export class MazeScene extends Scene {
 
         this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
 
-
-
-
-        // Spell ZONE cards
+        // -------- USER INTERFACE ----------
+        
+        // Zone cards
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
@@ -269,7 +271,7 @@ export class MazeScene extends Scene {
             )
         );
 
-        // Spell EFFECT cards
+        // Effect cards
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.BLAZE,

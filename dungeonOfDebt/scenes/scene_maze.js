@@ -478,8 +478,9 @@ export class MazeScene extends Scene {
 
         if (gameOver == true) {
 
-            // GAME OVER DRIVER
-            // Fade out the background and all but the fatal entity and player
+            // GAME OVER !!!
+            
+            // Use a driver to fade out the background and all but the fatal entity and player
 
             this.entitiesEnemy
                 .filter(ent => { return (ent != fatalEntity) })
@@ -507,6 +508,7 @@ export class MazeScene extends Scene {
                 )
             )
 
+            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER);
             this.selectedSpellZone = null;
             this.selectedSpellEffect = null;
             this.highlightedGridSquares = [];

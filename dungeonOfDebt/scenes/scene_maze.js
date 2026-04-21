@@ -347,8 +347,8 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
-                SpellEffect.PHASE,
-                () => { this.onSpellEffectSelected(SpellEffect.PHASE) },
+                SpellEffect.INVERT,
+                () => { this.onSpellEffectSelected(SpellEffect.INVERT) },
                 this.canvasSecondary,
                 384,
                 0,

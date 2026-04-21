@@ -16,6 +16,7 @@ export const SpellEffect = Object.freeze({
     FREEZE: 2,
     BLAZE: 3,
     PHASE: 4,
+    INVERT: 5,
 });
 
 /*
@@ -116,6 +117,9 @@ export class SpellEffectComponentCard extends ComponentCard {
                 break;
             case SpellEffect.PHASE:
                 this.image = assetManager.getImage(ImageAsset.SPELL_CARD_PHASE);
+                break;
+            case SpellEffect.INVERT:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_INVERT);
                 break;
         }
     }

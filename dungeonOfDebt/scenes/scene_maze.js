@@ -41,7 +41,8 @@ import { SoundPlayer } from "../sound.js";
  *      - acquiring wands expands zones
  * 
  * Magic / Entity Interactions
- *     - freeze spell KILLS certain enemies
+ *      - freeze spell KILLS certain enemies
+ *      - KILLING MONSTERS returns them as GHOSTS which can ignore walls and maybe have different behaviors
  * 
  * 
  * 
@@ -309,17 +310,17 @@ export class MazeScene extends Scene {
         );
 
         // Effect cards
-        this.spellCardComponents.push(
-            new SpellEffectComponentCard(
-                SpellEffect.BLAZE,
-                () => { this.onSpellEffectSelected(SpellEffect.BLAZE) },
-                this.canvasSecondary,
-                256,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
+        // this.spellCardComponents.push(
+        //     new SpellEffectComponentCard(
+        //         SpellEffect.BLAZE,
+        //         () => { this.onSpellEffectSelected(SpellEffect.BLAZE) },
+        //         this.canvasSecondary,
+        //         256,
+        //         0,
+        //         this.tileSize,
+        //         this.assetManager
+        //     )
+        // );
 
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
@@ -430,10 +431,10 @@ export class MazeScene extends Scene {
 
         // Render the overlays
         let driverCurrent = this.stateDrivers[0];
-        if( driverCurrent instanceof OverlayDriver) {
+        if (driverCurrent instanceof OverlayDriver) {
             driverCurrent.overlay.render(contextPrimary);
         }
-  
+
 
         // Render the secondary canvas
         this.spellCardComponents.forEach(component => {
@@ -517,7 +518,7 @@ export class MazeScene extends Scene {
         if (gameOver == true) {
 
             // GAME OVER !!!
-            
+
             // Use a driver to fade out the background and all but the fatal entity and player
 
             this.entitiesEnemy
@@ -880,6 +881,8 @@ export class MazeScene extends Scene {
                 console.log(`casting: ${this.getSpellEffectName(this.selectedSpellEffect)}`)
             }
 
+            let spellEffectOverlay = null;
+
             switch (this.selectedSpellEffect) {
 
                 case SpellEffect.FREEZE:
@@ -893,7 +896,7 @@ export class MazeScene extends Scene {
                     });
 
                     // Create a spell effect overlay to flash the screen during this spell effect
-                    let spellEffectOverlay = new SpellEffectOverlay(
+                    spellEffectOverlay = new SpellEffectOverlay(
                         this.canvasPrimary,
                         "#00a9FF"
                     );
@@ -916,6 +919,41 @@ export class MazeScene extends Scene {
                     )
 
                     this.updateGameSequence(GameSequence.SPECIAL_EFFECT_ANIMATING);
+                    break;
+
+                case SpellEffect.INVERT:
+                    this.highlightedGridSquares.map(sq => {
+                        return this.getRoom(sq.row, sq.col)
+                    }).forEach( gridSquare => {
+                        gridSquare.setIsOpen(!gridSquare.isOpen);
+                        if (gridSquare.occupant != null) {
+                            //gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
+                        }
+                    });
+
+                    this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms);
+
+                    spellEffectOverlay = new SpellEffectOverlay(
+                        this.canvasPrimary,
+                        "#ffffff"
+                    );
+
+                    // Flash! A spell is cast! 
+                    this.stateDrivers.push(
+                        new OverlayDriver(
+                            spellEffectOverlay,
+                            1.0,
+                            0.0,
+                            500,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                            }
+                        )
+                    )
                     break;
 
                 default:

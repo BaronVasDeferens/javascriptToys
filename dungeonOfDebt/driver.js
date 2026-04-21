@@ -112,7 +112,6 @@ export class OverlayDriver extends Driver {
         super(durationMillis, onUpdate, onComplete);
         this.overlay = overlay;
         this.coefficient = alphaEnd - alphaStart;
-        console.log("starting overlay: " + this.coefficient)
     }
 
     update(deltaMillis) {

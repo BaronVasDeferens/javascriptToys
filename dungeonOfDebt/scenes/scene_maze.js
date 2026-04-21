@@ -358,12 +358,8 @@ export class MazeScene extends Scene {
             )
         );
 
-
-
-
-
-
-
+        // Draw the curtain!
+        // Begin processing player input once the fade in has completed
         this.fadeIn(() => {
             this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
         });
@@ -508,6 +504,7 @@ export class MazeScene extends Scene {
 
     updateSequenceOrGameOver(sequence) {
 
+        // Control lockout during GAME OVER
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
             return;
         }
@@ -519,8 +516,12 @@ export class MazeScene extends Scene {
 
             // GAME OVER !!!
 
-            // Use a driver to fade out the background and all but the fatal entity and player
+            // Clear any player selections...
+            this.selectedSpellZone = null;
+            this.selectedSpellEffect = null;
+            this.highlightedGridSquares = [];
 
+            // Use a driver to fade out the background and all but the fatal entity and player...
             this.entitiesEnemy
                 .filter(ent => { return (ent != fatalEntity) })
                 .forEach(ent => {
@@ -547,11 +548,9 @@ export class MazeScene extends Scene {
                 )
             )
 
-            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER);
-            this.selectedSpellZone = null;
-            this.selectedSpellEffect = null;
-            this.highlightedGridSquares = [];
-            this.updateGameSequence(GameSequence.GAME_OVER)
+            // Play the "barbeque's over" sound and INITIALIZE once the sound finishes playing...
+            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => { this.initialize() });
+            this.updateGameSequence(GameSequence.GAME_OVER);
 
         } else {
             this.updateGameSequence(sequence)
@@ -569,8 +568,10 @@ export class MazeScene extends Scene {
     }
 
     onMouseDown(click) {
+
+        // Control lockout during GAME OVER
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
-            this.initialize();
+            return
         }
     }
 
@@ -605,6 +606,9 @@ export class MazeScene extends Scene {
 
         var driver = null;
 
+        if (this.currentGameSequence == GameSequence.GAME_OVER) {
+            return
+        }
 
         switch (event.key) {
 
@@ -924,7 +928,7 @@ export class MazeScene extends Scene {
                 case SpellEffect.INVERT:
                     this.highlightedGridSquares.map(sq => {
                         return this.getRoom(sq.row, sq.col)
-                    }).forEach( gridSquare => {
+                    }).forEach(gridSquare => {
                         gridSquare.setIsOpen(!gridSquare.isOpen);
                         if (gridSquare.occupant != null) {
                             //gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
@@ -1565,7 +1569,7 @@ export class MazeScene extends Scene {
         return this.allRooms[index]
     }
 
-    // -------------------------------------- UTILITIES and STUFF --------------------------------------
+    // ------------------------------------ ILM -----------------------------------------
 
     fadeIn(onComplete) {
 
@@ -1614,6 +1618,8 @@ export class MazeScene extends Scene {
             )
         )
     }
+
+    // -------------------------------------- UTILITIES --------------------------------------
 
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {

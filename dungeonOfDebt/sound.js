@@ -1,52 +1,5 @@
 import { AssetManager, ImageAsset, ImageLoader, SoundAsset, SoundLoader } from "./assets.js";
 
-export class MachineGunSoundHelper {
-
-    isMuted = false;
-
-    constructor(soundLoader) {
-
-        this.machineGunPrimary = soundLoader.getSound(SoundAsset.MACHINEGUN_1);
-        this.machineGunSecondary = soundLoader.getSound(SoundAsset.MACHINEGUN_2);
-        this.machineGunTrail = soundLoader.getSound(SoundAsset.MACHINEGUN_TRAIL);
-
-        this.audioPrimary = this.machineGunPrimary;
-        this.audioSecondary = this.machineGunTrail;
-
-    }
-
-    mute() {
-        this.isMuted = true;
-        this.audioPrimary.pause();
-        this.audioSecondary.pause();
-    }
-
-    unmute() {
-        this.isMuted = false;
-    }
-
-    fireMachineGuns() {
-
-        if (this.isMuted) {
-            return
-        }
-
-        this.audioPrimary.loop = true;
-        this.audioPrimary.play();
-    }
-
-    stopMachineGuns() {
-
-        if (this.isMuted) {
-            return
-        }
-
-        this.audioPrimary.pause();
-        this.audioSecondary.play();
-    }
-
-}
-
 export class SoundPlayer {
 
     isMuted = false;
@@ -60,7 +13,7 @@ export class SoundPlayer {
 
     setIsMuted(shouldMute) {
         this.isMuted = shouldMute;
-        if(this.isMuted) {
+        if (this.isMuted) {
             this.stopBackgroundMusic();
         }
     }
@@ -82,8 +35,15 @@ export class SoundPlayer {
         }
     }
 
-    playOneShot(soundAsset) {
+    playOneShot(soundAsset, onComplete) {
         let sound = this.assetManager.getSound(soundAsset, false);
+
+        if (onComplete != null) {
+            sound.addEventListener("ended", evt => {
+                onComplete();
+            }, true);
+        }
+
         sound.start();
     }
 

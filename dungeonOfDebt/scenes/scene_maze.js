@@ -11,14 +11,52 @@ import { SoundPlayer } from "../sound.js";
  * Version 2
  * 2026 Scott C West
  * 
+ * --- IDEAS ---
  * 
  * 
- * IDEAS
+ * ---------------------------------- MAGIC ----------------------------------
+ * 
+ * Spell Types
+ *      - swap walls for rooms and vice versa
+ *      - invisibility
+ *      - intangible
+ *      - swap locations
+ *      - befuddle
+ *      - wall of flame (temp block)
+ * 
+ * Spell Interface
+ *      - some spells require row/col selection, but others do not
+ *      - future vision / scry could be global
+ *      - this means that selcting the spell must come FIRST, then the UI changes to suit
+ * 
+ * Magic Economy
+ *      - small zones (self) cost 1
+ *      - medium (plus/inverted) cost 2
+ *      - large (whole row/col): cost 3 or possibly
+ *      - cost increases by tile???
+ *      - discounts or bonuses if all habitable squares in zones are occupied???
+ *
+ * Magic and Collectables
+ *      - acquiring books expands spells  
+ *      - acquiring wands expands zones
+ * 
+ * Magic / Entity Interactions
+ *     - freeze spell KILLS certain enemies
+ * 
+ * 
+ * 
+ * ---------------------------------- ENVIRONMENT ----------------------------
+ * 
+ * Environments
+ *      - pits
+ *      - traps
+ * 
+ * ------------------------------------ STORY --------------------------------------
+ * 
  *      - wizard's actual mission is to find and shake down monsters that owe HIM money
  * 
- *      - 
- * 
- * 
+ *      - wizard is a pacifist and either physically cannot harm monsters, OR mourns them 
+ *        OR slaying costs magic points, gold, whatever economic penalty
  * 
  */
 

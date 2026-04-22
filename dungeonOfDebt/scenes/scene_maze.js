@@ -114,7 +114,7 @@ export class MazeScene extends Scene {
     levelCurrent = 1;
     levelMax = 9;
 
-    movementRateDefaultMillis = 100;         // time to traverse from one grid section to the next 
+    movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
 
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
@@ -520,8 +520,12 @@ export class MazeScene extends Scene {
 
             // GAME OVER !!!
 
-            // Use a driver to fade out the background and all but the fatal entity and player
+            // Clear selection and states
+            this.selectedSpellZone = null;
+            this.selectedSpellEffect = null;
+            this.highlightedGridSquares = [];
 
+            // Use a driver to fade out the background and all but the fatal entity and player
             this.entitiesEnemy
                 .filter(ent => { return (ent != fatalEntity) })
                 .forEach(ent => {
@@ -548,10 +552,8 @@ export class MazeScene extends Scene {
                 )
             )
 
-            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER);
-            this.selectedSpellZone = null;
-            this.selectedSpellEffect = null;
-            this.highlightedGridSquares = [];
+            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => { this.initialize()});
+
             this.updateGameSequence(GameSequence.GAME_OVER)
 
         } else {
@@ -571,7 +573,7 @@ export class MazeScene extends Scene {
 
     onMouseDown(click) {
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
-            this.initialize();
+            return;
         }
     }
 
@@ -603,6 +605,10 @@ export class MazeScene extends Scene {
     }
 
     onKeyPressed(event) {
+
+        if (this.currentGameSequence == GameSequence.GAME_OVER) {
+            return;
+        }
 
         var driver = null;
 

@@ -445,11 +445,10 @@ export class MazeScene extends Scene {
     }
 
     updateGameSequence(newSequence) {
+
         if (this.currentGameSequence != newSequence) {
 
-            if (this.debugMode == true) {
-                console.log(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
-            }
+            this.debug(`changing sequence: ${Object.keys(GameSequence).find(k => GameSequence[k] === newSequence)}`);
 
             this.currentGameSequence = newSequence;
 
@@ -482,7 +481,6 @@ export class MazeScene extends Scene {
                     break;
 
                 case GameSequence.GAME_OVER:
-                    console.log("GAME OVER YEAH")
                     break;
             }
         }
@@ -881,9 +879,7 @@ export class MazeScene extends Scene {
         if (this.selectedSpellZone != null
             && this.selectedSpellEffect != null) {
 
-            if (this.debugMode == true) {
-                console.log(`casting: ${this.getSpellEffectName(this.selectedSpellEffect)}`)
-            }
+            this.debug(`casting: ${this.getSpellEffectName(this.selectedSpellEffect)}`)
 
             let spellEffectOverlay = null;
 
@@ -1145,8 +1141,6 @@ export class MazeScene extends Scene {
             // SPACIAL CASE: SLIDING ICE CUBES
             // The player can push a frozen enemy out into an adjacent space
             if (entity == this.player && destination.occupant != null && destination.occupant.isFrozen == true) {
-
-                console.log("calculating push...")
 
                 // Find the "end point" of the push
                 let endpoint = destination;
@@ -1664,6 +1658,12 @@ export class MazeScene extends Scene {
 
     getSpellEffectName(effect) {
         return Object.keys(SpellEffect).find(k => SpellEffect[k] === effect);
+    }
+
+    debug(msg) {
+        if (this.debugMode == true) {
+            console.log(msg);
+        }
     }
 }
 

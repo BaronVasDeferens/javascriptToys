@@ -65,9 +65,20 @@ export var ImageAsset = Object.freeze({
     WIZARD_1: "entity/wizard_1.png",
     MONSTER_EYE_SMALL: "entity/monster_eye_small.png",
     MONSTER_SPIDER_1: "entity/monster_spider_1.png",
-    
+
     TREASURE_CHEST_LARGE: "entity/chest_large.png",
-    TRAESURE_CHEST_SMALL: "entity/chest_small.png",
+    TREASURE_CHEST_SMALL: "entity/chest_small.png",
+
+    FLOOR_STONE_1: "tiles/floor/stone_1.png",
+    FLOOR_STONE_2: "tiles/floor/stone_2.png",
+    FLOOR_STONE_3: "tiles/floor/stone_3.png",
+    FLOOR_STONE_4: "tiles/floor/stone_4.png",
+
+    FLOOR_DARK_STONE_1: "tiles/floor/stone_dark_1.png",
+    FLOOR_DARK_STONE_2: "tiles/floor/stone_dark_2.png",
+    FLOOR_DARK_STONE_3: "tiles/floor/stone_dark_3.png",
+    FLOOR_DARK_STONE_4: "tiles/floor/stone_dark_4.png",
+
 
 });
 

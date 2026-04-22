@@ -13,6 +13,10 @@ import { SoundPlayer } from "../sound.js";
  * 
  * --- IDEAS ---
  * 
+ * ---------------------------------- THE CARROT ---------------------------
+ * 
+ * Collectables
+ *      - some high value collectables decay over time
  * 
  * ---------------------------------- MAGIC ----------------------------------
  * 
@@ -42,9 +46,14 @@ import { SoundPlayer } from "../sound.js";
  * 
  * Magic / Entity Interactions
  *      - freeze spell KILLS certain enemies
- *      - KILLING MONSTERS returns them as GHOSTS which can ignore walls and maybe have different behaviors
+ *      - SLAIM MONSTERS RETURN AS GHOSTS who ignore walls and maybe have different behaviors
  * 
- * 
+ * Magical Consequences
+ *      - Casting too many spells draws the attention of a rival sorcerer
+ *      - Changing too many tiles draws the attention of the minotaur
+ *      - Killing too many monsters draws the attention of the druid
+ *      - Stealing too much treasure draws the attention of the dragon
+ *      - Drinking too many potions draws the attention of the alchemist
  * 
  * ---------------------------------- ENVIRONMENT ----------------------------
  * 
@@ -105,7 +114,7 @@ export class MazeScene extends Scene {
     levelCurrent = 1;
     levelMax = 9;
 
-    movementRateDefaultMillis = 50;         // time to traverse from one grid section to the next 
+    movementRateDefaultMillis = 100;         // time to traverse from one grid section to the next 
 
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
@@ -168,7 +177,7 @@ export class MazeScene extends Scene {
         for (let i = 0; i < this.mazeRows; i++) {
             this.mazeArray[i] = new Array(this.mazeCols);
             for (let j = 0; j < this.mazeCols; j++) {
-                let room = new MazeRoom(i, j, this.tileSize, false);
+                let room = new MazeRoom(i, j, this.tileSize, false, this.assetManager);
                 this.allRooms.push(room);
                 this.mazeArray[i][j] = room;
             }
@@ -358,8 +367,6 @@ export class MazeScene extends Scene {
             )
         );
 
-        // Draw the curtain!
-        // Begin processing player input once the fade in has completed
         this.fadeIn(() => {
             this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
         });
@@ -502,7 +509,6 @@ export class MazeScene extends Scene {
 
     updateSequenceOrGameOver(sequence) {
 
-        // Control lockout during GAME OVER
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
             return;
         }
@@ -514,12 +520,8 @@ export class MazeScene extends Scene {
 
             // GAME OVER !!!
 
-            // Clear any player selections...
-            this.selectedSpellZone = null;
-            this.selectedSpellEffect = null;
-            this.highlightedGridSquares = [];
+            // Use a driver to fade out the background and all but the fatal entity and player
 
-            // Use a driver to fade out the background and all but the fatal entity and player...
             this.entitiesEnemy
                 .filter(ent => { return (ent != fatalEntity) })
                 .forEach(ent => {
@@ -546,9 +548,11 @@ export class MazeScene extends Scene {
                 )
             )
 
-            // Play the "barbeque's over" sound and INITIALIZE once the sound finishes playing...
-            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => { this.initialize() });
-            this.updateGameSequence(GameSequence.GAME_OVER);
+            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER);
+            this.selectedSpellZone = null;
+            this.selectedSpellEffect = null;
+            this.highlightedGridSquares = [];
+            this.updateGameSequence(GameSequence.GAME_OVER)
 
         } else {
             this.updateGameSequence(sequence)
@@ -566,10 +570,8 @@ export class MazeScene extends Scene {
     }
 
     onMouseDown(click) {
-
-        // Control lockout during GAME OVER
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
-            return
+            this.initialize();
         }
     }
 
@@ -604,9 +606,6 @@ export class MazeScene extends Scene {
 
         var driver = null;
 
-        if (this.currentGameSequence == GameSequence.GAME_OVER) {
-            return
-        }
 
         switch (event.key) {
 
@@ -1030,7 +1029,7 @@ export class MazeScene extends Scene {
                                 ineligibleRooms.add(destination);
                                 vacatedRooms.add(monster.room);
                                 vacatedRooms.delete(destination)
-                                let movementDriver = this.moveEntityToRoom(monster, destination, 50, () => { });
+                                let movementDriver = this.moveEntityToRoom(monster, destination, this.movementRateDefaultMillis, () => { });
                                 drivers.push(movementDriver);
                             }
                         }
@@ -1052,7 +1051,7 @@ export class MazeScene extends Scene {
                             ineligibleRooms.add(destination);
                             vacatedRooms.add(monster.room);
                             vacatedRooms.delete(destination)
-                            let movementDriver = this.moveEntityToRoom(monster, destination, 50, () => { });
+                            let movementDriver = this.moveEntityToRoom(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
                         break;
@@ -1088,7 +1087,7 @@ export class MazeScene extends Scene {
                             }
 
                             ineligibleRooms.push(neighbor);
-                            let movementDriver = this.moveEntityToRoom(monster, neighbor, 50, () => { });
+                            let movementDriver = this.moveEntityToRoom(monster, neighbor, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
                         break;
@@ -1563,7 +1562,7 @@ export class MazeScene extends Scene {
         return this.allRooms[index]
     }
 
-    // ------------------------------------ ILM -----------------------------------------
+    // -------------------------------------- UTILITIES and STUFF --------------------------------------
 
     fadeIn(onComplete) {
 
@@ -1612,8 +1611,6 @@ export class MazeScene extends Scene {
             )
         )
     }
-
-    // -------------------------------------- UTILITIES --------------------------------------
 
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -1684,10 +1681,13 @@ class MazeRoom {
 
     isEmpty = true;
 
-    constructor(row, col, roomSize, isOpen) {
+    image = null;
+
+    constructor(row, col, roomSize, isOpen, assetManager) {
         this.row = row;
         this.col = col;
         this.roomSize = roomSize;
+        this.assetManager = assetManager;
         this.setIsOpen(isOpen);
         this.computeEmptiness();
     }
@@ -1696,20 +1696,16 @@ class MazeRoom {
         this.isEmpty = (this.isOpen == true) && (this.isOccupied == false) && (this.event == null);
         if (this.isOpen == true) {
             this.color = "#606060";
+            this.image = this.assetManager.getImage(ImageAsset.FLOOR_STONE_1);
         } else {
             this.color = "#000000";
+            this.image = this.assetManager.getImage(ImageAsset.FLOOR_DARK_STONE_1);
         }
     }
 
     setIsOpen(isOpen) {
         this.isOpen = isOpen;
         this.computeEmptiness();
-
-        if (this.isOpen == true) {
-            this.color = "#606060";
-        } else {
-            this.color = "#000000";
-        }
     }
 
     setEvent(event) {
@@ -1753,13 +1749,21 @@ class MazeRoom {
             this.roomSize)
 
         // Draw the room
-        context.fillStyle = this.color;
-        context.fillRect(
-            (this.col - mazeWindowX) * this.roomSize,
-            (this.row - mazeWindowY) * this.roomSize,
-            this.roomSize,
-            this.roomSize
-        );
+        if (this.image != null) {
+            context.drawImage(
+                this.image,
+                (this.col * this.roomSize),
+                (this.row * this.roomSize))
+        } else {
+            context.fillStyle = this.color;
+            context.fillRect(
+                (this.col - mazeWindowX) * this.roomSize,
+                (this.row - mazeWindowY) * this.roomSize,
+                this.roomSize,
+                this.roomSize
+            );
+        }
+
     }
 
 };
@@ -1820,7 +1824,7 @@ class TreasureCollectableEvent extends MazeEvent {
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);
-        this.image = assetManager.getImage(ImageAsset.TRAESURE_CHEST_SMALL);
+        this.image = assetManager.getImage(ImageAsset.TREASURE_CHEST_SMALL);
     }
 
     triggerEvent(entity) {

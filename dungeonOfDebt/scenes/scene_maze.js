@@ -48,7 +48,12 @@ import { SoundPlayer } from "../sound.js";
  *      - freeze spell KILLS certain enemies
  *      - SLAIM MONSTERS RETURN AS GHOSTS who ignore walls and maybe have different behaviors
  * 
- * 
+ * Magical Consequences
+ *      - Casting too many spells draws the attention of a rival sorcerer
+ *      - Changing too many tiles draws the attention of the minotaur
+ *      - Killing too many monsters draws the attention of the druid
+ *      - Stealing too much treasure draws the attention of the dragon
+ *      - Drinking too many potions draws the attention of the alchemist
  * 
  * ---------------------------------- ENVIRONMENT ----------------------------
  * 
@@ -109,7 +114,7 @@ export class MazeScene extends Scene {
     levelCurrent = 1;
     levelMax = 9;
 
-    movementRateDefaultMillis = 50;         // time to traverse from one grid section to the next 
+    movementRateDefaultMillis = 100;         // time to traverse from one grid section to the next 
 
     stateDrivers = [];                      // each state driver is processed in the order in which they are received (queue) during the update cycle
 
@@ -361,12 +366,6 @@ export class MazeScene extends Scene {
                 this.assetManager
             )
         );
-
-
-
-
-
-
 
         this.fadeIn(() => {
             this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
@@ -1034,7 +1033,7 @@ export class MazeScene extends Scene {
                                 ineligibleRooms.add(destination);
                                 vacatedRooms.add(monster.room);
                                 vacatedRooms.delete(destination)
-                                let movementDriver = this.moveEntityToRoom(monster, destination, 50, () => { });
+                                let movementDriver = this.moveEntityToRoom(monster, destination, this.movementRateDefaultMillis, () => { });
                                 drivers.push(movementDriver);
                             }
                         }
@@ -1056,7 +1055,7 @@ export class MazeScene extends Scene {
                             ineligibleRooms.add(destination);
                             vacatedRooms.add(monster.room);
                             vacatedRooms.delete(destination)
-                            let movementDriver = this.moveEntityToRoom(monster, destination, 50, () => { });
+                            let movementDriver = this.moveEntityToRoom(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
                         break;
@@ -1092,7 +1091,7 @@ export class MazeScene extends Scene {
                             }
 
                             ineligibleRooms.push(neighbor);
-                            let movementDriver = this.moveEntityToRoom(monster, neighbor, 50, () => { });
+                            let movementDriver = this.moveEntityToRoom(monster, neighbor, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
                         break;

@@ -16,7 +16,14 @@ import { SoundPlayer } from "../sound.js";
  * ---------------------------------- THE CARROT ---------------------------
  * 
  * Collectables
- *      - some high value collectables decay over time
+ *      - opening a CHEST allows the player to choose from randomly-selcted items:
+ *              gold
+ *              new spells
+ *              new zones
+ *              potions (1-time spells)
+ *              medicine for their sick child
+ * 
+ *      - some high value collectables decay over time?
  * 
  * ---------------------------------- MAGIC ----------------------------------
  * 

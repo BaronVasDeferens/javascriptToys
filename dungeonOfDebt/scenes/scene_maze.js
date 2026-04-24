@@ -552,8 +552,10 @@ export class MazeScene extends Scene {
                 )
             )
 
+            // Play the "barbeque's over" sound and INITIALIZE when it finishes
             this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => { this.initialize()});
 
+            // Lock the controls
             this.updateGameSequence(GameSequence.GAME_OVER)
 
         } else {

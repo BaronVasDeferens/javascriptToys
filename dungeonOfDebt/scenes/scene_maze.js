@@ -128,6 +128,11 @@ export class MazeScene extends Scene {
     audioContext = new AudioContext();      // AudioContext must be initialized after interactions
 
     soundPlayer = null;
+    coinSounds = [
+        SoundAsset.COIN_1,
+        SoundAsset.COIN_2,
+        SoundAsset.COIN_3
+    ];
 
     spellCardComponents = [];
     selectedSpellZone = null;
@@ -229,9 +234,11 @@ export class MazeScene extends Scene {
         // Treasures...
         for (let n = 0; n < this.levelCurrent + 4; n++) {
 
+            let coinSound = this.coinSounds[Math.floor(this.coinSounds.length * Math.random())];
+
             this.eventList.push(
                 new TreasureCollectableEvent(
-                    () => { console.log(`cha-CHING ${n}`) },
+                    () => { this.soundPlayer.playOneShot(coinSound) },
                     this.assetManager
                 )
             );
@@ -1850,12 +1857,20 @@ class MazeEvent {
 
 class TreasureCollectableEvent extends MazeEvent {
 
+    coinTiles = [
+        ImageAsset.COIN_1,
+        ImageAsset.COIN_2,
+        ImageAsset.COIN_3,
+        ImageAsset.COIN_4
+    ];
+
     image = null;
     imageOpacity = 1.0;
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);
-        this.image = assetManager.getImage(ImageAsset.TREASURE_CHEST_SMALL);
+        let tile = this.coinTiles[Math.floor(this.coinTiles.length * Math.random())];
+        this.image = assetManager.getImage(tile);
     }
 
     triggerEvent(entity) {

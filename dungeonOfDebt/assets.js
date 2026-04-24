@@ -66,14 +66,18 @@ export var ImageAsset = Object.freeze({
     MONSTER_EYE_SMALL: "entity/monster_eye_smallzx.png",
     MONSTER_SPIDER_1: "entity/monster_spider_1zx.png",
 
-    TREASURE_CHEST_LARGE: "entity/chest_large.png",
-    TREASURE_CHEST_SMALL: "entity/chest_small.png",
+    TREASURE_CHEST_LARGE: "entity/chest_large_zx.png",
+    TREASURE_CHEST_SMALL: "entity/chest_small_zx.png",
+
+    COIN_1: "entity/coin_1_zx.png",
+    COIN_2: "entity/coin_2_zx.png",
+    COIN_3: "entity/coin_3_zx.png",
+    COIN_4: "entity/coin_4_zx.png",
 
     FLOOR_STONE_1: "tiles/floor/stone_1.png",
     FLOOR_STONE_2: "tiles/floor/stone_2.png",
     FLOOR_STONE_3: "tiles/floor/stone_3.png",
     FLOOR_STONE_4: "tiles/floor/stone_4.png",
-
 
     FLOOR_ZX_19: "tiles/floor/1119.png",
     FLOOR_ZX_20: "tiles/floor/1120.png",
@@ -137,6 +141,9 @@ export class ImageLoader {
 export var SoundAsset = Object.freeze({
     WIZARD_WALK: "wizard_walk.wav",
     WIZARD_CAST_SPELL: "wizard_cast_spell.wav",
+    COIN_1: "coin_1.wav",
+    COIN_2: "coin_2.wav",
+    COIN_3: "coin_3.wav",
     GAME_OVER: "game_over.wav"
 });
 

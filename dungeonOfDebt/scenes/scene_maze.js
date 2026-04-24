@@ -560,7 +560,7 @@ export class MazeScene extends Scene {
             )
 
             // Play the "barbeque's over" sound and INITIALIZE when it finishes
-            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => { this.initialize()});
+            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => { this.initialize() });
 
             // Lock the controls
             this.updateGameSequence(GameSequence.GAME_OVER)
@@ -1681,6 +1681,8 @@ export class MazeScene extends Scene {
 
 // -------------------------------------- CLASSES --------------------------------------
 
+
+
 class MazeRoom {
 
     row = 0;
@@ -1708,13 +1710,27 @@ class MazeRoom {
     }
 
     computeEmptiness() {
+
+        let floorTiles = [
+            ImageAsset.FLOOR_ZX_19,
+            ImageAsset.FLOOR_ZX_20,
+            ImageAsset.FLOOR_ZX_21,
+            ImageAsset.FLOOR_ZX_22,
+            ImageAsset.FLOOR_ZX_23,
+            ImageAsset.FLOOR_ZX_24,
+            ImageAsset.FLOOR_ZX_25,
+            ImageAsset.FLOOR_ZX_26,
+            ImageAsset.FLOOR_ZX_27
+        ];
+
         this.isEmpty = (this.isOpen == true) && (this.isOccupied == false) && (this.event == null);
         if (this.isOpen == true) {
             this.color = "#606060";
-            this.image = this.assetManager.getImage(ImageAsset.FLOOR_STONE_1);
+            let tile = floorTiles[Math.floor(floorTiles.length * Math.random())];
+            this.image = this.assetManager.getImage(tile);
         } else {
             this.color = "#000000";
-            this.image = this.assetManager.getImage(ImageAsset.FLOOR_DARK_STONE_1);
+            this.image = null //this.assetManager.getImage(ImageAsset.FLOOR_DARK_STONE_1);
         }
     }
 

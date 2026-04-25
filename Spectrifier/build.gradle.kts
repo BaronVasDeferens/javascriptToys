@@ -17,14 +17,12 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
 
 tasks.jar {
 
     enabled = true
-
-    //archiveBaseName.set("Lolpo-1.0-SNAPSHOT")
 
     manifest {
         attributes["Main-Class"] = "SpectrifierKt"

@@ -1,19 +1,34 @@
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import javax.sound.midi.MetaMessage
 import kotlin.math.abs
 import kotlin.system.exitProcess
 
 
 enum class ZXSpectrumColor(val r: Int, val g: Int, val b: Int, val hexCode: Int) {
-    BLACK(r = 0x00, g = 0x00, b = 0x00, hexCode = 0x000000),
-    BLUE(r = 0x01, g = 0x00, b = 0xCE, hexCode = 0x0100CE),
-    RED(r = 0xCF, g = 0x01, b = 0x00, hexCode = 0xCF0100),
-    MAGENTA(r = 0xCF, g = 0x01, b = 0xCE, 0xCF01CE),
-    GREEN(r = 0x00, g = 0xCF, b = 0x15, hexCode = 0x00CF15),
-    CYAN(r = 0x01, g = 0xCF, b = 0xCF, hexCode = 0x01CFCF),
-    YELLOW(r = 0xCF, g = 0xCF, b = 0x15, hexCode = 0xCFCF15),
-    WHITE(r = 0xCF, g = 0xCF, b = 0xCF, hexCode = 0xCFCFCF),
+    BLACK(0x00, 0x00, 0x00, 0x000000),
+
+    BLUE(0x01, 0x00, 0xCE, 0x0100CE),
+    BLUE_BRIGHT(0x02, 0x00, 0xFD, 0x0200FD),
+
+    RED(0xCF, 0x01, 0x00, 0xCF0100),
+    RED_BRIGHT(0xFF, 0x02, 0x01, 0xFF0201),
+
+    MAGENTA(0xCF, 0x01, 0xCE, 0xCF01CE),
+    MAGENTA_BRIGHT(0xff, 0x02, 0xFD, 0xFF02FD),
+
+    GREEN(0x00, 0xCF, 0x15, 0x00CF15),
+    GREEN_BRIGHT(0x00, 0xFF, 0x1C, 0x00FF1C),
+
+    CYAN(0x01, 0xCF, 0xCF, 0x01CFCF),
+    CYAN_BRIGHT(0x02, 0xFF, 0xFF, 0x00FFFF),
+
+    YELLOW(0xCF, 0xCF, 0x15, 0xCFCF15),
+    YELLOW_BRIGHT(0xFF, 0xFF, 0x1D, 0xFFFF1D),
+
+    WHITE(0xCF, 0xCF, 0xCF, 0xCFCFCF),
+    WHITE_BRIGHT(0xFF, 0xFF, 0xFF, 0xFFFFFF)
 }
 
 fun main(args: Array<String>) {
@@ -34,16 +49,21 @@ fun main(args: Array<String>) {
     if (sourceFile.isDirectory) {
 
         if (!outputFile.exists()) {
+            println("Creating output directory: ${outputFile.absolutePath}")
             outputFile.mkdir()
         } else if (outputFile.isFile) {
-            throw Exception("Source file is directory, but destination is NOT.")
+            printUsage("ERROR: Source (${sourceFile.absolutePath}) a directory, but destination (${outputFile.absolutePath}) is not.")
+            printUsage()
+            exitProcess(1)
         }
 
+        // MULTIPLE FILES
         sourceFile.listFiles().orEmpty().filter { it.extension == "png" }.forEach { file ->
 
             println("Converting: ${file.name}...")
 
-            val outFile = File(outputFile, file.name)
+            val outFile = File(outputFile, file.name.replace(".png", "_zx.png"))
+
             val sourceImage = ImageIO.read(file)
             val outputImage = BufferedImage(sourceImage.width, sourceImage.height, BufferedImage.TYPE_INT_RGB)
             convertImage(sourceImage, outputImage)
@@ -51,18 +71,24 @@ fun main(args: Array<String>) {
         }
     } else if (sourceFile.isFile) {
 
-        if (!outputFile.exists()) {
-            outputFile.createNewFile()
-            println("Created output dir :${outputFile.name}")
-        }
+        // SINGLE FILE
 
         println("Converting: ${sourceFile.name}...")
+
+        if (!outputFile.exists()) {
+            outputFile.createNewFile()
+            println("\t\t...reated output file :${outputFile.absolutePath}")
+        }
+
         val sourceImage = ImageIO.read(sourceFile)
         val outputImage = BufferedImage(sourceImage.width, sourceImage.height, BufferedImage.TYPE_INT_RGB)
         convertImage(sourceImage, outputImage)
         ImageIO.write(outputImage, "PNG", outputFile)
+        println("\t\t...DONE! Wrote: ${outputFile.absolutePath}")
     } else {
-        throw Exception("Source and destination must BOTH be single files or BOTH be directories")
+        // INVALID FILE
+        printUsage("Maybe you should read this...")
+        exitProcess(1)
     }
 }
 
@@ -91,15 +117,27 @@ private fun convertImage(sourceImage: BufferedImage, outputImage: BufferedImage)
 
 }
 
-private fun printUsage() {
+private fun printUsage(message: String? = null) {
+
+    message?.apply {
+        println(this)
+    }
+
     println(
         """
-                SPECTRIFIER: Transform your PNGs' color palettes into ZX Spectrum's!
+                SPECTRIFIER: Convert PNGs' color to ZX Spectrum's color palette.
+                
                 USAGE:
-                arg 0: source file/folder
-                arg 1: destination file/folder
-                If the source is a FILE, the modified file will be saved to the destination file.
-                If the source is a DIRECTORY, all files therein will be converted and saved to the destination.
+                arg 0: SOURCE
+                arg 1: DESTINATION
+                
+                If SOURCE is a single file, the result will be saved to DESTINATION. If DESTINATION does
+                not exist
+                
+                If the source is a DIRECTORY, all files therein will be converted and saved as
+                NEW FILES in the destination directory. New files will have the same name as
+                their source file, but be appended with "_zx.png"
+                 
             """.trimIndent()
     )
 }

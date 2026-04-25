@@ -144,8 +144,6 @@ export class MonsterWraith extends MonsterEntity {
                 this.y + ((this.tileSize - this.overlayImage.height) / 2)
             )
         }
-
-        context.globalAlpha = 1.0;
     }
 
 }

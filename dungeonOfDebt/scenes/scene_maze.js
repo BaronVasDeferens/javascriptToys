@@ -549,7 +549,7 @@ export class MazeScene extends Scene {
 
             // Use a driver to fade out the background and all but the fatal entity and player
             this.entitiesEnemy
-                .filter(ent => { return (ent != fatalEntity) })
+                .filter(ent => { return (ent !== fatalEntity) })
                 .forEach(ent => {
                     ent.imageOpacity = 0.0;
                     ent.overlayImage = null;

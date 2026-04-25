@@ -248,7 +248,7 @@ export class MazeScene extends Scene {
 
         // Monsters...
 
-        this.entitiesEnemy.push (new MonsterWraith(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
 
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
@@ -536,6 +536,11 @@ export class MazeScene extends Scene {
         if (gameOver == true) {
 
             // GAME OVER !!!
+
+            // If the fatal entity was a WRAITH, make him visible
+            if (fatalEntity instanceof MonsterWraith) {
+                fatalEntity.setVisibility(true);
+            }
 
             // Clear selection and states
             this.selectedSpellZone = null;

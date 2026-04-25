@@ -2,7 +2,7 @@ import { ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider } from "../entity/entity_enemy.js";
+import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith } from "../entity/entity_enemy.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 
@@ -247,6 +247,9 @@ export class MazeScene extends Scene {
         this.distributeAcrossOpenRooms(this.eventList);
 
         // Monsters...
+
+        this.entitiesEnemy.push (new MonsterWraith(this.tileSize, this.assetManager));
+
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         }
@@ -1261,6 +1264,11 @@ export class MazeScene extends Scene {
                 let result = {
                     target: monster,
                     isVisible: this.calculateLineOfSight(this.player.room, monster.room)
+                }
+
+                // If the monster is a WRAITH, it is only visible on screen when NOT in the wizard's LoS...
+                if (monster instanceof MonsterWraith) {
+                    monster.setVisibility(!result.isVisible);
                 }
 
                 let playerCenter = playerRoom.getCenter();

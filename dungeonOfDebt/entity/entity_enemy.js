@@ -9,7 +9,23 @@ export const MonsterBehavior = Object.freeze({
     CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
     FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
     FLEE_OMNISICIENT: 50            // Moves away from the player regardless of LOS
-})
+});
+
+export const MonsterVisibility = Object.freeze({
+    VISIBLE: 1.0,
+    TRANSPARENT_THREE_QUARTERS: 0.75,
+    TRANSPARENT_HALF: 0.5,
+    TRANSAPRENT_QUARTER: 0.25,
+    INVISIBLE: 0.0
+});
+
+const monsterVisiblityArray = [
+    MonsterVisibility.VISIBLE,
+    MonsterVisibility.TRANSPARENT_THREE_QUARTERS,
+    MonsterVisibility.TRANSPARENT_HALF,
+    MonsterVisibility.TRANSAPRENT_QUARTER,
+    MonsterVisibility.INVISIBLE
+];
 
 export class MonsterEntity extends Entity {
 
@@ -76,7 +92,6 @@ export class MonsterPinkEye extends MonsterEntity {
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_EYE_SMALL, assetManager);
     }
-
 }
 
 export class MonsterSpider extends MonsterEntity {
@@ -87,4 +102,50 @@ export class MonsterSpider extends MonsterEntity {
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_SPIDER_1, assetManager);
     }
+}
+
+export class MonsterWraith extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_WRAITH;
+    behavior = MonsterBehavior.RANDOM;
+
+    isVisible = true;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_WRAITH, assetManager);
+    }
+
+    setVisibility(isVisible) {
+        this.isVisible = isVisible;
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        // The wraith is only visible on screen when NOT in the wizard's LoS
+
+        if (this.isVisible == true) {
+            context.globalAlpha = MonsterVisibility.TRANSPARENT_HALF;
+        } else {
+            context.globalAlpha = MonsterVisibility.INVISIBLE;
+        }
+
+        context.drawImage(
+            this.image,
+            this.x + ((this.tileSize - this.image.width) / 2),
+            this.y + ((this.tileSize - this.image.height) / 2)
+        );
+
+        if (this.overlayImage != null) {
+
+            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
+            context.drawImage(
+                this.overlayImage,
+                this.x + ((this.tileSize - this.overlayImage.width) / 2),
+                this.y + ((this.tileSize - this.overlayImage.height) / 2)
+            )
+        }
+
+        context.globalAlpha = 1.0;
+    }
+
 }

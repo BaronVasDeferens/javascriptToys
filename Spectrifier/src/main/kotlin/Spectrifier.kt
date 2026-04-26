@@ -44,10 +44,10 @@ fun main(args: Array<String>) {
     val sourceFile = File(source)
     val outputFile = File(destination)
 
-
     // What are we dealing with? Single files or whole directories?
     if (sourceFile.isDirectory) {
 
+        // Create output directory (if needed) and perform error check
         if (!outputFile.exists()) {
             println("Creating output directory: ${outputFile.absolutePath}")
             outputFile.mkdir()
@@ -58,14 +58,14 @@ fun main(args: Array<String>) {
         }
 
         // MULTIPLE FILES
+
         sourceFile.listFiles().orEmpty().filter { it.extension == "png" }.forEach { file ->
 
             println("Converting: ${file.name}...")
 
             val outFile = File(outputFile, file.name.replace(".png", "_zx.png"))
-
             val sourceImage = ImageIO.read(file)
-            val outputImage = BufferedImage(sourceImage.width, sourceImage.height, BufferedImage.TYPE_INT_RGB)
+            val outputImage = BufferedImage(sourceImage.width, sourceImage.height, BufferedImage.TYPE_INT_ARGB)
             convertImage(sourceImage, outputImage)
             ImageIO.write(outputImage, "PNG", outFile)
         }
@@ -73,20 +73,22 @@ fun main(args: Array<String>) {
 
         // SINGLE FILE
 
-        println("Converting: ${sourceFile.name}...")
-
         if (!outputFile.exists()) {
             outputFile.createNewFile()
-            println("\t\t...reated output file :${outputFile.absolutePath}")
+            println("\t\t...created output file: ${outputFile.absolutePath}")
         }
 
+        println("Converting: ${sourceFile.name}...")
+
         val sourceImage = ImageIO.read(sourceFile)
-        val outputImage = BufferedImage(sourceImage.width, sourceImage.height, BufferedImage.TYPE_INT_RGB)
+        val outputImage = BufferedImage(sourceImage.width, sourceImage.height, BufferedImage.TYPE_INT_ARGB)
         convertImage(sourceImage, outputImage)
         ImageIO.write(outputImage, "PNG", outputFile)
         println("\t\t...DONE! Wrote: ${outputFile.absolutePath}")
     } else {
+
         // INVALID FILE
+
         printUsage("Maybe you should read this...")
         exitProcess(1)
     }
@@ -102,16 +104,20 @@ private fun convertImage(sourceImage: BufferedImage, outputImage: BufferedImage)
 
             val pixel = sourceImage.getRGB(x, y)
 
-            val pixelAlpha = pixel ushr 24.and(0x00FF)
-            val pixelRed = pixel.ushr(16).and(0x00FF)
-            val pixelGreen = pixel.ushr(8).and(0x00FF)
-            val pixelBlue = pixel.ushr(0).and(0x00FF)
+            val pixelAlpha = pixel.ushr(24).and(0xFF)
+            val pixelRed = pixel.ushr(16).and(0xFF)
+            val pixelGreen = pixel.ushr(8).and(0xFF)
+            val pixelBlue = pixel.ushr(0).and(0xFF)
 
-            val closest = ZXSpectrumColor.entries.map { zx ->
+            println("$pixelAlpha $pixelRed $pixelGreen $pixelBlue")
+
+            val closest: Int = ZXSpectrumColor.entries.map { zx ->
                 zx to abs(pixelRed - zx.r) + abs(pixelGreen - zx.g) + abs(pixelBlue - zx.b)
             }.minBy { abs(it.second) }
+                .first.hexCode
+                .or( pixelAlpha.shl(24) )
 
-            outputImage.setRGB(x, y, closest.first.hexCode)
+            outputImage.setRGB(x, y, closest)
         }
     }
 

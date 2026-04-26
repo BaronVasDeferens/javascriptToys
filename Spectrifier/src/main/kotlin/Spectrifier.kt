@@ -109,13 +109,11 @@ private fun convertImage(sourceImage: BufferedImage, outputImage: BufferedImage)
             val pixelGreen = pixel.ushr(8).and(0xFF)
             val pixelBlue = pixel.ushr(0).and(0xFF)
 
-            println("$pixelAlpha $pixelRed $pixelGreen $pixelBlue")
-
             val closest: Int = ZXSpectrumColor.entries.map { zx ->
                 zx to abs(pixelRed - zx.r) + abs(pixelGreen - zx.g) + abs(pixelBlue - zx.b)
             }.minBy { abs(it.second) }
                 .first.hexCode
-                .or( pixelAlpha.shl(24) )
+                .or(pixelAlpha.shl(24))
 
             outputImage.setRGB(x, y, closest)
         }

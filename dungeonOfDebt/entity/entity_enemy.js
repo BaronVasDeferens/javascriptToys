@@ -104,6 +104,15 @@ export class MonsterSpider extends MonsterEntity {
     }
 }
 
+export class MonsterInsect extends MonsterEntity {
+    imageAsset = ImageAsset.MONSTER_FLY_1;
+    behavior = MonsterBehavior.RANDOM;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_FLY_1, assetManager);
+    }
+}
+
 export class MonsterWraith extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_WRAITH;

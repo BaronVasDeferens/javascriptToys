@@ -2,7 +2,7 @@ import { ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith } from "../entity/entity_enemy.js";
+import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith, MonsterInsect } from "../entity/entity_enemy.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 
@@ -255,7 +255,7 @@ export class MazeScene extends Scene {
         }
 
         for (let n = 0; n < this.levelMax - this.levelCurrent; n++) {
-            this.entitiesEnemy.push(new MonsterSpider(this.tileSize, this.assetManager));
+            this.entitiesEnemy.push(new MonsterInsect(this.tileSize, this.assetManager));
         }
 
         this.distributeAcrossOpenRooms(this.entitiesEnemy, true);

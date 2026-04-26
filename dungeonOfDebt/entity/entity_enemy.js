@@ -11,6 +11,10 @@ export const MonsterBehavior = Object.freeze({
     FLEE_OMNISICIENT: 50            // Moves away from the player regardless of LOS
 });
 
+export const MonsterMobility = Object.freeze({
+    CORPOREAL: 0,           // Cannot move into void squares      
+});
+
 export const MonsterVisibility = Object.freeze({
     VISIBLE: 1.0,
     TRANSPARENT_THREE_QUARTERS: 0.75,

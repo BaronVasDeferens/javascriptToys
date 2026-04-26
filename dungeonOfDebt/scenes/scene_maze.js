@@ -13,6 +13,18 @@ import { SoundPlayer } from "../sound.js";
  * 
  * --- IDEAS ---
  * 
+ * 
+ * BUGS
+ *      enemeies can still stack on top of each other
+ *      wraith is always visible during GAME OVER except when he caused it :/
+ *      casting certain spells on yourself should be fatal
+ * 
+ * SHORT TERM
+ *      spell selection sounds
+ *      punting frozen enemies should trigger a sound
+ *      
+ * 
+ * 
  * ---------------------------------- THE CARROT ---------------------------
  * 
  * Collectables

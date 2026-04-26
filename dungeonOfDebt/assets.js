@@ -103,9 +103,7 @@ export var ImageAsset = Object.freeze({
     FLOOR_DARK_STONE_1: "tiles/floor/stone_dark_1.png",
     FLOOR_DARK_STONE_2: "tiles/floor/stone_dark_2.png",
     FLOOR_DARK_STONE_3: "tiles/floor/stone_dark_3.png",
-    FLOOR_DARK_STONE_4: "tiles/floor/stone_dark_4.png",
-
-
+    FLOOR_DARK_STONE_4: "tiles/floor/stone_dark_4.png"
 });
 
 export class ImageLoader {

@@ -22,13 +22,14 @@ export const SpellEffect = Object.freeze({
 /*
     spell ideas
         break apart walls
-        light (maze is dark otherwise, monstyers harder to see)
+        light (maze is dark otherwise, monsters harder to see)
 */
 
 export class ComponentCard {
 
     image = null;
     discharged = false;
+    alpha = 1.0;
 
     constructor(canvas, x, y, tileSize) {
         this.x = x;
@@ -50,9 +51,9 @@ export class ComponentCard {
     }
 
     render(context) {
+        context.globalAlpha = this.alpha;
         context.drawImage(this.image, this.x, this.y);
     }
-
 }
 
 /**
@@ -62,10 +63,13 @@ export class ComponentCard {
  */
 export class SpellZoneComponentCard extends ComponentCard {
 
+    isSelected = false;
+
     constructor(spellZone, onClick, canvas, x, y, tileSize, assetManager) {
         super(canvas, x, y, tileSize);
         this.onClick = onClick;
         this.spellZone = spellZone;
+        this.assetManager = assetManager;
 
         switch (spellZone) {
 
@@ -89,6 +93,17 @@ export class SpellZoneComponentCard extends ComponentCard {
                 break;
         }
     }
+
+    render(context) {
+
+        super.render(context)
+
+        if (this.isSelected == true) {
+            context.globalAlpha = 1.0;
+            context.drawImage(this.assetManager.getImage(ImageAsset.SPELL_SECTION_OVERLAY), this.x, this.y);
+        }
+
+    }
 }
 
 /**
@@ -103,6 +118,7 @@ export class SpellEffectComponentCard extends ComponentCard {
         super(canvas, x, y, tileSize);
         this.onClick = onClick;
         this.spellEffect = spellEffect;
+        this.alpha = 0.25;
 
         switch (spellEffect) {
 

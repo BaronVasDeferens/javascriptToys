@@ -108,6 +108,8 @@ export var ImageAsset = Object.freeze({
     SPELL_CARD_PHASE: "spells/spell_phase.png",
     SPELL_CARD_INVERT: "spells/spell_invert.png",
 
+    SPELL_SECTION_OVERLAY: "spells/3235_zx.png",
+
     // --- MISC ---
     INTRO_LOGO: "logo.png",
 });
@@ -154,10 +156,16 @@ export class ImageLoader {
 
 export var SoundAsset = Object.freeze({
     WIZARD_WALK: "wizard_walk.wav",
+
+    UI_SELECTION: "selection_forward.wav",
+    UI_CANCEL: "selection_backward.wav",
+    UI_INVALID: "negative.wav",
+
     WIZARD_CAST_SPELL: "wizard_cast_spell.wav",
     COIN_1: "coin_1.wav",
     COIN_2: "coin_2.wav",
     COIN_3: "coin_3.wav",
+
     GAME_OVER: "game_over.wav"
 });
 

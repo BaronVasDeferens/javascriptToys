@@ -19,15 +19,18 @@ import { SoundPlayer } from "../sound.js";
  *      casting certain spells on yourself should be fatal
  * 
  * SHORT TERM
- *      spell selection sounds
+ *      spell selection sounds, including clicking an invalid card
  *      punting frozen enemies should trigger a sound
+ *      vary footsteps sounds
+ *      vary spell effect sounds
+ *      freezing wraith make him visible
  *      
  * 
  * 
  * ---------------------------------- THE CARROT ---------------------------
  * 
  * Collectables
- *      - opening a CHEST allows the player to choose from randomly-selcted items:
+ *      - opening a CHEST allows the player to choose from randomly-selected items:
  *              gold
  *              new spells
  *              new zones
@@ -48,8 +51,8 @@ import { SoundPlayer } from "../sound.js";
  * 
  * Spell Interface
  *      - some spells require row/col selection, but others do not
- *      - future vision / scry could be global
- *      - this means that selcting the spell must come FIRST, then the UI changes to suit
+ *      - future vision could be global
+ *      - this means that selecting the spell must come FIRST, then the UI changes to suit
  * 
  * Magic Economy
  *      - small zones (self) cost 1
@@ -57,21 +60,33 @@ import { SoundPlayer } from "../sound.js";
  *      - large (whole row/col): cost 3 or possibly
  *      - cost increases by tile???
  *      - discounts or bonuses if all habitable squares in zones are occupied???
+ *      - MAKE IT A LITTLE VAGUE: rather than displaying a cut-and-dried meter, show a bottle or something
+ *        that fills up a little each time a spell is cast, making the player a little uncertain
+ *        whether the next spell will trigger a Peril
  *
  * Magic and Collectables
  *      - acquiring books expands spells  
  *      - acquiring wands expands zones
  * 
  * Magic / Entity Interactions
- *      - freeze spell KILLS certain enemies
- *      - SLAIM MONSTERS RETURN AS GHOSTS who ignore walls and maybe have different behaviors
+ *      - freeze spell SLAYS certain enemies
+ *      - SLAIN MONSTERS RETURN AS GHOSTS who ignore walls and maybe have different behaviors
+ *      - monster fragmentation?
  * 
  * Magical Consequences
- *      - Casting too many spells draws the attention of a rival sorcerer
+ *      - Casting too many spells draws the attention of a rival sorcerer (Illusionist)
  *      - Changing too many tiles draws the attention of the minotaur
  *      - Killing too many monsters draws the attention of the druid
  *      - Stealing too much treasure draws the attention of the dragon
  *      - Drinking too many potions draws the attention of the alchemist
+ *      
+ *      - Illusionist replaces floor tiles with garish "eye fry" versions 
+ * 
+ * -------------------------------- MONSTERS ------------------------------
+ * 
+ * Behaviors
+ *      - a monster that begins as scattered fragments which seek each other out and, once all are reunited, forms a MAJOR headache.
+ * 
  * 
  * ---------------------------------- ENVIRONMENT ----------------------------
  * 
@@ -225,7 +240,7 @@ export class MazeScene extends Scene {
         // -------- ENTITIES ---------
 
         // Player
-        // Find an UNOCCIPIED, NO EVENT square near the TOP LEFT
+        // Find an UNOCCUPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.x + a.y) < (b.x + b.y)) {
                 return -1;
@@ -259,7 +274,7 @@ export class MazeScene extends Scene {
 
         // Monsters...
 
-        // this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
 
         for (let n = 0; n < 10; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
@@ -277,7 +292,7 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
-                () => { this.onSpellZoneSected(SpellZone.CROSS_SMALL) },
+                () => { this.onSpellZoneSelected(SpellZone.CROSS_SMALL) },
                 this.canvasSecondary,
                 0,
                 0,
@@ -289,7 +304,7 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_INVERTED,
-                () => { this.onSpellZoneSected(SpellZone.CROSS_INVERTED) },
+                () => { this.onSpellZoneSelected(SpellZone.CROSS_INVERTED) },
                 this.canvasSecondary,
                 0,
                 64,
@@ -301,7 +316,7 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.COLUMN_FULL,
-                () => { this.onSpellZoneSected(SpellZone.COLUMN_FULL) },
+                () => { this.onSpellZoneSelected(SpellZone.COLUMN_FULL) },
                 this.canvasSecondary,
                 64,
                 0,
@@ -313,7 +328,7 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CANCEL,
-                () => { this.onSpellZoneSected(SpellZone.CANCEL) },
+                () => { this.onSpellZoneSelected(SpellZone.CANCEL) },
                 this.canvasSecondary,
                 64,
                 64,
@@ -325,7 +340,7 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.ROW_FULL,
-                () => { this.onSpellZoneSected(SpellZone.ROW_FULL) },
+                () => { this.onSpellZoneSelected(SpellZone.ROW_FULL) },
                 this.canvasSecondary,
                 128,
                 0,
@@ -337,7 +352,7 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.SELF_TARGET,
-                () => { this.onSpellZoneSected(SpellZone.SELF_TARGET) },
+                () => { this.onSpellZoneSelected(SpellZone.SELF_TARGET) },
                 this.canvasSecondary,
                 128,
                 64,
@@ -416,12 +431,12 @@ export class MazeScene extends Scene {
 
     render(contextPrimary, contextSecondary) {
 
+        contextPrimary.globalAlpha = 1.0;
         contextPrimary.fillStyle = "#000000";
         contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
 
         contextPrimary.globalAlpha = this.backgroundOpacity;
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
-        contextPrimary.globalAlpha = 1.0;
 
         // Render events
         this.eventList.forEach(evt => {
@@ -466,13 +481,11 @@ export class MazeScene extends Scene {
             driverCurrent.overlay.render(contextPrimary);
         }
 
+        contextSecondary.fillStyle = "#000000";
+        contextSecondary.globalAlpha = 1.0;
+        contextSecondary.fillRect(0, 0, this.canvasSecondary.width, this.canvasSecondary.height);
 
-        // Render the secondary canvas
-        this.spellCardComponents.forEach(component => {
-            component.render(contextSecondary);
-        });
-
-        // Render UI elements
+        // Render  secondary canvas: UI elements
         this.spellCardComponents.forEach(component => {
             component.render(contextSecondary);
         });
@@ -788,7 +801,7 @@ export class MazeScene extends Scene {
     /**
      * Triggered when the user clicks on a SpellZone card to select an area of effect. 
      */
-    onSpellZoneSected(spellZone) {
+    onSpellZoneSelected(spellZone) {
 
         // TODO: consider limiting spell effects such that they cannot pass through walls...?
 
@@ -798,11 +811,14 @@ export class MazeScene extends Scene {
         let room = null;
 
         if (this.selectedSpellZone == null) {
+            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
             this.selectedSpellZone = spellZone;
         } else {
             if (this.selectedSpellZone == spellZone || spellZone == SpellZone.CANCEL) {
+                this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
                 this.selectedSpellZone = null;
             } else {
+                this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
                 this.selectedSpellZone = spellZone;
             }
         }
@@ -854,7 +870,6 @@ export class MazeScene extends Scene {
                 rooms.push(this.getRoom(this.player.room.row, this.player.room.col - 1));
                 break;
 
-
             case SpellZone.CROSS_INVERTED:
                 rooms.push(this.getRoom(this.player.room.row - 1, this.player.room.col - 1));
                 rooms.push(this.getRoom(this.player.room.row - 1, this.player.room.col + 1));
@@ -898,16 +913,22 @@ export class MazeScene extends Scene {
                     }
                 )
             });
+
+        this.updateUI()
     }
 
     onSpellEffectSelected(spellEffect) {
 
         // TODO: consider enforcing the sequence: ZONE => EFFECT => DURATION/STRENGTH
 
+        if (this.selectedSpellZone == null) {
+            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID)
+        }
+
         if (this.selectedSpellEffect == null && spellEffect != SpellEffect.CANCEL) {
             this.selectedSpellEffect = spellEffect;
         } else {
-            // Double-selcting the same effect CLEARS the effect
+            // Double-selecting the same effect CLEARS the effect
             if (this.selectedSpellEffect == spellEffect || spellEffect == SpellEffect.CANCEL) {
                 this.selectedSpellEffect = null;
             } else {
@@ -1009,9 +1030,35 @@ export class MazeScene extends Scene {
             this.selectedSpellZone = null;
             this.highlightedGridSquares = [];
         }
+
+        this.updateUI()
     }
 
     processSpellHotkey(number) {
+
+    }
+
+    updateUI() {
+
+        let activateEffectCards = (this.selectedSpellZone != null);
+
+        this.spellCardComponents.forEach(card => {
+
+            if (card instanceof SpellZoneComponentCard) {
+                if (card.spellZone == this.selectedSpellZone && this.selectedSpellZone != null) {
+                    card.isSelected = true;
+                } else {
+                    card.isSelected = false;
+                }
+            } else if (card instanceof SpellEffectComponentCard) {
+                // Activate/dim the effect cards, depending on active zone selection
+                if (activateEffectCards == true) {
+                    card.alpha = 1.0;
+                } else {
+                    card.alpha = 0.25;
+                }
+            }
+        });
 
     }
 

@@ -1059,6 +1059,8 @@ export class MazeScene extends Scene {
                                 });
 
                             // Sort the neighbors in order of distance to player
+                            // NOTE: one consequence of this algorithm is that the monster will ALWAYS choose the same move;
+                            // moving back and forth in the hopes that it will make a different move will NOT WOK. Muah-ha-ha-ha-haaaa! 
                             let destination = eligibleNeighbors.sort((a, b) => {
                                 let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - b.col)
                                 let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)

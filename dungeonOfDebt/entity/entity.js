@@ -1,5 +1,5 @@
 import { SpellEffect } from "./entity_spell.js";
-import { ImageAsset } from "../assets.js";
+import { AssetManager, ImageAsset } from "../assets.js";
 
 
 export class Entity {
@@ -12,12 +12,15 @@ export class Entity {
     room = null;
 
     image = null;
+    imageAssetId = null;
     overlayImage = null;
 
     isAlive = true;
 
     spellEffects = new Map();
+
     isFrozen = false;
+    isTransmuted = false;
 
     constructor(tileSize, assetManager) {
         this.tileSize = tileSize;
@@ -46,6 +49,11 @@ export class Entity {
                 this.isFrozen = true;
                 break;
 
+            case SpellEffect.TRANSMUTATION:
+                this.image = this.assetManager.getImage(ImageAsset.FROG);
+                this.isTransmuted = true;
+                break;
+
             default:
                 break;
         }
@@ -61,6 +69,10 @@ export class Entity {
                 this.isFrozen = false;
                 break;
 
+            case SpellEffect.TRANSMUTATION:
+                this.image = this.assetManager.getImage(this.imageAssetId);
+                this.isTransmuted = false;
+                break;
             default:
                 break;
         }

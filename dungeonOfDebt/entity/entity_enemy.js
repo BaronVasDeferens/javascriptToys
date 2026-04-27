@@ -12,7 +12,7 @@ export const MonsterBehavior = Object.freeze({
 });
 
 export const MonsterMobility = Object.freeze({
-    CORPOREAL: 0,           // Cannot move into void squares      
+    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares      
 });
 
 export const MonsterVisibility = Object.freeze({
@@ -31,17 +31,30 @@ const monsterVisiblityArray = [
     MonsterVisibility.INVISIBLE
 ];
 
+
+
+
+
+
 export class MonsterEntity extends Entity {
 
-    imageAsset = ImageAsset.MONSTER_PINK_EYE;
+    imageAssetId = ImageAsset.MONSTER_PINK_EYE;
     imageOpacity = 1.0;
 
     behavior = MonsterBehavior.NONE;
 
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
-        this.imageAsset = imageAsset;
-        this.image = assetManager.getImage(this.imageAsset);
+        this.imageAssetId = imageAsset;
+        this.image = assetManager.getImage(this.imageAssetId);
+    }
+
+    getMovementBehavior() {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+            return MonsterBehavior.FLEE_LINE_OF_SIGHT;
+        } else {
+            return this.behavior;
+        }
     }
 
     onTurnConclusion() {
@@ -67,6 +80,7 @@ export class MonsterEntity extends Entity {
     render(context, mazeWindowX, mazeWindowY) {
 
         context.globalAlpha = this.imageOpacity;
+
         context.drawImage(
             this.image,
             this.x + ((this.tileSize - this.image.width) / 2),

@@ -1,7 +1,7 @@
 import { ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
-import { SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
+import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith, MonsterInsect } from "../entity/entity_enemy.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
@@ -558,8 +558,8 @@ export class MazeScene extends Scene {
 
     concludePlayerTurn() {
 
-        this.entitiesEnemy.forEach(enemy => {
-            enemy.onTurnConclusion();
+        this.entitiesEnemy.concat(this.player).forEach(ent => {
+            ent.onTurnConclusion();
         });
 
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
@@ -571,8 +571,10 @@ export class MazeScene extends Scene {
             return;
         }
 
-        let fatalEntity = this.entitiesEnemy.filter(ent => { return ent.room == this.player.room })[0];
-        let gameOver = fatalEntity != null;
+        let fatalEntity = this.entitiesEnemy
+            .filter(ent => { return (ent.isTransmuted == false) })
+            .filter(ent => { return ent.room == this.player.room })[0];
+        let gameOver = fatalEntity != null && !(this.player.isTransmuted == true);
 
         if (gameOver == true) {
 
@@ -1038,6 +1040,39 @@ export class MazeScene extends Scene {
                     )
                     break;
 
+                case SpellEffect.TRANSMUTATION:
+                    // Apply a TRANSMUTATION effect to every entity in the selected squares
+                    this.highlightedGridSquares.forEach(sq => {
+                        let gridSquare = this.getRoom(sq.row, sq.col);
+                        if (gridSquare.occupant != null) {
+                            gridSquare.occupant.addSpellEffect(SpellEffect.TRANSMUTATION, 5);
+                        }
+                    });
+
+                    // Create a spell effect overlay to flash the screen during this spell effect
+                    spellEffectOverlay = new SpellEffectOverlay(
+                        this.canvasPrimary,
+                        "#00ff0d"
+                    );
+
+                    // Flash! A spell is cast! 
+                    this.stateDrivers.push(
+                        new OverlayDriver(
+                            spellEffectOverlay,
+                            1.0,
+                            0.0,
+                            500,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                            }
+                        )
+                    )
+
+                    break;
                 default:
                     break;
             }
@@ -1093,7 +1128,7 @@ export class MazeScene extends Scene {
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
             .forEach(monster => {
 
-                switch (monster.behavior) {
+                switch (monster.getMovementBehavior()) {
 
                     case MonsterBehavior.CHASE_LINE_OF_SIGHT:
 
@@ -1181,36 +1216,48 @@ export class MazeScene extends Scene {
                     case MonsterBehavior.FLEE_LINE_OF_SIGHT:
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
-                            let neighbors =
-                                this.getAdjacentRooms(monster.room)
-                                    .filter(room => { return room.isOpen == true })
-                                    .filter(room => { return ineligibleRooms.indexOf(room) == -1 });
 
-                            let neighbor = null;
-
-                            if (neighbors.length >= 2) {
-
-                                let neighborsSortedByDistance = neighbors.sort((a, b) => {
-                                    let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col);
-                                    let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col);
-                                    if (distA > distB) {
-                                        return -1;
-                                    } else if (distA < distB) {
-                                        return 1;
+                            // Find all eligible neighbors
+                            let eligibleNeighbors = this.getAdjacentRooms(monster.room)
+                                .concat(monster.room)
+                                .filter(room => { return ineligibleRooms.has(room) == false })
+                                .filter(room => { return room.isOpen == true })
+                                .filter(room => {
+                                    if (room.occupant != null) {
+                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
                                     } else {
-                                        return 0;
+                                        return true
                                     }
                                 });
 
-                                neighbor = neighborsSortedByDistance[0];
+                            // Sort the neighbors in order of distance to player
+                            // NOTE: one consequence of this algorithm is that the monster will ALWAYS choose the same move;
+                            // moving back and forth in the hopes that it will make a different move will NOT WOK. Muah-ha-ha-ha-haaaa! 
+                            let possibleDestinations = eligibleNeighbors.sort((a, b) => {
+                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - b.col)
+                                let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)
+                                if (distA < distB) {
+                                    return -1
+                                } else if (distA > distB) {
+                                    return 1
+                                } else {
+                                    return 0
+                                }
+                            });
 
-                            } else {
-                                neighbor = neighbors[0];
+                            let destination = possibleDestinations[possibleDestinations.length - 1];
+
+                            if (destination != null) {
+                                ineligibleRooms.add(destination);
+                                vacatedRooms.add(monster.room);
+                                vacatedRooms.delete(destination)
+                                let movementDriver = this.moveEntityToRoom(
+                                    monster,
+                                    destination,
+                                    this.movementRateDefaultMillis,
+                                    () => { });
+                                drivers.push(movementDriver);
                             }
-
-                            ineligibleRooms.push(neighbor);
-                            let movementDriver = this.moveEntityToRoom(monster, neighbor, this.movementRateDefaultMillis, () => { });
-                            drivers.push(movementDriver);
                         }
                         break;
 

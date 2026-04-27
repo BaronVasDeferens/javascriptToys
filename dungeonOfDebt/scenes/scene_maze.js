@@ -42,6 +42,11 @@ import { SoundPlayer } from "../sound.js";
  * ---------------------------------- MAGIC ----------------------------------
  * 
  * Spell Types
+ *      - !!! transform: 
+ *              when cast on monsters, they become harmless for a few turns
+ *              when cast on wizard, monsters do not persue him but wizard cannot cast spells until reverting
+ *      - !!! future vision:
+ *              reveals the next move for RANOMLY moving monsters; monsters who use LoS will NOT
  *      - swap walls for rooms and vice versa
  *      - invisibility
  *      - intangible

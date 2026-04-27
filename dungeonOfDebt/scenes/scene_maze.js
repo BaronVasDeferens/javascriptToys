@@ -415,6 +415,18 @@ export class MazeScene extends Scene {
             )
         );
 
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.TRANSMUTATION,
+                () => { this.onSpellEffectSelected(SpellEffect.TRANSMUTATION) },
+                this.canvasSecondary,
+                448,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
         this.fadeIn(() => {
             this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
         });

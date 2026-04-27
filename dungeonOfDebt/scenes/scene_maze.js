@@ -15,7 +15,6 @@ import { SoundPlayer } from "../sound.js";
  * 
  * 
  * BUGS
- *      enemeies can still stack on top of each other
  *      wraith is always visible during GAME OVER except when he caused it :/
  *      casting certain spells on yourself should be fatal
  * 
@@ -260,13 +259,13 @@ export class MazeScene extends Scene {
 
         // Monsters...
 
-        this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
+        // this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
 
-        for (let n = 0; n < this.levelCurrent; n++) {
+        for (let n = 0; n < 10; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         }
 
-        for (let n = 0; n < this.levelMax - this.levelCurrent; n++) {
+        for (let n = 0; n < 10; n++) {
             this.entitiesEnemy.push(new MonsterInsect(this.tileSize, this.assetManager));
         }
 
@@ -1046,16 +1045,10 @@ export class MazeScene extends Scene {
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
 
-                            let destination = null;
-
-                            let neighborsRaw = this.getAdjacentRooms(monster.room)
+                            // Find all eligible neighbors
+                            let eligibleNeighbors = this.getAdjacentRooms(monster.room)
                                 .concat(monster.room)
-                                .map(room => {
-                                    room.distance = Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col);
-                                    return room
-                                });
-
-                            let neighborsFiltered = neighborsRaw
+                                .filter(room => { return ineligibleRooms.has(room) == false })
                                 .filter(room => { return room.isOpen == true })
                                 .filter(room => {
                                     if (room.occupant != null) {
@@ -1063,23 +1056,33 @@ export class MazeScene extends Scene {
                                     } else {
                                         return true
                                     }
-                                })
-                                .filter(room => { return ineligibleRooms.has(room) == false })
+                                });
 
-                            let minimalDistance = Math.min(...neighborsFiltered.map(rm => { return rm.distance }));
-
-                            let closest = neighborsFiltered.filter(room => { return room.distance == minimalDistance });
-                            destination = closest[Math.floor(Math.random() * closest.length)];
+                            // Sort the neighbors in order of distance to player
+                            let destination = eligibleNeighbors.sort((a, b) => {
+                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - b.col)
+                                let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)
+                                if (distA < distB) {
+                                    return -1
+                                } else if (distA > distB) {
+                                    return 1
+                                } else {
+                                    return 0
+                                }
+                            })[0];
 
                             if (destination != null) {
                                 ineligibleRooms.add(destination);
                                 vacatedRooms.add(monster.room);
                                 vacatedRooms.delete(destination)
-                                let movementDriver = this.moveEntityToRoom(monster, destination, this.movementRateDefaultMillis, () => { });
+                                let movementDriver = this.moveEntityToRoom(
+                                    monster,
+                                    destination,
+                                    this.movementRateDefaultMillis,
+                                    () => { });
                                 drivers.push(movementDriver);
                             }
                         }
-
                         break;
 
                     case MonsterBehavior.RANDOM:
@@ -1090,6 +1093,13 @@ export class MazeScene extends Scene {
                             .concat(monster.room)
                             .filter(room => { return room.isOpen == true })
                             .filter(room => { return ineligibleRooms.has(room) == false })
+                            .filter(room => {
+                                if (room.occupant != null) {
+                                    return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
+                                } else {
+                                    return true
+                                }
+                            });
 
                         destination = neighbors[Math.floor(Math.random() * neighbors.length)];
 

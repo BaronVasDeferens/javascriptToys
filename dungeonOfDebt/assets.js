@@ -46,41 +46,30 @@ export class AssetManager {
 
 export var ImageAsset = Object.freeze({
 
-    INTRO_LOGO: "logo.png",
+    // --- ENTITIES ----
 
-    SPELL_ZONE_CROSS: "spells/zone_cross_small.png",
-    SPELL_ZONE_CROSS_INVERTED: "spells/zone_cross_inverted.png",
-    SPELL_ZONE_COLUMN: "spells/zone_column_full.png",
-    SPELL_ZONE_ROW: "spells/zone_row_full.png",
-    SPELL_ZONE_WIZARD_ONLY: "spells/zone_wizard_only.png",
-    SPELL_CANCEL: "spells/cancel.png",
+    WIZARD_1: "entity/3794_zx.png",
 
-    SPELL_CARD_BLAZE: "spells/spell_blaze.png",
-    SPELL_CARD_FREEZE: "spells/spell_freeze.png",
-    SPELL_CARD_PHASE: "spells/spell_phase.png",
-    SPELL_CARD_INVERT: "spells/spell_invert.png",
+    MONSTER_PINK_EYE: "entity/monsters/3987_sm_zx.png",
+    MONSTER_CENTIPEDE: "entity/monsters/4160_sm_zx.png",
+    MONSTER_FLY_1: "entity/monsters/4066_sm_zx.png",
+    MONSTER_SCORPION: "entity/monsters/4082_sm_zx.png",
+    MONSTER_TROLL: "entity/monsters/3945_zx.png",
+    MONSTER_WRAITH: "entity/monsters/3825_zx.png",
 
     SPELL_EFFECT_FROZEN: "spells/spell_effect_frozen.png",
 
-    WIZARD_1: "entity/wizard_zx.png",
+    // --- COLLECTABLES ---
 
-    MONSTER_EYE_SMALL: "entity/monster_pink_eye_sm_zx.png",
-    MONSTER_SPIDER_1: "entity/monster_spider_1zx.png",
-    MONSTER_INSECT_1: "entity/monster_insect_zx.png",
-    MONSTER_FLY_1: "entity/monster_fly_sm_zx.png",
+    TREASURE_CHEST_LARGE: "entity/collectables/5_zx.png",
+    TREASURE_CHEST_SMALL: "entity/collectables/5_sm_zx.png",
 
-    MONSTER_SCORPION_SMALL: "entity/monster_scorpion_sm_zx.png",
+    COIN_1: "entity/collectables/2611_zx.png",
+    COIN_2: "entity/collectables/2607_zx.png",
+    COIN_3: "entity/collectables/2608_zx.png",
+    COIN_4: "entity/collectables/2609_zx.png",
 
-    MONSTER_TROLL: "entity/monster_troll_zx.png",
-    MONSTER_WRAITH: "entity/monster_wraith_zx.png",
-
-    TREASURE_CHEST_LARGE: "entity/chest_large_zx.png",
-    TREASURE_CHEST_SMALL: "entity/chest_small_zx.png",
-
-    COIN_1: "entity/coin_1_zx.png",
-    COIN_2: "entity/coin_2_zx.png",
-    COIN_3: "entity/coin_3_zx.png",
-    COIN_4: "entity/coin_4_zx.png",
+    // --- FLOOR TILES ---
 
     FLOOR_ZX_18: "tiles/floor/1118.png",
     FLOOR_ZX_19: "tiles/floor/1119.png",
@@ -103,7 +92,24 @@ export var ImageAsset = Object.freeze({
     FLOOR_DARK_STONE_1: "tiles/floor/stone_dark_1.png",
     FLOOR_DARK_STONE_2: "tiles/floor/stone_dark_2.png",
     FLOOR_DARK_STONE_3: "tiles/floor/stone_dark_3.png",
-    FLOOR_DARK_STONE_4: "tiles/floor/stone_dark_4.png"
+    FLOOR_DARK_STONE_4: "tiles/floor/stone_dark_4.png",
+
+    // --- UI COMPONENTS ---
+
+    SPELL_ZONE_CROSS: "spells/zone_cross_small.png",
+    SPELL_ZONE_CROSS_INVERTED: "spells/zone_cross_inverted.png",
+    SPELL_ZONE_COLUMN: "spells/zone_column_full.png",
+    SPELL_ZONE_ROW: "spells/zone_row_full.png",
+    SPELL_ZONE_WIZARD_ONLY: "spells/zone_wizard_only.png",
+    SPELL_CANCEL: "spells/cancel.png",
+
+    SPELL_CARD_BLAZE: "spells/spell_blaze.png",
+    SPELL_CARD_FREEZE: "spells/spell_freeze.png",
+    SPELL_CARD_PHASE: "spells/spell_phase.png",
+    SPELL_CARD_INVERT: "spells/spell_invert.png",
+
+    // --- MISC ---
+    INTRO_LOGO: "logo.png",
 });
 
 export class ImageLoader {

@@ -33,7 +33,7 @@ const monsterVisiblityArray = [
 
 export class MonsterEntity extends Entity {
 
-    imageAsset = ImageAsset.MONSTER_EYE_SMALL;
+    imageAsset = ImageAsset.MONSTER_PINK_EYE;
     imageOpacity = 1.0;
 
     behavior = MonsterBehavior.NONE;
@@ -90,11 +90,11 @@ export class MonsterEntity extends Entity {
 
 export class MonsterPinkEye extends MonsterEntity {
 
-    imageAsset = ImageAsset.MONSTER_EYE_SMALL;
+    imageAsset = ImageAsset.MONSTER_PINK_EYE;
     behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
 
     constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_EYE_SMALL, assetManager);
+        super(tileSize, ImageAsset.MONSTER_PINK_EYE, assetManager);
     }
 }
 

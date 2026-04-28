@@ -702,7 +702,7 @@ export class MazeScene extends Scene {
 
                 if (driver != null) {
                     if (this.player.isTransmuted == true) {
-                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                        this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
@@ -726,7 +726,7 @@ export class MazeScene extends Scene {
 
                 if (driver != null) {
                     if (this.player.isTransmuted == true) {
-                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                        this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
@@ -749,7 +749,7 @@ export class MazeScene extends Scene {
 
                 if (driver != null) {
                     if (this.player.isTransmuted == true) {
-                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                        this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
@@ -772,7 +772,7 @@ export class MazeScene extends Scene {
 
                 if (driver != null) {
                     if (this.player.isTransmuted == true) {
-                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                        this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }

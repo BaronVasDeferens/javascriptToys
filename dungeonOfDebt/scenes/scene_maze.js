@@ -45,6 +45,7 @@ import { SoundPlayer } from "../sound.js";
  *      - !!! transform: 
  *              when cast on monsters, they become harmless for a few turns
  *              when cast on wizard, monsters do not persue him but wizard cannot cast spells until reverting
+ *              should have a RANDOM DURATION
  *      - !!! future vision:
  *              reveals the next move for RANOMLY moving monsters; monsters who use LoS will NOT
  *      - swap walls for rooms and vice versa
@@ -558,6 +559,7 @@ export class MazeScene extends Scene {
 
     concludePlayerTurn() {
 
+        // Alert all entities that the current player turn has concluded; spell durations get shorter, etc.
         this.entitiesEnemy.concat(this.player).forEach(ent => {
             ent.onTurnConclusion();
         });

@@ -65,6 +65,8 @@ import { SoundPlayer } from "../sound.js";
  *      - MAKE IT A LITTLE VAGUE: rather than displaying a cut-and-dried meter, show a bottle or something
  *        that fills up a little each time a spell is cast, making the player a little uncertain
  *        whether the next spell will trigger a Peril
+ *      - !!! casting the same spell in succession increases the Peril cost
+ *      - !!! once Peril has reached a threshold, the MASTER AWAKENS
  *
  * Magic and Collectables
  *      - acquiring books expands spells  

@@ -158,6 +158,7 @@ export class ImageLoader {
 
 export var SoundAsset = Object.freeze({
     WIZARD_WALK: "wizard_walk.wav",
+    FROG_HOP: "frog.wav",
 
     UI_SELECTION: "selection_forward.wav",
     UI_CANCEL: "selection_backward.wav",

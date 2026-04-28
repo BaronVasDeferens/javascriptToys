@@ -562,7 +562,7 @@ export class MazeScene extends Scene {
             ent.onTurnConclusion();
         });
 
-        this.updateUI();
+        this.updateMagicInterface();
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
     }
 
@@ -627,7 +627,7 @@ export class MazeScene extends Scene {
 
             // Lock the controls
             this.updateGameSequence(GameSequence.GAME_OVER);
-            this.updateUI();
+            this.updateMagicInterface();
 
         } else {
             this.updateGameSequence(sequence)
@@ -701,7 +701,12 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
-                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    if (this.player.isTransmuted == true) {
+                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                    } else {
+                        this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    }
+
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -720,7 +725,11 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
-                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    if (this.player.isTransmuted == true) {
+                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                    } else {
+                        this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    }
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -739,7 +748,11 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
-                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    if (this.player.isTransmuted == true) {
+                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                    } else {
+                        this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    }
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -758,7 +771,11 @@ export class MazeScene extends Scene {
                 })
 
                 if (driver != null) {
-                    this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    if (this.player.isTransmuted == true) {
+                        this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                    } else {
+                        this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
+                    }
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -944,7 +961,7 @@ export class MazeScene extends Scene {
                 )
             });
 
-        this.updateUI()
+        this.updateMagicInterface()
     }
 
     onSpellEffectSelected(spellEffect) {
@@ -1096,14 +1113,14 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
         }
 
-        this.updateUI();
+        this.updateMagicInterface();
     }
 
     processSpellHotkey(number) {
 
     }
 
-    updateUI() {
+    updateMagicInterface() {
 
         let gameOver = this.currentGameSequence == GameSequence.GAME_OVER;
         let activateZoneCards = (this.player.isTransmuted != true);

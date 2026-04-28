@@ -42,12 +42,8 @@ import { SoundPlayer } from "../sound.js";
  * ---------------------------------- MAGIC ----------------------------------
  * 
  * Spell Types
- *      - !!! transform: 
- *              when cast on monsters, they become harmless for a few turns
- *              when cast on wizard, monsters do not persue him but wizard cannot cast spells until reverting
- *              should have a RANDOM DURATION
  *      - !!! future vision:
- *              reveals the next move for RANOMLY moving monsters; monsters who use LoS will NOT
+ *              reveals the next move for RANDOMLY moving monsters; monsters who use LoS will NOT
  *      - swap walls for rooms and vice versa
  *      - invisibility
  *      - intangible
@@ -437,6 +433,7 @@ export class MazeScene extends Scene {
     // -------------------------------------- MAIN LOOP --------------------------------------
 
     update(delta) {
+
         let driver = this.stateDrivers[0];
         if (driver != null) {
             if (driver.isFinished == true) {
@@ -550,6 +547,7 @@ export class MazeScene extends Scene {
                     break;
             }
         }
+
     }
 
     setLevel(level) {
@@ -564,6 +562,7 @@ export class MazeScene extends Scene {
             ent.onTurnConclusion();
         });
 
+        this.updateUI();
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
     }
 
@@ -627,7 +626,8 @@ export class MazeScene extends Scene {
             });
 
             // Lock the controls
-            this.updateGameSequence(GameSequence.GAME_OVER)
+            this.updateGameSequence(GameSequence.GAME_OVER);
+            this.updateUI();
 
         } else {
             this.updateGameSequence(sequence)
@@ -824,6 +824,15 @@ export class MazeScene extends Scene {
      */
     onSpellZoneSelected(spellZone) {
 
+        let spellZoneCard = this.spellCardComponents
+            .filter(card => { return card.spellZone == spellZone })[0];
+
+
+        if (spellZoneCard.isActive == false) {
+            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+            return;
+        }
+
         // TODO: consider limiting spell effects such that they cannot pass through walls...?
 
         this.highlightedGridSquares = [];
@@ -1008,6 +1017,7 @@ export class MazeScene extends Scene {
                     break;
 
                 case SpellEffect.INVERT:
+
                     this.highlightedGridSquares.map(sq => {
                         return this.getRoom(sq.row, sq.col)
                     }).forEach(gridSquare => {
@@ -1043,6 +1053,7 @@ export class MazeScene extends Scene {
                     break;
 
                 case SpellEffect.TRANSMUTATION:
+
                     // Apply a TRANSMUTATION effect to every entity in the selected squares
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
@@ -1085,7 +1096,7 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
         }
 
-        this.updateUI()
+        this.updateUI();
     }
 
     processSpellHotkey(number) {
@@ -1094,26 +1105,39 @@ export class MazeScene extends Scene {
 
     updateUI() {
 
+        let gameOver = this.currentGameSequence == GameSequence.GAME_OVER;
+        let activateZoneCards = (this.player.isTransmuted != true);
         let activateEffectCards = (this.selectedSpellZone != null);
 
         this.spellCardComponents.forEach(card => {
 
             if (card instanceof SpellZoneComponentCard) {
-                if (card.spellZone == this.selectedSpellZone && this.selectedSpellZone != null) {
-                    card.isSelected = true;
+
+                if (activateZoneCards == false || gameOver == true) {
+                    card.setIsActive(false);
+                    card.setIsSelected(false);
                 } else {
-                    card.isSelected = false;
+
+                    card.setIsActive(true);
+
+                    if (card.spellZone == this.selectedSpellZone && this.selectedSpellZone != null) {
+                        card.setIsSelected(true)
+                    } else {
+                        card.setIsSelected(false)
+                    }
                 }
+
             } else if (card instanceof SpellEffectComponentCard) {
-                // Activate/dim the effect cards, depending on active zone selection
-                if (activateEffectCards == true) {
-                    card.alpha = 1.0;
+
+                if (activateEffectCards == false) {
+                    card.setIsActive(false);
+                } else if (activateEffectCards == true) {
+                    card.setIsActive(true);
                 } else {
-                    card.alpha = 0.25;
+                    card.setIsActive(false);
                 }
             }
         });
-
     }
 
     // -------------------------------------- MOVEMENT STUFF --------------------------------------

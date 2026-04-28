@@ -13,11 +13,11 @@ export const SpellZone = Object.freeze({
 
 export const SpellEffect = Object.freeze({
     CANCEL: 0,
-    FREEZE: 2,
+    FREEZE: 2,              // Places monster in temporary stasis; makes them visible, and movable by pushing
     BLAZE: 3,
     PHASE: 4,
-    INVERT: 5,
-    TRANSMUTATION: 6
+    INVERT: 5,              // Transforms maze cells: open spaces become blocks and vice versa. No effect on monsters or player...?
+    TRANSMUTATION: 6        // Transforms any entity into a harmless frog for a few turns.
 });
 
 /*
@@ -30,6 +30,9 @@ export class ComponentCard {
 
     image = null;
     discharged = false;
+
+    isActive = true;         // TRUE: this card is fully opaque and clickable; FALSE: semi-opaque not clickable
+
     alpha = 1.0;
 
     constructor(canvas, x, y, tileSize) {
@@ -37,6 +40,17 @@ export class ComponentCard {
         this.y = y;
         this.canvas = canvas;
         this.tileSize = tileSize;
+    }
+
+    setIsActive(isActive) {
+
+        this.isActive = isActive;
+
+        if(this.isActive == true) {
+            this.alpha = 1.0;
+        } else {
+            this.alpha = 0.25;
+        }
     }
 
     containsPoint(click) {
@@ -95,6 +109,10 @@ export class SpellZoneComponentCard extends ComponentCard {
         }
     }
 
+    setIsSelected(isSelected) {
+        this.isSelected = isSelected;
+    }
+
     render(context) {
 
         super.render(context)
@@ -119,7 +137,6 @@ export class SpellEffectComponentCard extends ComponentCard {
         super(canvas, x, y, tileSize);
         this.onClick = onClick;
         this.spellEffect = spellEffect;
-        this.alpha = 0.25;
 
         switch (spellEffect) {
 

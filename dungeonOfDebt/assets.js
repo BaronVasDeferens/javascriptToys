@@ -55,6 +55,7 @@ export var ImageAsset = Object.freeze({
     MONSTER_CENTIPEDE: "entity/monsters/4160_sm_zx.png",
     MONSTER_FLY_1: "entity/monsters/4066_sm_zx.png",
     MONSTER_SCORPION: "entity/monsters/4082_sm_zx.png",
+    MONSTER_SPIDER: "entity/monsters/4142_sm_zx.png",
     MONSTER_TROLL: "entity/monsters/3945_zx.png",
     MONSTER_WRAITH: "entity/monsters/3825_zx.png",
 
@@ -105,7 +106,7 @@ export var ImageAsset = Object.freeze({
     SPELL_CANCEL: "spells/cancel.png",
 
     SPELL_CARD_BLAZE: "spells/spell_blaze.png",
-    SPELL_CARD_FREEZE: "spells/spell_freeze.png",
+    SPELL_CARD_FREEZE: "spells/2032.png",
     SPELL_CARD_PHASE: "spells/spell_phase.png",
     SPELL_CARD_INVERT: "spells/spell_invert.png",
     SPELL_CARD_TRANSMUTATION: "spells/2028.png",

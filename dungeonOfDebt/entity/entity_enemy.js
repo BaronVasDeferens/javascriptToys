@@ -19,7 +19,7 @@ export const MonsterVisibility = Object.freeze({
     VISIBLE: 1.0,
     TRANSPARENT_THREE_QUARTERS: 0.75,
     TRANSPARENT_HALF: 0.5,
-    TRANSAPRENT_QUARTER: 0.25,
+    TRANSPARENT_QUARTER: 0.25,
     INVISIBLE: 0.0
 });
 
@@ -27,7 +27,7 @@ const monsterVisiblityArray = [
     MonsterVisibility.VISIBLE,
     MonsterVisibility.TRANSPARENT_THREE_QUARTERS,
     MonsterVisibility.TRANSPARENT_HALF,
-    MonsterVisibility.TRANSAPRENT_QUARTER,
+    MonsterVisibility.TRANSPARENT_QUARTER,
     MonsterVisibility.INVISIBLE
 ];
 
@@ -112,22 +112,23 @@ export class MonsterPinkEye extends MonsterEntity {
     }
 }
 
-export class MonsterSpider extends MonsterEntity {
+export class MonsterScorpion extends MonsterEntity {
 
-    imageAsset = ImageAsset.MONSTER_SPIDER_1;
+    imageAsset = ImageAsset.MONSTER_SCORPION;
     behavior = MonsterBehavior.RANDOM;
 
     constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_SPIDER_1, assetManager);
+        super(tileSize, ImageAsset.MONSTER_SCORPION, assetManager);
     }
 }
 
-export class MonsterInsect extends MonsterEntity {
-    imageAsset = ImageAsset.MONSTER_FLY_1;
+export class MonsterSpider extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_SPIDER;
     behavior = MonsterBehavior.RANDOM;
 
     constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_FLY_1, assetManager);
+        super(tileSize, ImageAsset.MONSTER_SPIDER, assetManager);
     }
 }
 

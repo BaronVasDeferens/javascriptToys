@@ -19,7 +19,23 @@ import { SoundPlayer } from "../sound.js";
  *      casting certain spells on yourself should be fatal
  * 
  * SHORT TERM
- *      spell selection sounds, including clicking an invalid card
+ * 
+ *      !!! give player a randomized set of zones and spells
+ *      !!! cook up more spells then give the player a random number of them per "run" (? too rogue-like?)
+ *      !!! cook up more spells then let player choose however many
+ * 
+ *      !!! when cast upon a chest future vision (divination) reveals its contents
+ *      !!! opening a chest presents player with a choice between two or more items
+ * 
+ *      !!!  
+ * 
+ *      !!! BONUS LEVEL: contdown timer in a maze FULL of gold 
+ *      !!! bonus when all treasures collected 
+ * 
+ *      !!! spell hotkeys (and the spell -> zone -> commit workflow)
+ * 
+ *      !!! gold counter / debt counter / interest rate -- lean into revenue theme?
+ * 
  *      punting frozen enemies should trigger a sound
  *      vary footsteps sounds
  *      vary spell effect sounds
@@ -1182,7 +1198,7 @@ export class MazeScene extends Scene {
                                 * CHASE_LINE_OF_SIGHT: 
                                 * Monsters should...
                                 *      determine whether it can see the player
-                                *      seek to occupy the player's space, or occupy nearest space closest to the player
+                                *      seek to occupy the player's space, or occupy nearest space closest to the player...
                                 *      should NOT occupy the same space as another monster
                                 *      should consider not moving if it is the optimal move
                                 *      choose randomly between two equivalent potential moves

@@ -262,7 +262,7 @@ export class MazeScene extends Scene {
         );
 
         // Treasures...
-        for (let n = 0; n < this.levelCurrent + 4; n++) {
+        for (let n = 0; n < (this.levelCurrent * 3) + 2; n++) {
 
             let coinSound = this.coinSounds[Math.floor(this.coinSounds.length * Math.random())];
 
@@ -277,14 +277,13 @@ export class MazeScene extends Scene {
         this.distributeAcrossOpenRooms(this.eventList);
 
         // Monsters...
-
         this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
 
-        for (let n = 0; n < 10; n++) {
+        for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         }
 
-        for (let n = 0; n < 10; n++) {
+        for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
         }
 
@@ -1193,7 +1192,7 @@ export class MazeScene extends Scene {
 
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monster.room)
-                                .concat(monster.room)
+                                //.concat(monster.room)
                                 .filter(room => { return ineligibleRooms.has(room) == false })
                                 .filter(room => { return room.isOpen == true })
                                 .filter(room => {
@@ -1208,7 +1207,7 @@ export class MazeScene extends Scene {
                             // NOTE: one consequence of this algorithm is that the monster will ALWAYS choose the same move;
                             // moving back and forth in the hopes that it will make a different move will NOT WOK. Muah-ha-ha-ha-haaaa! 
                             let destination = eligibleNeighbors.sort((a, b) => {
-                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - b.col)
+                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col)
                                 let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)
                                 if (distA < distB) {
                                     return -1
@@ -1281,7 +1280,7 @@ export class MazeScene extends Scene {
                             // NOTE: one consequence of this algorithm is that the monster will ALWAYS choose the same move;
                             // moving back and forth in the hopes that it will make a different move will NOT WOK. Muah-ha-ha-ha-haaaa! 
                             let possibleDestinations = eligibleNeighbors.sort((a, b) => {
-                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - b.col)
+                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col)
                                 let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)
                                 if (distA < distB) {
                                     return -1

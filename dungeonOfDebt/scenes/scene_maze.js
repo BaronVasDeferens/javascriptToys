@@ -24,6 +24,10 @@ import { SoundPlayer } from "../sound.js";
  *      !!! cook up more spells then give the player a random number of them per "run" (? too rogue-like?)
  *      !!! cook up more spells then let player choose however many
  * 
+ *      !!! TRANSMUTATION has a chance of turning the user into a CRAZY MONSTER
+                - when a harmless frog, moving plays the player plays a ribbit sound, until the PENULTIMATE MOVE, which indicates that his next will last as a frog!
+ *              - every cast lasts a random number of turns???
+ * 
  *      !!! when cast upon a chest future vision (divination) reveals its contents
  *      !!! opening a chest presents player with a choice between two or more items
  * 
@@ -60,10 +64,10 @@ import { SoundPlayer } from "../sound.js";
  * Spell Types
  *      - !!! future vision:
  *              reveals the next move for RANDOMLY moving monsters; monsters who use LoS will NOT
- *      - swap walls for rooms and vice versa
- *      - invisibility
- *      - intangible
- *      - swap locations
+ *      - INVERT: swap walls for rooms and vice versa
+ *      - TRANSMUTATION: briefly turn into a creature
+ *      - PHASE: 
+ *      - EXCHANGE: randomly swap locations of all entities in the zone
  *      - befuddle
  *      - wall of flame (temp block)
  * 

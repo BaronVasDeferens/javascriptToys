@@ -110,6 +110,7 @@ export var ImageAsset = Object.freeze({
     SPELL_CARD_PHASE: "spells/spell_phase.png",
     SPELL_CARD_INVERT: "spells/spell_invert.png",
     SPELL_CARD_TRANSMUTATION: "spells/2028.png",
+    SPELL_CARD_EXCHANGE: "spells/2190.png",
 
     SPELL_SECTION_OVERLAY: "spells/3235_zx.png",
 

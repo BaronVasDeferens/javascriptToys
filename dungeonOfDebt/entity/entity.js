@@ -29,10 +29,6 @@ export class Entity {
 
     setRoom(room) {
 
-        if (this.room != null) {
-            this.room.occupant = null;
-        }
-
         this.room = room;
         this.x = this.room.col * this.tileSize;
         this.y = this.room.row * this.tileSize;

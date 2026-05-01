@@ -33,7 +33,7 @@ import { SoundPlayer } from "../sound.js";
  * 
  *      !!!  
  * 
- *      !!! BONUS LEVEL: contdown timer in a maze FULL of gold 
+ *      !!! BONUS LEVEL: countdown timer in a maze FULL of gold 
  *      !!! bonus when all treasures collected 
  * 
  *      !!! spell hotkeys (and the spell -> zone -> commit workflow)
@@ -168,7 +168,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 1;
+    levelCurrent = 7;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -384,19 +384,6 @@ export class MazeScene extends Scene {
             )
         );
 
-        // Effect cards
-        // this.spellCardComponents.push(
-        //     new SpellEffectComponentCard(
-        //         SpellEffect.BLAZE,
-        //         () => { this.onSpellEffectSelected(SpellEffect.BLAZE) },
-        //         this.canvasSecondary,
-        //         256,
-        //         0,
-        //         this.tileSize,
-        //         this.assetManager
-        //     )
-        // );
-
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.FREEZE,
@@ -411,8 +398,8 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
-                SpellEffect.CANCEL,
-                () => { this.onSpellEffectSelected(SpellEffect.CANCEL) },
+                SpellEffect.EXCHANGE,
+                () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
                 this.canvasSecondary,
                 320,
                 64,
@@ -1126,6 +1113,58 @@ export class MazeScene extends Scene {
                     )
 
                     break;
+
+                case SpellEffect.EXCHANGE:
+
+                    let affectedRooms = this.highlightedGridSquares
+                        .map(room => { return this.getRoom(room.row, room.col) })
+                        .concat(this.player.room)
+                        .filter(room => { return room.isOccupied == true })
+
+                    this.shuffleArray(affectedRooms);
+
+                    console.log(`affected rooms:`)
+                    console.log(affectedRooms)
+
+                    affectedRooms.forEach((room, index) => {
+
+                        if (affectedRooms[index + 1] != null) {
+
+                            let roomA = this.getRoom(room.row, room.col);
+                            let occupantA = roomA.occupant;
+
+                            let roomB = this.getRoom(affectedRooms[index + 1].row, affectedRooms[index + 1].col);
+                            let occupantB = roomB.occupant;
+
+                            this.setRoomResident(roomB, occupantA)
+                            this.setRoomResident(roomA, occupantB)
+                        }
+                    });
+
+                    spellEffectOverlay = new SpellEffectOverlay(
+                        this.canvasPrimary,
+                        "#6d0088"
+                    )
+
+                    // Flash! A spell is cast! 
+                    this.stateDrivers.push(
+                        new OverlayDriver(
+                            spellEffectOverlay,
+                            1.0,
+                            0.0,
+                            500,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                this.concludePlayerTurn();
+                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                            }
+                        )
+                    )
+                    break;
+
                 default:
                     break;
             }
@@ -1800,6 +1839,18 @@ export class MazeScene extends Scene {
     getRandomRoom() {
         var index = Math.floor(Math.random() * 1000 % (this.mazeRows * this.mazeCols));
         return this.allRooms[index]
+    }
+
+    setRoomResident(room, entity) {
+
+        if (room == null || entity == null) {
+            console.error(`setRoomResident failed: ${room} ${entity}`);
+            return;
+        }
+
+        entity.setRoom(room);
+        room.setOccupant(entity)
+
     }
 
     // -------------------------------------- UTILITIES and STUFF --------------------------------------

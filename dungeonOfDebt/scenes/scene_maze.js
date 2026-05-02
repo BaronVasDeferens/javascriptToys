@@ -37,6 +37,7 @@ import { SoundPlayer } from "../sound.js";
  *                  monsters move immediately after casting
  *              - INVERT
  *                  destroys treasure
+ *                  turns the door invisible
  *                  kills monsters, replacing them with angry ghosts
  *                  kills the wizard when cast on self
  *              - FREEZE
@@ -1108,10 +1109,16 @@ export class MazeScene extends Scene {
 
                     this.highlightedGridSquares.map(sq => {
                         return this.getRoom(sq.row, sq.col)
-                    }).forEach(gridSquare => {
-                        gridSquare.setIsOpen(!gridSquare.isOpen);
-                        if (gridSquare.occupant != null) {
-                            //gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
+                    }).forEach(room => {
+
+                        room.setIsOpen(!room.isOpen);
+
+                        if (room.occupant != null) {
+                            // TODO: kill the entity
+                        }
+
+                        if (room.event != null) {
+                            room.event.applySpellEffect(SpellEffect.INVERT);
                         }
                     });
 
@@ -1134,6 +1141,7 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
+                                this.computeMazeWindow();
                                 this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
                             }
                         )
@@ -2204,12 +2212,19 @@ class MazeEvent {
 
     room = null;
 
+    isVisible = true;
     isOneShot = true;
     isActive = true;
+
+    spellEffects = new Set();
 
     constructor(onTrigger, color) {
         this.onTrigger = onTrigger;
         this.color = color;
+    }
+
+    setIsVisible(isVisible) {
+        this.isVisible = isVisible;
     }
 
     setRoom(room) {
@@ -2219,24 +2234,9 @@ class MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
 
-        if (this.isActive == false) {
-            return;
-        }
-
-        context.fillStyle = this.color;
-        context.lineWidth = 1.0;
-        context.beginPath();
-        context.ellipse(
-            ((this.room.col - mazeWindowX) * this.room.roomSize) + this.room.roomSize / 2,
-            ((this.room.row - mazeWindowY) * this.room.roomSize) + this.room.roomSize / 2,
-            this.room.roomSize / 4, this.room.roomSize / 4,
-            2 * Math.PI,
-            2 * Math.PI,
-            false);
-        context.fill();
     }
 
-    addSpellEffect(effect) {
+    applySpellEffect(effect) {
 
     }
 
@@ -2273,17 +2273,36 @@ class TreasureCollectableEvent extends MazeEvent {
         }
     }
 
+    applySpellEffect(effect) {
+        switch (effect) {
+
+            case SpellEffect.INVERT:
+
+                // Inverting a treasure makes it invisible
+
+                if (!this.spellEffects.has(effect)) {
+                    this.spellEffects.add(effect);
+                    this.setIsVisible(false);
+                } else {
+                    this.spellEffects.delete(effect);
+                    this.setIsVisible(true);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
     render(context, mazeWindowX, mazeWindowY) {
-        if (this.isActive == true) {
+        if (this.isActive == true && this.isVisible == true) {
             context.globalAlpha = this.imageOpacity;
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
                 (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
             )
-
         }
-        context.imageOpacity = 1.0;
     }
 }
 
@@ -2303,8 +2322,28 @@ class KeyCollectableEvent extends MazeEvent {
         }
     }
 
+    applySpellEffect(effect) {
+        switch (effect) {
+            case SpellEffect.INVERT:
+
+                // Inverting a key makes it invisible
+
+                if (!this.spellEffects.has(effect)) {
+                    this.spellEffects.add(effect);
+                    this.setIsVisible(false);
+                } else {
+                    this.spellEffects.delete(effect);
+                    this.setIsVisible(true);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
     render(context, mazeWindowX, mazeWindowY) {
-        if (this.isActive == true) {
+        if (this.isActive == true && this.isVisible == true) {
             context.globalAlpha = this.imageOpacity;
             context.drawImage(
                 this.image,
@@ -2318,7 +2357,6 @@ class KeyCollectableEvent extends MazeEvent {
 class PortalStaircaseEvent extends MazeEvent {
 
     isLocked = true;
-    isVisible = true;
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);
@@ -2343,12 +2381,35 @@ class PortalStaircaseEvent extends MazeEvent {
         }
     }
 
+    applySpellEffect(effect) {
+        switch (effect) {
+
+            case SpellEffect.INVERT:
+
+                // Inverting a key makes it invisible
+
+                if (!this.spellEffects.has(effect)) {
+                    this.spellEffects.add(effect);
+                    this.setIsVisible(false);
+                } else {
+                    this.spellEffects.delete(effect);
+                    this.setIsVisible(true);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
     render(context, mazeWindowX, mazeWindowY) {
-        context.globalAlpha = 1.0;
-        context.drawImage(
-            this.image,
-            (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-            (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-        )
+        if (this.isVisible == true) {
+            context.globalAlpha = this.imageOpacity;
+            context.drawImage(
+                this.image,
+                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+            )
+        }
     }
 }

@@ -294,15 +294,32 @@ export class MazeScene extends Scene {
             );
         }
 
+        // Portals...
+        let exitPortal = new PortalStaircaseEvent(
+            () => {
+                this.levelCurrent += 1;
+                this.fadeOut(() => {
+                    this.initialize();
+                    this.computeMazeWindow();
+                });
+            },
+            this.assetManager
+        );
+
+        this.eventList.push(exitPortal);
+
         // Keys...
         this.eventList.push(
             new KeyCollectableEvent(
                 () => {
-                    this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED);
+                    this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
+                    exitPortal.setIsLocked(false);
                 },
                 this.assetManager
             )
         );
+
+
 
         this.distributeAcrossOpenRooms(this.eventList);
 
@@ -2292,9 +2309,37 @@ class KeyCollectableEvent extends MazeEvent {
 class PortalStaircaseEvent extends MazeEvent {
 
     isLocked = true;
+    isVisible = true;
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);
+        this.assetManager = assetManager;
+        this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_CLOSED);
     }
 
+    setIsLocked(isLocked) {
+        this.isLocked = isLocked;
+        if (isLocked) {
+            this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_CLOSED);
+        } else {
+            this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_OPEN);
+        }
+    }
+
+    triggerEvent(entity) {
+        if (entity != null && entity instanceof PlayerEntity) {
+            if (this.isLocked == false) {
+                this.onTrigger();
+            }
+        }
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+        context.globalAlpha = 1.0;
+        context.drawImage(
+            this.image,
+            (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+            (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+        )
+    }
 }

@@ -3,12 +3,12 @@ import { ImageAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
 
 export const MonsterBehavior = Object.freeze({
-    NONE: 0,
+    NONE: 0,                        // Does not move
     RANDOM: 10,                     // Moves to a random adjacent square
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
     CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
     FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
-    FLEE_OMNISICIENT: 50            // Moves away from the player regardless of LOS
+    FLEE_OMNISCIENT: 50            // Moves away from the player regardless of LOS
 });
 
 export const MonsterMobility = Object.freeze({
@@ -23,7 +23,7 @@ export const MonsterVisibility = Object.freeze({
     INVISIBLE: 0.0
 });
 
-const monsterVisiblityArray = [
+const monsterVisibilityArray = [
     MonsterVisibility.VISIBLE,
     MonsterVisibility.TRANSPARENT_THREE_QUARTERS,
     MonsterVisibility.TRANSPARENT_HALF,
@@ -99,6 +99,16 @@ export class MonsterEntity extends Entity {
 
         context.globalAlpha = 1.0;
 
+    }
+}
+
+export class MonsterMammoth extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_MAMMOTH;
+    behavior = MonsterBehavior.NONE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_MAMMOTH, assetManager);
     }
 }
 

@@ -58,6 +58,7 @@ export var ImageAsset = Object.freeze({
     MONSTER_SPIDER: "entity/monsters/4142_sm_zx.png",
     MONSTER_TROLL: "entity/monsters/3945_zx.png",
     MONSTER_WRAITH: "entity/monsters/3825_zx.png",
+    MONSTER_MAMMOTH: "entity/monsters/4052_zx.png",
 
     SPELL_EFFECT_FROZEN: "spells/spell_effect_frozen.png",
 

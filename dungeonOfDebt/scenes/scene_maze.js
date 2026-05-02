@@ -2,7 +2,7 @@ import { ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith, MonsterScorpion } from "../entity/entity_enemy.js";
+import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith, MonsterScorpion, MonsterMammoth } from "../entity/entity_enemy.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 
@@ -168,7 +168,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 7;
+    levelCurrent = 2;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -298,6 +298,10 @@ export class MazeScene extends Scene {
 
         // Monsters...
         this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
+
+        for(let n = 0; n < this.levelCurrent; n++) {
+            this.entitiesEnemy.push( new MonsterMammoth(this.tileSize, this.assetManager));
+        }
 
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
@@ -1143,9 +1147,6 @@ export class MazeScene extends Scene {
                         .filter(room => { return room.isOccupied == true })
 
                     this.shuffleArray(affectedRooms);
-
-                    console.log(`affected rooms:`)
-                    console.log(affectedRooms)
 
                     affectedRooms.forEach((room, index) => {
 

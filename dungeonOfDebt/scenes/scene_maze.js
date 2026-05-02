@@ -1390,15 +1390,7 @@ export class MazeScene extends Scene {
         let primaryDriver = null;
         let iceCubePush = null;
 
-        if (entity != null
-            && destination != null
-            //&& destination.isOpen == true
-        ) {
-
-            // Case 1: destination open, no occupant
-            // case 2: destination open, occupied
-            // case 3: destination open, occupant frozen
-
+        if (entity != null && destination != null) {
 
             if (destination.isOpen == true) {
 

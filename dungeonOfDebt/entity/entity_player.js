@@ -1,5 +1,6 @@
 import { Entity } from "./entity.js";
 import { ImageAsset } from "../assets.js";
+import { SpellEffect } from "./entity_spell.js";
 
 export class PlayerEntity extends Entity {
 
@@ -52,6 +53,18 @@ export class PlayerEntity extends Entity {
     render(context) {
         context.globalAlpha = this.imageAlpha;
         context.drawImage(this.image, this.x + this.offsetX, this.y + this.offsetY);
+
+
+        if (this.overlayImage != null) {
+
+            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
+            context.drawImage(
+                this.overlayImage,
+                this.x + ((this.tileSize - this.overlayImage.width) / 2),
+                this.y + ((this.tileSize - this.overlayImage.height) / 2)
+            )
+        }
+
         context.globalAlpha = 1.0;
     }
 };

@@ -582,15 +582,25 @@ export class MazeScene extends Scene {
             return;
         }
 
+        let gameOver = false;
+
+        // Check: monster occupies the wizard's square
         let fatalEntity = this.entitiesEnemy
             .filter(ent => { return (ent.isTransmuted == false) })
             .filter(ent => { return ent.room == this.player.room })[0];
-        let gameOver = fatalEntity != null && !(this.player.isTransmuted == true);
+
+        if (fatalEntity != null && !(this.player.isTransmuted == true)) {
+            gameOver = true;
+        }
+
+        // Check: did the wizard cast freeze upon himself? FAIL!
+        if (this.player.isFrozen == true) {
+            gameOver = true;
+        }
 
         if (gameOver == true) {
 
             // GAME OVER !!!
-
             // If the fatal entity was a WRAITH, make him visible
             if (fatalEntity instanceof MonsterWraith) {
                 fatalEntity.setVisibility(true);
@@ -1008,11 +1018,18 @@ export class MazeScene extends Scene {
 
                 case SpellEffect.FREEZE:
 
-                    // Apply a FREEZE effect (ice cube) to every entity in the selected squares
+                    let wizardFrozen = false;
+
+                    // Apply a FREEZE effect (ice cube) to every entity in the selected squares...
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
                             gridSquare.occupant.addSpellEffect(SpellEffect.FREEZE, 5);
+
+                            if (gridSquare.occupant instanceof PlayerEntity) {
+                                //...but if the wizard freezes himself, it's GAME OVER
+                                wizardFrozen = true
+                            }
                         }
                     });
 
@@ -1034,7 +1051,12 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                if (wizardFrozen == true) {
+                                    // O mighty wizard, thy game is over
+                                    this.concludePlayerTurn()
+                                } else {
+                                    this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                }
                             }
                         )
                     )

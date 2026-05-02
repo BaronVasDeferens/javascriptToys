@@ -1,4 +1,4 @@
-import { ImageAsset, SoundAsset } from "../assets.js";
+import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
@@ -294,13 +294,23 @@ export class MazeScene extends Scene {
             );
         }
 
+        // Keys...
+        this.eventList.push(
+            new KeyCollectableEvent(
+                () => {
+                    this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED);
+                },
+                this.assetManager
+            )
+        );
+
         this.distributeAcrossOpenRooms(this.eventList);
 
         // Monsters...
         this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
 
-        for(let n = 0; n < this.levelCurrent; n++) {
-            this.entitiesEnemy.push( new MonsterMammoth(this.tileSize, this.assetManager));
+        for (let n = 0; n < this.levelCurrent; n++) {
+            this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
         }
 
         for (let n = 0; n < this.levelCurrent; n++) {
@@ -2249,4 +2259,42 @@ class TreasureCollectableEvent extends MazeEvent {
         }
         context.imageOpacity = 1.0;
     }
+}
+
+class KeyCollectableEvent extends MazeEvent {
+
+    imageAssetId = ImageAsset.DUNGEON_KEY;
+
+    constructor(onTrigger, assetManager) {
+        super(onTrigger);
+        this.image = assetManager.getImage(this.imageAssetId);
+    }
+
+    triggerEvent(entity) {
+        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+            this.onTrigger();
+            this.isActive = false;
+        }
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+        if (this.isActive == true) {
+            context.globalAlpha = this.imageOpacity;
+            context.drawImage(
+                this.image,
+                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+            )
+        }
+    }
+}
+
+class PortalStaircaseEvent extends MazeEvent {
+
+    isLocked = true;
+
+    constructor(onTrigger, assetManager) {
+        super(onTrigger);
+    }
+
 }

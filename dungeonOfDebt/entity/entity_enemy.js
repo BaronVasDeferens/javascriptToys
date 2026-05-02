@@ -8,11 +8,17 @@ export const MonsterBehavior = Object.freeze({
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
     CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
     FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
-    FLEE_OMNISCIENT: 50            // Moves away from the player regardless of LOS
+    FLEE_OMNISCIENT: 50             // Moves away from the player regardless of LOS
 });
 
+export const MonsterContactEffect = Object.freeze({
+    LETHAL: 10,                     // Kills the wizard when in contact.
+})
+
+
 export const MonsterMobility = Object.freeze({
-    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares      
+    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares
+    INCORPOREAL: 10,                // Passes through blocks      
 });
 
 export const MonsterVisibility = Object.freeze({
@@ -42,6 +48,7 @@ export class MonsterEntity extends Entity {
     imageOpacity = 1.0;
 
     behavior = MonsterBehavior.NONE;
+    contactEffect = MonsterContactEffect.LETHAL;
 
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
@@ -74,6 +81,10 @@ export class MonsterEntity extends Entity {
         expiredEffects.forEach(key => {
             this.removeSpellEffect(key);
         })
+
+    }
+
+    onPlayerContact() {
 
     }
 

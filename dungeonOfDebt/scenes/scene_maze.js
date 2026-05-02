@@ -42,7 +42,9 @@ import { SoundPlayer } from "../sound.js";
  *                  kills the wizard when cast on self
  *              - FREEZE
  *                  kills the wizard when cast on self
- *                  
+ *              
+ * 
+ *      !!! hide some invisible treasure in "closed" rooms!    
  * 
  *      !!! BONUS LEVEL: countdown timer in a maze FULL of gold 
  *      !!! bonus when all treasures collected 

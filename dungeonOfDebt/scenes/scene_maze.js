@@ -31,7 +31,17 @@ import { SoundPlayer } from "../sound.js";
  *      !!! when cast upon a chest future vision (divination) reveals its contents
  *      !!! opening a chest presents player with a choice between two or more items
  * 
- *      !!!  
+ *      !!! each spell has a side effect:
+ *              - EXCHANGE 
+ *                  ends the wizards turn
+ *                  monsters move immediately after casting
+ *              - INVERT
+ *                  destroys treasure
+ *                  kills monsters, replacing them with angry ghosts
+ *                  kills the wizard when cast on self
+ *              - FREEZE
+ *                  kills the wizard when cast on self
+ *                  
  * 
  *      !!! BONUS LEVEL: countdown timer in a maze FULL of gold 
  *      !!! bonus when all treasures collected 
@@ -297,6 +307,7 @@ export class MazeScene extends Scene {
         // Portals...
         let exitPortal = new PortalStaircaseEvent(
             () => {
+                this.soundPlayer.playOneShot(SoundAsset.DESCEND_STAIRS);
                 this.levelCurrent += 1;
                 this.fadeOut(() => {
                     this.initialize();
@@ -318,8 +329,6 @@ export class MazeScene extends Scene {
                 this.assetManager
             )
         );
-
-
 
         this.distributeAcrossOpenRooms(this.eventList);
 

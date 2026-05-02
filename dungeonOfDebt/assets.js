@@ -183,6 +183,7 @@ export var SoundAsset = Object.freeze({
 
     KEY_ACQUIRED: "key_acquired.wav",
     KEY_ACQUIRED_DOOR_CREAKS: "key_acquired_door_creaks.wav",
+    DESCEND_STAIRS: "descend_stairs.wav",
 
     GAME_OVER: "game_over.wav"
 });

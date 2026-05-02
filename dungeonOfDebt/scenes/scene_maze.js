@@ -695,7 +695,6 @@ export class MazeScene extends Scene {
 
         var driver = null;
 
-
         switch (event.key) {
 
             case "a":
@@ -1388,76 +1387,138 @@ export class MazeScene extends Scene {
 
         let destination = this.getAdjacentRoomByDirection(entity.room, direction);
 
-        let icecubePush = null;
+        let primaryDriver = null;
+        let iceCubePush = null;
 
         if (entity != null
             && destination != null
-            && destination.isOpen == true
+            //&& destination.isOpen == true
         ) {
 
-            let primaryDriver = new EntityMovementDriver(
-                entity,
-                destination,
-                rate,
-                () => {
-                    // onUpdate
-                },
-                () => {
-                    // onComplete
-                    entity.room.setOccupant(null);
-                    entity.setRoom(destination);
-                    destination.setOccupant(entity);
-                    destination.triggerEventIfPresent(entity);
-                }
-            )
+            // Case 1: destination open, no occupant
+            // case 2: destination open, occupied
+            // case 3: destination open, occupant frozen
 
-            // SPACIAL CASE: SLIDING ICE CUBES
-            // The player can push a frozen enemy out into an adjacent space
-            if (entity == this.player && destination.occupant != null && destination.occupant.isFrozen == true) {
 
-                // Find the "end point" of the push
-                let endpoint = destination;
-                while (endpoint != null && endpoint.isOpen == true) {
-                    let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
-                    if (candidate != null && candidate.isOpen == true && candidate.occupant == null) {
-                        endpoint = candidate;
+            if (destination.isOpen == true) {
+
+                // Case 1: destination open, no occupant
+                if (destination.isOccupied == false) {
+                    primaryDriver = new EntityMovementDriver(
+                        entity,
+                        destination,
+                        rate,
+                        () => {
+                            // onUpdate
+                        },
+                        () => {
+                            // onComplete
+                            entity.room.setOccupant(null);
+                            entity.setRoom(destination);
+                            destination.setOccupant(entity);
+                            destination.triggerEventIfPresent(entity);
+                        }
+                    )
+                } else if (destination.occupant.isFrozen == false) {
+
+                    // Case 2: destination open, occupied (player likely dies!)
+                    primaryDriver = new EntityMovementDriver(
+                        entity,
+                        destination,
+                        rate,
+                        () => {
+                            // onUpdate
+                        },
+                        () => {
+                            // onComplete
+                            entity.room.setOccupant(null);
+                            entity.setRoom(destination);
+                            destination.setOccupant(entity);
+                            destination.triggerEventIfPresent(entity);
+                        }
+                    )
+
+                } else {
+
+                    // Case 3: destination open, occupant frozen
+                    // The player can push a frozen enemy out into an adjacent space under the following conditions:
+                    //      there must exist a space for the cube to move over to
+
+                    // Is there space immediately adjacent for the cube to move into?
+                    let adjacentToCube = this.getAdjacentRoomByDirection(destination, direction);
+
+                    if (adjacentToCube != null
+                        && adjacentToCube.isOpen == true
+                        && adjacentToCube.isOccupied == false
+                    ) {
+
+                        primaryDriver = new EntityMovementDriver(
+                            entity,
+                            destination,
+                            rate,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                entity.room.setOccupant(null);
+                                entity.setRoom(destination);
+                                destination.setOccupant(entity);
+                                destination.triggerEventIfPresent(entity);
+                            }
+                        )
+
+                        // Find the "end point" of the push
+                        let endpoint = destination;
+                        while (endpoint != null && endpoint.isOpen == true) {
+                            let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
+                            if (candidate != null && candidate.isOpen == true && candidate.occupant == null) {
+                                endpoint = candidate;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        let sliderEntity = destination.occupant
+
+                        // Compute a constant time for the slide-- 50ms per room
+                        let distance = Math.abs(destination.row - endpoint.row) + Math.abs(destination.col - endpoint.col);
+
+                        iceCubePush = new EntityMovementDriver(
+                            sliderEntity,
+                            endpoint,
+                            this.movementRateDefaultMillis * distance,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onCompleted
+                                sliderEntity.setRoom(endpoint);
+                                endpoint.setOccupant(sliderEntity);
+                            }
+                        )
                     } else {
-                        break;
+
                     }
                 }
 
-                let sliderEntity = destination.occupant
+                let allDrivers = [primaryDriver, iceCubePush].filter(drv => { return drv != null });
 
-                // Compute a constant time for the slide-- 50ms per room
-                let distance = Math.abs(destination.row - endpoint.row) + Math.abs(destination.col - endpoint.col);
+                if (allDrivers.length == 0) {
+                    return null;
+                }
 
-                icecubePush = new EntityMovementDriver(
-                    sliderEntity,
-                    endpoint,
-                    this.movementRateDefaultMillis * distance,
+                return new MultiEntityMovementDriver(
+                    allDrivers,
+                    () => { },
                     () => {
-                        // onUpdate
-                    },
-                    () => {
-                        // onCompleted
-                        sliderEntity.setRoom(endpoint);
-                        endpoint.setOccupant(sliderEntity);
+                        onComplete();       // Be sure to only call this ONCE, else each sub-driver will call it, too.
                     }
                 )
+
+            } else {
+                return null
             }
-
-            let allDrivers = [primaryDriver, icecubePush].filter(drv => { return drv != null });
-
-            return new MultiEntityMovementDriver(
-                allDrivers,
-                () => { },
-                () => {
-                    onComplete();       // Be sure to only call this ONCE, else each sub-driver will call it, too.
-                }
-            )
-
-        } else {
-            return null
         }
     }
 

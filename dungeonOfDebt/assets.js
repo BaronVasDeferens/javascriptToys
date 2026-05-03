@@ -59,6 +59,7 @@ export var ImageAsset = Object.freeze({
     MONSTER_TROLL: "entity/monsters/3945_zx.png",
     MONSTER_WRAITH: "entity/monsters/3825_zx.png",
     MONSTER_MAMMOTH: "entity/monsters/4052_zx.png",
+    MONSTER_GHOST: "entity/monsters/4725_sm_zx.png",
 
     SPELL_EFFECT_FROZEN: "spells/spell_effect_frozen.png",
 
@@ -103,7 +104,6 @@ export var ImageAsset = Object.freeze({
 
     PORTAL_DOOR_CLOSED: "tiles/portals/100.png",
     PORTAL_DOOR_OPEN: "tiles/portals/115.png",
-
 
     // --- UI COMPONENTS ---
 

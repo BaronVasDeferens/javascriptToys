@@ -2,6 +2,11 @@ import { Entity } from "./entity.js";
 import { ImageAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
 
+
+/**
+ *  MONSTER ATTRIBUTES
+ */
+
 export const MonsterBehavior = Object.freeze({
     NONE: 0,                        // Does not move
     RANDOM: 10,                     // Moves to a random adjacent square
@@ -14,7 +19,6 @@ export const MonsterBehavior = Object.freeze({
 export const MonsterContactEffect = Object.freeze({
     LETHAL: 10,                     // Kills the wizard when in contact.
 })
-
 
 export const MonsterMobility = Object.freeze({
     CORPOREAL: 0,                   // Cannot move into blocked/impassable squares
@@ -48,6 +52,8 @@ export class MonsterEntity extends Entity {
     imageOpacity = 1.0;
 
     behavior = MonsterBehavior.NONE;
+    mobility = MonsterMobility.CORPOREAL;
+    visibility = MonsterVisibility.VISIBLE;
     contactEffect = MonsterContactEffect.LETHAL;
 
     constructor(tileSize, imageAsset, assetManager) {
@@ -62,6 +68,10 @@ export class MonsterEntity extends Entity {
         } else {
             return this.behavior;
         }
+    }
+
+    setVisibility(visibility) {
+        this.visibility = visibility;
     }
 
     onTurnConclusion() {
@@ -90,7 +100,7 @@ export class MonsterEntity extends Entity {
 
     render(context, mazeWindowX, mazeWindowY) {
 
-        context.globalAlpha = this.imageOpacity;
+        context.globalAlpha = this.visibility;
 
         context.drawImage(
             this.image,
@@ -99,7 +109,6 @@ export class MonsterEntity extends Entity {
         );
 
         if (this.overlayImage != null) {
-
             context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
             context.drawImage(
                 this.overlayImage,
@@ -107,9 +116,6 @@ export class MonsterEntity extends Entity {
                 this.y + ((this.tileSize - this.overlayImage.height) / 2)
             )
         }
-
-        context.globalAlpha = 1.0;
-
     }
 }
 
@@ -117,6 +123,8 @@ export class MonsterMammoth extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_MAMMOTH;
     behavior = MonsterBehavior.NONE;
+    visibility = MonsterVisibility.VISIBLE;
+    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_MAMMOTH, assetManager);
@@ -127,6 +135,8 @@ export class MonsterPinkEye extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_PINK_EYE;
     behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
+    visibility = MonsterVisibility.VISIBLE;
+    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_PINK_EYE, assetManager);
@@ -137,19 +147,11 @@ export class MonsterScorpion extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_SCORPION;
     behavior = MonsterBehavior.RANDOM;
+    visibility = MonsterVisibility.VISIBLE;
+    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_SCORPION, assetManager);
-    }
-}
-
-export class MonsterSpider extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_SPIDER;
-    behavior = MonsterBehavior.RANDOM;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_SPIDER, assetManager);
     }
 }
 
@@ -157,27 +159,19 @@ export class MonsterWraith extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_WRAITH;
     behavior = MonsterBehavior.RANDOM;
-
-    isVisible = true;
+    visibility = MonsterVisibility.VISIBLE;
+    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_WRAITH, assetManager);
     }
 
-    setVisibility(isVisible) {
-        this.isVisible = isVisible;
-    }
 
     render(context, mazeWindowX, mazeWindowY) {
 
         // The wraith is only visible on screen when NOT in the wizard's LoS
 
-        if (this.isVisible == true) {
-            context.globalAlpha = MonsterVisibility.TRANSPARENT_HALF;
-        } else {
-            context.globalAlpha = MonsterVisibility.INVISIBLE;
-        }
-
+        context.globalAlpha = this.visibility;
         context.drawImage(
             this.image,
             this.x + ((this.tileSize - this.image.width) / 2),
@@ -194,5 +188,15 @@ export class MonsterWraith extends MonsterEntity {
             )
         }
     }
+}
 
+export class MonsterGhost extends MonsterEntity {
+    imageAsset = ImageAsset.MONSTER_GHOST;
+    behavior = MonsterBehavior.RANDOM;
+    visibility = MonsterVisibility.TRANSPARENT_HALF;
+    mobility = MonsterMobility.INCORPOREAL;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
+    }
 }

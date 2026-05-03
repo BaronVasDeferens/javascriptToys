@@ -1,0 +1,12 @@
+# VSCode
+.vscode/
+
+# Dependencies
+node_modules/
+
+# Browser-sync
+.firefox-debug-profile/
+
+# OS clutter
+.DS_Store
+Thumbs.db

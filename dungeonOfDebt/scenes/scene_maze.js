@@ -2,7 +2,7 @@ import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterSpider, MonsterWraith, MonsterScorpion, MonsterMammoth } from "../entity/entity_enemy.js";
+import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterMobility } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 
@@ -336,7 +336,7 @@ export class MazeScene extends Scene {
         this.distributeAcrossOpenRooms(this.eventList);
 
         // Monsters...
-        this.entitiesEnemy.push(new MonsterWraith(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
 
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
@@ -658,7 +658,7 @@ export class MazeScene extends Scene {
             this.entitiesEnemy
                 .filter(ent => { return (ent !== fatalEntity) })
                 .forEach(ent => {
-                    ent.imageOpacity = 0.0;
+                    ent.setVisibility(MonsterVisibility.INVISIBLE);
                     ent.overlayImage = null;
                 })
 
@@ -896,7 +896,7 @@ export class MazeScene extends Scene {
 
     }
 
-    // -------------------------------------- MAGIC STUFF --------------------------------------
+    // -------------------------------------- MAGIC --------------------------------------
 
     /**
      * Triggered when the user clicks on a SpellZone card to select an area of effect. 
@@ -1287,7 +1287,7 @@ export class MazeScene extends Scene {
         });
     }
 
-    // -------------------------------------- MOVEMENT STUFF --------------------------------------
+    // -------------------------------------- MOVEMENT --------------------------------------
 
     computeEnemyMoves() {
 
@@ -1349,7 +1349,7 @@ export class MazeScene extends Scene {
                                 ineligibleRooms.add(destination);
                                 vacatedRooms.add(monster.room);
                                 vacatedRooms.delete(destination)
-                                let movementDriver = this.moveEntityToRoom(
+                                let movementDriver = this.createEntityMovementDriver(
                                     monster,
                                     destination,
                                     this.movementRateDefaultMillis,
@@ -1365,8 +1365,8 @@ export class MazeScene extends Scene {
 
                         let neighbors = this.getAdjacentRooms(monster.room)
                             .concat(monster.room)
-                            .filter(room => { return room.isOpen == true })
-                            .filter(room => { return ineligibleRooms.has(room) == false })
+                            .filter(room => { return (room.isOpen == true  || monster.mobility == MonsterMobility.INCORPOREAL) })
+                            .filter(room => { return ineligibleRooms.has(room) == false})
                             .filter(room => {
                                 if (room.occupant != null) {
                                     return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
@@ -1375,15 +1375,17 @@ export class MazeScene extends Scene {
                                 }
                             });
 
+
                         destination = neighbors[Math.floor(Math.random() * neighbors.length)];
 
                         if (destination != null) {
                             ineligibleRooms.add(destination);
                             vacatedRooms.add(monster.room);
                             vacatedRooms.delete(destination)
-                            let movementDriver = this.moveEntityToRoom(monster, destination, this.movementRateDefaultMillis, () => { });
+                            let movementDriver = this.createEntityMovementDriver(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
+
                         break;
 
                     case MonsterBehavior.FLEE_LINE_OF_SIGHT:
@@ -1424,7 +1426,7 @@ export class MazeScene extends Scene {
                                 ineligibleRooms.add(destination);
                                 vacatedRooms.add(monster.room);
                                 vacatedRooms.delete(destination)
-                                let movementDriver = this.moveEntityToRoom(
+                                let movementDriver = this.createEntityMovementDriver(
                                     monster,
                                     destination,
                                     this.movementRateDefaultMillis,
@@ -1583,12 +1585,10 @@ export class MazeScene extends Scene {
         }
     }
 
-    moveEntityToRoom(entity, destination, rate, onComplete) {
+    createEntityMovementDriver(entity, destination, rate, onComplete) {
 
         if (entity != null
-            && destination != null
-            && destination.isOpen == true
-        ) {
+            && destination != null) {
 
             return new EntityMovementDriver(
                 entity,
@@ -1635,7 +1635,11 @@ export class MazeScene extends Scene {
 
                 // If the monster is a WRAITH, it is only visible on screen when NOT in the wizard's LoS...
                 if (monster instanceof MonsterWraith) {
-                    monster.setVisibility(!result.isVisible);
+                    let visibility = MonsterVisibility.VISIBLE;
+                    if (result.isVisible) {
+                        visibility = MonsterVisibility.INVISIBLE
+                    }
+                    monster.setVisibility(visibility);
                 }
 
                 let playerCenter = playerRoom.getCenter();

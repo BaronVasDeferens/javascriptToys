@@ -20,6 +20,7 @@ export class Entity {
     spellEffects = new Map();
 
     isFrozen = false;
+    isInverted = false;
     isTransmuted = false;
 
     constructor(tileSize, assetManager) {
@@ -45,6 +46,10 @@ export class Entity {
                 this.isFrozen = true;
                 break;
 
+            case SpellEffect.INVERT:
+                this.isInverted = true;
+                break;
+
             case SpellEffect.TRANSMUTATION:
                 this.image = this.assetManager.getImage(ImageAsset.FROG);
                 this.isTransmuted = true;
@@ -63,6 +68,10 @@ export class Entity {
 
             case SpellEffect.FREEZE:
                 this.isFrozen = false;
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = false;
                 break;
 
             case SpellEffect.TRANSMUTATION:

@@ -636,8 +636,8 @@ export class MazeScene extends Scene {
             gameOver = true;
         }
 
-        // Check: did the wizard cast freeze upon himself? FAIL!
-        if (this.player.isFrozen == true) {
+        // Check: did the wizard cast FREEZE or INVERT upon himself? FAIL!
+        if (this.player.isFrozen == true || this.player.isInverted == true) {
             gameOver = true;
         }
 
@@ -1109,6 +1109,8 @@ export class MazeScene extends Scene {
 
                 case SpellEffect.INVERT:
 
+                    let wizardInverted = false;
+
                     this.highlightedGridSquares.map(sq => {
                         return this.getRoom(sq.row, sq.col)
                     }).forEach(room => {
@@ -1116,7 +1118,13 @@ export class MazeScene extends Scene {
                         room.setIsOpen(!room.isOpen);
 
                         if (room.occupant != null) {
-                            // TODO: kill the entity
+                            
+                            // WIZARD DIES IF INVERTED
+                            if (room.occupant instanceof PlayerEntity) {
+                                wizardInverted = true;
+                                room.occupant.addSpellEffect(SpellEffect.INVERT);
+                                room.occupant.overlayImage = room.image;
+                            }
                         }
 
                         if (room.event != null) {
@@ -1143,8 +1151,13 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.computeMazeWindow();
-                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                if (wizardInverted == true) {
+                                    // O mighty wizard, thy game is over
+                                    this.concludePlayerTurn();
+                                } else {
+                                    this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                    this.computeMazeWindow();
+                                }
                             }
                         )
                     )
@@ -1365,8 +1378,8 @@ export class MazeScene extends Scene {
 
                         let neighbors = this.getAdjacentRooms(monster.room)
                             .concat(monster.room)
-                            .filter(room => { return (room.isOpen == true  || monster.mobility == MonsterMobility.INCORPOREAL) })
-                            .filter(room => { return ineligibleRooms.has(room) == false})
+                            .filter(room => { return (room.isOpen == true || monster.mobility == MonsterMobility.INCORPOREAL) })
+                            .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {
                                 if (room.occupant != null) {
                                     return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)

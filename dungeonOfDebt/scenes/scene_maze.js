@@ -1539,7 +1539,7 @@ export class MazeScene extends Scene {
                             entity.room.setOccupant(null);
                             entity.setRoom(destination);
                             destination.setOccupant(entity);
-                            destination.triggerEventIfPresent(entity);
+                            this.processCollectableEvents(entity, destination);
                         }
                     )
                 } else if (destination.occupant.isFrozen == false) {
@@ -1557,7 +1557,7 @@ export class MazeScene extends Scene {
                             entity.room.setOccupant(null);
                             entity.setRoom(destination);
                             destination.setOccupant(entity);
-                            destination.triggerEventIfPresent(entity);
+                            this.processCollectableEvents(entity, destination);
                         }
                     )
 
@@ -1587,7 +1587,7 @@ export class MazeScene extends Scene {
                                 entity.room.setOccupant(null);
                                 entity.setRoom(destination);
                                 destination.setOccupant(entity);
-                                destination.triggerEventIfPresent(entity);
+                                this.processCollectableEvents(entity, destination);
                             }
                         )
 
@@ -1662,7 +1662,7 @@ export class MazeScene extends Scene {
                     entity.room.setOccupant(null);
                     entity.setRoom(destination);
                     destination.setOccupant(entity);
-                    destination.triggerEventIfPresent();
+                    this.processCollectableEvents(entity, destination);
                     onComplete();
                 }
             )
@@ -2039,6 +2039,40 @@ export class MazeScene extends Scene {
 
     }
 
+    processCollectableEvents(entity, room) {
+        if (entity == null || room == null || room.event == null) {
+            return
+        }
+
+        let unclaimedTreasures = this.eventList
+            .filter(evt => { return evt instanceof TreasureCollectableEvent })
+            .filter(evt => { return evt.isActive == true });
+
+        if (unclaimedTreasures.length > 0) {
+
+            room.triggerEventIfPresent(entity);
+
+            if (unclaimedTreasures.every(evt => { return evt.isActive == false })) {
+                console.log(`all treasures claimed!`);
+                this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+
+                let chest = new ChestCollectableEvent(
+                    () => {
+                        console.log(`MEGA CHINGUS`);
+                        // play sound
+                    },
+                    this.assetManager
+                );
+
+                this.eventList.push(chest);
+                this.distributeAcrossOpenRooms([chest]);
+
+                }
+        } else {
+            room.triggerEventIfPresent(entity);
+        }
+    }
+
     // -------------------------------------- UTILITIES and STUFF --------------------------------------
 
     fadeIn(onComplete) {
@@ -2328,6 +2362,58 @@ class TreasureCollectableEvent extends MazeEvent {
         super(onTrigger);
         let tile = this.coinTiles[Math.floor(this.coinTiles.length * Math.random())];
         this.image = assetManager.getImage(tile);
+    }
+
+    triggerEvent(entity) {
+        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+            this.onTrigger();
+            if (this.isOneShot == true) {
+                this.isActive = false;
+            }
+        }
+    }
+
+    applySpellEffect(effect) {
+        switch (effect) {
+
+            case SpellEffect.INVERT:
+
+                // Inverting a treasure makes it invisible
+
+                if (!this.spellEffects.has(effect)) {
+                    this.spellEffects.add(effect);
+                    this.setIsVisible(false);
+                } else {
+                    this.spellEffects.delete(effect);
+                    this.setIsVisible(true);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+        if (this.isActive == true && this.isVisible == true) {
+            context.globalAlpha = this.imageOpacity;
+            context.drawImage(
+                this.image,
+                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+            )
+        }
+    }
+}
+
+class ChestCollectableEvent extends MazeEvent {
+
+    image = null;
+    imageOpacity = 1.0;
+
+    constructor(onTrigger, assetManager) {
+        super(onTrigger);
+        this.image = assetManager.getImage(ImageAsset.TREASURE_CHEST_SMALL);
     }
 
     triggerEvent(entity) {

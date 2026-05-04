@@ -1118,7 +1118,7 @@ export class MazeScene extends Scene {
                         room.setIsOpen(!room.isOpen);
 
                         if (room.occupant != null) {
-                            
+
                             // WIZARD DIES IF INVERTED
                             if (room.occupant instanceof PlayerEntity) {
                                 wizardInverted = true;
@@ -1310,71 +1310,16 @@ export class MazeScene extends Scene {
         let vacatedRooms = new Set();
         let drivers = [];
 
+
         this.entitiesEnemy
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
             .forEach(monster => {
 
+                let destination = null;
+
                 switch (monster.getMovementBehavior()) {
 
-                    case MonsterBehavior.CHASE_LINE_OF_SIGHT:
-
-                        /**
-                                * CHASE_LINE_OF_SIGHT: 
-                                * Monsters should...
-                                *      determine whether it can see the player
-                                *      seek to occupy the player's space, or occupy nearest space closest to the player...
-                                *      should NOT occupy the same space as another monster
-                                *      should consider not moving if it is the optimal move
-                                *      choose randomly between two equivalent potential moves
-                                */
-
-                        if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
-
-                            // Find all eligible neighbors
-                            let eligibleNeighbors = this.getAdjacentRooms(monster.room)
-                                //.concat(monster.room)
-                                .filter(room => { return ineligibleRooms.has(room) == false })
-                                .filter(room => { return room.isOpen == true })
-                                .filter(room => {
-                                    if (room.occupant != null) {
-                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
-                                    } else {
-                                        return true
-                                    }
-                                });
-
-                            // Sort the neighbors in order of distance to player
-                            // NOTE: one consequence of this algorithm is that the monster will ALWAYS choose the same move;
-                            // moving back and forth in the hopes that it will make a different move will NOT WOK. Muah-ha-ha-ha-haaaa! 
-                            let destination = eligibleNeighbors.sort((a, b) => {
-                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col)
-                                let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)
-                                if (distA < distB) {
-                                    return -1
-                                } else if (distA > distB) {
-                                    return 1
-                                } else {
-                                    return 0
-                                }
-                            })[0];
-
-                            if (destination != null) {
-                                ineligibleRooms.add(destination);
-                                vacatedRooms.add(monster.room);
-                                vacatedRooms.delete(destination)
-                                let movementDriver = this.createEntityMovementDriver(
-                                    monster,
-                                    destination,
-                                    this.movementRateDefaultMillis,
-                                    () => { });
-                                drivers.push(movementDriver);
-                            }
-                        }
-                        break;
-
                     case MonsterBehavior.RANDOM:
-
-                        let destination = null;
 
                         let neighbors = this.getAdjacentRooms(monster.room)
                             .concat(monster.room)
@@ -1398,7 +1343,61 @@ export class MazeScene extends Scene {
                             let movementDriver = this.createEntityMovementDriver(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
+                        break;
 
+                    case MonsterBehavior.CHASE_LINE_OF_SIGHT:
+
+                        /**
+                                * CHASE_LINE_OF_SIGHT: 
+                                * Monsters should...
+                                *      determine whether it can see the player
+                                *      seek to occupy the player's space, or occupy nearest space closest to the player...
+                                *      should NOT occupy the same space as another monster
+                                *      should consider not moving if it is the optimal move
+                                *      choose randomly between two equivalent potential moves
+                                */
+
+                        if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
+
+                            // Find all eligible neighbors
+                            let eligibleNeighbors = this.getAdjacentRooms(monster.room)
+                                .filter(room => { return ineligibleRooms.has(room) == false })
+                                .filter(room => { return room.isOpen == true })
+                                .filter(room => {
+                                    if (room.occupant != null) {
+                                        return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
+                                    } else {
+                                        return true
+                                    }
+                                });
+
+                            // Sort the neighbors in order of distance to player
+                            // NOTE: this algorithm will ALWAYS choose the same move, so moving back and forth
+                            // to "juke" the monster will NOT WORK. Muah-ha-ha-ha-haaaa! 
+                            destination = eligibleNeighbors.sort((a, b) => {
+                                let distA = Math.abs(this.player.room.row - a.row) + Math.abs(this.player.room.col - a.col)
+                                let distB = Math.abs(this.player.room.row - b.row) + Math.abs(this.player.room.col - b.col)
+                                if (distA < distB) {
+                                    return -1
+                                } else if (distA > distB) {
+                                    return 1
+                                } else {
+                                    return 0
+                                }
+                            })[0];
+
+                            if (destination != null) {
+                                ineligibleRooms.add(destination);
+                                vacatedRooms.add(monster.room);
+                                vacatedRooms.delete(destination)
+                                let movementDriver = this.createEntityMovementDriver(
+                                    monster,
+                                    destination,
+                                    this.movementRateDefaultMillis,
+                                    () => { });
+                                drivers.push(movementDriver);
+                            }
+                        }
                         break;
 
                     case MonsterBehavior.FLEE_LINE_OF_SIGHT:
@@ -1449,11 +1448,53 @@ export class MazeScene extends Scene {
                         }
                         break;
 
+                    case MonsterBehavior.CHASE_OMNISCIENT:
+
+                        /**
+                         * CHASE OMNISCIENT
+                         * This monster will compute the moves that get it closest to the wizard, choosing randomly
+                         * if there is a tie.
+                         */
+
+                        // Find all eligible neighbors
+                        let eligibleNeighbors = this.getAdjacentRooms(monster.room)
+                            .filter(room => { return (room.isOpen == true || monster.mobility == MonsterMobility.INCORPOREAL) })
+                            .filter(room => { return ineligibleRooms.has(room) == false })
+                            .filter(room => {
+                                if (room.occupant != null) {
+                                    return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
+                                } else {
+                                    return true
+                                }
+                            })
+                            .map(room => {
+                                return {
+                                    room: room,
+                                    distance: Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col)
+                                }
+                            });
+
+                        let minDist = Math.min(...eligibleNeighbors.map(n => { return n.distance }))
+                        eligibleNeighbors = eligibleNeighbors.filter(room => { return room.distance == minDist });
+                        this.shuffleArray(eligibleNeighbors);
+                        destination = eligibleNeighbors[0].room;
+
+                        if (destination != null) {
+                            ineligibleRooms.add(destination);
+                            vacatedRooms.add(monster.room);
+                            vacatedRooms.delete(destination)
+                            let movementDriver = this.createEntityMovementDriver(
+                                monster,
+                                destination,
+                                this.movementRateDefaultMillis,
+                                () => { });
+                            drivers.push(movementDriver);
+                        }
+                        break;
+
                     default:
                         break;
                 }
-
-
             });
 
         // Place all monster movements into a single multi-entity driver

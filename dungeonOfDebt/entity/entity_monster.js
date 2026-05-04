@@ -17,7 +17,11 @@ export const MonsterBehavior = Object.freeze({
 });
 
 export const MonsterContactEffect = Object.freeze({
-    LETHAL: 10,                     // Kills the wizard when in contact.
+                                    // Coming into contact with this monster...
+    LETHAL: 10,                     // Kills the wizard
+    PENALTY_FINANCIAL: 20,          // Deducts from the wizard's gold
+    PENALTY_ZONE: 30,               // Removes a spell zone; wizard unable to use that zone
+    PENALTY_EFFECT: 40,             // Removes a spell effect; wizard unable to that that spell
 })
 
 export const MonsterMobility = Object.freeze({
@@ -191,6 +195,7 @@ export class MonsterWraith extends MonsterEntity {
 }
 
 export class MonsterGhost extends MonsterEntity {
+
     imageAsset = ImageAsset.MONSTER_GHOST;
     behavior = MonsterBehavior.RANDOM;
     visibility = MonsterVisibility.TRANSPARENT_HALF;
@@ -199,4 +204,17 @@ export class MonsterGhost extends MonsterEntity {
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
     }
+}
+
+export class MonsterVengefulSpirit extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_VENGEFUL_SPIRIT;
+    behavior = MonsterBehavior.CHASE_OMNISCIENT;
+    visibility = MonsterVisibility.TRANSPARENT_HALF;
+    mobility = MonsterMobility.INCORPOREAL;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
+    }
+
 }

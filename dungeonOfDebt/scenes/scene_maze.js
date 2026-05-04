@@ -2,7 +2,7 @@ import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterBehavior, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterMobility } from "../entity/entity_monster.js";
+import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterPhysicality, MonsterSkeleton } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 
@@ -57,6 +57,8 @@ import { SoundPlayer } from "../sound.js";
  *      vary footsteps sounds
  *      vary spell effect sounds
  *      freezing wraith make him visible
+ * 
+ *      !!! monsters type that is drawn to magic?
  *      
  * 
  * 
@@ -181,7 +183,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 2;
+    levelCurrent = 0;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -337,6 +339,8 @@ export class MazeScene extends Scene {
 
         // Monsters...
         this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+
+        this.entitiesEnemy.push(new MonsterSkeleton(this.tileSize, this.assetManager));
 
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
@@ -1319,11 +1323,11 @@ export class MazeScene extends Scene {
 
                 switch (monster.getMovementBehavior()) {
 
-                    case MonsterBehavior.RANDOM:
+                    case MonsterMovement.RANDOM:
 
                         let neighbors = this.getAdjacentRooms(monster.room)
                             .concat(monster.room)
-                            .filter(room => { return (room.isOpen == true || monster.mobility == MonsterMobility.INCORPOREAL) })
+                            .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                             .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {
                                 if (room.occupant != null) {
@@ -1345,7 +1349,7 @@ export class MazeScene extends Scene {
                         }
                         break;
 
-                    case MonsterBehavior.CHASE_LINE_OF_SIGHT:
+                    case MonsterMovement.CHASE_LINE_OF_SIGHT:
 
                         /**
                                 * CHASE_LINE_OF_SIGHT: 
@@ -1362,8 +1366,7 @@ export class MazeScene extends Scene {
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monster.room)
                                 .filter(room => { return ineligibleRooms.has(room) == false })
-                                .filter(room => { return room.isOpen == true })
-                                .filter(room => {
+                                .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) }).filter(room => {
                                     if (room.occupant != null) {
                                         return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
                                     } else {
@@ -1400,7 +1403,7 @@ export class MazeScene extends Scene {
                         }
                         break;
 
-                    case MonsterBehavior.FLEE_LINE_OF_SIGHT:
+                    case MonsterMovement.FLEE_LINE_OF_SIGHT:
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
 
@@ -1408,7 +1411,7 @@ export class MazeScene extends Scene {
                             let eligibleNeighbors = this.getAdjacentRooms(monster.room)
                                 .concat(monster.room)
                                 .filter(room => { return ineligibleRooms.has(room) == false })
-                                .filter(room => { return room.isOpen == true })
+                                .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
                                     if (room.occupant != null) {
                                         return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
@@ -1448,7 +1451,7 @@ export class MazeScene extends Scene {
                         }
                         break;
 
-                    case MonsterBehavior.CHASE_OMNISCIENT:
+                    case MonsterMovement.CHASE_OMNISCIENT:
 
                         /**
                          * CHASE OMNISCIENT
@@ -1458,7 +1461,8 @@ export class MazeScene extends Scene {
 
                         // Find all eligible neighbors
                         let eligibleNeighbors = this.getAdjacentRooms(monster.room)
-                            .filter(room => { return (room.isOpen == true || monster.mobility == MonsterMobility.INCORPOREAL) })
+                            .concat(monster.room)
+                            .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                             .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {
                                 if (room.occupant != null) {

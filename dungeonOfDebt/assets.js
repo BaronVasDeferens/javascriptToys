@@ -51,16 +51,21 @@ export var ImageAsset = Object.freeze({
     WIZARD_1: "entity/3794_zx.png",
     FROG: "entity/4071_zx.png",
 
-    MONSTER_PINK_EYE: "entity/monsters/3987_sm_zx.png",
+    // MONSTERS
+
     MONSTER_CENTIPEDE: "entity/monsters/4160_sm_zx.png",
-    MONSTER_FLY_1: "entity/monsters/4066_sm_zx.png",
+    MONSTER_GHOST: "entity/monsters/4725_sm_zx.png",
+    MONSTER_MAMMOTH: "entity/monsters/4052_zx.png",
+    MONSTER_PINK_EYE: "entity/monsters/3987_sm_zx.png",
     MONSTER_SCORPION: "entity/monsters/4082_sm_zx.png",
+    MONSTER_SKELETON: "entity/monsters/4798_sm_zx.png",
     MONSTER_SPIDER: "entity/monsters/4142_sm_zx.png",
     MONSTER_TROLL: "entity/monsters/3945_zx.png",
     MONSTER_WRAITH: "entity/monsters/3825_zx.png",
-    MONSTER_MAMMOTH: "entity/monsters/4052_zx.png",
-    MONSTER_GHOST: "entity/monsters/4725_sm_zx.png",
     MONSTER_VENGEFUL_SPIRIT: "entity/monsters/4724_zx.png",
+
+
+    // SPELL EFFECT OVERLAY
 
     SPELL_EFFECT_FROZEN: "spells/spell_effect_frozen.png",
 
@@ -68,7 +73,7 @@ export var ImageAsset = Object.freeze({
 
     TREASURE_CHEST_LARGE: "entity/collectables/5_zx.png",
     TREASURE_CHEST_SMALL: "entity/collectables/5_sm_zx.png",
-    
+
     DUNGEON_KEY: "entity/collectables/2614_sm_zx.png",
 
     COIN_1: "entity/collectables/2611_zx.png",

@@ -7,7 +7,18 @@ import { Spell, SpellEffect } from "./entity_spell.js";
  *  MONSTER ATTRIBUTES
  */
 
-export const MonsterBehavior = Object.freeze({
+export const MonsterNature = Object.freeze({
+    MORTAL: 10,                     // Flesh and blood, can be slain
+    IMMORTAL: 20,                   // Flesh and blood, but cannot be slain
+    UNDEAD: 30,                     // Cursed to roam the mortal world in death
+});
+
+export const MonsterPhysicality = Object.freeze({
+    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares
+    INCORPOREAL: 10,                // Passes through blocks      
+});
+
+export const MonsterMovement = Object.freeze({
     NONE: 0,                        // Does not move
     RANDOM: 10,                     // Moves to a random adjacent square
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
@@ -17,16 +28,11 @@ export const MonsterBehavior = Object.freeze({
 });
 
 export const MonsterContactEffect = Object.freeze({
-                                    // Coming into contact with this monster...
+    // Coming into contact with this monster...
     LETHAL: 10,                     // Kills the wizard
     PENALTY_FINANCIAL: 20,          // Deducts from the wizard's gold
     PENALTY_ZONE: 30,               // Removes a spell zone; wizard unable to use that zone
     PENALTY_EFFECT: 40,             // Removes a spell effect; wizard unable to that that spell
-})
-
-export const MonsterMobility = Object.freeze({
-    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares
-    INCORPOREAL: 10,                // Passes through blocks      
 });
 
 export const MonsterVisibility = Object.freeze({
@@ -55,8 +61,9 @@ export class MonsterEntity extends Entity {
     imageAssetId = ImageAsset.MONSTER_PINK_EYE;
     imageOpacity = 1.0;
 
-    behavior = MonsterBehavior.NONE;
-    mobility = MonsterMobility.CORPOREAL;
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.NONE;
     visibility = MonsterVisibility.VISIBLE;
     contactEffect = MonsterContactEffect.LETHAL;
 
@@ -67,11 +74,7 @@ export class MonsterEntity extends Entity {
     }
 
     getMovementBehavior() {
-        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
-            return MonsterBehavior.FLEE_LINE_OF_SIGHT;
-        } else {
-            return this.behavior;
-        }
+        return this.movement;
     }
 
     setVisibility(visibility) {
@@ -126,50 +129,100 @@ export class MonsterEntity extends Entity {
 export class MonsterMammoth extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_MAMMOTH;
-    behavior = MonsterBehavior.NONE;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.NONE;
     visibility = MonsterVisibility.VISIBLE;
-    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_MAMMOTH, assetManager);
+    }
+
+    getMovementBehavior() {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+            return MonsterMovement.FLEE_LINE_OF_SIGHT;
+        } else {
+            return this.movement;
+        }
     }
 }
 
 export class MonsterPinkEye extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_PINK_EYE;
-    behavior = MonsterBehavior.CHASE_LINE_OF_SIGHT;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.CHASE_LINE_OF_SIGHT;
     visibility = MonsterVisibility.VISIBLE;
-    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_PINK_EYE, assetManager);
+    }
+
+    getMovementBehavior() {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+            return MonsterMovement.FLEE_LINE_OF_SIGHT;
+        } else {
+            return this.movement;
+        }
     }
 }
 
 export class MonsterScorpion extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_SCORPION;
-    behavior = MonsterBehavior.RANDOM;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.RANDOM;
     visibility = MonsterVisibility.VISIBLE;
-    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_SCORPION, assetManager);
     }
+
+    getMovementBehavior() {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+            return MonsterMovement.FLEE_LINE_OF_SIGHT;
+        } else {
+            return this.movement;
+        }
+    }
 }
+
+export class MonsterSkeleton extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_SKELETON;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.CHASE_OMNISCIENT;
+    visibility = MonsterVisibility.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_SKELETON, assetManager);
+    }
+
+    getMovementBehavior() {
+        return this.movement;
+    }
+}
+
 
 export class MonsterWraith extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_WRAITH;
-    behavior = MonsterBehavior.RANDOM;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.RANDOM;
     visibility = MonsterVisibility.VISIBLE;
-    mobility = MonsterMobility.CORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_WRAITH, assetManager);
     }
-
 
     render(context, mazeWindowX, mazeWindowY) {
 
@@ -197,9 +250,11 @@ export class MonsterWraith extends MonsterEntity {
 export class MonsterGhost extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_GHOST;
-    behavior = MonsterBehavior.RANDOM;
+
+    physicality = MonsterPhysicality.INCORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.RANDOM;
     visibility = MonsterVisibility.TRANSPARENT_HALF;
-    mobility = MonsterMobility.INCORPOREAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
@@ -209,9 +264,12 @@ export class MonsterGhost extends MonsterEntity {
 export class MonsterVengefulSpirit extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_VENGEFUL_SPIRIT;
-    behavior = MonsterBehavior.CHASE_OMNISCIENT;
+
+    physicality = MonsterPhysicality.INCORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.CHASE_OMNISCIENT;
     visibility = MonsterVisibility.TRANSPARENT_HALF;
-    mobility = MonsterMobility.INCORPOREAL;
+
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);

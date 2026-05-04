@@ -172,7 +172,7 @@ export class MazeScene extends Scene {
     mazeArray = [];
     allRooms = [];
     visibleRooms = [];
-    eventList = [];
+    eventList = [];                         // TODO: split out portals and collectables
 
     numEnemyEntities = 9;
     entitiesEnemy = [];

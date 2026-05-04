@@ -2040,10 +2040,12 @@ export class MazeScene extends Scene {
     }
 
     processCollectableEvents(entity, room) {
+
         if (entity == null || room == null || room.event == null) {
             return
         }
 
+        // Collecting all the loose treasures reveals a CHEST!
         let unclaimedTreasures = this.eventList
             .filter(evt => { return evt instanceof TreasureCollectableEvent })
             .filter(evt => { return evt.isActive == true });
@@ -2053,8 +2055,7 @@ export class MazeScene extends Scene {
             room.triggerEventIfPresent(entity);
 
             if (unclaimedTreasures.every(evt => { return evt.isActive == false })) {
-                console.log(`all treasures claimed!`);
-                this.soundPlayer.playOneShot(SoundAsset.FROG_HOP);
+                this.soundPlayer.playOneShot(SoundAsset.SECRET_REVEALED);
 
                 let chest = new ChestCollectableEvent(
                     () => {

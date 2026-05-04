@@ -20,6 +20,12 @@ import { SoundPlayer } from "../sound.js";
  * 
  * SHORT TERM
  * 
+ *      !!! FREEZE is too powerful-- should end turn after 1st use?
+ * 
+ *      !!! spell effects x monster types
+ *              - can UNDEAD be TRANSMUTED?
+ *              - can INCORPOREAL be FROZEN?
+ * 
  *      !!! give player a randomized set of zones and spells
  *      !!! cook up more spells then give the player a random number of them per "run" (? too rogue-like?)
  *      !!! cook up more spells then let player choose however many

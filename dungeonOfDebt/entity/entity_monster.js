@@ -148,6 +148,24 @@ export class MonsterMammoth extends MonsterEntity {
     }
 }
 
+export class MonsterMummy extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_MUMMY;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.CHASE_OMNISCIENT;
+    visibility = MonsterVisibility.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_MUMMY, assetManager);
+    }
+
+    getMovementBehavior() {
+        return this.movement;
+    }
+}
+
 export class MonsterPinkEye extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_PINK_EYE;
@@ -191,25 +209,6 @@ export class MonsterScorpion extends MonsterEntity {
         }
     }
 }
-
-export class MonsterSkeleton extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_SKELETON;
-
-    physicality = MonsterPhysicality.CORPOREAL;
-    nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.CHASE_OMNISCIENT;
-    visibility = MonsterVisibility.VISIBLE;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_SKELETON, assetManager);
-    }
-
-    getMovementBehavior() {
-        return this.movement;
-    }
-}
-
 
 export class MonsterWraith extends MonsterEntity {
 

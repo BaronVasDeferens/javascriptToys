@@ -2,7 +2,7 @@ import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterPhysicality, MonsterSkeleton } from "../entity/entity_monster.js";
+import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterPhysicality, MonsterMummy } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 
@@ -340,7 +340,7 @@ export class MazeScene extends Scene {
         // Monsters...
         this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
 
-        this.entitiesEnemy.push(new MonsterSkeleton(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
 
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
@@ -1481,7 +1481,9 @@ export class MazeScene extends Scene {
                         let minDist = Math.min(...eligibleNeighbors.map(n => { return n.distance }))
                         eligibleNeighbors = eligibleNeighbors.filter(room => { return room.distance == minDist });
                         this.shuffleArray(eligibleNeighbors);
-                        destination = eligibleNeighbors[0].room;
+                        if (eligibleNeighbors[0] != null) {
+                            destination = eligibleNeighbors[0].room;
+                        }
 
                         if (destination != null) {
                             ineligibleRooms.add(destination);

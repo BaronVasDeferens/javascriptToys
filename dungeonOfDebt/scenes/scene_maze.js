@@ -364,98 +364,15 @@ export class MazeScene extends Scene {
 
         // -------- USER INTERFACE ----------
 
-        // Zone cards
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.CROSS_SMALL,
-                () => { this.onSpellZoneSelected(SpellZone.CROSS_SMALL) },
-                this.canvasSecondary,
-                0,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
 
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.CROSS_INVERTED,
-                () => { this.onSpellZoneSelected(SpellZone.CROSS_INVERTED) },
-                this.canvasSecondary,
-                0,
-                64,
-                this.tileSize,
-                this.assetManager
-            )
-        );
-
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.COLUMN_FULL,
-                () => { this.onSpellZoneSelected(SpellZone.COLUMN_FULL) },
-                this.canvasSecondary,
-                64,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
-
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.CANCEL,
-                () => { this.onSpellZoneSelected(SpellZone.CANCEL) },
-                this.canvasSecondary,
-                64,
-                64,
-                this.tileSize,
-                this.assetManager
-            )
-        );
-
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.ROW_FULL,
-                () => { this.onSpellZoneSelected(SpellZone.ROW_FULL) },
-                this.canvasSecondary,
-                128,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
-
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.SELF_TARGET,
-                () => { this.onSpellZoneSelected(SpellZone.SELF_TARGET) },
-                this.canvasSecondary,
-                128,
-                64,
-                this.tileSize,
-                this.assetManager
-            )
-        );
-
+        // EFFECTS: UPPER ROW ---------------------------------------------------------
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.FREEZE,
                 () => { this.onSpellEffectSelected(SpellEffect.FREEZE) },
                 this.canvasSecondary,
-                320,
                 0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
-
-        this.spellCardComponents.push(
-            new SpellEffectComponentCard(
-                SpellEffect.EXCHANGE,
-                () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
-                this.canvasSecondary,
-                320,
-                64,
+                0,
                 this.tileSize,
                 this.assetManager
             )
@@ -466,7 +383,7 @@ export class MazeScene extends Scene {
                 SpellEffect.INVERT,
                 () => { this.onSpellEffectSelected(SpellEffect.INVERT) },
                 this.canvasSecondary,
-                384,
+                64,
                 0,
                 this.tileSize,
                 this.assetManager
@@ -478,8 +395,87 @@ export class MazeScene extends Scene {
                 SpellEffect.TRANSMUTATION,
                 () => { this.onSpellEffectSelected(SpellEffect.TRANSMUTATION) },
                 this.canvasSecondary,
+                128,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        // EFFECTS: LOWER ROW ---------------------------------------------------------
+
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.EXCHANGE,
+                () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
+                this.canvasSecondary,
+                0,
+                64,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        // ZONES: UPPER ROW ---------------------------------------------------------
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.CROSS_SMALL,
+                () => { this.onSpellZoneSelected(SpellZone.CROSS_SMALL) },
+                this.canvasSecondary,
+                320,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.COLUMN_FULL,
+                () => { this.onSpellZoneSelected(SpellZone.COLUMN_FULL) },
+                this.canvasSecondary,
+                384,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.SELF_TARGET,
+                () => { this.onSpellZoneSelected(SpellZone.SELF_TARGET) },
+                this.canvasSecondary,
                 448,
                 0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        // ZONES: LOWER ROW ---------------------------------------------------------
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.CROSS_INVERTED,
+                () => { this.onSpellZoneSelected(SpellZone.CROSS_INVERTED) },
+                this.canvasSecondary,
+                320,
+                64,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.ROW_FULL,
+                () => { this.onSpellZoneSelected(SpellZone.ROW_FULL) },
+                this.canvasSecondary,
+                384,
+                64,
                 this.tileSize,
                 this.assetManager
             )
@@ -716,6 +712,8 @@ export class MazeScene extends Scene {
     onStop() {
 
     }
+
+    // -------------------------------------- PLAYER INPUT --------------------------------------
 
     onMouseDown(click) {
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
@@ -2074,7 +2072,7 @@ export class MazeScene extends Scene {
                 this.eventList.push(chest);
                 this.distributeAcrossOpenRooms([chest]);
 
-                }
+            }
         } else {
             room.triggerEventIfPresent(entity);
         }

@@ -33,6 +33,7 @@ export class ComponentCard {
     discharged = false;
 
     isActive = true;         // TRUE: this card is fully opaque and clickable; FALSE: semi-opaque not clickable
+    isSelected = false;
 
     alpha = 1.0;
 
@@ -43,7 +44,22 @@ export class ComponentCard {
         this.tileSize = tileSize;
     }
 
+    setIsSelected(isSelected) {
+        if (this.discharged == true) {
+            this.isSelected = false;
+            this.isActive = false;
+            return;
+        }
+        
+        this.isSelected = isSelected;
+    }
+
     setIsActive(isActive) {
+
+        if (this.discharged == true) {
+            this.isActive = false;
+            return;
+        }
 
         this.isActive = isActive;
 
@@ -79,7 +95,7 @@ export class ComponentCard {
  */
 export class SpellZoneComponentCard extends ComponentCard {
 
-    isSelected = false;
+
 
     constructor(spellZone, onClick, canvas, x, y, tileSize, assetManager) {
         super(canvas, x, y, tileSize);
@@ -110,9 +126,7 @@ export class SpellZoneComponentCard extends ComponentCard {
         }
     }
 
-    setIsSelected(isSelected) {
-        this.isSelected = isSelected;
-    }
+
 
     render(context) {
 
@@ -164,10 +178,6 @@ export class SpellEffectComponentCard extends ComponentCard {
                 this.image = assetManager.getImage(ImageAsset.SPELL_CARD_EXCHANGE);
                 break;
         }
-    }
-
-    setIsSelected(isSelected) {
-        this.isSelected = isSelected;
     }
 
     render(context) {

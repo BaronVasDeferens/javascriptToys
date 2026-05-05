@@ -346,7 +346,9 @@ export class MazeScene extends Scene {
         // Monsters...
         this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
 
-        this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+        if (this.levelCurrent - 5 >= 0) {
+            this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+        }
 
         for (let n = 0; n < this.levelCurrent; n++) {
             this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
@@ -941,7 +943,6 @@ export class MazeScene extends Scene {
         this.updateMagicInterface();
     }
 
-
     onSpellZoneHover(spellZone) {
 
         this.highlightedGridSquares = [];
@@ -1075,13 +1076,8 @@ export class MazeScene extends Scene {
             }
         }
 
-
-
-
         this.resolveSpellCasting();
     }
-
-
 
     resolveSpellCasting() {
 
@@ -1257,6 +1253,12 @@ export class MazeScene extends Scene {
                         }
                     });
 
+                    // CHECK: did the wizard exchange places with an incorporeal entity inside a block?
+                    let fatalTeleport = !this.player.room.isOpen;
+                    if (fatalTeleport == true) {
+                        this.player.addSpellEffect(SpellEffect.INVERT);     // Teleported to a closed room-- same as INVERTED!
+                    }
+
                     spellEffectOverlay = new SpellEffectOverlay(
                         this.canvasPrimary,
                         "#6d0088"
@@ -1274,8 +1276,12 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.concludePlayerTurn();
-                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                if (fatalTeleport == true) {
+                                    this.concludePlayerTurn();
+                                } else {
+                                    this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                    this.computeMazeWindow();
+                                }
                             }
                         )
                     )

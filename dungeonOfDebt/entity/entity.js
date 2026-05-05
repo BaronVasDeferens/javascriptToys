@@ -42,17 +42,18 @@ export class Entity {
         switch (effect) {
 
             case SpellEffect.FREEZE:
-                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
                 this.isFrozen = true;
+                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
                 break;
 
             case SpellEffect.INVERT:
                 this.isInverted = true;
+                this.overlayImage = this.room.image;
                 break;
 
             case SpellEffect.TRANSMUTATION:
-                this.image = this.assetManager.getImage(ImageAsset.FROG);
                 this.isTransmuted = true;
+                this.image = this.assetManager.getImage(ImageAsset.FROG);
                 break;
 
             default:

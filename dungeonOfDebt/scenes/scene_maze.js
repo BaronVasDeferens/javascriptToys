@@ -238,8 +238,8 @@ export class MazeScene extends Scene {
 
         this.soundPlayer = new SoundPlayer(this.assetManager, this.audioContext)
 
-        this.selectedSpellZone = null;
         this.selectedSpellEffect = null;
+        this.selectedSpellZone = null;
 
         this.eventList = [];
         this.spellCardComponents = [];
@@ -366,6 +366,7 @@ export class MazeScene extends Scene {
 
 
         // EFFECTS: UPPER ROW ---------------------------------------------------------
+
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.FREEZE,
@@ -746,6 +747,18 @@ export class MazeScene extends Scene {
 
     onMouseMoveSecondary(event) {
 
+        if (this.selectedSpellEffect != null) {
+
+            let hoverTarget = this.spellCardComponents
+                .filter(card => { return card instanceof SpellZoneComponentCard })
+                .filter(card => { return card.containsPoint(event) })[0];
+
+            if (hoverTarget != null) {
+                this.onSpellZoneHover(hoverTarget.spellZone)
+            } else {
+                this.onSpellZoneHover(null);
+            }
+        }
     }
 
     onKeyPressed(event) {
@@ -906,41 +919,41 @@ export class MazeScene extends Scene {
 
     // -------------------------------------- MAGIC --------------------------------------
 
-    /**
-     * Triggered when the user clicks on a SpellZone card to select an area of effect. 
-     */
-    onSpellZoneSelected(spellZone) {
+    onSpellEffectSelected(spellEffect) {
 
-        let spellZoneCard = this.spellCardComponents
-            .filter(card => { return card.spellZone == spellZone })[0];
-
-
-        if (spellZoneCard.isActive == false) {
-            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
-            return;
+        if (this.selectedSpellEffect == null) {
+            // No other selection has been made
+            this.selectedSpellEffect = spellEffect;
+            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+        } else {
+            if (this.selectedSpellEffect == spellEffect) {
+                // Double-selection of the same effect cancels everything
+                this.selectedSpellEffect = null;
+                this.selectedSpellZone = null;
+                this.highlightedGridSquares = [];
+                this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+            } else {
+                this.selectedSpellEffect = spellEffect;
+                this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+            }
         }
 
-        // TODO: consider limiting spell effects such that they cannot pass through walls...?
+        this.updateMagicInterface();
+    }
+
+
+    onSpellZoneHover(spellZone) {
 
         this.highlightedGridSquares = [];
+
+        if (spellZone == null) {
+            return
+        }
 
         let rooms = [];
         let room = null;
 
-        if (this.selectedSpellZone == null) {
-            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
-            this.selectedSpellZone = spellZone;
-        } else {
-            if (this.selectedSpellZone == spellZone || spellZone == SpellZone.CANCEL) {
-                this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
-                this.selectedSpellZone = null;
-            } else {
-                this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
-                this.selectedSpellZone = spellZone;
-            }
-        }
-
-        switch (this.selectedSpellZone) {
+        switch (spellZone) {
 
             case SpellZone.CANCEL:
                 this.selectedSpellZone = null;
@@ -1002,9 +1015,17 @@ export class MazeScene extends Scene {
                 break;
         }
 
+        // TODO: move this somewhere LESS volatile
+        let spellColorMap = new Map();
+        spellColorMap.set(SpellEffect.FREEZE, "#00a9FF")
+        spellColorMap.set(SpellEffect.INVERT, "#ffffff");
+        spellColorMap.set(SpellEffect.TRANSMUTATION, "#00ff0d");
+        spellColorMap.set(SpellEffect.EXCHANGE, "#6d0088");
+
+        let color = spellColorMap.get(this.selectedSpellEffect);
+
         rooms
             .filter(rm => { return rm != null })
-            //.filter(rm => { return (rm.row != this.player.room.row) && (rm.col != this.player.room.col) })
             .forEach(highlightedRoom => {
                 this.highlightedGridSquares.push(
 
@@ -1016,7 +1037,7 @@ export class MazeScene extends Scene {
                         row: highlightedRoom.row,
                         tileSize: this.tileSize,
                         render: function (context) {
-                            context.fillStyle = "#FF0000";
+                            context.fillStyle = color;
                             context.globalAlpha = 0.5;
                             context.fillRect(
                                 this.col * this.tileSize,
@@ -1030,31 +1051,37 @@ export class MazeScene extends Scene {
                     }
                 )
             });
-
-        this.updateMagicInterface()
     }
 
-    onSpellEffectSelected(spellEffect) {
+    /**
+     * Triggered when the user clicks on a SpellZone card to select an area of effect. 
+     */
+    onSpellZoneSelected(spellZone) {
 
-        // TODO: consider enforcing the sequence: ZONE => EFFECT => DURATION/STRENGTH
-
-        if (this.selectedSpellZone == null) {
-            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID)
+        if (this.selectedSpellEffect == null) {
+            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+            return
         }
 
-        if (this.selectedSpellEffect == null && spellEffect != SpellEffect.CANCEL) {
-            this.selectedSpellEffect = spellEffect;
+        if (this.selectedSpellZone == null) {
+            this.selectedSpellZone = spellZone;
         } else {
-            // Double-selecting the same effect CLEARS the effect
-            if (this.selectedSpellEffect == spellEffect || spellEffect == SpellEffect.CANCEL) {
-                this.selectedSpellEffect = null;
+            if (this.selectedSpellZone == spellZone) {
+                this.selectedSpellZone = null;
+                this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
             } else {
-                this.selectedSpellEffect = spellEffect;
+                this.selectedSpellZone = spellZone;
+                this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
             }
         }
 
+
+
+
         this.resolveSpellCasting();
     }
+
+
 
     resolveSpellCasting() {
 
@@ -1274,30 +1301,33 @@ export class MazeScene extends Scene {
     updateMagicInterface() {
 
         let gameOver = this.currentGameSequence == GameSequence.GAME_OVER;
-        let activateZoneCards = (this.player.isTransmuted != true);
-        let activateEffectCards = (this.selectedSpellZone != null);
+
+        let activateEffectCards = (this.player.isTransmuted == false);
+        let activateZoneCards = (this.selectedSpellEffect != null);
+
 
         this.spellCardComponents.forEach(card => {
 
-            if (card instanceof SpellZoneComponentCard) {
+            if (card instanceof SpellEffectComponentCard) {
 
-                if (activateZoneCards == false || gameOver == true) {
+                if (activateEffectCards == false || gameOver == true) {
+                    // Effect cards aren't lit while the wizard is transmuted or defeated...
                     card.setIsActive(false);
                     card.setIsSelected(false);
                 } else {
 
+                    // ...otherwise, the effect cards are always lit
                     card.setIsActive(true);
-
-                    if (card.spellZone == this.selectedSpellZone && this.selectedSpellZone != null) {
+                    if (card.spellEffect == this.selectedSpellEffect) {
                         card.setIsSelected(true)
                     } else {
                         card.setIsSelected(false)
                     }
                 }
 
-            } else if (card instanceof SpellEffectComponentCard) {
+            } else if (card instanceof SpellZoneComponentCard) {
 
-                if (activateEffectCards == false) {
+                if (activateZoneCards == false) {
                     card.setIsActive(false);
                 } else if (activateEffectCards == true) {
                     card.setIsActive(true);

@@ -138,6 +138,7 @@ export class SpellEffectComponentCard extends ComponentCard {
         super(canvas, x, y, tileSize);
         this.onClick = onClick;
         this.spellEffect = spellEffect;
+        this.assetManager = assetManager;
 
         switch (spellEffect) {
 
@@ -163,6 +164,21 @@ export class SpellEffectComponentCard extends ComponentCard {
                 this.image = assetManager.getImage(ImageAsset.SPELL_CARD_EXCHANGE);
                 break;
         }
+    }
+
+    setIsSelected(isSelected) {
+        this.isSelected = isSelected;
+    }
+
+    render(context) {
+
+        super.render(context)
+
+        if (this.isSelected == true) {
+            context.globalAlpha = 1.0;
+            context.drawImage(this.assetManager.getImage(ImageAsset.SPELL_SECTION_OVERLAY), this.x, this.y);
+        }
+
     }
 }
 

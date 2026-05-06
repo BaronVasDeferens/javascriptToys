@@ -322,7 +322,7 @@ export class MazeScene extends Scene {
         );
 
         // Treasures...
-        for (let n = 0; n < (this.levelCurrent * 3) + 2; n++) {
+        for (let n = 0; n < 5; n++) {
 
             let coinSound = this.coinSounds[Math.floor(this.coinSounds.length * Math.random())];
 

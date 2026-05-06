@@ -37,7 +37,6 @@ import { SoundPlayer } from "../sound.js";
 
  * 
  * 
- * 
  *      !!! FREEZE is too powerful-- should end turn after 1st use?
  * 
  *      !!! spell effects x monster types
@@ -451,7 +450,6 @@ export class MazeScene extends Scene {
                 this.assetManager
             )
         );
-
 
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
@@ -1062,7 +1060,6 @@ export class MazeScene extends Scene {
             });
     }
 
-
     onSpellEffectSelected(spellEffect) {
 
         let playThisSound = null;
@@ -1224,13 +1221,7 @@ export class MazeScene extends Scene {
                                 // onUpdate
                             },
                             () => {
-                                // onComplete
-                                if (wizardFrozen == true) {
-                                    // O mighty wizard, thy game is over
-                                    this.concludePlayerTurn()
-                                } else {
-                                    this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
-                                }
+                                this.concludePlayerTurn();
                             }
                         )
                     )
@@ -1281,14 +1272,7 @@ export class MazeScene extends Scene {
                                 // onUpdate
                             },
                             () => {
-                                // onComplete
-                                if (wizardInverted == true) {
-                                    // O mighty wizard, thy game is over
-                                    this.concludePlayerTurn();
-                                } else {
-                                    this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
-                                    this.computeMazeWindow();
-                                }
+                                this.concludePlayerTurn();
                             }
                         )
                     )
@@ -1321,8 +1305,7 @@ export class MazeScene extends Scene {
                                 // onUpdate
                             },
                             () => {
-                                // onComplete
-                                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+                                this.concludePlayerTurn();
                             }
                         )
                     )
@@ -1375,13 +1358,8 @@ export class MazeScene extends Scene {
                                 // onUpdate
                             },
                             () => {
-                                // onComplete
-                                if (fatalTeleport == true) {
-                                    this.concludePlayerTurn();
-                                } else {
-                                    this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
-                                    this.computeMazeWindow();
-                                }
+    
+                                this.concludePlayerTurn();
                             }
                         )
                     )
@@ -1659,7 +1637,7 @@ export class MazeScene extends Scene {
 
                 } else {
 
-                    // Case 3: destination open, occupant frozen
+                    // Case 3: destination open, occupant frozen...KICK THE CUBE!
                     // The player can push a frozen enemy out into an adjacent space under the following conditions:
                     //      there must exist a space for the cube to move over to
 
@@ -1716,6 +1694,8 @@ export class MazeScene extends Scene {
                                 endpoint.setOccupant(sliderEntity);
                             }
                         )
+
+                        this.soundPlayer.playOneShot(SoundAsset.ZIP);
                     } else {
 
                     }
@@ -2151,12 +2131,16 @@ export class MazeScene extends Scene {
             room.triggerEventIfPresent(entity);
 
             if (unclaimedTreasures.every(evt => { return evt.isActive == false })) {
-                this.soundPlayer.playOneShot(SoundAsset.SECRET_REVEALED);
 
+                // Place a chest in a random square
+
+                this.soundPlayer.playOneShot(SoundAsset.SECRET_REVEALED);
                 let chest = new ChestCollectableEvent(
                     () => {
+                        // onTreasureCollected
                         console.log(`MEGA CHINGUS`);
-                        // play sound
+                        this.soundPlayer.playOneShot(SoundAsset.BONUS);
+                        // TODO: award bonus
                     },
                     this.assetManager
                 );

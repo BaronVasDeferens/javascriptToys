@@ -20,6 +20,24 @@ import { SoundPlayer } from "../sound.js";
  * 
  * SHORT TERM
  * 
+ * 
+ *      O sorcerer! Not for want of arcane power 
+ *          hast thou been defeated
+ * 
+ *      Poor sorcerer! The level failed
+ *          and thou must again repeat it
+ * 
+ *      O sorcerer! What possessed thee to seek 
+ *          thy fortune in such a place
+ *  * 
+ *      O sorcerer! Ruin 
+
+ *          thou hast been consumed by greed 
+ *          and the labyrinth consumes the weak 
+
+ * 
+ * 
+ * 
  *      !!! FREEZE is too powerful-- should end turn after 1st use?
  * 
  *      !!! spell effects x monster types
@@ -759,7 +777,8 @@ export class MazeScene extends Scene {
                     this.setHighlightedSquares(hoverTarget.spellEffect, this.selectedSpellZone)
                 }
             } else if (hoverTarget instanceof SpellZoneComponentCard) {
-                if (hoverTarget.spellZone != this.selectedSpellZone) {
+                // Don't update the zone on hover if a zone has already been selected
+                if (hoverTarget.spellZone != this.selectedSpellZone && this.selectedSpellZone == null) {
                     this.setHighlightedSquares(this.selectedSpellEffect, hoverTarget.spellZone)
                 }
             }
@@ -929,7 +948,7 @@ export class MazeScene extends Scene {
 
     // -------------------------------------- MAGIC --------------------------------------
 
-    setHighlightedSquares(spellEffect, spellZone) {               // TODO rename: onSpellZoneCardHover
+    setHighlightedSquares(spellEffect, spellZone) {
 
         this.highlightedGridSquares = [];
 
@@ -1039,23 +1058,35 @@ export class MazeScene extends Scene {
             });
     }
 
+
     onSpellEffectSelected(spellEffect) {
+
+        let playThisSound = null;
 
         if (this.selectedSpellEffect == null) {
             // No other selection has been made
             this.selectedSpellEffect = spellEffect;
-            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+
+            if (this.selectedSpellZone == null) {
+                playThisSound = SoundAsset.UI_SELECTION;
+            }
+
         } else {
             if (this.selectedSpellEffect == spellEffect) {
                 // Double-selection of the same effect cancels everything
                 this.selectedSpellEffect = null;
                 this.highlightedGridSquares = [];
-                this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                playThisSound = SoundAsset.UI_CANCEL;
             } else {
                 this.selectedSpellEffect = spellEffect;
-                this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                playThisSound = SoundAsset.UI_SELECTION;
             }
         }
+
+        if (playThisSound != null) {
+            this.soundPlayer.playOneShot(playThisSound);
+        }
+
 
         this.updateMagicInterface();
 
@@ -1068,17 +1099,28 @@ export class MazeScene extends Scene {
 
     onSpellZoneSelected(spellZone) {
 
+        let playThisSound = null;
+
         if (this.selectedSpellZone == null) {
+            // No prior effect was selected -> SELECT
             this.selectedSpellZone = spellZone;
-            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+            if (this.selectedSpellEffect == null) {
+                playThisSound = SoundAsset.UI_SELECTION;
+            }
         } else {
             if (this.selectedSpellZone == spellZone) {
+                // Selected the same options -> DESELECT
                 this.selectedSpellZone = null;
-                this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                playThisSound = SoundAsset.UI_CANCEL;
             } else {
+                // user changed their selection -> SELECT
                 this.selectedSpellZone = spellZone;
-                this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                playThisSound.SoundAsset.UI_SELECTION;
             }
+        }
+
+        if (playThisSound != null) {
+            this.soundPlayer.playOneShot(playThisSound);
         }
 
         this.updateMagicInterface();

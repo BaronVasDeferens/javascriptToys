@@ -952,7 +952,7 @@ export class MazeScene extends Scene {
 
         this.highlightedGridSquares = [];
 
-        if (this.player.isTransmuted == true) {
+        if (this.player.isTransmuted == true || this.currentGameSequence == GameSequence.GAME_OVER) {
             return;
         }
 

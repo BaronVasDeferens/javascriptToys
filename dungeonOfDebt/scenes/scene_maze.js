@@ -952,6 +952,10 @@ export class MazeScene extends Scene {
 
         this.highlightedGridSquares = [];
 
+        if (this.player.isTransmuted == true) {
+            return;
+        }
+
         let rooms = [];
         let room = null;
 
@@ -1063,7 +1067,9 @@ export class MazeScene extends Scene {
 
         let playThisSound = null;
 
-        if (this.selectedSpellEffect == null) {
+        if (this.player.isTransmuted == true) {
+            playThisSound = SoundAsset.UI_INVALID;
+        } else if (this.selectedSpellEffect == null) {
             // No other selection has been made
             this.selectedSpellEffect = spellEffect;
 
@@ -1101,7 +1107,9 @@ export class MazeScene extends Scene {
 
         let playThisSound = null;
 
-        if (this.selectedSpellZone == null) {
+        if (this.player.isTransmuted == true) {
+            playThisSound = SoundAsset.UI_INVALID;
+        } else if (this.selectedSpellZone == null) {
             // No prior effect was selected -> SELECT
             this.selectedSpellZone = spellZone;
             if (this.selectedSpellEffect == null) {
@@ -1115,7 +1123,7 @@ export class MazeScene extends Scene {
             } else {
                 // user changed their selection -> SELECT
                 this.selectedSpellZone = spellZone;
-                playThisSound.SoundAsset.UI_SELECTION;
+                playThisSound = SoundAsset.UI_SELECTION;
             }
         }
 
@@ -1142,7 +1150,10 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.forEach(card => {
 
-            if (card instanceof SpellEffectComponentCard) {
+            if (this.player.isTransmuted == true) {
+                card.setIsActive(false);
+                card.setIsSelected(false)
+            } else if (card instanceof SpellEffectComponentCard) {
 
                 if (gameOver == true) {
                     // Effect cards aren't lit while the wizard is transmuted or defeated...

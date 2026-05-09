@@ -10,6 +10,8 @@ export class MazeEvent {
 
     room = null;
 
+    alpha = 1.0;
+
     isVisible = true;
     isOneShot = true;
     isActive = true;
@@ -19,6 +21,10 @@ export class MazeEvent {
     constructor(onTrigger, color) {
         this.onTrigger = onTrigger;
         this.color = color;
+    }
+
+    setAlpha(alpha) {
+        this.alpha = alpha;
     }
 
     setIsVisible(isVisible) {
@@ -54,7 +60,7 @@ export class TreasureCollectableEvent extends MazeEvent {
     ];
 
     image = null;
-    imageOpacity = 1.0;
+    alpha = 1.0;
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);
@@ -94,7 +100,7 @@ export class TreasureCollectableEvent extends MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
         if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.imageOpacity;
+            context.globalAlpha = this.alpha;
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
@@ -107,7 +113,7 @@ export class TreasureCollectableEvent extends MazeEvent {
 export class ChestCollectableEvent extends MazeEvent {
 
     image = null;
-    imageOpacity = 1.0;
+    alpha = 1.0;
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);
@@ -146,7 +152,7 @@ export class ChestCollectableEvent extends MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
         if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.imageOpacity;
+            context.globalAlpha = this.alpha;
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
@@ -194,7 +200,7 @@ export class KeyCollectableEvent extends MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
         if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.imageOpacity;
+            context.globalAlpha = this.alpha;
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
@@ -254,7 +260,7 @@ export class PortalStaircaseEvent extends MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
         if (this.isVisible == true) {
-            context.globalAlpha = this.imageOpacity;
+            context.globalAlpha = this.alpha;
             context.drawImage(
                 this.image,
                 (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,

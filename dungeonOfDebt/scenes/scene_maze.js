@@ -1,5 +1,5 @@
 import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
-import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, ImageUpdateDriver } from "../driver.js";
+import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect } from "../entity/entity_monster.js";
@@ -166,18 +166,16 @@ import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollecta
  * 
  */
 
-const GameSequence = Object.freeze(
-    {
-        "INITIALIZING": 0,
-        "PLAYER_AWAITING_MOVEMENT": 10,
-        "PLAYER_MOVING": 20,
-        "SPECIAL_EFFECT_ANIMATING": 21,
-        "ENEMY_PLOTTING_MOVEMENT": 30,
-        "ENEMY_MOVING": 40,
-        "WAIT_FOR_DRIVER": 50,
-        "GAME_OVER": 99999
-    }
-);
+const GameSequence = Object.freeze({
+    "INITIALIZING": 0,
+    "PLAYER_AWAITING_MOVEMENT": 10,
+    "PLAYER_MOVING": 20,
+    "SPECIAL_EFFECT_ANIMATING": 21,
+    "ENEMY_PLOTTING_MOVEMENT": 30,
+    "ENEMY_MOVING": 40,
+    "WAIT_FOR_DRIVER": 50,
+    "GAME_OVER": 99999
+});
 
 const Direction = Object.freeze({
     UP: { rowOffset: -1, colOffset: 0 },
@@ -322,7 +320,8 @@ export class MazeScene extends Scene {
         );
 
         // TREASURES...
-        for (let n = 0; n < 5; n++) {
+        let treasureTotal = 1;
+        for (let n = 0; n < treasureTotal; n++) {
 
             let coinSound = this.coinSounds[Math.floor(this.coinSounds.length * Math.random())];
 
@@ -382,20 +381,20 @@ export class MazeScene extends Scene {
 
 
         // MONSTERS...
-        // this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
 
         // if (this.levelCurrent - 5 >= 0) {
         this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
-        this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+        // this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
         // }
 
         // for (let n = 0; n < this.levelCurrent; n++) {
         //     this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
         // }
 
-        // for (let n = 0; n < this.levelCurrent; n++) {
-        //     this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-        // }
+        for (let n = 0; n < this.levelCurrent; n++) {
+            this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+        }
 
         // for (let n = 0; n < this.levelCurrent; n++) {
         //     this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
@@ -538,6 +537,7 @@ export class MazeScene extends Scene {
             }
         }
 
+        // Remove any "dead" (permanently neutralized) entities
         this.entitiesEnemy = this.entitiesEnemy.filter(ent => { return ent.isAlive == true });
     }
 
@@ -620,9 +620,9 @@ export class MazeScene extends Scene {
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
     }
 
- /*
-    TODO ---- REFACTOR UpdateGameSeq() and UpdateGameSeqOrGameOver() to be less...uh, like they are
- */
+    /*
+       TODO ---- REFACTOR UpdateGameSeq() and UpdateGameSeqOrGameOver() to be less...uh, like they are
+    */
 
     updateGameSequence(newSequence) {
 
@@ -1257,8 +1257,6 @@ export class MazeScene extends Scene {
                             }
                         )
                     )
-
-                    this.updateGameSequence(GameSequence.SPECIAL_EFFECT_ANIMATING);
                     break;
 
                 case SpellEffect.INVERT:
@@ -1341,7 +1339,6 @@ export class MazeScene extends Scene {
                             }
                         )
                     )
-
                     break;
 
                 case SpellEffect.EXCHANGE:
@@ -2176,9 +2173,21 @@ export class MazeScene extends Scene {
                     },
                     this.assetManager
                 );
+                chest.setAlpha(0.0);
 
                 this.eventList.push(chest);
                 this.distributeAcrossOpenRooms([chest]);
+
+                let fadeInDriver = new EntityImageOpacityUpdateDriver(
+                    chest,
+                    0.0,
+                    1.0,
+                    1000,
+                    () => { 
+                        // onComplete
+                     }
+                )
+                this.stateDrivers.push(fadeInDriver);
 
             }
         } else {

@@ -1,3 +1,4 @@
+import { SoundAsset } from "../assets.js";
 
 
 
@@ -141,29 +142,38 @@ export class OverlayDriver extends Driver {
     }
 }
 
-export class ImageUpdateDriver {
+export class EntityImageOpacityUpdateDriver extends Driver {
 
     totalTimeMillis = 0;
     isFinished = false;
 
-    opacity = 1.0;
+    coefficient = -1;
 
-    constructor(image, durationMillis, onComplete) {
-        this.image = image;
-        this.durationMillis = durationMillis;
-        this.onComplete = onComplete;
+    constructor(entity, alphaStart, alphaEnd, durationMillis, onComplete) {
+        super(durationMillis, () => { }, onComplete);
+        this.entity = entity;
+        this.coefficient = alphaEnd - alphaStart;
     }
 
-    update(updateMillis) {
+    update(deltaMillis) {
 
         if (this.isFinished == true) {
             return;
         }
 
-        this.totalTimeMillis += updateMillis;
+        this.totalTimeMillis += deltaMillis;
 
-        this.opacity = this.totalTimeMillis / this.durationMillis;
-        this.image.style.filter = `brightness(${this.opacity})`;
+        if (this.coefficient < 0) {
+            this.entity.setAlpha(1 - (this.totalTimeMillis / this.durationMillis));
+        } else {
+            this.entity.setAlpha(this.totalTimeMillis / this.durationMillis);
+        }
+
+        if (this.entity.alpha < 0) {
+            this.entity.setAlpha(0.0);
+        } else if (this.entity.alpha > 1) {
+            this.entity.setAlpha(1.0);
+        }
 
         if (this.totalTimeMillis >= this.durationMillis) {
             this.isFinished = true;
@@ -171,6 +181,5 @@ export class ImageUpdateDriver {
         }
 
     }
-
 
 }

@@ -604,6 +604,26 @@ export class MazeScene extends Scene {
 
     }
 
+    setLevel(level) {
+        console.log(`level: ${this.levelCurrent}`);
+        this.levelCurrent = level;
+    }
+
+    concludePlayerTurn() {
+
+        // Alert all entities that the current player turn has concluded; spell durations get shorter, etc.
+        this.entitiesEnemy.concat(this.player).forEach(ent => {
+            ent.onTurnConclusion();
+        });
+
+        this.updateMagicInterface();
+        this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+    }
+
+ /*
+    TODO ---- REFACTOR UpdateGameSeq() and UpdateGameSeqOrGameOver() to be less...uh, like they are
+ */
+
     updateGameSequence(newSequence) {
 
         if (this.currentGameSequence != newSequence) {
@@ -647,22 +667,6 @@ export class MazeScene extends Scene {
 
     }
 
-    setLevel(level) {
-        console.log(`level: ${this.levelCurrent}`);
-        this.levelCurrent = level;
-    }
-
-    concludePlayerTurn() {
-
-        // Alert all entities that the current player turn has concluded; spell durations get shorter, etc.
-        this.entitiesEnemy.concat(this.player).forEach(ent => {
-            ent.onTurnConclusion();
-        });
-
-        this.updateMagicInterface();
-        this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
-    }
-
     updateSequenceOrGameOver(sequence) {
 
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
@@ -694,8 +698,6 @@ export class MazeScene extends Scene {
                     break;
             }
         }
-
-
 
         if (gameOver == true) {
 

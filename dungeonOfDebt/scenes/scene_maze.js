@@ -388,9 +388,9 @@ export class MazeScene extends Scene {
         // EFFECTS: UPPER ROW ---------------------------------------------------------
 
         this.spellCardComponents.push(
-            new SpellEffectComponentCard(
-                SpellEffect.FREEZE,
-                () => { this.onSpellEffectSelected(SpellEffect.FREEZE) },
+            new SpellZoneComponentCard(
+                SpellZone.CROSS_SMALL,
+                () => { this.onSpellZoneSelected(SpellZone.CROSS_SMALL) },
                 this.canvasSecondary,
                 0,
                 0,
@@ -400,12 +400,77 @@ export class MazeScene extends Scene {
         );
 
         this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.ROW_FULL,
+                () => { this.onSpellZoneSelected(SpellZone.ROW_FULL) },
+                this.canvasSecondary,
+                0,
+                1,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.SELF_TARGET,
+                () => { this.onSpellZoneSelected(SpellZone.SELF_TARGET) },
+                this.canvasSecondary,
+                0,
+                2,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+        this.spellCardComponents.push(
+            new SpellEffectComponentCard(
+                SpellEffect.FREEZE,
+                () => { this.onSpellEffectSelected(SpellEffect.FREEZE) },
+                this.canvasSecondary,
+                0,
+                4,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+
+        this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.INVERT,
                 () => { this.onSpellEffectSelected(SpellEffect.INVERT) },
                 this.canvasSecondary,
-                64,
                 0,
+                5,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+
+
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.CROSS_INVERTED,
+                () => { this.onSpellZoneSelected(SpellZone.CROSS_INVERTED) },
+                this.canvasSecondary,
+                1,
+                0,
+                this.tileSize,
+                this.assetManager
+            )
+        );
+
+
+        this.spellCardComponents.push(
+            new SpellZoneComponentCard(
+                SpellZone.COLUMN_FULL,
+                () => { this.onSpellZoneSelected(SpellZone.COLUMN_FULL) },
+                this.canvasSecondary,
+                1,
+                1,
                 this.tileSize,
                 this.assetManager
             )
@@ -416,8 +481,8 @@ export class MazeScene extends Scene {
                 SpellEffect.TRANSMUTATION,
                 () => { this.onSpellEffectSelected(SpellEffect.TRANSMUTATION) },
                 this.canvasSecondary,
-                128,
-                0,
+                1,
+                4,
                 this.tileSize,
                 this.assetManager
             )
@@ -430,8 +495,8 @@ export class MazeScene extends Scene {
                 SpellEffect.EXCHANGE,
                 () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
                 this.canvasSecondary,
-                0,
-                64,
+                1,
+                5,
                 this.tileSize,
                 this.assetManager
             )
@@ -439,67 +504,16 @@ export class MazeScene extends Scene {
 
         // ZONES: UPPER ROW ---------------------------------------------------------
 
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.CROSS_SMALL,
-                () => { this.onSpellZoneSelected(SpellZone.CROSS_SMALL) },
-                this.canvasSecondary,
-                320,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
 
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.COLUMN_FULL,
-                () => { this.onSpellZoneSelected(SpellZone.COLUMN_FULL) },
-                this.canvasSecondary,
-                384,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
 
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.SELF_TARGET,
-                () => { this.onSpellZoneSelected(SpellZone.SELF_TARGET) },
-                this.canvasSecondary,
-                448,
-                0,
-                this.tileSize,
-                this.assetManager
-            )
-        );
+
+
 
         // ZONES: LOWER ROW ---------------------------------------------------------
 
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.CROSS_INVERTED,
-                () => { this.onSpellZoneSelected(SpellZone.CROSS_INVERTED) },
-                this.canvasSecondary,
-                320,
-                64,
-                this.tileSize,
-                this.assetManager
-            )
-        );
 
-        this.spellCardComponents.push(
-            new SpellZoneComponentCard(
-                SpellZone.ROW_FULL,
-                () => { this.onSpellZoneSelected(SpellZone.ROW_FULL) },
-                this.canvasSecondary,
-                384,
-                64,
-                this.tileSize,
-                this.assetManager
-            )
-        );
+
+
 
         this.fadeIn(() => {
             this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
@@ -1358,7 +1372,7 @@ export class MazeScene extends Scene {
                                 // onUpdate
                             },
                             () => {
-    
+
                                 this.concludePlayerTurn();
                             }
                         )

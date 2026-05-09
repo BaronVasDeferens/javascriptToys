@@ -37,10 +37,10 @@ export class ComponentCard {
 
     alpha = 1.0;
 
-    constructor(canvas, x, y, tileSize) {
-        this.x = x;
-        this.y = y;
+    constructor(canvas, row, col, tileSize) {
         this.canvas = canvas;
+        this.x = col * tileSize;
+        this.y = row * tileSize;
         this.tileSize = tileSize;
     }
 
@@ -50,7 +50,7 @@ export class ComponentCard {
             this.isActive = false;
             return;
         }
-        
+
         this.isSelected = isSelected;
     }
 
@@ -95,10 +95,10 @@ export class ComponentCard {
  */
 export class SpellZoneComponentCard extends ComponentCard {
 
-    
 
-    constructor(spellZone, onClick, canvas, x, y, tileSize, assetManager) {
-        super(canvas, x, y, tileSize);
+
+    constructor(spellZone, onClick, canvas, row, col, tileSize, assetManager) {
+        super(canvas, row, col, tileSize);
         this.onClick = onClick;
         this.spellZone = spellZone;
         this.assetManager = assetManager;
@@ -147,8 +147,8 @@ export class SpellEffectComponentCard extends ComponentCard {
 
     spellEffect = null;
 
-    constructor(spellEffect, onClick, canvas, x, y, tileSize, assetManager) {
-        super(canvas, x, y, tileSize);
+    constructor(spellEffect, onClick, canvas, row, col, tileSize, assetManager) {
+        super(canvas, row, col, tileSize);
         this.onClick = onClick;
         this.spellEffect = spellEffect;
         this.assetManager = assetManager;

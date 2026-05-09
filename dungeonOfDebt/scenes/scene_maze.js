@@ -721,7 +721,7 @@ export class MazeScene extends Scene {
                 })
 
             this.eventList
-                .forEach(evt => { evt.imageOpacity = 0.0; })
+                .forEach(evt => { evt.setAlpha(0.0) })
 
             this.stateDrivers.push(
                 new Driver(

@@ -33,6 +33,7 @@ export const MonsterContactEffect = Object.freeze({
     PENALTY_FINANCIAL: 20,          // Deducts from the wizard's gold
     PENALTY_ZONE: 30,               // Removes a spell zone; wizard unable to use that zone
     PENALTY_EFFECT: 40,             // Removes a spell effect; wizard unable to that that spell
+    TRIGGER_EVENT: 50               // Something happens when the wizard makes contact (gains a key, for example)
 });
 
 export const MonsterVisibility = Object.freeze({
@@ -57,6 +58,8 @@ const monsterVisibilityArray = [
 
 
 export class MonsterEntity extends Entity {
+
+    isAlive = true;                                 // Whether this entity is active on the board
 
     imageAssetId = ImageAsset.MONSTER_PINK_EYE;
     imageOpacity = 1.0;
@@ -101,7 +104,7 @@ export class MonsterEntity extends Entity {
 
     }
 
-    onPlayerContact() {
+    onPlayerContact(player) {
 
     }
 
@@ -268,10 +271,29 @@ export class MonsterVengefulSpirit extends MonsterEntity {
     nature = MonsterNature.UNDEAD;
     movement = MonsterMovement.CHASE_OMNISCIENT;
     visibility = MonsterVisibility.TRANSPARENT_HALF;
+    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
 
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
     }
 
+}
+
+export class MonsterCollectable extends MonsterEntity {
+
+    imageAsset = ImageAsset.DUNGEON_KEY;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.IMMORTAL;
+    movement = MonsterMovement.FLEE_LINE_OF_SIGHT;
+    visibility = MonsterVisibility.VISIBLE;
+    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+
+    onContact = () => { };
+
+    constructor(onContact, tileSize, assetManager) {
+        super(tileSize, ImageAsset.DUNGEON_KEY, assetManager);
+        this.onContact = onContact;
+    }
 }

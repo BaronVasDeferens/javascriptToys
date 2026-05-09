@@ -1,5 +1,6 @@
 import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { PlayerEntity } from "../entity/entity_player.js"
+import { SpellEffect } from "../entity/entity_spell.js";
 
 
 export class MazeEvent {

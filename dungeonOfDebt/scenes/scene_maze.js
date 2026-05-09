@@ -384,7 +384,6 @@ export class MazeScene extends Scene {
 
         // -------- USER INTERFACE ----------
 
-
         // EFFECTS: UPPER ROW ---------------------------------------------------------
 
         this.spellCardComponents.push(
@@ -435,7 +434,6 @@ export class MazeScene extends Scene {
             )
         );
 
-
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.INVERT,
@@ -448,9 +446,6 @@ export class MazeScene extends Scene {
             )
         );
 
-
-
-
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_INVERTED,
@@ -462,7 +457,6 @@ export class MazeScene extends Scene {
                 this.assetManager
             )
         );
-
 
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
@@ -488,8 +482,6 @@ export class MazeScene extends Scene {
             )
         );
 
-        // EFFECTS: LOWER ROW ---------------------------------------------------------
-
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.EXCHANGE,
@@ -501,19 +493,6 @@ export class MazeScene extends Scene {
                 this.assetManager
             )
         );
-
-        // ZONES: UPPER ROW ---------------------------------------------------------
-
-
-
-
-
-
-        // ZONES: LOWER ROW ---------------------------------------------------------
-
-
-
-
 
         this.fadeIn(() => {
             this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);

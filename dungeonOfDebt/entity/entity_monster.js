@@ -20,7 +20,8 @@ export const MonsterPhysicality = Object.freeze({
 
 export const MonsterMovement = Object.freeze({
     NONE: 0,                        // Does not move
-    RANDOM: 10,                     // Moves to a random adjacent square
+    RANDOM: 10,                     // Moves to a random adjacent square,
+    RANDOM_ROOK: 11,                // Moves the maximum horizontal or vertical distance
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
     CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
     FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
@@ -260,6 +261,20 @@ export class MonsterGhost extends MonsterEntity {
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
+    }
+}
+
+export class MonsterMosquitoGiant extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_MOSQUITO_GIANT;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.RANDOM_ROOK;
+    visibility = MonsterVisibility.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_MOSQUITO_GIANT, assetManager);
     }
 }
 

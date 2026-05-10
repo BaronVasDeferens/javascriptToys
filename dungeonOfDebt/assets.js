@@ -54,8 +54,10 @@ export var ImageAsset = Object.freeze({
     // MONSTERS
 
     MONSTER_CENTIPEDE: "entity/monsters/4160_sm_zx.png",
+    MONSTER_CENTIPEDE_GIANT: "entity/monsters/4160_zx.png",
     MONSTER_GHOST: "entity/monsters/4725_sm_zx.png",
     MONSTER_MAMMOTH: "entity/monsters/4052_zx.png",
+    MONSTER_MOSQUITO_GIANT: "entity/monsters/4079_zx.png",
     MONSTER_MUMMY: "entity/monsters/4737.png",
     MONSTER_PINK_EYE: "entity/monsters/3987_sm_zx.png",
     MONSTER_SCORPION: "entity/monsters/4082_sm_zx.png",

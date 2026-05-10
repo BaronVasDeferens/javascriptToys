@@ -2,7 +2,7 @@ import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect } from "../entity/entity_monster.js";
+import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollectableEvent, PortalStaircaseEvent } from "../event/event.js"
@@ -37,6 +37,15 @@ import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollecta
  *          and the labyrinth consumes the weak 
 
  * 
+        LEVELS
+            Overworld:
+                Dungeon Entrance
+                Wizard School
+            Dungeon
+                Floors 01 - 09: cellars (insects only)
+                Floors 10 - 19: crypts (undead and insects)
+                Floors 20 - 29: depths (demons and sorcerers)
+
  * 
  *      !!! FREEZE is too powerful-- should end turn after 1st use?
  * 
@@ -381,10 +390,13 @@ export class MazeScene extends Scene {
 
 
         // MONSTERS...
-        this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+
+        this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+
+        //this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
 
         // if (this.levelCurrent - 5 >= 0) {
-        this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+        //this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
         // this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
         // }
 
@@ -393,11 +405,11 @@ export class MazeScene extends Scene {
         // }
 
         for (let n = 0; n < this.levelCurrent; n++) {
-            this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+            // this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         }
 
         for (let n = 0; n < this.levelCurrent; n++) {
-            this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+            // this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
         }
 
 
@@ -1450,6 +1462,59 @@ export class MazeScene extends Scene {
                             let movementDriver = this.createEntityMovementDriver(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
+                        break;
+
+                    case MonsterMovement.RANDOM_ROOK:
+
+                        // ASSERTION: this monster is either INCORPOREAL or the ONLY monster in the maze;
+                        // monster overlap, blocking, etc. makes this a bit hard without more codified rules
+
+                        let possibleDirections = [
+                            Direction.UP,
+                            Direction.DOWN,
+                            Direction.LEFT,
+                            Direction.RIGHT
+                        ].map(dir => {
+                            let neighbor = this.getAdjacentRoomByDirection(monster.room, dir);
+                            if (neighbor != null && neighbor.isOpen == true) {
+                                return {
+                                    direction: dir,
+                                    room: neighbor
+                                }
+                            } else {
+                                return null
+                            }
+                        }).filter(nbr => { return nbr != null });
+
+                        this.shuffleArray(possibleDirections);
+
+                        if (possibleDirections[0] == null) {
+                            return
+                        }
+
+                        let firstRoom = possibleDirections[0].room;
+                        let direction = possibleDirections[0].direction;
+
+                        let path = [firstRoom];
+                        let candidateRoom = this.getAdjacentRoomByDirection(firstRoom, direction);
+                        while (candidateRoom != null && candidateRoom.isOpen == true) {
+                            path.push(candidateRoom);
+                            if (candidateRoom.occupant == this.player) {
+                                break;
+                            }
+                            candidateRoom = this.getAdjacentRoomByDirection(candidateRoom, direction);
+                        }
+
+                        let driver = this.createEntityMovementDriver(
+                            monster,
+                            path.pop(),
+                            Math.floor(this.movementRateDefaultMillis * (3 / 4)),
+                            () => {
+                                // onComplete 
+                            }
+                        )
+
+                        drivers.push(driver);
                         break;
 
                     case MonsterMovement.CHASE_LINE_OF_SIGHT:

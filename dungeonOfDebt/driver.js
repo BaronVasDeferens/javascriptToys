@@ -183,3 +183,32 @@ export class EntityImageOpacityUpdateDriver extends Driver {
     }
 
 }
+
+// export class Renderable {
+
+//     x = 0;
+//     y = 0;
+//     image = null;
+//     driver = null;
+
+//     alpha = 1.0;
+
+//     constructor(x, y, image, tileSize, driver) {
+//         this.x = x;
+//         this.y = y;
+//         this.image = image;
+//         this.tileSize = tileSize;
+//         this.driver = driver;
+//     }
+
+//     render(context) {
+//         context.globalAlpha = this.alpha;
+//         context.drawImage(
+//             this.image,
+//             this.x + ((this.tileSize - this.image.width) / 2),
+//             this.y + ((this.tileSize - this.image.height) / 2)
+//         );
+//     }
+
+// }
+

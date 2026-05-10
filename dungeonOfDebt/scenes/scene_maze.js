@@ -320,7 +320,7 @@ export class MazeScene extends Scene {
         );
 
         // TREASURES...
-        let treasureTotal = 1;
+        let treasureTotal = 5;
         for (let n = 0; n < treasureTotal; n++) {
 
             let coinSound = this.coinSounds[Math.floor(this.coinSounds.length * Math.random())];
@@ -396,9 +396,9 @@ export class MazeScene extends Scene {
             this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
         }
 
-        // for (let n = 0; n < this.levelCurrent; n++) {
-        //     this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-        // }
+        for (let n = 0; n < this.levelCurrent; n++) {
+            this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+        }
 
 
 
@@ -1345,10 +1345,10 @@ export class MazeScene extends Scene {
 
                     let affectedRooms = this.highlightedGridSquares
                         .map(room => { return this.getRoom(room.row, room.col) })
-                        .concat(this.player.room)
-                        .filter(room => { return room.isOccupied == true })
+                        .filter(room => { return room.isOccupied == true });
 
                     this.shuffleArray(affectedRooms);
+                    affectedRooms = affectedRooms.concat(this.player.room);
 
                     affectedRooms.forEach((room, index) => {
 
@@ -1357,7 +1357,7 @@ export class MazeScene extends Scene {
                             let roomA = this.getRoom(room.row, room.col);
                             let occupantA = roomA.occupant;
 
-                            let roomB = this.getRoom(affectedRooms[index + 1].row, affectedRooms[index + 1].col);
+                            let roomB = affectedRooms[index + 1];
                             let occupantB = roomB.occupant;
 
                             this.setRoomResident(roomB, occupantA)
@@ -1412,7 +1412,7 @@ export class MazeScene extends Scene {
     computeEnemyMoves() {
 
         // Ineligible rooms will be those that another monster has set its sights on
-        // TODO: ...but make the room that a monster is LEAVING elibible to the next monster
+        // TODO: ...but make the room that a monster is LEAVING eligible to the next monster
         let ineligibleRooms = new Set();
         let vacatedRooms = new Set();
         let drivers = [];
@@ -2183,9 +2183,9 @@ export class MazeScene extends Scene {
                     0.0,
                     1.0,
                     1000,
-                    () => { 
+                    () => {
                         // onComplete
-                     }
+                    }
                 )
                 this.stateDrivers.push(fadeInDriver);
 

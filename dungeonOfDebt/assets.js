@@ -79,6 +79,7 @@ export var ImageAsset = Object.freeze({
     COIN_2: "entity/collectables/2607_zx.png",
     COIN_3: "entity/collectables/2608_zx.png",
     COIN_4: "entity/collectables/2609_zx.png",
+    COIN_SINGLE: "entity/collectables/2600_zx.png",
 
     // --- FLOOR TILES ---
 

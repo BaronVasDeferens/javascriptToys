@@ -393,24 +393,20 @@ export class MazeScene extends Scene {
 
         this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
 
-        //this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
 
-        // if (this.levelCurrent - 5 >= 0) {
-        //this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+
+        // this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+
         // this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
-        // }
 
-        // for (let n = 0; n < this.levelCurrent; n++) {
-        //     this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
-        // }
+        // this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
 
-        for (let n = 0; n < this.levelCurrent; n++) {
-            // this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-        }
+        // this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
 
-        for (let n = 0; n < this.levelCurrent; n++) {
-            // this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-        }
+        this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+        this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+
 
 
 
@@ -1438,6 +1434,7 @@ export class MazeScene extends Scene {
 
                 switch (monster.getMovementBehavior()) {
 
+                    // ---------------------------------- RANDOM ----------------------------------
                     case MonsterMovement.RANDOM:
 
                         let neighbors = this.getAdjacentRooms(monster.room)
@@ -1464,6 +1461,7 @@ export class MazeScene extends Scene {
                         }
                         break;
 
+                    // ------------------------------------ ROOK -------------------------------------
                     case MonsterMovement.RANDOM_ROOK:
 
                         // ASSERTION: this monster is either INCORPOREAL or the ONLY monster in the maze;
@@ -1498,16 +1496,24 @@ export class MazeScene extends Scene {
                         let path = [firstRoom];
                         let candidateRoom = this.getAdjacentRoomByDirection(firstRoom, direction);
                         while (candidateRoom != null && candidateRoom.isOpen == true) {
-                            path.push(candidateRoom);
-                            if (candidateRoom.occupant == this.player) {
+                            if (candidateRoom.occupant == this.player){
+                                path.push(candidateRoom);
                                 break;
+                            } else if (candidateRoom.occupant?.isFrozen == true) {
+                                break;
+                            } else {
+                                path.push(candidateRoom);
+                                candidateRoom = this.getAdjacentRoomByDirection(candidateRoom, direction);
                             }
-                            candidateRoom = this.getAdjacentRoomByDirection(candidateRoom, direction);
+
                         }
+
+                        destination = path.pop();
+                        ineligibleRooms.add(destination);
 
                         let driver = this.createEntityMovementDriver(
                             monster,
-                            path.pop(),
+                            destination,
                             Math.floor(this.movementRateDefaultMillis * (3 / 4)),
                             () => {
                                 // onComplete 
@@ -1517,6 +1523,7 @@ export class MazeScene extends Scene {
                         drivers.push(driver);
                         break;
 
+                    // ------------------------------------ CHASE (LINE of SIGHT) -------------------------------------
                     case MonsterMovement.CHASE_LINE_OF_SIGHT:
 
                         /**
@@ -1571,6 +1578,55 @@ export class MazeScene extends Scene {
                         }
                         break;
 
+                    // ------------------------------------ CHASE (OMNISCIENT) -------------------------------------
+                    case MonsterMovement.CHASE_OMNISCIENT:
+
+                        /**
+                         * CHASE OMNISCIENT
+                         * This monster will compute the moves that get it closest to the wizard, choosing randomly
+                         * if there is a tie.
+                         */
+
+                        // Find all eligible neighbors
+                        let eligibleNeighbors = this.getAdjacentRooms(monster.room)
+                            .concat(monster.room)
+                            .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
+                            .filter(room => { return ineligibleRooms.has(room) == false })
+                            .filter(room => {
+                                if (room.occupant != null) {
+                                    return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
+                                } else {
+                                    return true
+                                }
+                            })
+                            .map(room => {
+                                return {
+                                    room: room,
+                                    distance: Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col)
+                                }
+                            });
+
+                        let minDist = Math.min(...eligibleNeighbors.map(n => { return n.distance }))
+                        eligibleNeighbors = eligibleNeighbors.filter(room => { return room.distance == minDist });
+                        this.shuffleArray(eligibleNeighbors);
+                        if (eligibleNeighbors[0] != null) {
+                            destination = eligibleNeighbors[0].room;
+                        }
+
+                        if (destination != null) {
+                            ineligibleRooms.add(destination);
+                            vacatedRooms.add(monster.room);
+                            vacatedRooms.delete(destination)
+                            let movementDriver = this.createEntityMovementDriver(
+                                monster,
+                                destination,
+                                this.movementRateDefaultMillis,
+                                () => { });
+                            drivers.push(movementDriver);
+                        }
+                        break;
+
+                    // ------------------------------------ FLEE (LINE of SIGHT) -------------------------------------
                     case MonsterMovement.FLEE_LINE_OF_SIGHT:
 
                         if (this.calculateLineOfSight(this.player.room, monster.room) == true) {
@@ -1616,53 +1672,6 @@ export class MazeScene extends Scene {
                                     () => { });
                                 drivers.push(movementDriver);
                             }
-                        }
-                        break;
-
-                    case MonsterMovement.CHASE_OMNISCIENT:
-
-                        /**
-                         * CHASE OMNISCIENT
-                         * This monster will compute the moves that get it closest to the wizard, choosing randomly
-                         * if there is a tie.
-                         */
-
-                        // Find all eligible neighbors
-                        let eligibleNeighbors = this.getAdjacentRooms(monster.room)
-                            .concat(monster.room)
-                            .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
-                            .filter(room => { return ineligibleRooms.has(room) == false })
-                            .filter(room => {
-                                if (room.occupant != null) {
-                                    return (vacatedRooms.has(room) == true) || (room.occupant instanceof PlayerEntity)
-                                } else {
-                                    return true
-                                }
-                            })
-                            .map(room => {
-                                return {
-                                    room: room,
-                                    distance: Math.abs(this.player.room.row - room.row) + Math.abs(this.player.room.col - room.col)
-                                }
-                            });
-
-                        let minDist = Math.min(...eligibleNeighbors.map(n => { return n.distance }))
-                        eligibleNeighbors = eligibleNeighbors.filter(room => { return room.distance == minDist });
-                        this.shuffleArray(eligibleNeighbors);
-                        if (eligibleNeighbors[0] != null) {
-                            destination = eligibleNeighbors[0].room;
-                        }
-
-                        if (destination != null) {
-                            ineligibleRooms.add(destination);
-                            vacatedRooms.add(monster.room);
-                            vacatedRooms.delete(destination)
-                            let movementDriver = this.createEntityMovementDriver(
-                                monster,
-                                destination,
-                                this.movementRateDefaultMillis,
-                                () => { });
-                            drivers.push(movementDriver);
                         }
                         break;
 

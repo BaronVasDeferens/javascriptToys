@@ -14,7 +14,7 @@ export const MonsterNature = Object.freeze({
 });
 
 export const MonsterPhysicality = Object.freeze({
-    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares
+    CORPOREAL: 0,                   // Cannot move into blocked/impassable squares; cannot pass through another entity
     INCORPOREAL: 10,                // Passes through blocks      
 });
 

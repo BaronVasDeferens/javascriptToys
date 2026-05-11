@@ -502,8 +502,8 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
-                SpellEffect.TRANSMUTATION,
-                () => { this.onSpellEffectSelected(SpellEffect.TRANSMUTATION) },
+                SpellEffect.TRANSMUTE,
+                () => { this.onSpellEffectSelected(SpellEffect.TRANSMUTE) },
                 this.canvasSecondary,
                 1,
                 4,
@@ -1063,7 +1063,7 @@ export class MazeScene extends Scene {
         let spellColorMap = new Map();
         spellColorMap.set(SpellEffect.FREEZE, "#00a9FF")
         spellColorMap.set(SpellEffect.INVERT, "#ffffff");
-        spellColorMap.set(SpellEffect.TRANSMUTATION, "#00ff0d");
+        spellColorMap.set(SpellEffect.TRANSMUTE, "#00ff0d");
         spellColorMap.set(SpellEffect.EXCHANGE, "#6d0088");
 
         let color = spellColorMap.get(spellEffect);
@@ -1316,13 +1316,13 @@ export class MazeScene extends Scene {
                     )
                     break;
 
-                case SpellEffect.TRANSMUTATION:
+                case SpellEffect.TRANSMUTE:
 
                     // Apply a TRANSMUTATION effect to every entity in the selected squares
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
                         if (gridSquare.occupant != null) {
-                            gridSquare.occupant.addSpellEffect(SpellEffect.TRANSMUTATION, 5);
+                            gridSquare.occupant.addSpellEffect(SpellEffect.TRANSMUTE, 5);
                         }
                     });
 
@@ -1362,14 +1362,14 @@ export class MazeScene extends Scene {
 
                         if (affectedRooms[index + 1] != null) {
 
-                            let roomA = this.getRoom(room.row, room.col);
+                            let roomA = room;
                             let occupantA = roomA.occupant;
 
                             let roomB = affectedRooms[index + 1];
                             let occupantB = roomB.occupant;
 
-                            this.setRoomResident(roomB, occupantA)
-                            this.setRoomResident(roomA, occupantB)
+                            this.setRoomOccupant(roomB, occupantA)
+                            this.setRoomOccupant(roomA, occupantB)
                         }
                     });
 
@@ -2206,7 +2206,7 @@ export class MazeScene extends Scene {
         return this.allRooms[index]
     }
 
-    setRoomResident(room, entity) {
+    setRoomOccupant(room, entity) {
 
         if (room == null || entity == null) {
             console.error(`setRoomResident failed: ${room} ${entity}`);

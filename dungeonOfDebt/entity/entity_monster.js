@@ -144,7 +144,7 @@ export class MonsterMammoth extends MonsterEntity {
     }
 
     getMovementBehavior() {
-        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTE)) {
             return MonsterMovement.FLEE_LINE_OF_SIGHT;
         } else {
             return this.movement;
@@ -184,7 +184,7 @@ export class MonsterPinkEye extends MonsterEntity {
     }
 
     getMovementBehavior() {
-        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTE)) {
             return MonsterMovement.FLEE_LINE_OF_SIGHT;
         } else {
             return this.movement;
@@ -206,7 +206,7 @@ export class MonsterScorpion extends MonsterEntity {
     }
 
     getMovementBehavior() {
-        if (this.spellEffects.has(SpellEffect.TRANSMUTATION)) {
+        if (this.spellEffects.has(SpellEffect.TRANSMUTE)) {
             return MonsterMovement.FLEE_LINE_OF_SIGHT;
         } else {
             return this.movement;

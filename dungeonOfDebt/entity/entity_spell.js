@@ -17,7 +17,7 @@ export const SpellEffect = Object.freeze({
     BLAZE: 3,
     PHASE: 4,
     INVERT: 5,              // Transforms maze cells: open spaces become blocks and vice versa. No effect on monsters or player...?
-    TRANSMUTATION: 6,       // Transforms any entity into a harmless frog for a few turns.
+    TRANSMUTE: 6,       // Transforms any entity into a harmless frog for a few turns.
     EXCHANGE: 7,            // All entities exchange rooms
 });
 
@@ -170,7 +170,7 @@ export class SpellEffectComponentCard extends ComponentCard {
             case SpellEffect.INVERT:
                 this.image = assetManager.getImage(ImageAsset.SPELL_CARD_INVERT);
                 break;
-            case SpellEffect.TRANSMUTATION:
+            case SpellEffect.TRANSMUTE:
                 this.image = assetManager.getImage(ImageAsset.SPELL_CARD_TRANSMUTATION);
                 break;
             case SpellEffect.EXCHANGE:

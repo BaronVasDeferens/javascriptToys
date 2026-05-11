@@ -51,7 +51,7 @@ export class Entity {
                 this.overlayImage = this.room.image;
                 break;
 
-            case SpellEffect.TRANSMUTATION:
+            case SpellEffect.TRANSMUTE:
                 this.isTransmuted = true;
                 this.image = this.assetManager.getImage(ImageAsset.FROG);
                 break;
@@ -75,7 +75,7 @@ export class Entity {
                 this.isInverted = false;
                 break;
 
-            case SpellEffect.TRANSMUTATION:
+            case SpellEffect.TRANSMUTE:
                 this.image = this.assetManager.getImage(this.imageAssetId);
                 this.isTransmuted = false;
                 break;

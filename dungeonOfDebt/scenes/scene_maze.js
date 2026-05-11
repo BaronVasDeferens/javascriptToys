@@ -1357,7 +1357,7 @@ export class MazeScene extends Scene {
                     this.shuffleArray(affectedRooms);
                     affectedRooms = affectedRooms.concat(this.player.room);
 
-                    affectedRooms.forEach((room, index) => {
+                    affectedRooms.forEach((room, index) => {   
 
                         if (affectedRooms[index + 1] != null) {
 
@@ -2345,7 +2345,7 @@ export class MazeScene extends Scene {
 
             // There may not be enough rooms outside of the player's LoS...
             if (room == null) {
-                console.error("Not enough avialable rooms!");
+                console.error("Not enough available rooms!");
                 return
             }
 

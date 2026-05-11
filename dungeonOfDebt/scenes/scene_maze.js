@@ -2,7 +2,7 @@ import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect } from "../entity/entity_monster.js";
+import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect, MonsterTroll } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollectableEvent, PortalStaircaseEvent } from "../event/event.js"
@@ -391,8 +391,9 @@ export class MazeScene extends Scene {
 
         // MONSTERS...
 
-        this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+        // this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
 
+        this.entitiesEnemy.push(new MonsterTroll(this.tileSize, this.assetManager));
 
 
         // this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
@@ -413,8 +414,6 @@ export class MazeScene extends Scene {
         this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
 
         // -------- USER INTERFACE ----------
-
-        // EFFECTS: UPPER ROW ---------------------------------------------------------
 
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
@@ -466,8 +465,8 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
-                SpellEffect.INVERT,
-                () => { this.onSpellEffectSelected(SpellEffect.INVERT) },
+                SpellEffect.EXCHANGE,
+                () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
                 this.canvasSecondary,
                 0,
                 5,
@@ -514,8 +513,8 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
-                SpellEffect.EXCHANGE,
-                () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
+                SpellEffect.INVERT,
+                () => { this.onSpellEffectSelected(SpellEffect.INVERT) },
                 this.canvasSecondary,
                 1,
                 5,
@@ -1496,7 +1495,7 @@ export class MazeScene extends Scene {
                         let path = [firstRoom];
                         let candidateRoom = this.getAdjacentRoomByDirection(firstRoom, direction);
                         while (candidateRoom != null && candidateRoom.isOpen == true) {
-                            if (candidateRoom.occupant == this.player){
+                            if (candidateRoom.occupant == this.player) {
                                 path.push(candidateRoom);
                                 break;
                             } else if (candidateRoom.occupant?.isFrozen == true) {

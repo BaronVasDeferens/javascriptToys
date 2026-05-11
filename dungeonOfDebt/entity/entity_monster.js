@@ -130,6 +130,20 @@ export class MonsterEntity extends Entity {
     }
 }
 
+export class MonsterGhost extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_GHOST;
+
+    physicality = MonsterPhysicality.INCORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.RANDOM;
+    visibility = MonsterVisibility.TRANSPARENT_HALF;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
+    }
+}
+
 export class MonsterMammoth extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_MAMMOTH;
@@ -149,6 +163,20 @@ export class MonsterMammoth extends MonsterEntity {
         } else {
             return this.movement;
         }
+    }
+}
+
+export class MonsterMosquitoGiant extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_MOSQUITO_GIANT;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.RANDOM_ROOK;
+    visibility = MonsterVisibility.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_MOSQUITO_GIANT, assetManager);
     }
 }
 
@@ -214,6 +242,37 @@ export class MonsterScorpion extends MonsterEntity {
     }
 }
 
+export class MonsterTroll extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_TROLL;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = MonsterMovement.CHASE_OMNISCIENT;
+    visibility = MonsterVisibility.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_TROLL, assetManager);
+    }
+}
+
+export class MonsterVengefulSpirit extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_VENGEFUL_SPIRIT;
+
+    physicality = MonsterPhysicality.INCORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = MonsterMovement.CHASE_OMNISCIENT;
+    visibility = MonsterVisibility.TRANSPARENT_HALF;
+    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
+    }
+
+}
+
 export class MonsterWraith extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_WRAITH;
@@ -250,50 +309,7 @@ export class MonsterWraith extends MonsterEntity {
     }
 }
 
-export class MonsterGhost extends MonsterEntity {
 
-    imageAsset = ImageAsset.MONSTER_GHOST;
-
-    physicality = MonsterPhysicality.INCORPOREAL;
-    nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.RANDOM;
-    visibility = MonsterVisibility.TRANSPARENT_HALF;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
-    }
-}
-
-export class MonsterMosquitoGiant extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_MOSQUITO_GIANT;
-
-    physicality = MonsterPhysicality.CORPOREAL;
-    nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.RANDOM_ROOK;
-    visibility = MonsterVisibility.VISIBLE;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_MOSQUITO_GIANT, assetManager);
-    }
-}
-
-export class MonsterVengefulSpirit extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_VENGEFUL_SPIRIT;
-
-    physicality = MonsterPhysicality.INCORPOREAL;
-    nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.CHASE_OMNISCIENT;
-    visibility = MonsterVisibility.TRANSPARENT_HALF;
-    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
-
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
-    }
-
-}
 
 export class MonsterCollectable extends MonsterEntity {
 

@@ -1,4 +1,4 @@
-import { SoundAsset } from "../assets.js";
+import { SoundAsset } from "./assets.js";
 
 
 

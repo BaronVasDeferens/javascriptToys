@@ -214,7 +214,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 0;
+    levelCurrent = 1;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -308,9 +308,9 @@ export class MazeScene extends Scene {
         contextPrimary.fillStyle = "#00000";
         contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height)
 
-        // -------- ENTITIES ---------
+        // --- ENTITIES ---
 
-        // PLAYER
+        // Entity: PLAYER
         // Find an UNOCCUPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.x + a.y) < (b.x + b.y)) {
@@ -328,7 +328,97 @@ export class MazeScene extends Scene {
             this.assetManager
         );
 
-        // TREASURES...
+        // ENTITY: FLEEING KEY
+        let keyMonster = new MonsterCollectable(
+            () => {
+                this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
+                exitPortal.setIsLocked(false);
+                keyMonster.isAlive = false;
+            },
+            this.tileSize,
+            this.assetManager
+        )
+
+        this.entitiesEnemy.push(
+            keyMonster
+        )
+
+        // ENTITY: MONSTERS...
+
+        switch (this.levelCurrent) {
+
+            case 1:
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                break;
+
+            case 2:
+                this.entitiesEnemy.push(new MonsterTroll(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                break;
+
+            case 3:
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                break;
+
+            case 4:
+                this.entitiesEnemy.push(new MonsterTroll(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                break;
+
+            case 5:
+                this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                break;
+
+            case 6:
+                this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                break;
+
+            default:
+
+                for (let n = 0; n < this.levelCurrent - 1; n++) {
+                    this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+                }
+
+                let numMummies = Math.floor(this.levelCurrent / 4) + 1;
+                for (let n = 0; n < numMummies; n++) {
+                    this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+                }
+                break;
+        }
+
+
+        // 
+
+        // this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+
+        // this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+
+        // this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
+
+        // this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+
+        this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
+
+        // --- EVENTS ---
+
+        // EVENTS: TREASURES...
         let treasureTotal = 5;
         for (let n = 0; n < treasureTotal; n++) {
 
@@ -342,7 +432,7 @@ export class MazeScene extends Scene {
             );
         }
 
-        // PORTALS...
+        // EVENTS: PORTALS...
         let exitPortal = new PortalStaircaseEvent(
             () => {
                 this.soundPlayer.playOneShot(SoundAsset.DESCEND_STAIRS);
@@ -356,62 +446,8 @@ export class MazeScene extends Scene {
         );
 
         this.eventList.push(exitPortal);
-
-        // // KEYS...
-        // this.eventList.push(
-        //     new KeyCollectableEvent(
-        //         () => {
-        //             this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
-        //             exitPortal.setIsLocked(false);
-        //         },
-        //         this.assetManager
-        //     )
-        // );
-
         this.distributeAcrossOpenRooms(this.eventList);
 
-
-
-        // FLEEING KEY
-        let keyMonster = new MonsterCollectable(
-            () => {
-                this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
-                exitPortal.setIsLocked(false);
-                keyMonster.isAlive = false;
-            },
-            this.tileSize,
-            this.assetManager
-        )
-        this.entitiesEnemy.push(
-            keyMonster
-        )
-
-
-
-
-        // MONSTERS...
-
-        // this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-
-        this.entitiesEnemy.push(new MonsterTroll(this.tileSize, this.assetManager));
-
-
-        // this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
-
-        // this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
-
-        // this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
-
-        // this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-
-        this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-        this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-        this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-
-
-
-
-        this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
 
         // -------- USER INTERFACE ----------
 
@@ -1357,7 +1393,7 @@ export class MazeScene extends Scene {
                     this.shuffleArray(affectedRooms);
                     affectedRooms = affectedRooms.concat(this.player.room);
 
-                    affectedRooms.forEach((room, index) => {   
+                    affectedRooms.forEach((room, index) => {
 
                         if (affectedRooms[index + 1] != null) {
 

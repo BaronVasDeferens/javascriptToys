@@ -2,7 +2,7 @@ import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
-import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect, MonsterTroll } from "../entity/entity_monster.js";
+import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
 import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollectableEvent, PortalStaircaseEvent } from "../event/event.js"
@@ -17,10 +17,12 @@ import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollecta
  * 
  * BUGS
  *      wraith is always visible during GAME OVER except when he caused it :/
- *      casting certain spells on yourself should be fatal
  * 
  * SHORT TERM
  * 
+ *      HUGE key that has to be pushed to the door
+ * 
+ *  
  * 
  *      O sorcerer! Not for want of arcane power 
  *          hast thou been defeated
@@ -206,7 +208,7 @@ export class MazeScene extends Scene {
     eventList = [];                         // TODO: split out portals and collectables
 
     numEnemyEntities = 9;
-    entitiesEnemy = [];
+    entities = [];
 
     mazeWindowWidth = 0;                    // Number of maze squares visible on screen at any time
     mazeWindowHeight = 0;
@@ -273,7 +275,7 @@ export class MazeScene extends Scene {
         this.stateDrivers = [];
         this.lineOfSightLines = [];
 
-        this.entitiesEnemy = [];
+        this.entities = [];
         this.allRooms = [];
         this.mazeArray = [];
 
@@ -328,18 +330,18 @@ export class MazeScene extends Scene {
             this.assetManager
         );
 
-        // ENTITY: FLEEING KEY
-        let keyMonster = new MonsterCollectable(
+        // ENTITY: KEY
+        let keyMonster = new KeyFleeing(
+            this.tileSize,
+            this.assetManager,
             () => {
                 this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
                 exitPortal.setIsLocked(false);
                 keyMonster.isAlive = false;
             },
-            this.tileSize,
-            this.assetManager
         )
 
-        this.entitiesEnemy.push(
+        this.entities.push(
             keyMonster
         )
 
@@ -348,73 +350,62 @@ export class MazeScene extends Scene {
         switch (this.levelCurrent) {
 
             case 1:
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 break;
 
             case 2:
-                this.entitiesEnemy.push(new MonsterTroll(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterTroll(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 break;
 
             case 3:
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 break;
 
             case 4:
-                this.entitiesEnemy.push(new MonsterTroll(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterTroll(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 break;
 
             case 5:
-                this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
                 break;
 
             case 6:
-                this.entitiesEnemy.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                this.entitiesEnemy.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 break;
 
             default:
 
                 for (let n = 0; n < this.levelCurrent - 1; n++) {
-                    this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
+                    this.entities.push(new MonsterGhost(this.tileSize, this.assetManager));
                 }
 
                 let numMummies = Math.floor(this.levelCurrent / 4) + 1;
                 for (let n = 0; n < numMummies; n++) {
-                    this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
+                    this.entities.push(new MonsterMummy(this.tileSize, this.assetManager));
                 }
                 break;
         }
 
-
-        // 
-
-        // this.entitiesEnemy.push(new MonsterGhost(this.tileSize, this.assetManager));
-
-        // this.entitiesEnemy.push(new MonsterMummy(this.tileSize, this.assetManager));
-
-        // this.entitiesEnemy.push(new MonsterMammoth(this.tileSize, this.assetManager));
-
-        // this.entitiesEnemy.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-
-        this.distributeAcrossOpenRooms(this.entitiesEnemy, true);
+        this.distributeAcrossOpenRooms(this.entities, true);
 
         // --- EVENTS ---
 
@@ -581,7 +572,7 @@ export class MazeScene extends Scene {
         }
 
         // Remove any "dead" (permanently neutralized) entities
-        this.entitiesEnemy = this.entitiesEnemy.filter(ent => { return ent.isAlive == true });
+        this.entities = this.entities.filter(ent => { return ent.isAlive == true });
     }
 
     render(contextPrimary, contextSecondary) {
@@ -601,8 +592,8 @@ export class MazeScene extends Scene {
         // Render player
         this.player.render(contextPrimary, this.mazeWindowX, this.mazeWindowY)
 
-        // Render enemies
-        this.entitiesEnemy.forEach(monster => {
+        // Render non-player entities
+        this.entities.forEach(monster => {
             monster.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         })
 
@@ -655,12 +646,63 @@ export class MazeScene extends Scene {
     concludePlayerTurn() {
 
         // Alert all entities that the current player turn has concluded; spell durations get shorter, etc.
-        this.entitiesEnemy.concat(this.player).forEach(ent => {
+        this.entities.concat(this.player).forEach(ent => {
             ent.onTurnConclusion();
         });
 
         this.updateMagicInterface();
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
+    }
+
+    processCollectableEvents(entity, room) {
+
+        if (entity == null || room == null || room.event == null) {
+            return
+        }
+
+        // Collecting all the loose treasures reveals a CHEST!
+        let unclaimedTreasures = this.eventList
+            .filter(evt => { return evt instanceof TreasureCollectableEvent })
+            .filter(evt => { return evt.isActive == true });
+
+        if (unclaimedTreasures.length > 0) {
+
+            room.triggerEventIfPresent(entity);
+
+            if (unclaimedTreasures.every(evt => { return evt.isActive == false })) {
+
+                // Place a chest in a random square
+
+                this.soundPlayer.playOneShot(SoundAsset.SECRET_REVEALED);
+                let chest = new ChestCollectableEvent(
+                    () => {
+                        // onTreasureCollected
+                        console.log(`MEGA CHINGUS`);
+                        this.soundPlayer.playOneShot(SoundAsset.BONUS);
+                        // TODO: award bonus
+                    },
+                    this.assetManager
+                );
+                chest.setAlpha(0.0);
+
+                this.eventList.push(chest);
+                this.distributeAcrossOpenRooms([chest]);
+
+                let fadeInDriver = new EntityImageOpacityUpdateDriver(
+                    chest,
+                    0.0,
+                    1.0,
+                    1000,
+                    () => {
+                        // onComplete
+                    }
+                )
+                this.stateDrivers.push(fadeInDriver);
+
+            }
+        } else {
+            room.triggerEventIfPresent(entity);
+        }
     }
 
     /*
@@ -724,7 +766,7 @@ export class MazeScene extends Scene {
         }
 
         // Check: does any monster co-occupy the wizard's square?
-        let contactEntity = this.entitiesEnemy
+        let contactEntity = this.entities
             .filter(ent => { return (ent.isTransmuted == false) })
             .filter(ent => { return ent.room == this.player.room })[0];
 
@@ -756,7 +798,7 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
 
             // Use a driver to fade out the background and all but the fatal entity and player
-            this.entitiesEnemy
+            this.entities
                 .filter(ent => { return (ent !== contactEntity) })
                 .forEach(ent => {
                     ent.setVisibility(MonsterVisibility.INVISIBLE);
@@ -1403,8 +1445,16 @@ export class MazeScene extends Scene {
                             let roomB = affectedRooms[index + 1];
                             let occupantB = roomB.occupant;
 
-                            this.setRoomOccupant(roomB, occupantA)
-                            this.setRoomOccupant(roomA, occupantB)
+                            // !!!! THERE IS A TRANSIENT BUG HERE !!!
+                            if (roomB == null || occupantA == null) {
+                                console.error('error 1')
+                            }
+                            this.setRoomOccupant(roomB, occupantA);
+
+                            if (roomA == null || occupantB == null) {
+                                console.error('error 2')
+                            }
+                            this.setRoomOccupant(roomA, occupantB);
                         }
                     });
 
@@ -1461,7 +1511,7 @@ export class MazeScene extends Scene {
         let drivers = [];
 
 
-        this.entitiesEnemy
+        this.entities
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
             .forEach(monster => {
 
@@ -1732,6 +1782,7 @@ export class MazeScene extends Scene {
 
         let primaryDriver = null;
         let iceCubePush = null;
+        let pushOnlyMove = null;
 
         if (entity != null && destination != null) {
 
@@ -1754,26 +1805,7 @@ export class MazeScene extends Scene {
                             this.processCollectableEvents(entity, destination);
                         }
                     )
-                } else if (destination.occupant.isFrozen == false) {
-
-                    // Case 2: destination open, occupied (player likely dies!)
-                    primaryDriver = new EntityMovementDriver(
-                        entity,
-                        destination,
-                        rate,
-                        () => {
-                            // onUpdate
-                        },
-                        () => {
-                            // onComplete
-                            entity.room.setOccupant(null);
-                            entity.setRoom(destination);
-                            destination.setOccupant(entity);
-                            this.processCollectableEvents(entity, destination);
-                        }
-                    )
-
-                } else {
+                } else if (destination.occupant.isFrozen == true) {
 
                     // Case 3: destination open, occupant frozen...KICK THE CUBE!
                     // The player can push a frozen enemy out into an adjacent space under the following conditions:
@@ -1828,18 +1860,76 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onCompleted
+                                sliderEntity.room.setOccupant(null);
                                 sliderEntity.setRoom(endpoint);
                                 endpoint.setOccupant(sliderEntity);
                             }
                         )
 
                         this.soundPlayer.playOneShot(SoundAsset.ZIP);
-                    } else {
-
                     }
+                } else if (destination.occupant.movement == MonsterMovement.ONLY_WHEN_PUSHED) {
+
+                    // Case 4: destination open, occupied, but occupant moves ONLY_WHEN_PUSHED
+                    let neighborToObject = this.getAdjacentRoomByDirection(destination, direction);
+                    if (neighborToObject == null) {
+                        return;
+                    }
+
+                    let sliderObject = destination.occupant;
+                    if (neighborToObject.isOpen && !neighborToObject.isOccupied) {
+
+                        primaryDriver = new EntityMovementDriver(
+                            entity,
+                            destination,
+                            rate,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                entity.room.setOccupant(null);
+                                entity.setRoom(destination);
+                                destination.setOccupant(entity);
+                            }
+                        )
+
+                        pushOnlyMove = new EntityMovementDriver(
+                            sliderObject,
+                            neighborToObject,
+                            rate,
+                            () => {
+                                // onUpdate
+                            },
+                            () => {
+                                // onComplete
+                                sliderObject.room.setOccupant(null);
+                                sliderObject.setRoom(neighborToObject);
+                                neighborToObject.setOccupant(sliderObject);
+                            }
+                        )
+                    }
+
+                } else {
+                    // Case 2: destination open, but occupied (player likely dies!)
+                    primaryDriver = new EntityMovementDriver(
+                        entity,
+                        destination,
+                        rate,
+                        () => {
+                            // onUpdate
+                        },
+                        () => {
+                            // onComplete
+                            entity.room.setOccupant(null);
+                            entity.setRoom(destination);
+                            destination.setOccupant(entity);
+                            this.processCollectableEvents(entity, destination);
+                        }
+                    )
                 }
 
-                let allDrivers = [primaryDriver, iceCubePush].filter(drv => { return drv != null });
+                let allDrivers = [primaryDriver, iceCubePush, pushOnlyMove].filter(drv => { return drv != null });
 
                 if (allDrivers.length == 0) {
                     return null;
@@ -1899,7 +1989,7 @@ export class MazeScene extends Scene {
 
         this.lineOfSightLines = [];
         let playerRoom = this.player.room;
-        let visibilityMap = this.entitiesEnemy
+        let visibilityMap = this.entities
             .map(monster => {
                 let eventRoom = monster.room;
                 let result = {
@@ -2250,58 +2340,6 @@ export class MazeScene extends Scene {
 
         entity.setRoom(room);
         room.setOccupant(entity)
-
-    }
-
-    processCollectableEvents(entity, room) {
-
-        if (entity == null || room == null || room.event == null) {
-            return
-        }
-
-        // Collecting all the loose treasures reveals a CHEST!
-        let unclaimedTreasures = this.eventList
-            .filter(evt => { return evt instanceof TreasureCollectableEvent })
-            .filter(evt => { return evt.isActive == true });
-
-        if (unclaimedTreasures.length > 0) {
-
-            room.triggerEventIfPresent(entity);
-
-            if (unclaimedTreasures.every(evt => { return evt.isActive == false })) {
-
-                // Place a chest in a random square
-
-                this.soundPlayer.playOneShot(SoundAsset.SECRET_REVEALED);
-                let chest = new ChestCollectableEvent(
-                    () => {
-                        // onTreasureCollected
-                        console.log(`MEGA CHINGUS`);
-                        this.soundPlayer.playOneShot(SoundAsset.BONUS);
-                        // TODO: award bonus
-                    },
-                    this.assetManager
-                );
-                chest.setAlpha(0.0);
-
-                this.eventList.push(chest);
-                this.distributeAcrossOpenRooms([chest]);
-
-                let fadeInDriver = new EntityImageOpacityUpdateDriver(
-                    chest,
-                    0.0,
-                    1.0,
-                    1000,
-                    () => {
-                        // onComplete
-                    }
-                )
-                this.stateDrivers.push(fadeInDriver);
-
-            }
-        } else {
-            room.triggerEventIfPresent(entity);
-        }
     }
 
     // -------------------------------------- UTILITIES and STUFF --------------------------------------

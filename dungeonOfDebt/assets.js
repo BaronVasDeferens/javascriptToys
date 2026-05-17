@@ -75,7 +75,8 @@ export var ImageAsset = Object.freeze({
     TREASURE_CHEST_LARGE: "entity/collectables/5_zx.png",
     TREASURE_CHEST_SMALL: "entity/collectables/5_sm_zx.png",
 
-    DUNGEON_KEY: "entity/collectables/2614_sm_zx.png",
+    DUNGEON_KEY_SMALL: "entity/collectables/2614_sm_zx.png",
+    DUNGEON_KEY_LARGE: "entity/collectables/2614_zx.png",
 
     COIN_1: "entity/collectables/2611_zx.png",
     COIN_2: "entity/collectables/2607_zx.png",

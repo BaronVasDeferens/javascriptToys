@@ -25,11 +25,14 @@ export const MonsterMovement = Object.freeze({
     CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
     CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
     FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
-    FLEE_OMNISCIENT: 50             // Moves away from the player regardless of LOS
+    FLEE_OMNISCIENT: 50,            // Moves away from the player regardless of LOS
+
+    ONLY_WHEN_PUSHED: 60,           // Moves only when the wizard pushes it
 });
 
 export const MonsterContactEffect = Object.freeze({
     // Coming into contact with this monster...
+    NOTHING: 0,                     // Nothing happens.
     LETHAL: 10,                     // Kills the wizard
     PENALTY_FINANCIAL: 20,          // Deducts from the wizard's gold
     PENALTY_ZONE: 30,               // Removes a spell zone; wizard unable to use that zone
@@ -313,7 +316,41 @@ export class MonsterWraith extends MonsterEntity {
 
 export class MonsterCollectable extends MonsterEntity {
 
-    imageAsset = ImageAsset.DUNGEON_KEY;
+    imageAsset = null;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.IMMORTAL;
+    movement = MonsterMovement.NONE;
+    visibility = MonsterVisibility.VISIBLE;
+    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+
+    onContact = () => { };
+
+    constructor(tileSize, imageAsset, assetManager, onContact) {
+        super(tileSize, imageAsset, assetManager);
+        this.imageAsset = imageAsset;
+        this.onContact = onContact;
+    }
+}
+
+export class KeyNormal extends MonsterCollectable {
+
+    imageAsset = ImageAsset.DUNGEON_KEY_SMALL;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.IMMORTAL;
+    movement = MonsterMovement.NONE;
+    visibility = MonsterVisibility.VISIBLE;
+    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+
+    constructor(tileSize, assetManager, onContact) {
+        super(tileSize, ImageAsset.DUNGEON_KEY_SMALL, assetManager, onContact);
+    }
+}
+
+export class KeyFleeing extends MonsterCollectable {
+
+    imageAsset = ImageAsset.DUNGEON_KEY_SMALL;
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.IMMORTAL;
@@ -321,10 +358,22 @@ export class MonsterCollectable extends MonsterEntity {
     visibility = MonsterVisibility.VISIBLE;
     contactEffect = MonsterContactEffect.TRIGGER_EVENT;
 
-    onContact = () => { };
+    constructor(tileSize, assetManager, onContact) {
+        super(tileSize, ImageAsset.DUNGEON_KEY_SMALL, assetManager, onContact);
+    }
+}
 
-    constructor(onContact, tileSize, assetManager) {
-        super(tileSize, ImageAsset.DUNGEON_KEY, assetManager);
-        this.onContact = onContact;
+export class TreasureChestMassive extends MonsterCollectable {
+
+    imageAsset = ImageAsset.TREASURE_CHEST_LARGE;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.IMMORTAL;
+    movement = MonsterMovement.ONLY_WHEN_PUSHED;
+    visibility = MonsterVisibility.VISIBLE;
+    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+
+    constructor(tileSize, assetManager, onContact) {
+        super(tileSize, ImageAsset.TREASURE_CHEST_LARGE, assetManager, onContact);
     }
 }

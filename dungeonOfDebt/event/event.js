@@ -164,7 +164,7 @@ export class ChestCollectableEvent extends MazeEvent {
 
 export class KeyCollectableEvent extends MazeEvent {
 
-    imageAssetId = ImageAsset.DUNGEON_KEY;
+    imageAssetId = ImageAsset.DUNGEON_KEY_SMALL;
 
     constructor(onTrigger, assetManager) {
         super(onTrigger);

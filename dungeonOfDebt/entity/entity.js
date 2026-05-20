@@ -4,12 +4,12 @@ import { AssetManager, ImageAsset } from "../assets.js";
 
 export class Entity {
 
+    id = crypto.randomUUID();
+
     x = 0;
     y = 0;
 
     tileSize = 64;
-
-    room = null;
 
     image = null;
     imageAssetId = null;
@@ -26,13 +26,6 @@ export class Entity {
     constructor(tileSize, assetManager) {
         this.tileSize = tileSize;
         this.assetManager = assetManager;
-    }
-
-    setRoom(room) {
-
-        this.room = room;
-        this.x = this.room.col * this.tileSize;
-        this.y = this.room.row * this.tileSize;
     }
 
     addSpellEffect(effect, turns) {

@@ -4,20 +4,19 @@ import { SpellEffect } from "./entity_spell.js";
 
 export class PlayerEntity extends Entity {
 
+    id = crypto.randomUUID();
+
     image = null;
     imageAlpha = 1.0;
 
     offsetX = 0;
     offsetY = 0;
 
-    constructor(room, tileSize, assetManager) {
+    constructor(tileSize, assetManager) {
         super(tileSize, assetManager);
 
         this.imageAssetId = ImageAsset.WIZARD_1;
         this.image = this.assetManager.getImage(ImageAsset.WIZARD_1);
-
-        this.setRoom(room);
-        room.setOccupant(this);
 
         // Centers the tile if it is smaller than tileSize
         if (this.image.width < this.tileSize) {

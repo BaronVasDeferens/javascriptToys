@@ -5,10 +5,13 @@ import { SpellEffect } from "../entity/entity_spell.js";
 
 export class MazeEvent {
 
+    id = crypto.randomUUID();
+
+    x = 0;
+    y = 0;
+
     onTrigger = null;
     color = "#FF0000"
-
-    room = null;
 
     alpha = 1.0;
 
@@ -31,13 +34,15 @@ export class MazeEvent {
         this.isVisible = isVisible;
     }
 
-    setRoom(room) {
-        // !!! be sure to call room.setOccupant() BUT NOT FROM HERE (unless you have infinite compute, RAM, and time)
-        this.room = room;
-    }
-
     render(context, mazeWindowX, mazeWindowY) {
-
+        if (this.isActive == true && this.isVisible == true) {
+            context.globalAlpha = this.alpha;
+            context.drawImage(
+                this.image,
+                this.x,
+                this.y
+            )
+        }
     }
 
     applySpellEffect(effect) {
@@ -98,16 +103,6 @@ export class TreasureCollectableEvent extends MazeEvent {
         }
     }
 
-    render(context, mazeWindowX, mazeWindowY) {
-        if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.alpha;
-            context.drawImage(
-                this.image,
-                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-            )
-        }
-    }
 }
 
 export class ChestCollectableEvent extends MazeEvent {
@@ -150,16 +145,16 @@ export class ChestCollectableEvent extends MazeEvent {
         }
     }
 
-    render(context, mazeWindowX, mazeWindowY) {
-        if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.alpha;
-            context.drawImage(
-                this.image,
-                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-            )
-        }
-    }
+    // render(context, mazeWindowX, mazeWindowY) {
+    //     if (this.isActive == true && this.isVisible == true) {
+    //         context.globalAlpha = this.alpha;
+    //         context.drawImage(
+    //             this.image,
+    //             (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+    //             (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+    //         )
+    //     }
+    // }
 }
 
 export class KeyCollectableEvent extends MazeEvent {
@@ -198,16 +193,16 @@ export class KeyCollectableEvent extends MazeEvent {
         }
     }
 
-    render(context, mazeWindowX, mazeWindowY) {
-        if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.alpha;
-            context.drawImage(
-                this.image,
-                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-            )
-        }
-    }
+    // render(context, mazeWindowX, mazeWindowY) {
+    //     if (this.isActive == true && this.isVisible == true) {
+    //         context.globalAlpha = this.alpha;
+    //         context.drawImage(
+    //             this.image,
+    //             (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+    //             (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+    //         )
+    //     }
+    // }
 }
 
 export class PortalStaircaseEvent extends MazeEvent {
@@ -258,14 +253,14 @@ export class PortalStaircaseEvent extends MazeEvent {
         }
     }
 
-    render(context, mazeWindowX, mazeWindowY) {
-        if (this.isVisible == true) {
-            context.globalAlpha = this.alpha;
-            context.drawImage(
-                this.image,
-                (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-                (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-            )
-        }
-    }
+    // render(context, mazeWindowX, mazeWindowY) {
+    //     if (this.isVisible == true) {
+    //         context.globalAlpha = this.alpha;
+    //         context.drawImage(
+    //             this.image,
+    //             (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
+    //             (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
+    //         )
+    //     }
+    // }
 }

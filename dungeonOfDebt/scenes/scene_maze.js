@@ -1383,19 +1383,20 @@ export class MazeScene extends Scene {
 
                         room.setIsOpen(!room.isOpen);
                         let occupant = this.entityRoomManager.getEntityForRoom(room);
+                        let event = this.entityRoomManager.getEventForRoom(room);
 
                         if (occupant != null) {
 
                             // WIZARD DIES IF INVERTED
-                            if (room.occupant instanceof PlayerEntity) {
+                            if (occupant instanceof PlayerEntity) {
                                 wizardInverted = true;
                                 occupant.addSpellEffect(SpellEffect.INVERT);
                                 occupant.overlayImage = room.image;
                             }
                         }
 
-                        if (room.event != null) {
-                            room.event.applySpellEffect(SpellEffect.INVERT);
+                        if (event != null) {
+                            event.applySpellEffect(SpellEffect.INVERT);
                         }
                     });
 
@@ -1467,8 +1468,7 @@ export class MazeScene extends Scene {
                             return this.entityRoomManager.getRoomById(room.id)
                         })
                         .filter(room => {
-                            console.log(`${room.id} -> ${this.entityRoomManager.getEntitiesForRoom(room)}`)
-                            return this.entityRoomManager.getEntitiesForRoom(room).length > 0
+                            return this.entityRoomManager.getEntityForRoom(room) != null
                         });
 
                     this.shuffleArray(affectedRooms);
@@ -1587,6 +1587,8 @@ export class MazeScene extends Scene {
                             });
 
 
+                        console.log(`neighbors: ${neighbors.length}`)
+
                         destination = neighbors[Math.floor(Math.random() * neighbors.length)];
 
                         if (destination != null) {
@@ -1595,7 +1597,10 @@ export class MazeScene extends Scene {
                             vacatedRooms.delete(destination)
                             let movementDriver = this.createEntityMovementDriver(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
+                        } else {
+                            console.log("i aint moving for nobody")
                         }
+
                         break;
 
                     // ------------------------------------ ROOK -------------------------------------
@@ -1681,7 +1686,8 @@ export class MazeScene extends Scene {
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
                                 .filter(room => { return ineligibleRooms.has(room) == false })
-                                .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) }).filter(room => {
+                                .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
+                                .filter(room => {
                                     let roomOccupant = this.entityRoomManager.getEntityForRoom(monsterRoom);
                                     if (roomOccupant != null) {
                                         return (vacatedRooms.has(room) == true) || (roomOccupant instanceof PlayerEntity)
@@ -1694,7 +1700,6 @@ export class MazeScene extends Scene {
                             // NOTE: this algorithm will ALWAYS choose the same move, so moving back and forth
                             // to "juke" the monster will NOT WORK. Muah-ha-ha-ha-haaaa! 
                             destination = eligibleNeighbors.sort((a, b) => {
-
                                 let distA = Math.abs(playerRoom.row - a.row) + Math.abs(playerRoom.col - a.col)
                                 let distB = Math.abs(playerRoom.row - b.row) + Math.abs(playerRoom.col - b.col)
                                 if (distA < distB) {
@@ -1735,7 +1740,7 @@ export class MazeScene extends Scene {
                             .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                             .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {
-                                let occupant = this.entityRoomManager.getEntitiesForRoom(room)[0];
+                                let occupant = this.entityRoomManager.getEntityForRoom(room);
                                 if (occupant != null) {
                                     return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
                                 } else {
@@ -1885,7 +1890,7 @@ export class MazeScene extends Scene {
 
                     if (adjacentToCube != null
                         && adjacentToCube.isOpen == true
-                        && adjacentToCube.isOccupied == false
+                        && this.getEntityForRoom(adjacentToCube) == null
                     ) {
 
                         primaryDriver = new EntityMovementDriver(
@@ -1909,14 +1914,15 @@ export class MazeScene extends Scene {
                         let endpoint = destination;
                         while (endpoint != null && endpoint.isOpen == true) {
                             let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
-                            if (candidate != null && candidate.isOpen == true && candidate.occupant == null) {
+                            let candidateOccupant = this.entityRoomManager.getEntityForRoom(candidate)
+                            if (candidate != null && candidate.isOpen == true && candidateOccupant == null) {
                                 endpoint = candidate;
                             } else {
                                 break;
                             }
                         }
 
-                        let sliderEntity = destination.occupant
+                        let sliderEntity = this.entityRoomManager.getEntityFOrRoom(destination);
 
                         // Compute a constant time for the slide-- 50ms per room
                         let distance = Math.abs(destination.row - endpoint.row) + Math.abs(destination.col - endpoint.col);
@@ -2708,7 +2714,8 @@ class EntityRoomManager {
     }
 
     getEntityForRoom(room) {
-        return this.roomIdToEntityId.get(room.id);
+        let entityId = this.roomIdToEntityId.get(room.id);
+        return this.entityIdToEntity.get(entityId);
     }
 
     getRoomForEntity(entity) {
@@ -2730,7 +2737,6 @@ class EntityRoomManager {
     getEventForRoom(room) {
         let eventId = this.roomIdToEventId.get(room.id);
         let event = this.eventIdToEvent.get(eventId);
-        console.log(`roomid ${room.id} -> ${eventId} -> ${event}`)
         return event;
     }
 

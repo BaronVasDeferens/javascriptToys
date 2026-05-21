@@ -321,9 +321,7 @@ export class MazeScene extends Scene {
 
         // --- ENTITIES ---
 
-
-
-        // Entity: PLAYER
+        // ENTITY: PLAYER...
         // Find an UNOCCUPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.col + a.row) < (b.col + b.row)) {
@@ -334,9 +332,6 @@ export class MazeScene extends Scene {
                 return 0;
             }
         }).filter(room => { return room.isEmpty == true })[0];
-
-
-        console.log(`allrooms: ${this.allRooms.length} :: pstart: ${playerStartRoom}`)
 
         this.player = new PlayerEntity(
             this.tileSize,
@@ -1573,7 +1568,6 @@ export class MazeScene extends Scene {
                     case MonsterMovement.RANDOM:
 
                         let neighbors = this.getAdjacentRooms(monsterRoom)
-                            .concat(monsterRoom)
                             .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                             .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {

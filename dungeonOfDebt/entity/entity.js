@@ -41,7 +41,7 @@ export class Entity {
 
             case SpellEffect.INVERT:
                 this.isInverted = true;
-                this.overlayImage = this.room.image;
+                //this.overlayImage = this.room.image;
                 break;
 
             case SpellEffect.TRANSMUTE:

@@ -1450,7 +1450,8 @@ export class MazeScene extends Scene {
 
                 case SpellEffect.EXCHANGE:
 
-                 
+                    let playerRoom = this.roomManager.getPlayerRoom();
+
                     let rooms = this.highlightedGridSquares
                         .map(highlighted => {
                             return this.roomManager.getRoomById(highlighted.id)
@@ -1458,23 +1459,25 @@ export class MazeScene extends Scene {
                         .filter(room => {
                             return this.roomManager.getEntityForRoom(room) != null
                         })
-                        .concat(this.roomManager.getPlayerRoom())
+                        .concat(playerRoom)
                         
 
                     let entities = rooms.map(room => {
                         return this.roomManager.getEntityForRoom(room)
                     });
 
-
-                    this.shuffleArray(entities);            // FIXME: we want to guarantee that each entity changes position !!
-
-
-                    entities.forEach((entity, index) => {
-                        this.roomManager.setEntityRoom(entity, rooms[index])
+                    let shuffledEntities = [];
+                    entities.forEach( entity => {
+                        shuffledEntities.unshift(entity)
                     });
 
+                    for (let index = 0; index < shuffledEntities.length; index++) {
+                        let entity = shuffledEntities[index];
+                        this.roomManager.setEntityRoom(entity, rooms[index])
+                    };
+
                     // CHECK: did the wizard exchange places with an incorporeal entity inside a block?
-                    let fatalTeleport = this.roomManager.getRoomForEntity(this.player).isOpen == false //!this.player.room.isOpen;
+                    let fatalTeleport = this.roomManager.getPlayerRoom() == false;
                     if (fatalTeleport == true) {
                         this.player.addSpellEffect(SpellEffect.INVERT);     // Teleported to a closed room-- same as INVERTED!
                     }
@@ -2635,8 +2638,8 @@ class EntityRoomManager {
 
     setEntityRoom(entity, room) {
 
-        console.log(`entity: ${JSON.stringify(entity)}`)
-        console.log(`room: ${JSON.stringify(room)}`)
+        // console.log(`entity: ${JSON.stringify(entity)}`)
+        // console.log(`room: ${JSON.stringify(room)}`)
 
         let target = this.entityIdToEntity.get(entity.id);
 
@@ -2657,6 +2660,7 @@ class EntityRoomManager {
         this.entityIdToRoomId.set(entity.id, room.id);
         this.roomIdToEntityId.set(room.id, entity.id);
 
+        console.log("room -> ent");
         console.log(this.roomIdToEntityId);
 
     }

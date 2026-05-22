@@ -1523,7 +1523,7 @@ export class MazeScene extends Scene {
         let vacatedRooms = new Set();
         let drivers = [];
 
-        let playerRoom = this.roomManager.getRoomForEntity(this.player);
+        let playerRoom = this.roomManager.getPlayerRoom(0);
 
         this.roomManager.getActiveMonsters()
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
@@ -1648,7 +1648,7 @@ export class MazeScene extends Scene {
                                 .filter(room => { return ineligibleRooms.has(room) == false })
                                 .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
-                                    let roomOccupant = this.roomManager.getEntityForRoom(monsterRoom);
+                                    let roomOccupant = this.roomManager.getEntityForRoom(room);
                                     if (roomOccupant != null) {
                                         return (vacatedRooms.has(room) == true) || (roomOccupant instanceof PlayerEntity)
                                     } else {

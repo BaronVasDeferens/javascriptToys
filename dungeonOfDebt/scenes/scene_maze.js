@@ -1837,9 +1837,6 @@ export class MazeScene extends Scene {
                         },
                         () => {
                             // onComplete
-                            // entity.room.setOccupant(null);
-                            // entity.setRoom(destination);
-                            // destination.setOccupant(entity);
                             this.roomManager.setEntityRoom(entity, destination);
                             this.processCollectableEvents(entity, destination);
                         }
@@ -1867,9 +1864,6 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                // entity.room.setOccupant(null);
-                                // entity.setRoom(destination);
-                                // destination.setOccupant(entity);
                                 this.roomManager.setEntityRoom(entity, destination);
                                 this.processCollectableEvents(entity, destination);
                             }
@@ -1879,7 +1873,7 @@ export class MazeScene extends Scene {
                         let endpoint = destination;
                         while (endpoint != null && endpoint.isOpen == true) {
                             let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
-                            let candidateOccupant = this.roomManager.getEntityForRoom(candidate)
+                            let candidateOccupant = candidate ? this.roomManager.getEntityForRoom(candidate) : null
                             if (candidate != null && candidate.isOpen == true && candidateOccupant == null) {
                                 endpoint = candidate;
                             } else {
@@ -1901,10 +1895,7 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onCompleted
-                                // sliderEntity.room.setOccupant(null);
-                                // sliderEntity.setRoom(endpoint);
-                                //endpoint.setOccupant(sliderEntity);
-                                this.roomManager.setEntityRoom(entity, endpoint);
+                                this.roomManager.setEntityRoom(sliderEntity, endpoint);
                             }
                         )
 

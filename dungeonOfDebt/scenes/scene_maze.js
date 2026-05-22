@@ -219,7 +219,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 1;
+    levelCurrent = 5;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -1523,7 +1523,7 @@ export class MazeScene extends Scene {
         let vacatedRooms = new Set();
         let drivers = [];
 
-        let playerRoom = this.roomManager.getPlayerRoom(0);
+        let playerRoom = this.roomManager.getPlayerRoom();
 
         this.roomManager.getActiveMonsters()
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
@@ -1600,7 +1600,7 @@ export class MazeScene extends Scene {
                         let candidateOccupant = this.roomManager.getEntityForRoom(candidateRoom);
 
                         while (candidateRoom != null && candidateRoom.isOpen == true) {
-                            if (candidateOccupant == this.player) {
+                            if (candidateRoom == playerRoom) {
                                 path.push(candidateRoom);
                                 break;
                             } else if (candidateOccupant?.isFrozen == true) {
@@ -2682,10 +2682,13 @@ class EntityRoomManager {
 
     getEntityForRoom(room) {
 
+        if (room == null) {
+            return null
+        }
+
         let roomId = room.id;
         let entityId = this.roomIdToEntityId.get(roomId);
         return this.entityIdToEntity.get(entityId);
-
     }
 
     getRoomForEntity(entity) {

@@ -55,6 +55,7 @@ export class MazeEvent {
 
 }
 
+
 export class TreasureCollectableEvent extends MazeEvent {
 
     coinTiles = [
@@ -144,66 +145,44 @@ export class ChestCollectableEvent extends MazeEvent {
                 break;
         }
     }
-
-    // render(context, mazeWindowX, mazeWindowY) {
-    //     if (this.isActive == true && this.isVisible == true) {
-    //         context.globalAlpha = this.alpha;
-    //         context.drawImage(
-    //             this.image,
-    //             (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-    //             (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-    //         )
-    //     }
-    // }
 }
 
-export class KeyCollectableEvent extends MazeEvent {
+// export class KeyCollectableEvent extends MazeEvent {
 
-    imageAssetId = ImageAsset.DUNGEON_KEY_SMALL;
+//     imageAssetId = ImageAsset.DUNGEON_KEY_SMALL;
 
-    constructor(onTrigger, assetManager) {
-        super(onTrigger);
-        this.image = assetManager.getImage(this.imageAssetId);
-    }
+//     constructor(onTrigger, assetManager) {
+//         super(onTrigger);
+//         this.image = assetManager.getImage(this.imageAssetId);
+//     }
 
-    triggerEvent(entity) {
-        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
-            this.onTrigger();
-            this.isActive = false;
-        }
-    }
+//     triggerEvent(entity) {
+//         if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+//             this.onTrigger();
+//             this.isActive = false;
+//         }
+//     }
 
-    applySpellEffect(effect) {
-        switch (effect) {
-            case SpellEffect.INVERT:
+//     applySpellEffect(effect) {
+//         switch (effect) {
+//             case SpellEffect.INVERT:
 
-                // Inverting a key makes it invisible
+//                 // Inverting a key makes it invisible
 
-                if (!this.spellEffects.has(effect)) {
-                    this.spellEffects.add(effect);
-                    this.setIsVisible(false);
-                } else {
-                    this.spellEffects.delete(effect);
-                    this.setIsVisible(true);
-                }
-                break;
+//                 if (!this.spellEffects.has(effect)) {
+//                     this.spellEffects.add(effect);
+//                     this.setIsVisible(false);
+//                 } else {
+//                     this.spellEffects.delete(effect);
+//                     this.setIsVisible(true);
+//                 }
+//                 break;
 
-            default:
-                break;
-        }
-    }
-
-    // render(context, mazeWindowX, mazeWindowY) {
-    //     if (this.isActive == true && this.isVisible == true) {
-    //         context.globalAlpha = this.alpha;
-    //         context.drawImage(
-    //             this.image,
-    //             (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-    //             (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-    //         )
-    //     }
-    // }
-}
+//             default:
+//                 break;
+//         }
+//     }
+// }
 
 export class PortalStaircaseEvent extends MazeEvent {
 
@@ -252,15 +231,4 @@ export class PortalStaircaseEvent extends MazeEvent {
                 break;
         }
     }
-
-    // render(context, mazeWindowX, mazeWindowY) {
-    //     if (this.isVisible == true) {
-    //         context.globalAlpha = this.alpha;
-    //         context.drawImage(
-    //             this.image,
-    //             (this.room.col * this.room.roomSize) + (this.room.roomSize - this.image.width) / 2,
-    //             (this.room.row * this.room.roomSize) + (this.room.roomSize - this.image.height) / 2
-    //         )
-    //     }
-    // }
 }

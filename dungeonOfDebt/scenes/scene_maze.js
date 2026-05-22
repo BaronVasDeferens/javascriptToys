@@ -6,7 +6,7 @@ import { Entity } from "../entity/entity.js";
 import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
-import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, KeyCollectableEvent, PortalStaircaseEvent } from "../event/event.js"
+import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, PortalStaircaseEvent } from "../event/event.js"
 
 /**
  * DUNGEON of DEBT
@@ -344,19 +344,19 @@ export class MazeScene extends Scene {
         let entities = [];
 
         // ENTITY: KEY
-        // let keyMonster = new KeyFleeing(
-        //     this.tileSize,
-        //     this.assetManager,
-        //     () => {
-        //         this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
-        //         exitPortal.setIsLocked(false);
-        //         keyMonster.isAlive = false;
-        //     },
-        // )
+        let keyMonster = new KeyFleeing(
+            this.tileSize,
+            this.assetManager,
+            () => {
+                this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
+                exitPortal.setIsLocked(false);
+                keyMonster.isAlive = false;
+            },
+        )
 
-        // entities.push(
-        //     keyMonster
-        // )
+        entities.push(
+            keyMonster
+        )
 
         // ENTITY: MONSTERS...
 
@@ -597,13 +597,13 @@ export class MazeScene extends Scene {
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
 
         // Render events
-        this.roomManager.getActiveEvents().forEach(evt => {
-            evt.render(contextPrimary, 0, 0)
+        this.roomManager.getActiveEvents().forEach(event => {
+            event.render(contextPrimary, 0, 0)
         })
 
         // Render entities
-        this.roomManager.getActiveEntities().forEach(monster => {
-            monster.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
+        this.roomManager.getActiveEntities().forEach(entity => {
+            entity.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         });
 
         // Render LOS (in debug)
@@ -666,25 +666,30 @@ export class MazeScene extends Scene {
 
     processCollectableEvents(entity, room) {
 
-        if (!(entity instanceof PlayerEntity)) {
+        if (entity == null || room == null || !(entity instanceof PlayerEntity)) {
             return
         }
 
-        let event = this.roomManager.getEventForRoom(room);
+        if (this.roomManager.getIsPlayerEventContact()) {
+            let event = this.roomManager.getEventForRoom(room);
 
-        if (entity == null || room == null || event == null) {
-            return
-        }
-
-        // Collecting all the loose treasures reveals a CHEST!
-        let unclaimedTreasures = this.roomManager.getActiveEvents()
-            .filter(evt => { return evt instanceof TreasureCollectableEvent });
-
-        if (unclaimedTreasures.length > 0) {
+            if (!event.isActive) {
+                return
+            }
 
             event.triggerEvent(entity);
 
-            if (unclaimedTreasures.every(evt => { return evt.isActive == false })) {
+            // CHECK: was that the last treasure?
+            // Collecting all the loose treasures reveals a CHEST!
+            let unclaimedTreasures = this.roomManager
+                .getAllEvents()
+                .filter(event => { return event instanceof TreasureCollectableEvent })
+
+            if (
+                event instanceof TreasureCollectableEvent
+                && unclaimedTreasures.every(event => { return event.isActive == false })
+            ) {
+
 
                 // Place a chest in a random square
 
@@ -711,10 +716,7 @@ export class MazeScene extends Scene {
                     }
                 )
                 this.stateDrivers.push(fadeInDriver);
-
             }
-        } else {
-            event.triggerEvent(entity);
         }
     }
 
@@ -772,20 +774,14 @@ export class MazeScene extends Scene {
         }
 
         let gameOver = false;
+        let contactEntity = null;
 
         // Check: did the wizard cast FREEZE or INVERT upon himself? 
         if (this.player.isFrozen == true || this.player.isInverted == true) {
             gameOver = true;
-        }
-
-        // Check: does any monster co-occupy the wizard's square?
-        let playerRoom = this.roomManager.getPlayerRoom();
-        let contactEntity = this.roomManager.getActiveMonsters()
-            .filter(ent => { return (ent.isTransmuted == false) })
-            .filter(ent => { return this.roomManager.getRoomForEntity(ent) == playerRoom });
-
-        if (contactEntity != null && !(this.player.isTransmuted == true)) {
-
+        } else if (this.roomManager.getIsPlayerEntityContact()) {
+            // Check: does any monster co-occupy the wizard's square?
+            contactEntity = this.roomManager.getEntityForRoom(this.roomManager.getPlayerRoom());
             switch (contactEntity.contactEffect) {
 
                 case MonsterContactEffect.LETHAL:
@@ -1459,15 +1455,15 @@ export class MazeScene extends Scene {
                         .filter(room => {
                             return this.roomManager.getEntityForRoom(room) != null
                         })
-                        .concat(playerRoom)
-                        
 
                     let entities = rooms.map(room => {
                         return this.roomManager.getEntityForRoom(room)
-                    });
+                    }).concat(this.player);
+
+                    rooms = rooms.concat(playerRoom)
 
                     let shuffledEntities = [];
-                    entities.forEach( entity => {
+                    entities.forEach(entity => {
                         shuffledEntities.unshift(entity)
                     });
 
@@ -2481,8 +2477,6 @@ class MazeRoom {
 
     isOpen = false;         // Whether this room can be occupied
 
-    event = null;
-
     isEmpty = true;
 
     image = null;
@@ -2584,13 +2578,15 @@ class EntityRoomManager {
 
     rooms = [];
 
-    entityIdToEntity = new Map();
     roomIdToRoom = new Map();
-    eventIdToEvent = new Map();
-    entityIdToRoomId = new Map();             // entityId -> room
-    roomIdToEntityId = new Map();            // room -> List<Entity>
-    eventIdToRoomId = new Map();
+    roomIdToEntityId = new Map();
     roomIdToEventId = new Map();
+
+    entityIdToEntity = new Map();
+    entityIdToRoomId = new Map();
+
+    eventIdToEvent = new Map();
+    eventIdToRoomId = new Map();
 
     constructor(tileSize) {
         this.tileSize = tileSize;
@@ -2629,31 +2625,28 @@ class EntityRoomManager {
 
     setEntityRoom(entity, room) {
 
-        // console.log(`entity: ${JSON.stringify(entity)}`)
-        // console.log(`room: ${JSON.stringify(room)}`)
-
         let target = this.entityIdToEntity.get(entity.id);
 
         if (entity instanceof PlayerEntity) {
             this.playerRoomId = room.id;
+            entity.x = room.col * this.tileSize;
+            entity.y = room.row * this.tileSize;
+            return;
+        } else {
+
+            // remove prior room association
+            let oldRoomId = this.entityIdToRoomId.get(entity.id);
+            if (oldRoomId != null) {
+                this.entityIdToRoomId.delete(entity.id);
+                this.roomIdToEntityId.delete(oldRoomId);
+            }
+
+            entity.x = room.col * this.tileSize;
+            entity.y = room.row * this.tileSize;
+            this.entityIdToEntity.set(entity.id, entity);
+            this.entityIdToRoomId.set(entity.id, room.id);
+            this.roomIdToEntityId.set(room.id, entity.id);
         }
-
-        // remove prior room association
-        let oldRoomId = this.entityIdToRoomId.get(entity.id);
-        if (oldRoomId != null) {
-            this.entityIdToRoomId.delete(entity.id);
-            this.roomIdToEntityId.delete(oldRoomId);
-        }
-
-        entity.x = room.col * this.tileSize;
-        entity.y = room.row * this.tileSize;
-        this.entityIdToEntity.set(entity.id, entity);
-        this.entityIdToRoomId.set(entity.id, room.id);
-        this.roomIdToEntityId.set(room.id, entity.id);
-
-        console.log("room -> ent");
-        console.log(this.roomIdToEntityId);
-
     }
 
     getPlayerRoom() {
@@ -2673,11 +2666,11 @@ class EntityRoomManager {
 
     getActiveMonsters() {
         let monsters = [...this.entityIdToEntity.values()]
-            .filter(ent => {
-                return ent.id != this.player.id
+            .filter(entity => {
+                return entity instanceof MonsterEntity
             })
-            .filter(ent => {
-                return ent.isAlive == true
+            .filter(entity => {
+                return entity.isAlive == true
             });
 
         return monsters;
@@ -2690,13 +2683,7 @@ class EntityRoomManager {
     getEntityForRoom(room) {
 
         let roomId = room.id;
-        let entityId = 0;
-        if (roomId == this.playerRoomId) {
-            entityId = this.player.id
-        } else {
-            entityId = this.roomIdToEntityId.get(roomId);
-        }
-
+        let entityId = this.roomIdToEntityId.get(roomId);
         return this.entityIdToEntity.get(entityId);
 
     }
@@ -2713,6 +2700,40 @@ class EntityRoomManager {
         return this.roomIdToRoom.get(roomId);
     }
 
+    getIsPlayerEntityContact() {
+        let entityId = this.roomIdToEntityId.get(this.playerRoomId);
+        if (entityId == null) {
+            return false;
+        }
+
+        let entity = this.entityIdToEntity.get(entityId);
+        if (entity instanceof MonsterEntity) {
+            return true
+        } else {
+            return false
+        }
+
+    }
+
+    getPlayerCollectableContact() {
+        let entityId = this.roomIdToEntityId.get(this.playerRoomId);
+        if (entityId == null) {
+            return false;
+        }
+
+        let entity = this.entityIdToEntity.get(entityId);
+        if (entity instanceof MonsterCollectable) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    getIsPlayerEventContact() {
+        return (this.roomIdToEventId.get(this.playerRoomId) != null)
+    }
+
+
     // EVENTS
 
     setEventRoom(event, room) {
@@ -2727,6 +2748,10 @@ class EntityRoomManager {
         let eventId = this.roomIdToEventId.get(room.id);
         let event = this.eventIdToEvent.get(eventId);
         return event;
+    }
+
+    getAllEvents() {
+        return [...this.eventIdToEvent.values()];
     }
 
     getActiveEvents() {

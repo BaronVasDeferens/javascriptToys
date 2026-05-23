@@ -11,7 +11,6 @@ export class MazeEvent {
     y = 0;
 
     onTrigger = null;
-    color = "#FF0000"
 
     alpha = 1.0;
 
@@ -21,9 +20,8 @@ export class MazeEvent {
 
     spellEffects = new Set();
 
-    constructor(onTrigger, color) {
+    constructor(onTrigger) {
         this.onTrigger = onTrigger;
-        this.color = color;
     }
 
     setAlpha(alpha) {
@@ -49,12 +47,15 @@ export class MazeEvent {
 
     }
 
+    onTurnConclusion() {
+
+    }
+
     triggerEvent(entity) {
 
     }
 
 }
-
 
 export class TreasureCollectableEvent extends MazeEvent {
 
@@ -147,43 +148,6 @@ export class ChestCollectableEvent extends MazeEvent {
     }
 }
 
-// export class KeyCollectableEvent extends MazeEvent {
-
-//     imageAssetId = ImageAsset.DUNGEON_KEY_SMALL;
-
-//     constructor(onTrigger, assetManager) {
-//         super(onTrigger);
-//         this.image = assetManager.getImage(this.imageAssetId);
-//     }
-
-//     triggerEvent(entity) {
-//         if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
-//             this.onTrigger();
-//             this.isActive = false;
-//         }
-//     }
-
-//     applySpellEffect(effect) {
-//         switch (effect) {
-//             case SpellEffect.INVERT:
-
-//                 // Inverting a key makes it invisible
-
-//                 if (!this.spellEffects.has(effect)) {
-//                     this.spellEffects.add(effect);
-//                     this.setIsVisible(false);
-//                 } else {
-//                     this.spellEffects.delete(effect);
-//                     this.setIsVisible(true);
-//                 }
-//                 break;
-
-//             default:
-//                 break;
-//         }
-//     }
-// }
-
 export class PortalStaircaseEvent extends MazeEvent {
 
     isLocked = true;
@@ -231,4 +195,53 @@ export class PortalStaircaseEvent extends MazeEvent {
                 break;
         }
     }
+}
+
+export class SnailTrailEvent extends MazeEvent {
+
+    maxTurnsBeforeDissolve = 5;
+    turnsBeforeDissolve = 5;
+
+    imageAsset = null;
+
+    constructor(onTrigger, assetManager) {
+
+        super(onTrigger);
+
+        let assetIds = [
+            ImageAsset.MONSTER_SNAIL_TRAIL_1,
+            ImageAsset.MONSTER_SNAIL_TRAIL_2,
+            ImageAsset.MONSTER_SNAIL_TRAIL_3,
+            ImageAsset.MONSTER_SNAIL_TRAIL_4,
+            ImageAsset.MONSTER_SNAIL_TRAIL_5
+        ];
+        let index = Math.floor(assetIds.length * Math.random());
+        this.image = assetManager.getImage(assetIds[index]);
+    }
+
+    applySpellEffect(effect) {
+
+        // ??? What happens ???
+
+    }
+
+    onTurnConclusion() {
+        this.turnsBeforeDissolve--;
+        this.alpha = this.turnsBeforeDissolve / this.maxTurnsBeforeDissolve;
+        if (this.turnsBeforeDissolve <= 0) {
+            this.isActive = false;
+        }
+    }
+
+    triggerEvent(entity) {
+
+        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+            this.onTrigger();
+            if (this.isOneShot == true) {
+                this.isActive = false;
+            }
+        }
+    }
+
+
 }

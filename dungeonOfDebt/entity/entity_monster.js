@@ -277,17 +277,20 @@ export class MonsterSnail extends MonsterEntity {
     }
 
     onTurnConclusion() {
+        super.onTurnConclusion();
         let index = Math.floor(this.trailAssetIds.length * Math.random());
         this.trailImage = this.assetManager.getImage(this.trailAssetIds[index]);
     }
 
     render(context, windowOffsetX, windowOffsetY) {
 
-        context.drawImage(
-            this.trailImage,
-            this.x + ((this.tileSize - this.trailImage.width) / 2),
-            this.y + ((this.tileSize - this.trailImage.height) / 2)
-        );
+        if (this.isTransmuted == false) {
+            context.drawImage(
+                this.trailImage,
+                this.x + ((this.tileSize - this.trailImage.width) / 2),
+                this.y + ((this.tileSize - this.trailImage.height) / 2)
+            );
+        }
 
         context.drawImage(
             this.image,
@@ -296,62 +299,6 @@ export class MonsterSnail extends MonsterEntity {
         );
     }
 
-}
-
-export class MonsterSnailTrail extends MonsterEntity {
-
-    maxTurnsBeforeDissolve = 5;
-    turnsBeforeDesolve = 5;
-
-    imageAsset = null;
-
-    physicality = MonsterPhysicality.CORPOREAL;
-    nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.NONE;
-    visibility = MonsterVisibility.VISIBLE;
-
-    constructor(tileSize, assetManager) {
-        let assetIds = [
-            ImageAsset.MONSTER_SNAIL_TRAIL_1,
-            ImageAsset.MONSTER_SNAIL_TRAIL_2,
-            ImageAsset.MONSTER_SNAIL_TRAIL_3,
-            ImageAsset.MONSTER_SNAIL_TRAIL_4,
-            ImageAsset.MONSTER_SNAIL_TRAIL_5
-        ];
-        let index = Math.floor(assetId.length * Math.random());
-        super(tileSize, assetIds[index], assetManager);
-
-    }
-
-    getMovementBehavior() {
-        return MonsterMovement.NONE;
-    }
-
-    onTurnConclusion() {
-
-        let expiredEffects = new Set();
-        let keys = this.spellEffects.keys()
-
-        keys.forEach(key => {
-            let current = this.spellEffects.get(key) - 1;
-            this.spellEffects.set(key, current);
-
-            if (current <= 0) {
-                expiredEffects.add(key)
-            }
-        });
-
-        expiredEffects.forEach(key => {
-            this.removeSpellEffect(key);
-        })
-
-        this.turnsBeforeDesolve--;
-        this.alpha = this.turnsBeforeDesolve / this.maxTurnsBeforeDissolve;
-        if (this.turnsBeforeDesolve <= 0) {
-            this.isAlive = false;
-        }
-
-    }
 }
 
 

@@ -6,7 +6,7 @@ import { Entity } from "../entity/entity.js";
 import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
-import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, PortalStaircaseEvent } from "../event/event.js"
+import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, PortalStaircaseEvent, SnailTrailEvent } from "../event/event.js"
 
 /**
  * DUNGEON of DEBT
@@ -24,9 +24,12 @@ import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, PortalStair
  *      PUSHING
  *      HUGE key that has to be pushed to the door
  *      HUGE chest that has to be pushed to the open door to be collected
- *      MONSTER that pushes toward HOLES IN THE FLOOR
+ *      
+ *      MONSTER that pushes PLAYER toward HOLES IN THE FLOOR
  * 
+ *      MONSTER which travels in one direction
  * 
+ *      MONSTER that leaves a toxic trail
  *  
  * 
  *      O sorcerer! Not for want of arcane power 
@@ -219,7 +222,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 5;
+    levelCurrent = 1;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -363,10 +366,12 @@ export class MazeScene extends Scene {
         switch (this.levelCurrent) {
 
             case 1:
-                entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
+                //entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
                 // entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                // entities.push(new MonsterSnail(this.tileSize, this.assetManager));
+                entities.push(new MonsterSnail(this.tileSize, this.assetManager));
+                entities.push(new MonsterSnail(this.tileSize, this.assetManager));
+                entities.push(new MonsterSnail(this.tileSize, this.assetManager));
                 break;
 
             case 2:
@@ -660,6 +665,11 @@ export class MazeScene extends Scene {
                 ent.onTurnConclusion();
             });
 
+        this.roomManager.getActiveEvents()
+            .forEach(event => {
+                event.onTurnConclusion();
+            })
+
         this.updateMagicInterface();
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
     }
@@ -777,7 +787,7 @@ export class MazeScene extends Scene {
         let contactEntity = null;
 
         // Check: did the wizard cast FREEZE or INVERT upon himself? 
-        if (this.player.isFrozen == true || this.player.isInverted == true) {
+        if (this.player.isAlive == false || this.player.isFrozen == true || this.player.isInverted == true) {
             gameOver = true;
         } else if (this.roomManager.getIsPlayerEntityContact()) {
             // Check: does any monster co-occupy the wizard's square?
@@ -1788,13 +1798,23 @@ export class MazeScene extends Scene {
                         break;
                 }
 
-                switch (monster) {
-                    case monster instanceof MonsterSnail:
-                        // Drop a trail
-                        break;
-                    default:
-                        break;
+                if (monster instanceof MonsterSnail && monster.isTransmuted == false) {
+                    // Drop a trail
+                    let event = this.roomManager.getEventForRoom(monsterRoom);
+                    if (event == null || event.isActive == false) {
+                        this.roomManager.setEventRoom(
+                            new SnailTrailEvent(
+                                () => {
+                                    this.player.isAlive = false;
+                                    this.updateSequenceOrGameOver(GameSequence.GAME_OVER)
+                                },
+                                this.assetManager
+                            ),
+                            monsterRoom
+                        )
+                    }
                 }
+
             });
 
         // Place all monster movements into a single multi-entity driver
@@ -2423,6 +2443,8 @@ export class MazeScene extends Scene {
 
         let availableRooms = this.allRooms.filter(room => {
             return room.isEmpty == true
+                && this.roomManager.getEventForRoom(room) == null
+                && this.roomManager.getEntityForRoom(room) == null
         });
 
         if (avoidPlayerLos == true) {

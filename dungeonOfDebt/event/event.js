@@ -1,4 +1,5 @@
 import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
+import { MonsterVisibility } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SpellEffect } from "../entity/entity_spell.js";
 
@@ -28,6 +29,9 @@ export class MazeEvent {
         this.alpha = alpha;
     }
 
+    setVisibility(visibility) {
+        this.visibility = visibility;
+    }
     setIsVisible(isVisible) {
         this.isVisible = isVisible;
     }
@@ -217,6 +221,22 @@ export class SnailTrailEvent extends MazeEvent {
         ];
         let index = Math.floor(assetIds.length * Math.random());
         this.image = assetManager.getImage(assetIds[index]);
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (this.visibility == MonsterVisibility.INVISIBLE) {
+            return;
+        }
+
+        if (this.isActive == true && this.isVisible == true) {
+            context.globalAlpha = this.alpha;
+            context.drawImage(
+                this.image,
+                this.x,
+                this.y
+            )
+        }
     }
 
     applySpellEffect(effect) {

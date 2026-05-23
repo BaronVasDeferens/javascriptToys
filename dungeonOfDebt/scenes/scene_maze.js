@@ -777,19 +777,31 @@ export class MazeScene extends Scene {
 
     }
 
+
+
+    processEventsAndCollisions() {
+
+    }
+
+    checkForGameOver() {
+
+    }
+
+
     updateSequenceOrGameOver(sequence) {
 
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
             return;
         }
 
-        let gameOver = false;
+        if (this.roomManager.getIsPlayerEventContact()) {
+            this.processCollectableEvents(this.player, this.roomManager.getPlayerRoom());
+        }
+
+        let gameOver = (sequence == GameSequence.GAME_OVER);
         let contactEntity = null;
 
-        // Check: did the wizard cast FREEZE or INVERT upon himself? 
-        if (this.player.isAlive == false || this.player.isFrozen == true || this.player.isInverted == true) {
-            gameOver = true;
-        } else if (this.roomManager.getIsPlayerEntityContact()) {
+        if (this.roomManager.getIsPlayerEntityContact()) {
             // Check: does any monster co-occupy the wizard's square?
             contactEntity = this.roomManager.getEntityForRoom(this.roomManager.getPlayerRoom());
             switch (contactEntity.contactEffect) {
@@ -804,13 +816,20 @@ export class MazeScene extends Scene {
             }
         }
 
+
+
+        // Check: did the wizard cast FREEZE or INVERT upon himself? 
+        if (this.player.isAlive == false
+            || this.player.isFrozen == true
+            || this.player.isInverted == true) {
+            gameOver = true;
+        }
+
         if (gameOver == true) {
 
             // GAME OVER !!!
-            // If the fatal entity was a WRAITH, make him visible
-            if (contactEntity instanceof MonsterWraith) {
-                contactEntity.setVisibility(true);
-            }
+
+            console.log(`contact: ${JSON.stringify(contactEntity)}`)
 
             // Clear selection and states
             this.selectedSpellZone = null;
@@ -819,14 +838,17 @@ export class MazeScene extends Scene {
 
             // Use a driver to fade out the background and all but the fatal entity and player
             this.roomManager.getActiveMonsters()
-                .filter(ent => { return (ent !== contactEntity) })
+                .concat(this.roomManager.getActiveEvents())
                 .forEach(ent => {
-                    ent.setVisibility(MonsterVisibility.INVISIBLE);
-                    ent.overlayImage = null;
+                    if (contactEntity != ent) {
+                        ent.setVisibility(MonsterVisibility.INVISIBLE);
+                        ent.overlayImage = null;
+                        ent.setAlpha(0.0)
+                    } else {
+                        ent.setVisibility(MonsterVisibility.VISIBLE);
+                        ent.setAlpha(1.0);
+                    }
                 })
-
-            this.eventList
-                .forEach(evt => { evt.setAlpha(0.0) })
 
             this.stateDrivers.push(
                 new Driver(
@@ -1182,6 +1204,7 @@ export class MazeScene extends Scene {
                         col: highlightedRoom.col,
                         row: highlightedRoom.row,
                         id: highlightedRoom.id,
+                        room: highlightedRoom,
                         tileSize: this.tileSize,
                         render: function (context) {
                             context.fillStyle = color;
@@ -1332,17 +1355,15 @@ export class MazeScene extends Scene {
                     let wizardFrozen = false;
 
                     // Apply a FREEZE effect (ice cube) to every entity in the selected squares...
-                    this.highlightedGridSquares.forEach(highlight => {
-                        let room = this.roomManager.getRoomById(highlight.id);
+                    this.highlightedGridSquares.forEach(highlighted => {
+                        let room = highlighted.room;
                         let occupant = this.roomManager.getEntityForRoom(room)
                         if (occupant != null) {
-
                             occupant.addSpellEffect(SpellEffect.FREEZE, 5);
+                        }
 
-                            if (occupant instanceof PlayerEntity) {
-                                //...but if the wizard freezes himself, it's GAME OVER
-                                wizardFrozen = true
-                            }
+                        if (room == this.roomManager.getPlayerRoom()) {
+                            this.player.addSpellEffect(SpellEffect.FREEZE, 5)
                         }
                     });
 
@@ -1373,23 +1394,19 @@ export class MazeScene extends Scene {
 
                     let wizardInverted = false;
 
-                    this.highlightedGridSquares.map(sq => {
-                        return this.getRoom(sq.row, sq.col)
-                    }).forEach(room => {
-
+                    this.highlightedGridSquares.forEach(highlighted => {
+                        let room = highlighted.room;
                         room.setIsOpen(!room.isOpen);
+
+                        // WIZARD DIES IF INVERTED
+                        if (room == this.roomManager.getPlayerRoom()) {
+                            this.player.addSpellEffect(SpellEffect.INVERT);
+                            this.player.overlayImage = room.image;
+                        }
+
                         let occupant = this.roomManager.getEntityForRoom(room);
                         let event = this.roomManager.getEventForRoom(room);
 
-                        if (occupant != null) {
-
-                            // WIZARD DIES IF INVERTED
-                            if (occupant instanceof PlayerEntity) {
-                                wizardInverted = true;
-                                occupant.addSpellEffect(SpellEffect.INVERT);
-                                occupant.overlayImage = room.image;
-                            }
-                        }
 
                         if (event != null) {
                             event.applySpellEffect(SpellEffect.INVERT);
@@ -1805,8 +1822,8 @@ export class MazeScene extends Scene {
                         this.roomManager.setEventRoom(
                             new SnailTrailEvent(
                                 () => {
+                                    //this.updateSequenceOrGameOver(GameSequence.GAME_OVER)
                                     this.player.isAlive = false;
-                                    this.updateSequenceOrGameOver(GameSequence.GAME_OVER)
                                 },
                                 this.assetManager
                             ),
@@ -1854,7 +1871,7 @@ export class MazeScene extends Scene {
                         () => {
                             // onComplete
                             this.roomManager.setEntityRoom(entity, destination);
-                            this.processCollectableEvents(entity, destination);
+                            //this.processCollectableEvents(entity, destination);
                         }
                     )
                 } else if (destinationOccupant.isFrozen == true) {
@@ -1881,7 +1898,7 @@ export class MazeScene extends Scene {
                             () => {
                                 // onComplete
                                 this.roomManager.setEntityRoom(entity, destination);
-                                this.processCollectableEvents(entity, destination);
+                                //this.processCollectableEvents(entity, destination);
                             }
                         )
 
@@ -1975,7 +1992,7 @@ export class MazeScene extends Scene {
                             // entity.setRoom(destination);
                             // destination.setOccupant(entity);
                             this.roomManager.setEntityRoom(entity, destination);
-                            this.processCollectableEvents(entity, destination);
+                            //this.processCollectableEvents(entity, destination);
                         }
                     )
                 }
@@ -2018,7 +2035,7 @@ export class MazeScene extends Scene {
                     // entity.setRoom(destination);
                     // destination.setOccupant(entity);
                     this.roomManager.setEntityRoom(entity, destination);
-                    this.processCollectableEvents(entity, destination);
+                    //this.processCollectableEvents(entity, destination);
                     onComplete();
                 }
             )
@@ -2740,7 +2757,7 @@ class EntityRoomManager {
 
     }
 
-    getPlayerCollectableContact() {
+    getIsPlayerCollectableContact() {
         let entityId = this.roomIdToEntityId.get(this.playerRoomId);
         if (entityId == null) {
             return false;

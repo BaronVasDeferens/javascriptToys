@@ -50,12 +50,11 @@ export class PlayerEntity extends Entity {
     }
 
     render(context) {
+
         context.globalAlpha = this.imageAlpha;
         context.drawImage(this.image, this.x + this.offsetX, this.y + this.offsetY);
 
-
         if (this.overlayImage != null) {
-
             context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
             context.drawImage(
                 this.overlayImage,
@@ -63,7 +62,5 @@ export class PlayerEntity extends Entity {
                 this.y + ((this.tileSize - this.overlayImage.height) / 2)
             )
         }
-
-        context.globalAlpha = 1.0;
     }
 };

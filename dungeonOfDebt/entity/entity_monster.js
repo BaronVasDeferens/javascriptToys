@@ -256,20 +256,8 @@ export class MonsterSnail extends MonsterEntity {
     movement = MonsterMovement.RANDOM;
     visibility = MonsterVisibility.VISIBLE;
 
-    trailAssetIds = [
-        ImageAsset.MONSTER_SNAIL_TRAIL_1,
-        ImageAsset.MONSTER_SNAIL_TRAIL_2,
-        ImageAsset.MONSTER_SNAIL_TRAIL_3,
-        ImageAsset.MONSTER_SNAIL_TRAIL_4,
-        ImageAsset.MONSTER_SNAIL_TRAIL_5
-    ];
-
-    trailImage = null;
-
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_SNAIL, assetManager);
-        let index = Math.floor(this.trailAssetIds.length * Math.random());
-        this.trailImage = this.assetManager.getImage(this.trailAssetIds[index]);
     }
 
     getMovementBehavior() {
@@ -278,20 +266,9 @@ export class MonsterSnail extends MonsterEntity {
 
     onTurnConclusion() {
         super.onTurnConclusion();
-        let index = Math.floor(this.trailAssetIds.length * Math.random());
-        this.trailImage = this.assetManager.getImage(this.trailAssetIds[index]);
     }
 
     render(context, windowOffsetX, windowOffsetY) {
-
-        if (this.isTransmuted == false) {
-            context.drawImage(
-                this.trailImage,
-                this.x + ((this.tileSize - this.trailImage.width) / 2),
-                this.y + ((this.tileSize - this.trailImage.height) / 2)
-            );
-        }
-
         context.drawImage(
             this.image,
             this.x + ((this.tileSize - this.image.width) / 2),
@@ -300,9 +277,6 @@ export class MonsterSnail extends MonsterEntity {
     }
 
 }
-
-
-
 
 export class MonsterTroll extends MonsterEntity {
 

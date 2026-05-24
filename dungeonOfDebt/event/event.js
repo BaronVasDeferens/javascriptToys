@@ -10,6 +10,8 @@ export class EventEntity extends Entity {
     isOneShot = true;
     onTrigger = () => { console.log("no event") };
 
+    spellEffects = new Set();
+
     constructor(tileSize, assetManager, onTrigger) {
         super(tileSize, assetManager);
         this.onTrigger = onTrigger;
@@ -218,7 +220,7 @@ export class SnailTrailEvent extends EventEntity {
         if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
             this.onTrigger();
             if (this.isOneShot == true) {
-                this.isActive = false;
+                this.turnsBeforeDissolve = this.maxTurnsBeforeDissolve;
             }
         }
     }

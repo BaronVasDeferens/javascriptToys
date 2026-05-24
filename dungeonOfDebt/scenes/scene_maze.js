@@ -731,7 +731,6 @@ export class MazeScene extends Scene {
         }
     }
 
-
     processMonsters() {
 
         let room = this.entityManager.getPlayerRoom();
@@ -744,6 +743,7 @@ export class MazeScene extends Scene {
         switch (entity.contactEffect) {
 
             case EntityContactEffectType.LETHAL:
+                this.player.isActive = false;
                 this.updateGameSequence(GameSequence.GAME_OVER);
                 break;
 
@@ -751,13 +751,7 @@ export class MazeScene extends Scene {
                 entity.onPlayerContact(this.player);
                 break;
         }
-
     }
-
-
-    /*
-       TODO ---- REFACTOR UpdateGameSeq() and UpdateGameSeqOrGameOver() to be less...uh, like they are
-    */
 
     updateGameSequence(newSequence) {
 
@@ -803,43 +797,16 @@ export class MazeScene extends Scene {
     }
 
 
-
-    checkForGameOver() {
-
-
-    }
-
-
     updateSequenceOrGameOver(sequence) {
 
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
             return;
         }
 
-
         this.processMonsters();
         this.processEvents();
 
-
         let gameOver = (sequence == GameSequence.GAME_OVER);
-        let contactEntity = null;
-
-        if (this.entityManager.getIsPlayerEntityContact()) {
-            // Check: does any monster co-occupy the wizard's square?
-            contactEntity = this.entityManager.getEntityForRoom(this.entityManager.getPlayerRoom());
-            switch (contactEntity.contactEffect) {
-
-                case EntityContactEffectType.LETHAL:
-                    gameOver = true;
-                    break;
-
-                case EntityContactEffectType.TRIGGER_EVENT:
-                    contactEntity.onPlayerContact(this.player);
-                    break;
-            }
-        }
-
-
 
         // Check: did the wizard cast FREEZE or INVERT upon himself? 
         if (this.player.isActive == false
@@ -849,58 +816,65 @@ export class MazeScene extends Scene {
         }
 
         if (gameOver == true) {
-
-            // GAME OVER !!!
-
-            console.log(`contact: ${JSON.stringify(contactEntity)}`)
-
-            // Clear selection and states
-            this.selectedSpellZone = null;
-            this.selectedSpellEffect = null;
-            this.highlightedGridSquares = [];
-
-            // Use a driver to fade out the background and all but the fatal entity and player
-            this.entityManager.getActiveMonsters()
-                .concat(this.entityManager.getActiveEvents())
-                .forEach(ent => {
-                    if (contactEntity != ent) {
-                        ent.setOpacity(EntityOpacityType.INVISIBLE);
-                        ent.overlayImage = null;
-                    } else {
-                        ent.setOpacity(EntityOpacityType.VISIBLE);
-                    }
-                })
-
-            this.stateDrivers.push(
-                new Driver(
-                    1000,
-                    (pctComplete) => {
-                        // onUpdate
-                        if (pctComplete <= 1.0) {
-                            let opacity = 1 - pctComplete;
-                            this.backgroundOpacity = opacity;
-                        }
-                    },
-                    () => {
-                        // onComplete 
-                    }
-                )
-            )
-
-            // Play the "barbeque's over" sound and INITIALIZE when it finishes
-            this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => {
-                this.fadeOut(() => {
-                    this.initialize();
-                });
-            });
-
-            // Lock the controls
-            this.updateGameSequence(GameSequence.GAME_OVER);
-            this.updateMagicInterface();
-
+            this.gameOver();
         } else {
             this.updateGameSequence(sequence)
         }
+    }
+
+    gameOver() {
+
+        this.selectedSpellZone = null;
+        this.selectedSpellEffect = null;
+        this.highlightedGridSquares = [];
+
+        let playerRoom = this.entityManager.getPlayerRoom();
+        let contactEntity = this.entityManager.getEntityForRoom(playerRoom) ? this.entityManager.getEntityForRoom(playerRoom) : this.entityManager.getEventForRoom(playerRoom)
+
+        if (contactEntity == null) {
+            console.error("contact entity is NULL?????")
+        } else {
+            console.log(`fatal entity: ${contactEntity.constructor.name} : ${contactEntity.id}`)
+        }
+
+        // Hide all entities but the fatal entity and player
+        this.entityManager.getActiveMonsters()
+            .concat(this.entityManager.getActiveEvents())
+            .forEach(entityOrEvent => {
+                entityOrEvent.setOpacity(EntityOpacityType.INVISIBLE);
+                entityOrEvent.setAlpha(0.0);
+            })
+
+        contactEntity.setOpacity(EntityOpacityType.VISIBLE);
+        contactEntity.setAlpha(1.0);
+
+        // Use a driver to fade out the background
+        this.stateDrivers.push(
+            new Driver(
+                1000,
+                (pctComplete) => {
+                    // onUpdated
+                    if (pctComplete <= 1.0) {
+                        let opacity = 1 - pctComplete;
+                        this.backgroundOpacity = opacity;
+                    }
+                },
+                () => {
+                    // onComplete 
+                }
+            )
+        )
+
+        // Play the "BBQ's over" sound and INITIALIZE when it finishes
+        this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => {
+            this.fadeOut(() => {
+                this.initialize();
+            });
+        });
+
+        // Lock the controls
+        this.updateGameSequence(GameSequence.GAME_OVER);
+        this.updateMagicInterface();
     }
 
     // -------------------------------------- SCENE STUFF --------------------------------------

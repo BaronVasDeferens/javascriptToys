@@ -53,7 +53,7 @@ export class Entity {
 
     overlayImage = null;
 
-    spellEffects = new Set();
+    spellEffects = new Map();           // SpellEffectType -> number of turns
     isFrozen = false;
     isInverted = false;
     isTransmuted = false;
@@ -62,8 +62,6 @@ export class Entity {
         this.tileSize = tileSize;
         this.assetManager = assetManager;
     }
-
-
 
     render(context, mazeWindowX, mazeWindowY) {
 

@@ -2,17 +2,18 @@ import { Entity } from "./entity.js";
 import { ImageAsset } from "../assets.js";
 import { SpellEffect } from "./entity_spell.js";
 
+
+
+
 export class PlayerEntity extends Entity {
 
     id = crypto.randomUUID();
-
-    image = null;
-    imageAlpha = 1.0;
 
     offsetX = 0;
     offsetY = 0;
 
     constructor(tileSize, assetManager) {
+
         super(tileSize, assetManager);
 
         this.imageAssetId = ImageAsset.WIZARD_1;
@@ -51,7 +52,7 @@ export class PlayerEntity extends Entity {
 
     render(context) {
 
-        context.globalAlpha = this.imageAlpha;
+        context.globalAlpha = this.alpha;
         context.drawImage(this.image, this.x + this.offsetX, this.y + this.offsetY);
 
         if (this.overlayImage != null) {

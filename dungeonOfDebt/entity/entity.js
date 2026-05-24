@@ -2,6 +2,37 @@ import { SpellEffect } from "./entity_spell.js";
 import { AssetManager, ImageAsset } from "../assets.js";
 
 
+
+export const EntityMovementType = Object.freeze({
+    NONE: 0, // Does not move
+    RANDOM: 10, // Moves to a random adjacent square,
+    RANDOM_ROOK: 11, // Moves the maximum horizontal or vertical distance
+    CHASE_LINE_OF_SIGHT: 20, // Moves toward the player if it can draw LOS to him    
+    CHASE_OMNISCIENT: 30, // Moves toward the player regardless of LOS
+    FLEE_LINE_OF_SIGHT: 40, // Moves away from the player when in LOS
+    FLEE_OMNISCIENT: 50, // Moves away from the player regardless of LOS
+    ONLY_WHEN_PUSHED: 60, // Moves only when the wizard pushes it
+});
+
+export const EntityContactEffectType = Object.freeze({
+    // Coming into contact with this monster...
+    NOTHING: 0, // Nothing happens.
+    LETHAL: 10, // Kills the wizard
+    PENALTY_FINANCIAL: 20, // Deducts from the wizard's gold
+    PENALTY_ZONE: 30, // Removes a spell zone; wizard unable to use that zone
+    PENALTY_EFFECT: 40, // Removes a spell effect; wizard unable to that that spell
+    TRIGGER_EVENT: 50 // Something happens when the wizard makes contact (gains a key, for example)
+});
+
+export const EntityOpacityType = Object.freeze({
+    VISIBLE: 1.0,
+    TRANSPARENT_THREE_QUARTERS: 0.75,
+    TRANSPARENT_HALF: 0.5,
+    TRANSPARENT_QUARTER: 0.25,
+    INVISIBLE: 0.0
+});
+
+
 export class Entity {
 
     id = crypto.randomUUID();
@@ -9,16 +40,20 @@ export class Entity {
     x = 0;
     y = 0;
 
+    isActive = true;
+
+    movementType = EntityMovementType.NONE;
+
     tileSize = 64;
 
     image = null;
     imageAssetId = null;
+    alpha = 1.0;
+    opacity = EntityOpacityType.VISIBLE;
+
     overlayImage = null;
 
-    isAlive = true;
-
-    spellEffects = new Map();
-
+    spellEffects = new Set();
     isFrozen = false;
     isInverted = false;
     isTransmuted = false;
@@ -28,65 +63,44 @@ export class Entity {
         this.assetManager = assetManager;
     }
 
+
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (!this.isActive) {
+            return
+        }
+
+        context.globalAlpha = this.opacity;
+        context.drawImage(
+            this.image,
+            this.x + ((this.tileSize - this.image.width) / 2),
+            this.y + ((this.tileSize - this.image.height) / 2)
+        );
+    }
+
     addSpellEffect(effect, turns) {
 
-        this.spellEffects.set(effect, turns);
-
-        switch (effect) {
-
-            case SpellEffect.FREEZE:
-                this.isFrozen = true;
-                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
-                break;
-
-            case SpellEffect.INVERT:
-                this.isInverted = true;
-                //this.overlayImage = this.room.image;
-                break;
-
-            case SpellEffect.TRANSMUTE:
-                this.isTransmuted = true;
-                this.image = this.assetManager.getImage(ImageAsset.FROG);
-                break;
-
-            default:
-                break;
-        }
     }
 
     removeSpellEffect(effect) {
 
-        this.spellEffects.delete(effect);
-
-        switch (effect) {
-
-            case SpellEffect.FREEZE:
-                this.isFrozen = false;
-                break;
-
-            case SpellEffect.INVERT:
-                this.isInverted = false;
-                break;
-
-            case SpellEffect.TRANSMUTE:
-                this.image = this.assetManager.getImage(this.imageAssetId);
-                this.isTransmuted = false;
-                break;
-            default:
-                break;
-        }
-
-        if (this.spellEffects.size == 0) {
-            this.overlayImage = null;
-        }
     }
 
     clearAllSpellEffects() {
         this.spellEffects.clear();
     }
 
+    onPlayerContact(player) {
+
+    }
+
     onTurnConclusion() {
 
+    }
+
+    setOpacity(opacity) {
+        this.opacity = opacity;
     }
 
     setAlpha(alpha) {
@@ -96,8 +110,9 @@ export class Entity {
     update(delta) {
 
     }
-
-    render(context) {
-
-    }
 }
+
+
+
+
+

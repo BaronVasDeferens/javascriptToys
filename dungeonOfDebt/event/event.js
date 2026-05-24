@@ -1,94 +1,52 @@
 import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
-import { MonsterVisibility } from "../entity/entity_monster.js";
+import { Entity } from "../entity/entity.js";
+import { EntityOpacityType } from "../entity/entity.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SpellEffect } from "../entity/entity_spell.js";
 
 
-export class MazeEvent {
+export class EventEntity extends Entity {
 
-    id = crypto.randomUUID();
-
-    x = 0;
-    y = 0;
-
-    onTrigger = null;
-
-    alpha = 1.0;
-
-    isVisible = true;
     isOneShot = true;
-    isActive = true;
+    onTrigger = () => { console.log("no event") };
 
-    spellEffects = new Set();
-
-    constructor(onTrigger) {
+    constructor(tileSize, assetManager, onTrigger) {
+        super(tileSize, assetManager);
         this.onTrigger = onTrigger;
     }
 
-    setAlpha(alpha) {
-        this.alpha = alpha;
-    }
-
-    setVisibility(visibility) {
-        this.visibility = visibility;
-    }
-    setIsVisible(isVisible) {
-        this.isVisible = isVisible;
-    }
-
-    render(context, mazeWindowX, mazeWindowY) {
-        if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.alpha;
-            context.drawImage(
-                this.image,
-                this.x,
-                this.y
-            )
+    checkTrigger(entity) {
+        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+            this.onTrigger();
+            if (this.isOneShot == true) {
+                this.isActive = false;
+            }
+            return true;
+        } else {
+            return false;
         }
     }
-
-    applySpellEffect(effect) {
-
-    }
-
-    onTurnConclusion() {
-
-    }
-
-    triggerEvent(entity) {
-
-    }
-
 }
 
-export class TreasureCollectableEvent extends MazeEvent {
 
-    coinTiles = [
-        ImageAsset.COIN_1,
-        ImageAsset.COIN_2,
-        ImageAsset.COIN_3,
-        ImageAsset.COIN_4
-    ];
 
-    image = null;
-    alpha = 1.0;
 
-    constructor(onTrigger, assetManager) {
-        super(onTrigger);
-        let tile = this.coinTiles[Math.floor(this.coinTiles.length * Math.random())];
+export class TreasureCollectableEvent extends EventEntity {
+
+    constructor(tileSize, assetManager, onTrigger) {
+        super(tileSize, assetManager, onTrigger);
+        let coinTiles = [
+            ImageAsset.COIN_1,
+            ImageAsset.COIN_2,
+            ImageAsset.COIN_3,
+            ImageAsset.COIN_4
+        ];
+        let tile = coinTiles[Math.floor(coinTiles.length * Math.random())];
         this.image = assetManager.getImage(tile);
     }
 
-    triggerEvent(entity) {
-        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
-            this.onTrigger();
-            if (this.isOneShot == true) {
-                this.isActive = false;
-            }
-        }
-    }
-
     applySpellEffect(effect) {
+
         switch (effect) {
 
             case SpellEffect.INVERT:
@@ -97,10 +55,10 @@ export class TreasureCollectableEvent extends MazeEvent {
 
                 if (!this.spellEffects.has(effect)) {
                     this.spellEffects.add(effect);
-                    this.setIsVisible(false);
+                    this.opacity = EntityOpacityType.INVISIBLE;
                 } else {
                     this.spellEffects.delete(effect);
-                    this.setIsVisible(true);
+                    this.opacity = EntityOpacityType.VISIBLE;
                 }
                 break;
 
@@ -111,26 +69,17 @@ export class TreasureCollectableEvent extends MazeEvent {
 
 }
 
-export class ChestCollectableEvent extends MazeEvent {
+export class ChestCollectableEvent extends EventEntity {
 
-    image = null;
-    alpha = 1.0;
+    alpha = 0.0;
 
-    constructor(onTrigger, assetManager) {
-        super(onTrigger);
+    constructor(tileSize, assetManager, onTrigger) {
+        super(tileSize, assetManager, onTrigger);
         this.image = assetManager.getImage(ImageAsset.TREASURE_CHEST_SMALL);
     }
 
-    triggerEvent(entity) {
-        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
-            this.onTrigger();
-            if (this.isOneShot == true) {
-                this.isActive = false;
-            }
-        }
-    }
-
     applySpellEffect(effect) {
+
         switch (effect) {
 
             case SpellEffect.INVERT:
@@ -139,10 +88,10 @@ export class ChestCollectableEvent extends MazeEvent {
 
                 if (!this.spellEffects.has(effect)) {
                     this.spellEffects.add(effect);
-                    this.setIsVisible(false);
+                    this.opacity = EntityOpacityType.INVISIBLE;
                 } else {
                     this.spellEffects.delete(effect);
-                    this.setIsVisible(true);
+                    this.opacity = EntityOpacityType.VISIBLE;
                 }
                 break;
 
@@ -150,15 +99,29 @@ export class ChestCollectableEvent extends MazeEvent {
                 break;
         }
     }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (this.isActive == false) {
+            return
+        }
+
+        context.globalAlpha = this.alpha;
+        context.drawImage(
+            this.image,
+            this.x,
+            this.y
+        );
+    }
+
 }
 
-export class PortalStaircaseEvent extends MazeEvent {
+export class PortalStaircaseEvent extends EventEntity {
 
     isLocked = true;
 
-    constructor(onTrigger, assetManager) {
-        super(onTrigger);
-        this.assetManager = assetManager;
+    constructor(tileSize, assetManager, onTrigger) {
+        super(tileSize, assetManager, onTrigger);
         this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_CLOSED);
     }
 
@@ -171,7 +134,7 @@ export class PortalStaircaseEvent extends MazeEvent {
         }
     }
 
-    triggerEvent(entity) {
+    checkTrigger(entity) {
         if (entity != null && entity instanceof PlayerEntity) {
             if (this.isLocked == false) {
                 this.onTrigger();
@@ -184,14 +147,14 @@ export class PortalStaircaseEvent extends MazeEvent {
 
             case SpellEffect.INVERT:
 
-                // Inverting a key makes it invisible
+                // Inverting a portal makes it invisible
 
                 if (!this.spellEffects.has(effect)) {
                     this.spellEffects.add(effect);
-                    this.setIsVisible(false);
+                    this.opacity = EntityOpacityType.INVISIBLE;
                 } else {
                     this.spellEffects.delete(effect);
-                    this.setIsVisible(true);
+                    this.opacity = EntityOpacityType.VISIBLE;
                 }
                 break;
 
@@ -201,16 +164,15 @@ export class PortalStaircaseEvent extends MazeEvent {
     }
 }
 
-export class SnailTrailEvent extends MazeEvent {
+export class SnailTrailEvent extends EventEntity {
 
     maxTurnsBeforeDissolve = 5;
     turnsBeforeDissolve = 5;
+    alpha = 1.0;
 
-    imageAsset = null;
+    constructor(tileSize, assetManager, onTrigger) {
 
-    constructor(onTrigger, assetManager) {
-
-        super(onTrigger);
+        super(tileSize, assetManager, onTrigger);
 
         let assetIds = [
             ImageAsset.MONSTER_SNAIL_TRAIL_1,
@@ -225,18 +187,17 @@ export class SnailTrailEvent extends MazeEvent {
 
     render(context, mazeWindowX, mazeWindowY) {
 
-        if (this.visibility == MonsterVisibility.INVISIBLE) {
-            return;
+        if (!this.isActive) {
+            return
         }
 
-        if (this.isActive == true && this.isVisible == true) {
-            context.globalAlpha = this.alpha;
-            context.drawImage(
-                this.image,
-                this.x,
-                this.y
-            )
-        }
+        context.globalAlpha = this.alpha;
+        context.drawImage(
+            this.image,
+            this.x,
+            this.y
+        )
+
     }
 
     applySpellEffect(effect) {
@@ -253,8 +214,7 @@ export class SnailTrailEvent extends MazeEvent {
         }
     }
 
-    triggerEvent(entity) {
-
+    checkTrigger(entity) {
         if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
             this.onTrigger();
             if (this.isOneShot == true) {

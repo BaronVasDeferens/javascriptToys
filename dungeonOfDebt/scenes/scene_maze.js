@@ -1,12 +1,16 @@
-import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
+import { AssetManager, SoundAsset } from "../assets.js";
 import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { Entity } from "../entity/entity.js";
-import { MonsterEntity, MonsterMovement, MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterVisibility, MonsterPhysicality, MonsterMummy, MonsterCollectable, MonsterContactEffect, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail } from "../entity/entity_monster.js";
+import { MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail, MonsterEntity } from "../entity/entity_monster.js";
+import { EntityOpacityType } from "../entity/entity.js";
+import { EntityContactEffectType } from "../entity/entity.js";
+import { EntityMovementType } from "../entity/entity.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SoundPlayer } from "../sound.js";
-import { MazeEvent, TreasureCollectableEvent, ChestCollectableEvent, PortalStaircaseEvent, SnailTrailEvent } from "../event/event.js"
+import { EventEntity, TreasureCollectableEvent, ChestCollectableEvent, PortalStaircaseEvent, SnailTrailEvent } from "../event/event.js"
+import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
 
 /**
  * DUNGEON of DEBT
@@ -214,7 +218,7 @@ export class MazeScene extends Scene {
     allRooms = [];
     visibleRooms = [];
 
-    roomManager = null;
+    entityManager = null;
 
     mazeWindowWidth = 0;                    // Number of maze squares visible on screen at any time
     mazeWindowHeight = 0;
@@ -268,8 +272,7 @@ export class MazeScene extends Scene {
 
         this.updateGameSequence(GameSequence.INITIALIZING)
 
-        this.roomManager = new EntityRoomManager(this.tileSize);
-        this.roomManager.clear();
+        this.entityManager = new EntityRoomManager(this.tileSize);
 
         this.setLevel(this.levelCurrent);
 
@@ -278,7 +281,7 @@ export class MazeScene extends Scene {
         this.selectedSpellEffect = null;
         this.selectedSpellZone = null;
 
-        this.roomManager.clear();
+        this.entityManager.clear();
 
         this.eventList = [];
         this.spellCardComponents = [];
@@ -314,7 +317,7 @@ export class MazeScene extends Scene {
             closedRooms[n].setIsOpen(true);
         }
 
-        this.roomManager.setRooms(this.allRooms);
+        this.entityManager.setRooms(this.allRooms);
 
         // Print the rooms onto a re-usable background image...
         this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms);
@@ -324,7 +327,7 @@ export class MazeScene extends Scene {
 
         // --- ENTITIES ---
 
-        // ENTITY: PLAYER...
+        // PLAYER...
         // Find an UNOCCUPIED, NO EVENT square near the TOP LEFT
         let playerStartRoom = this.allRooms.sort((a, b) => {
             if ((a.col + a.row) < (b.col + b.row)) {
@@ -341,95 +344,96 @@ export class MazeScene extends Scene {
             this.assetManager
         );
 
-        this.roomManager.setPlayer(this.player);
-        this.roomManager.setEntityRoom(this.player, playerStartRoom);
+        this.entityManager.setPlayer(this.player);
+        this.entityManager.setEntityRoom(this.player, playerStartRoom);
 
-        let entities = [];
+        let monsters = [];
 
-        // ENTITY: KEY
+        // KEY...
         let keyMonster = new KeyFleeing(
             this.tileSize,
             this.assetManager,
             () => {
                 this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
                 exitPortal.setIsLocked(false);
-                keyMonster.isAlive = false;
             },
         )
 
-        entities.push(
+        monsters.push(
             keyMonster
         )
 
-        // ENTITY: MONSTERS...
+        // MONSTERS...
 
         switch (this.levelCurrent) {
+
+            case 0:
+                break;
 
             case 1:
                 //entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
                 // entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterSnail(this.tileSize, this.assetManager));
-                entities.push(new MonsterSnail(this.tileSize, this.assetManager));
-                entities.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 break;
 
             case 2:
-                entities.push(new MonsterTroll(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 break;
 
             case 3:
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 break;
 
             case 4:
-                entities.push(new MonsterTroll(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                entities.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 break;
 
             case 5:
-                entities.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
                 break;
 
             case 6:
-                entities.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 break;
 
             default:
 
                 for (let n = 0; n < this.levelCurrent - 1; n++) {
-                    entities.push(new MonsterGhost(this.tileSize, this.assetManager));
+                    monsters.push(new MonsterGhost(this.tileSize, this.assetManager));
                 }
 
                 let numMummies = Math.floor(this.levelCurrent / 4) + 1;
                 for (let n = 0; n < numMummies; n++) {
-                    entities.push(new MonsterMummy(this.tileSize, this.assetManager));
+                    monsters.push(new MonsterMummy(this.tileSize, this.assetManager));
                 }
                 break;
         }
 
-        this.distributeAcrossOpenRooms(entities, true);
+        this.distributeAcrossOpenRooms(monsters, true);
 
-        // --- EVENTS ---
         let eventList = [];
 
-        // EVENTS: TREASURES...
+        // TREASURES...
         let treasureTotal = 5;
         for (let n = 0; n < treasureTotal; n++) {
 
@@ -437,14 +441,17 @@ export class MazeScene extends Scene {
 
             eventList.push(
                 new TreasureCollectableEvent(
-                    () => { this.soundPlayer.playOneShot(coinSound) },
-                    this.assetManager
+                    this.tileSize,
+                    this.assetManager,
+                    () => { this.soundPlayer.playOneShot(coinSound) }
                 )
             );
         }
 
-        // EVENTS: PORTALS...
+        // PORTALS...
         let exitPortal = new PortalStaircaseEvent(
+            this.tileSize,
+            this.assetManager,
             () => {
                 this.soundPlayer.playOneShot(SoundAsset.DESCEND_STAIRS);
                 this.levelCurrent += 1;
@@ -452,8 +459,7 @@ export class MazeScene extends Scene {
                     this.initialize();
                     this.computeMazeWindow();
                 });
-            },
-            this.assetManager
+            }
         );
 
         eventList.push(exitPortal);
@@ -602,12 +608,15 @@ export class MazeScene extends Scene {
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
 
         // Render events
-        this.roomManager.getActiveEvents().forEach(event => {
+
+        this.entityManager.getActiveEvents().forEach(event => {
             event.render(contextPrimary, 0, 0)
         })
 
+        this.player.render(contextPrimary, 0, 0)
+
         // Render entities
-        this.roomManager.getActiveEntities().forEach(entity => {
+        this.entityManager.getActiveMonsters().forEach(entity => {
             entity.render(contextPrimary, this.mazeWindowX, this.mazeWindowY);
         });
 
@@ -660,12 +669,12 @@ export class MazeScene extends Scene {
     concludePlayerTurn() {
 
         // Alert all entities that the current player turn has concluded; spell durations get shorter, etc.
-        this.roomManager.getActiveMonsters()
+        this.entityManager.getActiveMonsters()
             .forEach(ent => {
                 ent.onTurnConclusion();
             });
 
-        this.roomManager.getActiveEvents()
+        this.entityManager.getActiveEvents()
             .forEach(event => {
                 event.onTurnConclusion();
             })
@@ -674,46 +683,38 @@ export class MazeScene extends Scene {
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
     }
 
-    processCollectableEvents(entity, room) {
+    processEvents() {
 
-        if (entity == null || room == null || !(entity instanceof PlayerEntity)) {
-            return
-        }
+        let room = this.entityManager.getPlayerRoom();
+        let entity = this.entityManager.getEventForRoom(room)
+        let event = this.entityManager.getEventForRoom(room);
 
-        if (this.roomManager.getIsPlayerEventContact()) {
-            let event = this.roomManager.getEventForRoom(room);
+        if (event != null) {
 
-            if (!event.isActive) {
-                return
-            }
-
-            event.triggerEvent(entity);
+            let eventTriggered = event.checkTrigger(this.player);
 
             // CHECK: was that the last treasure?
             // Collecting all the loose treasures reveals a CHEST!
-            let unclaimedTreasures = this.roomManager
+            let unclaimedTreasures = this.entityManager
                 .getAllEvents()
                 .filter(event => { return event instanceof TreasureCollectableEvent })
 
-            if (
-                event instanceof TreasureCollectableEvent
+            if (eventTriggered == true && event instanceof TreasureCollectableEvent
                 && unclaimedTreasures.every(event => { return event.isActive == false })
             ) {
 
-
                 // Place a chest in a random square
-
                 this.soundPlayer.playOneShot(SoundAsset.SECRET_REVEALED);
+
                 let chest = new ChestCollectableEvent(
+                    this.tileSize,
+                    this.assetManager,
                     () => {
                         // onTreasureCollected
-                        console.log(`MEGA CHINGUS`);
                         this.soundPlayer.playOneShot(SoundAsset.BONUS);
                         // TODO: award bonus
-                    },
-                    this.assetManager
+                    }
                 );
-                chest.setAlpha(0.0);
                 this.distributeAcrossOpenRooms([chest]);
 
                 let fadeInDriver = new EntityImageOpacityUpdateDriver(
@@ -729,6 +730,30 @@ export class MazeScene extends Scene {
             }
         }
     }
+
+
+    processMonsters() {
+
+        let room = this.entityManager.getPlayerRoom();
+        let entity = this.entityManager.getEntityForRoom(room);
+
+        if (entity == null || room == null) {
+            return
+        }
+
+        switch (entity.contactEffect) {
+
+            case EntityContactEffectType.LETHAL:
+                this.updateGameSequence(GameSequence.GAME_OVER);
+                break;
+
+            case EntityContactEffectType.TRIGGER_EVENT:
+                entity.onPlayerContact(this.player);
+                break;
+        }
+
+    }
+
 
     /*
        TODO ---- REFACTOR UpdateGameSeq() and UpdateGameSeqOrGameOver() to be less...uh, like they are
@@ -779,11 +804,8 @@ export class MazeScene extends Scene {
 
 
 
-    processEventsAndCollisions() {
-
-    }
-
     checkForGameOver() {
+
 
     }
 
@@ -794,24 +816,25 @@ export class MazeScene extends Scene {
             return;
         }
 
-        if (this.roomManager.getIsPlayerEventContact()) {
-            this.processCollectableEvents(this.player, this.roomManager.getPlayerRoom());
-        }
+
+        this.processMonsters();
+        this.processEvents();
+
 
         let gameOver = (sequence == GameSequence.GAME_OVER);
         let contactEntity = null;
 
-        if (this.roomManager.getIsPlayerEntityContact()) {
+        if (this.entityManager.getIsPlayerEntityContact()) {
             // Check: does any monster co-occupy the wizard's square?
-            contactEntity = this.roomManager.getEntityForRoom(this.roomManager.getPlayerRoom());
+            contactEntity = this.entityManager.getEntityForRoom(this.entityManager.getPlayerRoom());
             switch (contactEntity.contactEffect) {
 
-                case MonsterContactEffect.LETHAL:
+                case EntityContactEffectType.LETHAL:
                     gameOver = true;
                     break;
 
-                case MonsterContactEffect.TRIGGER_EVENT:
-                    contactEntity.onContact();
+                case EntityContactEffectType.TRIGGER_EVENT:
+                    contactEntity.onPlayerContact(this.player);
                     break;
             }
         }
@@ -819,7 +842,7 @@ export class MazeScene extends Scene {
 
 
         // Check: did the wizard cast FREEZE or INVERT upon himself? 
-        if (this.player.isAlive == false
+        if (this.player.isActive == false
             || this.player.isFrozen == true
             || this.player.isInverted == true) {
             gameOver = true;
@@ -837,16 +860,14 @@ export class MazeScene extends Scene {
             this.highlightedGridSquares = [];
 
             // Use a driver to fade out the background and all but the fatal entity and player
-            this.roomManager.getActiveMonsters()
-                .concat(this.roomManager.getActiveEvents())
+            this.entityManager.getActiveMonsters()
+                .concat(this.entityManager.getActiveEvents())
                 .forEach(ent => {
                     if (contactEntity != ent) {
-                        ent.setVisibility(MonsterVisibility.INVISIBLE);
+                        ent.setOpacity(EntityOpacityType.INVISIBLE);
                         ent.overlayImage = null;
-                        ent.setAlpha(0.0)
                     } else {
-                        ent.setVisibility(MonsterVisibility.VISIBLE);
-                        ent.setAlpha(1.0);
+                        ent.setOpacity(EntityOpacityType.VISIBLE);
                     }
                 })
 
@@ -1115,7 +1136,7 @@ export class MazeScene extends Scene {
 
         let rooms = [];
         let room = null;
-        let playerRoom = this.roomManager.getPlayerRoom();
+        let playerRoom = this.entityManager.getPlayerRoom();
 
         switch (spellZone) {
 
@@ -1357,12 +1378,12 @@ export class MazeScene extends Scene {
                     // Apply a FREEZE effect (ice cube) to every entity in the selected squares...
                     this.highlightedGridSquares.forEach(highlighted => {
                         let room = highlighted.room;
-                        let occupant = this.roomManager.getEntityForRoom(room)
+                        let occupant = this.entityManager.getEntityForRoom(room)
                         if (occupant != null) {
                             occupant.addSpellEffect(SpellEffect.FREEZE, 5);
                         }
 
-                        if (room == this.roomManager.getPlayerRoom()) {
+                        if (room == this.entityManager.getPlayerRoom()) {
                             this.player.addSpellEffect(SpellEffect.FREEZE, 5)
                         }
                     });
@@ -1399,13 +1420,13 @@ export class MazeScene extends Scene {
                         room.setIsOpen(!room.isOpen);
 
                         // WIZARD DIES IF INVERTED
-                        if (room == this.roomManager.getPlayerRoom()) {
+                        if (room == this.entityManager.getPlayerRoom()) {
                             this.player.addSpellEffect(SpellEffect.INVERT);
                             this.player.overlayImage = room.image;
                         }
 
-                        let occupant = this.roomManager.getEntityForRoom(room);
-                        let event = this.roomManager.getEventForRoom(room);
+                        let occupant = this.entityManager.getEntityForRoom(room);
+                        let event = this.entityManager.getEventForRoom(room);
 
 
                         if (event != null) {
@@ -1442,7 +1463,7 @@ export class MazeScene extends Scene {
                     // Apply a TRANSMUTATION effect to every entity in the selected squares
                     this.highlightedGridSquares.forEach(sq => {
                         let gridSquare = this.getRoom(sq.row, sq.col);
-                        let occupant = this.roomManager.getEntityForRoom(gridSquare);
+                        let occupant = this.entityManager.getEntityForRoom(gridSquare);
                         if (occupant != null) {
                             occupant.addSpellEffect(SpellEffect.TRANSMUTE, 5);
                         }
@@ -1473,18 +1494,18 @@ export class MazeScene extends Scene {
 
                 case SpellEffect.EXCHANGE:
 
-                    let playerRoom = this.roomManager.getPlayerRoom();
+                    let playerRoom = this.entityManager.getPlayerRoom();
 
                     let rooms = this.highlightedGridSquares
                         .map(highlighted => {
-                            return this.roomManager.getRoomById(highlighted.id)
+                            return this.entityManager.getRoomById(highlighted.id)
                         })
                         .filter(room => {
-                            return this.roomManager.getEntityForRoom(room) != null
+                            return this.entityManager.getEntityForRoom(room) != null
                         })
 
                     let entities = rooms.map(room => {
-                        return this.roomManager.getEntityForRoom(room)
+                        return this.entityManager.getEntityForRoom(room)
                     }).concat(this.player);
 
                     rooms = rooms.concat(playerRoom)
@@ -1496,11 +1517,11 @@ export class MazeScene extends Scene {
 
                     for (let index = 0; index < shuffledEntities.length; index++) {
                         let entity = shuffledEntities[index];
-                        this.roomManager.setEntityRoom(entity, rooms[index])
+                        this.entityManager.setEntityRoom(entity, rooms[index])
                     };
 
                     // CHECK: did the wizard exchange places with an incorporeal entity inside a block?
-                    let fatalTeleport = this.roomManager.getPlayerRoom() == false;
+                    let fatalTeleport = this.entityManager.getPlayerRoom() == false;
                     if (fatalTeleport == true) {
                         this.player.addSpellEffect(SpellEffect.INVERT);     // Teleported to a closed room-- same as INVERTED!
                     }
@@ -1550,25 +1571,25 @@ export class MazeScene extends Scene {
         let vacatedRooms = new Set();
         let drivers = [];
 
-        let playerRoom = this.roomManager.getPlayerRoom();
+        let playerRoom = this.entityManager.getPlayerRoom();
 
-        this.roomManager.getActiveMonsters()
+        this.entityManager.getActiveMonsters()
             .filter(monster => { return !monster.spellEffects.has(SpellEffect.FREEZE) })
             .forEach(monster => {
 
                 let destination = null;
-                let monsterRoom = this.roomManager.getRoomForEntity(monster);
+                let monsterRoom = this.entityManager.getRoomForEntity(monster);
 
                 switch (monster.getMovementBehavior()) {
 
                     // ---------------------------------- RANDOM ----------------------------------
-                    case MonsterMovement.RANDOM:
+                    case EntityMovementType.RANDOM:
 
                         let neighbors = this.getAdjacentRooms(monsterRoom)
                             .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                             .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {
-                                let occupant = this.roomManager.getEntityForRoom(room);
+                                let occupant = this.entityManager.getEntityForRoom(room);
 
                                 if (occupant != null) {
                                     return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
@@ -1591,7 +1612,7 @@ export class MazeScene extends Scene {
                         break;
 
                     // ------------------------------------ ROOK -------------------------------------
-                    case MonsterMovement.RANDOM_ROOK:
+                    case EntityMovementType.RANDOM_ROOK:
 
                         // ASSERTION: this monster is either INCORPOREAL or the ONLY monster in the maze;
                         // monster overlap, blocking, etc. makes this a bit hard without more codified rules
@@ -1624,7 +1645,7 @@ export class MazeScene extends Scene {
 
                         let path = [firstRoom];
                         let candidateRoom = this.getAdjacentRoomByDirection(firstRoom, direction);
-                        let candidateOccupant = this.roomManager.getEntityForRoom(candidateRoom);
+                        let candidateOccupant = this.entityManager.getEntityForRoom(candidateRoom);
 
                         while (candidateRoom != null && candidateRoom.isOpen == true) {
                             if (candidateRoom == playerRoom) {
@@ -1635,7 +1656,7 @@ export class MazeScene extends Scene {
                             } else {
                                 path.push(candidateRoom);
                                 candidateRoom = this.getAdjacentRoomByDirection(candidateRoom, direction);
-                                candidateOccupant = this.roomManager.getEntityForRoom(candidateRoom);
+                                candidateOccupant = this.entityManager.getEntityForRoom(candidateRoom);
                             }
 
                         }
@@ -1656,7 +1677,7 @@ export class MazeScene extends Scene {
                         break;
 
                     // ------------------------------------ CHASE (LINE of SIGHT) -------------------------------------
-                    case MonsterMovement.CHASE_LINE_OF_SIGHT:
+                    case EntityMovementType.CHASE_LINE_OF_SIGHT:
 
                         /**
                                 * CHASE_LINE_OF_SIGHT: 
@@ -1675,7 +1696,7 @@ export class MazeScene extends Scene {
                                 .filter(room => { return ineligibleRooms.has(room) == false })
                                 .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
-                                    let roomOccupant = this.roomManager.getEntityForRoom(room);
+                                    let roomOccupant = this.entityManager.getEntityForRoom(room);
                                     if (roomOccupant != null) {
                                         return (vacatedRooms.has(room) == true) || (roomOccupant instanceof PlayerEntity)
                                     } else {
@@ -1713,7 +1734,7 @@ export class MazeScene extends Scene {
                         break;
 
                     // ------------------------------------ CHASE (OMNISCIENT) -------------------------------------
-                    case MonsterMovement.CHASE_OMNISCIENT:
+                    case EntityMovementType.CHASE_OMNISCIENT:
 
                         /**
                          * CHASE OMNISCIENT
@@ -1727,7 +1748,7 @@ export class MazeScene extends Scene {
                             .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                             .filter(room => { return ineligibleRooms.has(room) == false })
                             .filter(room => {
-                                let occupant = this.roomManager.getEntityForRoom(room);
+                                let occupant = this.entityManager.getEntityForRoom(room);
                                 if (occupant != null) {
                                     return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
                                 } else {
@@ -1762,7 +1783,7 @@ export class MazeScene extends Scene {
                         break;
 
                     // ------------------------------------ FLEE (LINE of SIGHT) -------------------------------------
-                    case MonsterMovement.FLEE_LINE_OF_SIGHT:
+                    case EntityMovementType.FLEE_LINE_OF_SIGHT:
 
                         if (this.calculateLineOfSight(playerRoom, monsterRoom) == true) {
 
@@ -1772,7 +1793,7 @@ export class MazeScene extends Scene {
                                 .filter(room => { return ineligibleRooms.has(room) == false })
                                 .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
-                                    let occupant = this.roomManager.getEntityForRoom(monster);
+                                    let occupant = this.entityManager.getEntityForRoom(monster);
                                     if (occupant != null) {
                                         return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
                                     } else {
@@ -1817,15 +1838,15 @@ export class MazeScene extends Scene {
 
                 if (monster instanceof MonsterSnail && monster.isTransmuted == false) {
                     // Drop a trail
-                    let event = this.roomManager.getEventForRoom(monsterRoom);
+                    let event = this.entityManager.getEventForRoom(monsterRoom);
                     if (event == null || event.isActive == false) {
-                        this.roomManager.setEventRoom(
+                        this.entityManager.setEventRoom(
                             new SnailTrailEvent(
+                                this.tileSize,
+                                this.assetManager,
                                 () => {
-                                    //this.updateSequenceOrGameOver(GameSequence.GAME_OVER)
-                                    this.player.isAlive = false;
-                                },
-                                this.assetManager
+                                    this.player.isActive = false;
+                                }
                             ),
                             monsterRoom
                         )
@@ -1846,7 +1867,7 @@ export class MazeScene extends Scene {
     }
 
     createMovementDriverByDirection(entity, direction, rate, onComplete) {
-        let entityRoom = this.roomManager.getRoomForEntity(entity);
+        let entityRoom = this.entityManager.getRoomForEntity(entity);
         let destination = this.getAdjacentRoomByDirection(entityRoom, direction);
 
 
@@ -1859,7 +1880,7 @@ export class MazeScene extends Scene {
             if (destination.isOpen == true) {
 
                 // Case 1: destination open, no occupant
-                let destinationOccupant = this.roomManager.getEntityForRoom(destination);
+                let destinationOccupant = this.entityManager.getEntityForRoom(destination);
                 if (destinationOccupant == null) {
                     primaryDriver = new EntityMovementDriver(
                         entity,
@@ -1870,7 +1891,7 @@ export class MazeScene extends Scene {
                         },
                         () => {
                             // onComplete
-                            this.roomManager.setEntityRoom(entity, destination);
+                            this.entityManager.setEntityRoom(entity, destination);
                             //this.processCollectableEvents(entity, destination);
                         }
                     )
@@ -1885,7 +1906,7 @@ export class MazeScene extends Scene {
 
                     if (adjacentToCube != null
                         && adjacentToCube.isOpen == true
-                        && this.roomManager.getEntityForRoom(adjacentToCube) == null
+                        && this.entityManager.getEntityForRoom(adjacentToCube) == null
                     ) {
 
                         primaryDriver = new EntityMovementDriver(
@@ -1897,7 +1918,7 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onComplete
-                                this.roomManager.setEntityRoom(entity, destination);
+                                this.entityManager.setEntityRoom(entity, destination);
                                 //this.processCollectableEvents(entity, destination);
                             }
                         )
@@ -1906,7 +1927,7 @@ export class MazeScene extends Scene {
                         let endpoint = destination;
                         while (endpoint != null && endpoint.isOpen == true) {
                             let candidate = this.getAdjacentRoomByDirection(endpoint, direction)
-                            let candidateOccupant = candidate ? this.roomManager.getEntityForRoom(candidate) : null
+                            let candidateOccupant = candidate ? this.entityManager.getEntityForRoom(candidate) : null
                             if (candidate != null && candidate.isOpen == true && candidateOccupant == null) {
                                 endpoint = candidate;
                             } else {
@@ -1914,7 +1935,7 @@ export class MazeScene extends Scene {
                             }
                         }
 
-                        let sliderEntity = this.roomManager.getEntityForRoom(destination);
+                        let sliderEntity = this.entityManager.getEntityForRoom(destination);
 
                         // Compute a constant time for the slide-- 50ms per room
                         let distance = Math.abs(destination.row - endpoint.row) + Math.abs(destination.col - endpoint.col);
@@ -1928,13 +1949,13 @@ export class MazeScene extends Scene {
                             },
                             () => {
                                 // onCompleted
-                                this.roomManager.setEntityRoom(sliderEntity, endpoint);
+                                this.entityManager.setEntityRoom(sliderEntity, endpoint);
                             }
                         )
 
                         this.soundPlayer.playOneShot(SoundAsset.ZIP);
                     }
-                } else if (destinationOccupant.movement == MonsterMovement.ONLY_WHEN_PUSHED) {
+                } else if (destinationOccupant.movement == EntityMovementType.ONLY_WHEN_PUSHED) {
 
                     // Case 4: destination open, occupied, but occupant moves ONLY_WHEN_PUSHED
                     let neighborToObject = this.getAdjacentRoomByDirection(destination, direction);
@@ -1942,7 +1963,7 @@ export class MazeScene extends Scene {
                         return;
                     }
 
-                    let sliderObject = this.roomManager.getEntityForRoom(destination);
+                    let sliderObject = this.entityManager.getEntityForRoom(destination);
                     if (neighborToObject.isOpen && !neighborToObject.isOccupied) {
 
                         primaryDriver = new EntityMovementDriver(
@@ -1957,7 +1978,7 @@ export class MazeScene extends Scene {
                                 // entity.room.setOccupant(null);
                                 // entity.setRoom(destination);
                                 // destination.setOccupant(entity);
-                                this.roomManager.setEntityRoom(entity, destination)
+                                this.entityManager.setEntityRoom(entity, destination)
                             }
                         )
 
@@ -1991,7 +2012,7 @@ export class MazeScene extends Scene {
                             // entity.room.setOccupant(null);
                             // entity.setRoom(destination);
                             // destination.setOccupant(entity);
-                            this.roomManager.setEntityRoom(entity, destination);
+                            this.entityManager.setEntityRoom(entity, destination);
                             //this.processCollectableEvents(entity, destination);
                         }
                     )
@@ -2034,7 +2055,7 @@ export class MazeScene extends Scene {
                     // entity.room.setOccupant(null);
                     // entity.setRoom(destination);
                     // destination.setOccupant(entity);
-                    this.roomManager.setEntityRoom(entity, destination);
+                    this.entityManager.setEntityRoom(entity, destination);
                     //this.processCollectableEvents(entity, destination);
                     onComplete();
                 }
@@ -2057,9 +2078,9 @@ export class MazeScene extends Scene {
          */
 
         this.lineOfSightLines = [];
-        let playerRoom = this.roomManager.getRoomForEntity(this.player);
-        let visibilityMap = this.roomManager.getActiveMonsters().map(monster => {
-            let monsterRoom = this.roomManager.getRoomForEntity(monster); //monster.room;
+        let playerRoom = this.entityManager.getRoomForEntity(this.player);
+        let visibilityMap = this.entityManager.getActiveMonsters().map(monster => {
+            let monsterRoom = this.entityManager.getRoomForEntity(monster); //monster.room;
             let result = {
                 target: monster,
                 isVisible: this.calculateLineOfSight(playerRoom, monsterRoom)
@@ -2067,11 +2088,11 @@ export class MazeScene extends Scene {
 
             // If the monster is a WRAITH, it is only visible on screen when NOT in the wizard's LoS...
             if (monster instanceof MonsterWraith) {
-                let visibility = MonsterVisibility.VISIBLE;
+                let visibility = EntityOpacityType.VISIBLE;
                 if (result.isVisible) {
-                    visibility = MonsterVisibility.INVISIBLE
+                    visibility = EntityOpacityType.INVISIBLE
                 }
-                monster.setVisibility(visibility);
+                monster.setOpacity(visibility);
             }
 
             let playerCenter = playerRoom.getCenter();
@@ -2460,12 +2481,12 @@ export class MazeScene extends Scene {
 
         let availableRooms = this.allRooms.filter(room => {
             return room.isEmpty == true
-                && this.roomManager.getEventForRoom(room) == null
-                && this.roomManager.getEntityForRoom(room) == null
+                && this.entityManager.getEventForRoom(room) == null
+                && this.entityManager.getEntityForRoom(room) == null
         });
 
         if (avoidPlayerLos == true) {
-            let playerRoom = this.roomManager.getRoomForEntity(this.player);
+            let playerRoom = this.entityManager.getRoomForEntity(this.player);
 
             availableRooms = availableRooms.filter(room => {
                 return this.calculateLineOfSight(room, playerRoom) == false
@@ -2484,10 +2505,10 @@ export class MazeScene extends Scene {
                 return
             }
 
-            if (object instanceof MazeEvent) {
-                this.roomManager.setEventRoom(object, room);
-            } else if (object instanceof Entity) {
-                this.roomManager.setEntityRoom(object, room);
+            if (object instanceof EventEntity) {
+                this.entityManager.setEventRoom(object, room);
+            } else if (object instanceof MonsterEntity) {
+                this.entityManager.setEntityRoom(object, room);
             }
         });
     }
@@ -2503,309 +2524,4 @@ export class MazeScene extends Scene {
     }
 }
 
-// -------------------------------------- CLASSES --------------------------------------
-
-
-class MazeRoom {
-
-    id = crypto.randomUUID();
-
-    row = 0;
-    col = 0;
-    roomSize = 64;
-
-    isOpen = false;         // Whether this room can be occupied
-
-    isEmpty = true;
-
-    image = null;
-
-    constructor(row, col, roomSize, isOpen, assetManager) {
-        this.row = row;
-        this.col = col;
-        this.roomSize = roomSize;
-        this.assetManager = assetManager;
-        this.setIsOpen(isOpen);
-        this.computeEmptiness();
-    }
-
-    computeEmptiness() {
-
-        let floorTiles = [
-            ImageAsset.FLOOR_ZX_18,
-            ImageAsset.FLOOR_ZX_19,
-            ImageAsset.FLOOR_ZX_20,
-            ImageAsset.FLOOR_ZX_21,
-            ImageAsset.FLOOR_ZX_22,
-            ImageAsset.FLOOR_ZX_23,
-            ImageAsset.FLOOR_ZX_24,
-            ImageAsset.FLOOR_ZX_25,
-            ImageAsset.FLOOR_ZX_26,
-            ImageAsset.FLOOR_ZX_27
-        ];
-
-        let blockTiles = [
-            ImageAsset.BLOCK_ZX_1,
-            ImageAsset.BLOCK_ZX_2,
-            ImageAsset.BLOCK_ZX_3,
-            ImageAsset.BLOCK_ZX_4,
-            ImageAsset.BLOCK_ZX_5,
-            ImageAsset.BLOCK_ZX_6
-        ];
-
-        this.isEmpty = (this.isOpen == true) && (this.event == null);
-        if (this.isOpen == true) {
-            this.color = "#606060";
-            let tile = floorTiles[Math.floor(floorTiles.length * Math.random())];
-            this.image = this.assetManager.getImage(tile);
-        } else {
-            let tile = blockTiles[Math.floor(blockTiles.length * Math.random())];
-            this.image = this.assetManager.getImage(tile);
-        }
-    }
-
-    setIsOpen(isOpen) {
-        this.isOpen = isOpen;
-        this.computeEmptiness();
-    }
-
-    setEvent(event) {
-        this.event = event;
-        this.computeEmptiness();
-    }
-
-    getCenter() {
-        let xCenter = (this.col * this.roomSize) + (this.roomSize / 2);
-        let yCenter = (this.row * this.roomSize) + (this.roomSize / 2);
-        return { x: xCenter, y: yCenter };
-    }
-
-    render(context, mazeWindowX, mazeWindowY) {
-
-        // Draw a border
-        context.strokeStyle = "#000000"
-        context.strokeRect(
-            (this.col - mazeWindowX) * this.roomSize,
-            (this.row - mazeWindowY) * this.roomSize,
-            this.roomSize,
-            this.roomSize)
-
-        // Draw the room
-        if (this.image != null) {
-            context.drawImage(
-                this.image,
-                (this.col * this.roomSize),
-                (this.row * this.roomSize))
-        } else {
-            context.fillStyle = this.color;
-            context.fillRect(
-                (this.col - mazeWindowX) * this.roomSize,
-                (this.row - mazeWindowY) * this.roomSize,
-                this.roomSize,
-                this.roomSize
-            );
-        }
-
-    }
-
-};
-
-class EntityRoomManager {
-
-    player = null;
-    playerRoomId = null;
-
-    rooms = [];
-
-    roomIdToRoom = new Map();
-    roomIdToEntityId = new Map();
-    roomIdToEventId = new Map();
-
-    entityIdToEntity = new Map();
-    entityIdToRoomId = new Map();
-
-    eventIdToEvent = new Map();
-    eventIdToRoomId = new Map();
-
-    constructor(tileSize) {
-        this.tileSize = tileSize;
-    }
-
-    clear() {
-        this.player = null;
-        this.playerRoomId = null;
-        this.entityIdToEntity.clear();
-        this.rooms = [];
-        this.roomIdToRoom.clear();
-        this.entityIdToRoomId.clear();
-        this.roomIdToEntityId.clear();
-        this.eventIdToEvent.clear();
-        this.eventIdToRoomId.clear();
-        this.roomIdToEventId.clear();
-    }
-
-    setRooms(rooms) {
-        this.rooms = rooms;
-        this.rooms.forEach(room => {
-            this.roomIdToRoom.set(room.id, room);
-        });
-    }
-
-    // ENTITY
-
-    addEntity(entity) {
-        this.entityIdToEntity.set(entity.id, entity);
-    }
-
-    setPlayer(player) {
-        this.player = player;
-        this.addEntity(player);
-    }
-
-    setEntityRoom(entity, room) {
-
-        let target = this.entityIdToEntity.get(entity.id);
-
-        if (entity instanceof PlayerEntity) {
-            this.playerRoomId = room.id;
-            entity.x = room.col * this.tileSize;
-            entity.y = room.row * this.tileSize;
-            return;
-        } else {
-
-            // remove prior room association
-            let oldRoomId = this.entityIdToRoomId.get(entity.id);
-            if (oldRoomId != null) {
-                this.entityIdToRoomId.delete(entity.id);
-                this.roomIdToEntityId.delete(oldRoomId);
-            }
-
-            entity.x = room.col * this.tileSize;
-            entity.y = room.row * this.tileSize;
-            this.entityIdToEntity.set(entity.id, entity);
-            this.entityIdToRoomId.set(entity.id, room.id);
-            this.roomIdToEntityId.set(room.id, entity.id);
-        }
-    }
-
-    getPlayerRoom() {
-        return this.roomIdToRoom.get(this.playerRoomId);
-    }
-
-    getRoomById(id) {
-        return this.roomIdToRoom.get(id);
-    }
-
-    getActiveEntities() {
-        return [...this.entityIdToEntity.values()]
-            .filter(entity => {
-                return entity.isAlive == true
-            });
-    }
-
-    getActiveMonsters() {
-        let monsters = [...this.entityIdToEntity.values()]
-            .filter(entity => {
-                return entity instanceof MonsterEntity
-            })
-            .filter(entity => {
-                return entity.isAlive == true
-            });
-
-        return monsters;
-    }
-
-    getEntityForId(id) {
-        return this.entityIdToEntity.get(id);
-    }
-
-    getEntityForRoom(room) {
-
-        if (room == null) {
-            return null
-        }
-
-        let roomId = room.id;
-        let entityId = this.roomIdToEntityId.get(roomId);
-        return this.entityIdToEntity.get(entityId);
-    }
-
-    getRoomForEntity(entity) {
-
-        let roomId = null;
-        if (entity instanceof PlayerEntity) {
-            roomId = this.playerRoomId;
-        } else {
-            roomId = this.entityIdToRoomId.get(entity.id);
-        }
-
-        return this.roomIdToRoom.get(roomId);
-    }
-
-    getIsPlayerEntityContact() {
-        let entityId = this.roomIdToEntityId.get(this.playerRoomId);
-        if (entityId == null) {
-            return false;
-        }
-
-        let entity = this.entityIdToEntity.get(entityId);
-        if (entity instanceof MonsterEntity) {
-            return true
-        } else {
-            return false
-        }
-
-    }
-
-    getIsPlayerCollectableContact() {
-        let entityId = this.roomIdToEntityId.get(this.playerRoomId);
-        if (entityId == null) {
-            return false;
-        }
-
-        let entity = this.entityIdToEntity.get(entityId);
-        if (entity instanceof MonsterCollectable) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    getIsPlayerEventContact() {
-        return (this.roomIdToEventId.get(this.playerRoomId) != null)
-    }
-
-
-    // EVENTS
-
-    setEventRoom(event, room) {
-        event.x = (room.col * this.tileSize) + (this.tileSize - event.image.width) / 2;
-        event.y = (room.row * this.tileSize) + (this.tileSize - event.image.height) / 2;
-        this.eventIdToEvent.set(event.id, event);
-        this.eventIdToRoomId.set(event.id, room.id);
-        this.roomIdToEventId.set(room.id, event.id);
-    }
-
-    getEventForRoom(room) {
-        let eventId = this.roomIdToEventId.get(room.id);
-        let event = this.eventIdToEvent.get(eventId);
-        return event;
-    }
-
-    getAllEvents() {
-        return [...this.eventIdToEvent.values()];
-    }
-
-    getActiveEvents() {
-        return [...this.eventIdToEvent.values()]
-            .filter(evt => { return evt.isActive == true })
-    }
-
-    debugOut() {
-        [...this.entityIdToEntity.entries()].forEach((key, value) => {
-            console.log(`id: ${key}: ${value.imageAssetId}`)
-        })
-    }
-
-}
 

@@ -1,4 +1,4 @@
-import { Entity } from "./entity.js";
+import { Entity, EntityContactEffectType, EntityMovementType, EntityOpacityType } from "./entity.js";
 import { ImageAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
 
@@ -18,42 +18,12 @@ export const MonsterPhysicality = Object.freeze({
     INCORPOREAL: 10,                // Passes through blocks      
 });
 
-export const MonsterMovement = Object.freeze({
-    NONE: 0,                        // Does not move
-    RANDOM: 10,                     // Moves to a random adjacent square,
-    RANDOM_ROOK: 11,                // Moves the maximum horizontal or vertical distance
-    CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
-    CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
-    FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
-    FLEE_OMNISCIENT: 50,            // Moves away from the player regardless of LOS
-
-    ONLY_WHEN_PUSHED: 60,           // Moves only when the wizard pushes it
-});
-
-export const MonsterContactEffect = Object.freeze({
-    // Coming into contact with this monster...
-    NOTHING: 0,                     // Nothing happens.
-    LETHAL: 10,                     // Kills the wizard
-    PENALTY_FINANCIAL: 20,          // Deducts from the wizard's gold
-    PENALTY_ZONE: 30,               // Removes a spell zone; wizard unable to use that zone
-    PENALTY_EFFECT: 40,             // Removes a spell effect; wizard unable to that that spell
-    TRIGGER_EVENT: 50               // Something happens when the wizard makes contact (gains a key, for example)
-});
-
-export const MonsterVisibility = Object.freeze({
-    VISIBLE: 1.0,
-    TRANSPARENT_THREE_QUARTERS: 0.75,
-    TRANSPARENT_HALF: 0.5,
-    TRANSPARENT_QUARTER: 0.25,
-    INVISIBLE: 0.0
-});
-
 const monsterVisibilityArray = [
-    MonsterVisibility.VISIBLE,
-    MonsterVisibility.TRANSPARENT_THREE_QUARTERS,
-    MonsterVisibility.TRANSPARENT_HALF,
-    MonsterVisibility.TRANSPARENT_QUARTER,
-    MonsterVisibility.INVISIBLE
+    EntityOpacityType.VISIBLE,
+    EntityOpacityType.TRANSPARENT_THREE_QUARTERS,
+    EntityOpacityType.TRANSPARENT_HALF,
+    EntityOpacityType.TRANSPARENT_QUARTER,
+    EntityOpacityType.INVISIBLE
 ];
 
 
@@ -63,16 +33,13 @@ const monsterVisibilityArray = [
 
 export class MonsterEntity extends Entity {
 
-    isAlive = true;                                 // Whether this entity is active on the board
-
-    imageAssetId = ImageAsset.MONSTER_PINK_EYE;
-    imageOpacity = 1.0;
+    imageAssetId = 0;
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.NONE;
-    visibility = MonsterVisibility.VISIBLE;
-    contactEffect = MonsterContactEffect.LETHAL;
+    movement = EntityMovementType.NONE;
+    visibility = EntityOpacityType.VISIBLE;
+    contactEffect = EntityContactEffectType.LETHAL;
 
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
@@ -80,12 +47,60 @@ export class MonsterEntity extends Entity {
         this.image = assetManager.getImage(this.imageAssetId);
     }
 
-    getMovementBehavior() {
-        return this.movement;
+    addSpellEffect(effect, turns) {
+
+        this.spellEffects.set(effect, turns);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = true;
+                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = true;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                this.isTransmuted = true;
+                this.image = this.assetManager.getImage(ImageAsset.FROG);
+                break;
+
+            default:
+                break;
+        }
     }
 
-    setVisibility(visibility) {
-        this.visibility = visibility;
+    removeSpellEffect(effect) {
+
+        this.spellEffects.delete(effect);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = false;
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = false;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                this.image = this.assetManager.getImage(this.imageAssetId);
+                this.isTransmuted = false;
+                break;
+            default:
+                break;
+        }
+
+        if (this.spellEffects.size == 0) {
+            this.overlayImage = null;
+        }
+    }
+
+    getMovementBehavior() {
+        return this.movement;
     }
 
     onTurnConclusion() {
@@ -114,7 +129,11 @@ export class MonsterEntity extends Entity {
 
     render(context, mazeWindowX, mazeWindowY) {
 
-        context.globalAlpha = this.visibility;
+        if (!this.isActive) {
+            return
+        }
+
+        context.globalAlpha = this.opacity;
 
         context.drawImage(
             this.image,
@@ -139,8 +158,8 @@ export class MonsterGhost extends MonsterEntity {
 
     physicality = MonsterPhysicality.INCORPOREAL;
     nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.RANDOM;
-    visibility = MonsterVisibility.TRANSPARENT_HALF;
+    movement = EntityMovementType.RANDOM;
+    visibility = EntityOpacityType.TRANSPARENT_HALF;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
@@ -153,8 +172,8 @@ export class MonsterMammoth extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.NONE;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.NONE;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_MAMMOTH, assetManager);
@@ -162,7 +181,7 @@ export class MonsterMammoth extends MonsterEntity {
 
     getMovementBehavior() {
         if (this.spellEffects.has(SpellEffect.TRANSMUTE)) {
-            return MonsterMovement.FLEE_LINE_OF_SIGHT;
+            return EntityMovementType.FLEE_LINE_OF_SIGHT;
         } else {
             return this.movement;
         }
@@ -175,8 +194,8 @@ export class MonsterMosquitoGiant extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.RANDOM_ROOK;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.RANDOM_ROOK;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_MOSQUITO_GIANT, assetManager);
@@ -189,8 +208,8 @@ export class MonsterMummy extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.CHASE_OMNISCIENT;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.CHASE_OMNISCIENT;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_MUMMY, assetManager);
@@ -207,8 +226,8 @@ export class MonsterPinkEye extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.CHASE_LINE_OF_SIGHT;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.CHASE_LINE_OF_SIGHT;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_PINK_EYE, assetManager);
@@ -216,7 +235,7 @@ export class MonsterPinkEye extends MonsterEntity {
 
     getMovementBehavior() {
         if (this.spellEffects.has(SpellEffect.TRANSMUTE)) {
-            return MonsterMovement.FLEE_LINE_OF_SIGHT;
+            return EntityMovementType.FLEE_LINE_OF_SIGHT;
         } else {
             return this.movement;
         }
@@ -229,8 +248,8 @@ export class MonsterScorpion extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.RANDOM;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.RANDOM;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_SCORPION, assetManager);
@@ -238,7 +257,7 @@ export class MonsterScorpion extends MonsterEntity {
 
     getMovementBehavior() {
         if (this.spellEffects.has(SpellEffect.TRANSMUTE)) {
-            return MonsterMovement.FLEE_LINE_OF_SIGHT;
+            return EntityMovementType.FLEE_LINE_OF_SIGHT;
         } else {
             return this.movement;
         }
@@ -253,8 +272,8 @@ export class MonsterSnail extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.RANDOM;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.RANDOM;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_SNAIL, assetManager);
@@ -268,14 +287,6 @@ export class MonsterSnail extends MonsterEntity {
         super.onTurnConclusion();
     }
 
-    render(context, windowOffsetX, windowOffsetY) {
-        context.drawImage(
-            this.image,
-            this.x + ((this.tileSize - this.image.width) / 2),
-            this.y + ((this.tileSize - this.image.height) / 2)
-        );
-    }
-
 }
 
 export class MonsterTroll extends MonsterEntity {
@@ -284,8 +295,8 @@ export class MonsterTroll extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.MORTAL;
-    movement = MonsterMovement.CHASE_OMNISCIENT;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.CHASE_OMNISCIENT;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_TROLL, assetManager);
@@ -298,9 +309,9 @@ export class MonsterVengefulSpirit extends MonsterEntity {
 
     physicality = MonsterPhysicality.INCORPOREAL;
     nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.CHASE_OMNISCIENT;
-    visibility = MonsterVisibility.TRANSPARENT_HALF;
-    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+    movement = EntityMovementType.CHASE_OMNISCIENT;
+    visibility = EntityOpacityType.TRANSPARENT_HALF;
+    contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
 
     constructor(tileSize, assetManager) {
@@ -315,8 +326,8 @@ export class MonsterWraith extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.UNDEAD;
-    movement = MonsterMovement.RANDOM;
-    visibility = MonsterVisibility.VISIBLE;
+    movement = EntityMovementType.RANDOM;
+    visibility = EntityOpacityType.VISIBLE;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_WRAITH, assetManager);
@@ -353,11 +364,11 @@ export class MonsterCollectable extends MonsterEntity {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.IMMORTAL;
-    movement = MonsterMovement.NONE;
-    visibility = MonsterVisibility.VISIBLE;
-    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+    movement = EntityMovementType.NONE;
+    visibility = EntityOpacityType.VISIBLE;
+    contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
-    onContact = () => { };
+    onContact = () => { console.log(`NO CONTACT SET!`) };
 
     constructor(tileSize, imageAsset, assetManager, onContact) {
         super(tileSize, imageAsset, assetManager);
@@ -372,12 +383,16 @@ export class KeyNormal extends MonsterCollectable {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.IMMORTAL;
-    movement = MonsterMovement.NONE;
-    visibility = MonsterVisibility.VISIBLE;
-    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+    movement = EntityMovementType.NONE;
+    visibility = EntityOpacityType.VISIBLE;
+    contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
     constructor(tileSize, assetManager, onContact) {
         super(tileSize, ImageAsset.DUNGEON_KEY_SMALL, assetManager, onContact);
+    }
+
+    onPlayerContact(player) {
+        this.isActive = false;
     }
 }
 
@@ -387,12 +402,19 @@ export class KeyFleeing extends MonsterCollectable {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.IMMORTAL;
-    movement = MonsterMovement.FLEE_LINE_OF_SIGHT;
-    visibility = MonsterVisibility.VISIBLE;
-    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+    movement = EntityMovementType.FLEE_LINE_OF_SIGHT;
+    visibility = EntityOpacityType.VISIBLE;
+    contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
     constructor(tileSize, assetManager, onContact) {
         super(tileSize, ImageAsset.DUNGEON_KEY_SMALL, assetManager, onContact);
+    }
+
+    onPlayerContact(player) {
+        if (this.isActive == true) {
+            this.onContact();
+            this.isActive = false;
+        }
     }
 }
 
@@ -402,9 +424,9 @@ export class TreasureChestMassive extends MonsterCollectable {
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.IMMORTAL;
-    movement = MonsterMovement.ONLY_WHEN_PUSHED;
-    visibility = MonsterVisibility.VISIBLE;
-    contactEffect = MonsterContactEffect.TRIGGER_EVENT;
+    movement = EntityMovementType.ONLY_WHEN_PUSHED;
+    visibility = EntityOpacityType.VISIBLE;
+    contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
     constructor(tileSize, assetManager, onContact) {
         super(tileSize, ImageAsset.TREASURE_CHEST_LARGE, assetManager, onContact);

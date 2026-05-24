@@ -3,7 +3,7 @@ import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver,
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { Entity } from "../entity/entity.js";
-import { MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail, MonsterEntity } from "../entity/entity_monster.js";
+import { MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail, MonsterEntity, MonsterVengefulSpirit } from "../entity/entity_monster.js";
 import { EntityOpacityType } from "../entity/entity.js";
 import { EntityContactEffectType } from "../entity/entity.js";
 import { EntityMovementType } from "../entity/entity.js";
@@ -374,9 +374,9 @@ export class MazeScene extends Scene {
                 //entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
                 // entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
                 break;
 
             case 2:
@@ -743,6 +743,7 @@ export class MazeScene extends Scene {
         switch (entity.contactEffect) {
 
             case EntityContactEffectType.LETHAL:
+                entity.onPlayerContact(this.player);
                 this.player.isActive = false;
                 this.updateGameSequence(GameSequence.GAME_OVER);
                 break;
@@ -767,12 +768,14 @@ export class MazeScene extends Scene {
                     break;
 
                 case GameSequence.PLAYER_AWAITING_MOVEMENT:
+                    this.computeEntityVisibility();
                     break;
 
                 case GameSequence.PLAYER_MOVING:
                     break;
 
                 case GameSequence.ENEMY_PLOTTING_MOVEMENT:
+                    this.computeEntityVisibility();
                     this.computeEnemyMoves();
                     this.stateDrivers.push(
                         new Driver(
@@ -780,7 +783,6 @@ export class MazeScene extends Scene {
                             () => { },
                             () => {
                                 this.updateSequenceOrGameOver(GameSequence.PLAYER_AWAITING_MOVEMENT);
-                                this.computeEntityVisibility()
                             }
                         )
                     )
@@ -795,7 +797,6 @@ export class MazeScene extends Scene {
         }
 
     }
-
 
     updateSequenceOrGameOver(sequence) {
 
@@ -844,7 +845,6 @@ export class MazeScene extends Scene {
                 entityOrEvent.setOpacity(EntityOpacityType.INVISIBLE);
                 entityOrEvent.setAlpha(0.0);
             })
-
         contactEntity.setOpacity(EntityOpacityType.VISIBLE);
         contactEntity.setAlpha(1.0);
 
@@ -1663,7 +1663,7 @@ export class MazeScene extends Scene {
                                 *      choose randomly between two equivalent potential moves
                                 */
 
-                        if (this.calculateLineOfSight(playerRoom, monsterRoom) == true) {
+                        if (monster.isVisibleToPlayer == true) {
 
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
@@ -1759,7 +1759,7 @@ export class MazeScene extends Scene {
                     // ------------------------------------ FLEE (LINE of SIGHT) -------------------------------------
                     case EntityMovementType.FLEE_LINE_OF_SIGHT:
 
-                        if (this.calculateLineOfSight(playerRoom, monsterRoom) == true) {
+                        if (monster.isVisibleToPlayer == true) {
 
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
@@ -1811,7 +1811,7 @@ export class MazeScene extends Scene {
                 }
 
                 if (monster instanceof MonsterSnail && monster.isTransmuted == false) {
-                    // Drop a trail
+                    // Drop a poisonous SNAIL TRAIL
                     let event = this.entityManager.getEventForRoom(monsterRoom);
                     if (event == null || event.isActive == false) {
                         this.entityManager.setEventRoom(
@@ -2047,45 +2047,43 @@ export class MazeScene extends Scene {
         /**
          * Computes line of sight (LOS) to other things in the maze.
          * From the player's position, draw lines to each event and entity.
-         * If any such line crosss through a grid square that is block (open == false),
+         * If any such line crosses through a grid square that is block (open == false),
          * then no LOS can be established to that entity/event.
          */
 
         this.lineOfSightLines = [];
-        let playerRoom = this.entityManager.getRoomForEntity(this.player);
-        let visibilityMap = this.entityManager.getActiveMonsters().map(monster => {
-            let monsterRoom = this.entityManager.getRoomForEntity(monster); //monster.room;
-            let result = {
-                target: monster,
-                isVisible: this.calculateLineOfSight(playerRoom, monsterRoom)
-            }
+        let playerRoom = this.entityManager.getPlayerRoom();
 
-            // If the monster is a WRAITH, it is only visible on screen when NOT in the wizard's LoS...
-            if (monster instanceof MonsterWraith) {
-                let visibility = EntityOpacityType.VISIBLE;
-                if (result.isVisible) {
-                    visibility = EntityOpacityType.INVISIBLE
+        let visibilityMap = this.entityManager
+            .getActiveMonsters()
+            .map(monster => {
+                let monsterRoom = this.entityManager.getRoomForEntity(monster);
+                let result = {
+                    target: monster,
+                    monsterId: monster.id,
+                    roomId: monsterRoom.id,
+                    isVisible: this.calculateLineOfSight(playerRoom, monsterRoom)
                 }
-                monster.setOpacity(visibility);
-            }
 
-            let playerCenter = playerRoom.getCenter();
-            let targetCenter = monsterRoom.getCenter();
+                monster.setIsVisibleToPlayer(result.isVisible);
 
-            this.lineOfSightLines.push(
-                {
-                    startX: playerCenter.x,
-                    startY: playerCenter.y,
-                    endX: targetCenter.x,
-                    endY: targetCenter.y,
-                    isVisible: result.isVisible
-                }
-            )
+                let playerCenter = playerRoom.getCenter();
+                let targetCenter = monsterRoom.getCenter();
 
-            return result;
-        });
+                this.lineOfSightLines.push(
+                    {
+                        startX: playerCenter.x,
+                        startY: playerCenter.y,
+                        endX: targetCenter.x,
+                        endY: targetCenter.y,
+                        isVisible: result.isVisible
+                    }
+                )
 
-        return visibilityMap;
+                return result;
+            });
+
+        //return visibilityMap;
     }
 
     calculateLineOfSight(origin, target) {

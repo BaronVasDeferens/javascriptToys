@@ -41,10 +41,16 @@ export class MonsterEntity extends Entity {
     visibility = EntityOpacityType.VISIBLE;
     contactEffect = EntityContactEffectType.LETHAL;
 
+    isVisibleToPlayer = false;
+
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
         this.imageAssetId = imageAsset;
         this.image = assetManager.getImage(this.imageAssetId);
+    }
+
+    setIsVisibleToPlayer(visible) {
+        this.isVisibleToPlayer = visible;
     }
 
     addSpellEffect(effect, turns) {
@@ -164,6 +170,34 @@ export class MonsterGhost extends MonsterEntity {
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_GHOST, assetManager);
     }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (!this.isActive) {
+            return
+        }
+
+        if (this.alpha == 1.0) {
+            context.globalAlpha = this.visibility;
+        } else {
+            context.globalAlpha = this.alpha;
+        }
+
+        context.drawImage(
+            this.image,
+            this.x + ((this.tileSize - this.image.width) / 2),
+            this.y + ((this.tileSize - this.image.height) / 2)
+        );
+
+        if (this.overlayImage != null) {
+            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
+            context.drawImage(
+                this.overlayImage,
+                this.x + ((this.tileSize - this.overlayImage.width) / 2),
+                this.y + ((this.tileSize - this.overlayImage.height) / 2)
+            )
+        }
+    }
 }
 
 export class MonsterMammoth extends MonsterEntity {
@@ -264,8 +298,6 @@ export class MonsterScorpion extends MonsterEntity {
     }
 }
 
-
-
 export class MonsterSnail extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_SNAIL;
@@ -311,13 +343,39 @@ export class MonsterVengefulSpirit extends MonsterEntity {
     nature = MonsterNature.UNDEAD;
     movement = EntityMovementType.CHASE_OMNISCIENT;
     visibility = EntityOpacityType.TRANSPARENT_HALF;
-    contactEffect = EntityContactEffectType.TRIGGER_EVENT;
-
+    contactEffect = EntityContactEffectType.LETHAL;
 
     constructor(tileSize, assetManager) {
         super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
     }
 
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (!this.isActive) {
+            return
+        }
+
+        if (this.alpha == 1.0) {
+            context.globalAlpha = this.visibility;
+        } else {
+            context.globalAlpha = this.alpha;
+        }
+
+        context.drawImage(
+            this.image,
+            this.x + ((this.tileSize - this.image.width) / 2),
+            this.y + ((this.tileSize - this.image.height) / 2)
+        );
+
+        if (this.overlayImage != null) {
+            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
+            context.drawImage(
+                this.overlayImage,
+                this.x + ((this.tileSize - this.overlayImage.width) / 2),
+                this.y + ((this.tileSize - this.overlayImage.height) / 2)
+            )
+        }
+    }
 }
 
 export class MonsterWraith extends MonsterEntity {
@@ -333,11 +391,27 @@ export class MonsterWraith extends MonsterEntity {
         super(tileSize, ImageAsset.MONSTER_WRAITH, assetManager);
     }
 
+    onPlayerContact(player) {
+        this.isVisibleToPlayer = false;
+    }
+
     render(context, mazeWindowX, mazeWindowY) {
 
-        // The wraith is only visible on screen when NOT in the wizard's LoS
 
-        context.globalAlpha = this.visibility;
+        // FIXME: when killing the player, this causes him to become invisible...
+
+        if (this.alpha == 1.0) {
+            // The wraith is only visible on screen when NOT in the wizard's LoS
+            if (this.isVisibleToPlayer == true) {
+                this.visibility = EntityOpacityType.INVISIBLE;
+            } else {
+                this.visibility = EntityOpacityType.VISIBLE;
+            }
+            context.globalAlpha = this.visibility;
+        } else {
+            context.globalAlpha = this.alpha;
+        }
+
         context.drawImage(
             this.image,
             this.x + ((this.tileSize - this.image.width) / 2),

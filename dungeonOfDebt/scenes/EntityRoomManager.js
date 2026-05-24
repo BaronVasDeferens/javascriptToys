@@ -97,6 +97,12 @@ export class EntityRoomManager {
         return this.roomIdToRoom.get(id);
     }
 
+    getIsEmptyForRoom(room) {
+        return this.roomIdToEntityId.get(room.id) == null
+            && this.roomIdToEventId.get(room.id) == null
+            && room.id != this.playerRoomId;
+    }
+
     getActiveEntities() {
         return [...this.entityIdToEntity.values()]
             .filter(entity => {
@@ -221,13 +227,33 @@ export class MazeRoom {
 
     id = crypto.randomUUID();
 
+    floorTiles = [
+        ImageAsset.FLOOR_ZX_18,
+        ImageAsset.FLOOR_ZX_19,
+        ImageAsset.FLOOR_ZX_20,
+        ImageAsset.FLOOR_ZX_21,
+        ImageAsset.FLOOR_ZX_22,
+        ImageAsset.FLOOR_ZX_23,
+        ImageAsset.FLOOR_ZX_24,
+        ImageAsset.FLOOR_ZX_25,
+        ImageAsset.FLOOR_ZX_26,
+        ImageAsset.FLOOR_ZX_27
+    ];
+
+    blockTiles = [
+        ImageAsset.BLOCK_ZX_1,
+        ImageAsset.BLOCK_ZX_2,
+        ImageAsset.BLOCK_ZX_3,
+        ImageAsset.BLOCK_ZX_4,
+        ImageAsset.BLOCK_ZX_5,
+        ImageAsset.BLOCK_ZX_6
+    ];
+
     row = 0;
     col = 0;
     roomSize = 64;
 
-    isOpen = false; // Whether this room can be occupied
-
-    isEmpty = true;
+    isOpen = true;     // when TRUE, this room can be occupied by an entity
 
     image = null;
 
@@ -237,52 +263,17 @@ export class MazeRoom {
         this.roomSize = roomSize;
         this.assetManager = assetManager;
         this.setIsOpen(isOpen);
-        this.computeEmptiness();
-    }
-
-    computeEmptiness() {
-
-        let floorTiles = [
-            ImageAsset.FLOOR_ZX_18,
-            ImageAsset.FLOOR_ZX_19,
-            ImageAsset.FLOOR_ZX_20,
-            ImageAsset.FLOOR_ZX_21,
-            ImageAsset.FLOOR_ZX_22,
-            ImageAsset.FLOOR_ZX_23,
-            ImageAsset.FLOOR_ZX_24,
-            ImageAsset.FLOOR_ZX_25,
-            ImageAsset.FLOOR_ZX_26,
-            ImageAsset.FLOOR_ZX_27
-        ];
-
-        let blockTiles = [
-            ImageAsset.BLOCK_ZX_1,
-            ImageAsset.BLOCK_ZX_2,
-            ImageAsset.BLOCK_ZX_3,
-            ImageAsset.BLOCK_ZX_4,
-            ImageAsset.BLOCK_ZX_5,
-            ImageAsset.BLOCK_ZX_6
-        ];
-
-        this.isEmpty = (this.isOpen == true) && (this.event == null);
-        if (this.isOpen == true) {
-            this.color = "#606060";
-            let tile = floorTiles[Math.floor(floorTiles.length * Math.random())];
-            this.image = this.assetManager.getImage(tile);
-        } else {
-            let tile = blockTiles[Math.floor(blockTiles.length * Math.random())];
-            this.image = this.assetManager.getImage(tile);
-        }
     }
 
     setIsOpen(isOpen) {
         this.isOpen = isOpen;
-        this.computeEmptiness();
-    }
-
-    setEvent(event) {
-        this.event = event;
-        this.computeEmptiness();
+        if (this.isOpen == true) {
+            let tile = this.floorTiles[Math.floor(this.floorTiles.length * Math.random())];
+            this.image = this.assetManager.getImage(tile);
+        } else {
+            let tile = this.blockTiles[Math.floor(this.blockTiles.length * Math.random())];
+            this.image = this.assetManager.getImage(tile);
+        }
     }
 
     getCenter() {

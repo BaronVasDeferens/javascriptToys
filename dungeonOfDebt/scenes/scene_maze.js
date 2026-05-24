@@ -328,16 +328,18 @@ export class MazeScene extends Scene {
         // --- ENTITIES ---
 
         // PLAYER...
-        // Find an UNOCCUPIED, NO EVENT square near the TOP LEFT
-        let playerStartRoom = this.allRooms.sort((a, b) => {
-            if ((a.col + a.row) < (b.col + b.row)) {
-                return -1;
-            } else if ((a.col + a.row) > (b.col + b.row)) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }).filter(room => { return room.isEmpty == true })[0];
+        // Find an UNOCCUPIED, NO EVENT square near the top...
+        let playerStartRoom = this.allRooms
+            .filter(room => { return room.isOpen == true })
+            .sort((a, b) => {
+                if ((a.col + a.row) < (b.col + b.row)) {
+                    return -1;
+                } else if ((a.col + a.row) > (b.col + b.row)) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            })[5];      // ...left-ish
 
         this.player = new PlayerEntity(
             this.tileSize,
@@ -2451,15 +2453,13 @@ export class MazeScene extends Scene {
 
     distributeAcrossOpenRooms(objects, avoidPlayerLos) {
 
+        let playerRoom = this.entityManager.getRoomForEntity(this.player);
+
         let availableRooms = this.allRooms.filter(room => {
-            return room.isEmpty == true
-                && this.entityManager.getEventForRoom(room) == null
-                && this.entityManager.getEntityForRoom(room) == null
+            return room.isOpen == true
         });
 
         if (avoidPlayerLos == true) {
-            let playerRoom = this.entityManager.getRoomForEntity(this.player);
-
             availableRooms = availableRooms.filter(room => {
                 return this.calculateLineOfSight(room, playerRoom) == false
             })

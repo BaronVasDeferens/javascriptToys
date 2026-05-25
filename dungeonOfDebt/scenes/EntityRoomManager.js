@@ -65,14 +65,19 @@ export class EntityRoomManager {
 
     setEntityRoom(entity, room) {
 
-        let target = this.entityIdToEntity.get(entity.id);
-
         if (entity instanceof PlayerEntity) {
             this.playerRoomId = room.id;
             entity.x = room.col * this.tileSize;
             entity.y = room.row * this.tileSize;
             return;
         } else {
+
+            let target = this.entityIdToEntity.get(entity.id);
+
+            // Is there a record of this entity in the registry?
+            if (target == null) {
+                this.entityIdToEntity.set(entity.id, entity)
+            }
 
             // remove prior room association
             let oldRoomId = this.entityIdToRoomId.get(entity.id);

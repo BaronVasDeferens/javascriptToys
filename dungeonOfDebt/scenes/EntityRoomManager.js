@@ -74,11 +74,6 @@ export class EntityRoomManager {
 
             let target = this.entityIdToEntity.get(entity.id);
 
-            // Is there a record of this entity in the registry?
-            if (target == null) {
-                this.entityIdToEntity.set(entity.id, entity)
-            }
-
             // remove prior room association
             let oldRoomId = this.entityIdToRoomId.get(entity.id);
             if (oldRoomId != null) {

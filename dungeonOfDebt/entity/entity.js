@@ -48,6 +48,8 @@ export class Entity {
 
     image = null;
     imageAssetId = null;
+    offsetX = 0;
+    offsetY = 0;
     alpha = 1.0;
     opacity = EntityOpacityType.VISIBLE;
 
@@ -63,17 +65,23 @@ export class Entity {
         this.assetManager = assetManager;
     }
 
+    setImage(imageAssetId) {
+        this.image = this.assetManager.getImage(imageAssetId);
+        this.offsetX = (this.tileSize - this.image.width) / 2;
+        this.offsetY = (this.tileSize - this.image.height) / 2; 
+    }
+
     render(context, mazeWindowX, mazeWindowY) {
 
-        if (!this.isActive) {
+        if (this.isActive == false) {
             return
         }
 
         context.globalAlpha = this.opacity;
         context.drawImage(
             this.image,
-            this.x + ((this.tileSize - this.image.width) / 2),
-            this.y + ((this.tileSize - this.image.height) / 2)
+            this.x, //  + this.offsetX,
+            this.y //  + this.offsetY
         );
     }
 

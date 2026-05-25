@@ -32,8 +32,6 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  *      MONSTER that pushes PLAYER toward HOLES IN THE FLOOR
  * 
  *      MONSTER which travels in one direction
- * 
- *      MONSTER that leaves a toxic trail
  *  
  * 
  *      O sorcerer! Not for want of arcane power 
@@ -100,7 +98,6 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  * 
  *      !!! gold counter / debt counter / interest rate -- lean into revenue theme?
  * 
- *      punting frozen enemies should trigger a sound
  *      vary footsteps sounds
  *      vary spell effect sounds
  *      freezing wraith make him visible
@@ -376,9 +373,12 @@ export class MazeScene extends Scene {
                 //entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
                 // entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
+                // monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
+                // monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+
                 break;
 
             case 2:

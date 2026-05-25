@@ -28,6 +28,7 @@ export class EventEntity extends Entity {
             return false;
         }
     }
+    
 }
 
 
@@ -44,7 +45,10 @@ export class TreasureCollectableEvent extends EventEntity {
             ImageAsset.COIN_4
         ];
         let tile = coinTiles[Math.floor(coinTiles.length * Math.random())];
-        this.image = assetManager.getImage(tile);
+        this.setImage(tile);
+
+        console.log(`${this.offsetX} ${this.offsetY}`)
+
     }
 
     applySpellEffect(effect) {
@@ -73,11 +77,12 @@ export class TreasureCollectableEvent extends EventEntity {
 
 export class ChestCollectableEvent extends EventEntity {
 
+    imageAssetId = ImageAsset.TREASURE_CHEST_SMALL;
     alpha = 0.0;
 
     constructor(tileSize, assetManager, onTrigger) {
         super(tileSize, assetManager, onTrigger);
-        this.image = assetManager.getImage(ImageAsset.TREASURE_CHEST_SMALL);
+        this.setImage(this.imageAssetId);
     }
 
     applySpellEffect(effect) {
@@ -124,15 +129,15 @@ export class PortalStaircaseEvent extends EventEntity {
 
     constructor(tileSize, assetManager, onTrigger) {
         super(tileSize, assetManager, onTrigger);
-        this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_CLOSED);
+        this.setImage(ImageAsset.PORTAL_DOOR_CLOSED);
     }
 
     setIsLocked(isLocked) {
         this.isLocked = isLocked;
         if (isLocked) {
-            this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_CLOSED);
+            this.setImage(ImageAsset.PORTAL_DOOR_CLOSED);
         } else {
-            this.image = this.assetManager.getImage(ImageAsset.PORTAL_DOOR_OPEN);
+            this.setImage(ImageAsset.PORTAL_DOOR_OPEN);
         }
     }
 
@@ -184,7 +189,7 @@ export class SnailTrailEvent extends EventEntity {
             ImageAsset.MONSTER_SNAIL_TRAIL_5
         ];
         let index = Math.floor(assetIds.length * Math.random());
-        this.image = assetManager.getImage(assetIds[index]);
+        this.setImage(assetIds[index]);
     }
 
     render(context, mazeWindowX, mazeWindowY) {

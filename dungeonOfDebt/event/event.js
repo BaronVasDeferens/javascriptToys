@@ -46,9 +46,6 @@ export class TreasureCollectableEvent extends EventEntity {
         ];
         let tile = coinTiles[Math.floor(coinTiles.length * Math.random())];
         this.setImage(tile);
-
-        console.log(`${this.offsetX} ${this.offsetY}`)
-
     }
 
     applySpellEffect(effect) {

@@ -370,14 +370,21 @@ export class MazeScene extends Scene {
                 break;
 
             case 1:
-                //entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
+                // entities.push(new MonsterMammoth(this.tileSize, this.assetManager));
                 // entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                // this.entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                // entities.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 // monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
                 // monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+
+                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
+                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
+                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
+                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
+                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
 
                 break;
 
@@ -449,6 +456,14 @@ export class MazeScene extends Scene {
                 )
             );
         }
+
+        eventList.push(
+            new TreasureChestMassive(
+                this.tileSize,
+                this.assetManager,
+                () => { console.log("!?!?!?!?") }
+            )
+        )
 
         // PORTALS...
         let exitPortal = new PortalStaircaseEvent(
@@ -1857,6 +1872,7 @@ export class MazeScene extends Scene {
 
                 // Case 1: destination open, no occupant
                 let destinationOccupant = this.entityManager.getEntityForRoom(destination);
+
                 if (destinationOccupant == null) {
                     primaryDriver = new EntityMovementDriver(
                         entity,
@@ -1970,6 +1986,7 @@ export class MazeScene extends Scene {
                                 // sliderObject.room.setOccupant(null);
                                 // sliderObject.setRoom(neighborToObject);
                                 // neighborToObject.setOccupant(sliderObject);
+                                this.entityManager.setEntityRoom(sliderObject, neighborToObject);
                             }
                         )
                     }

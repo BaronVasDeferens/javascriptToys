@@ -307,10 +307,15 @@ export class MazeScene extends Scene {
         // Arrange the maze...
         this.createMaze();
 
-        // Remove some tiles...
+        // Change a number of tiles from closed to open
         let closedRooms = this.allRooms.filter(room => { return room.isOpen == false });
         this.shuffleArray(closedRooms);
-        for (let n = 0; n < this.levelCurrent + 3; n++) {
+
+        let numRoomsToOpen = 20 - (2 * this.levelCurrent);
+        if (numRoomsToOpen < 0) {
+            numRoomsToOpen = 0
+        }
+        for (let n = 0; n < numRoomsToOpen; n++) {
             closedRooms[n].setIsOpen(true);
         }
 

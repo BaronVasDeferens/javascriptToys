@@ -170,8 +170,8 @@ export class PortalStaircaseEvent extends EventEntity {
 
 export class SnailTrailEvent extends EventEntity {
 
-    maxTurnsBeforeDissolve = 5;
-    turnsBeforeDissolve = 5;
+    maxTurnsBeforeDissolve = 10;
+    turnsBeforeDissolve = 10;
     alpha = 1.0;
 
     constructor(tileSize, assetManager, onTrigger) {

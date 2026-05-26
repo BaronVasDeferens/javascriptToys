@@ -25,18 +25,27 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  * 
  * SHORT TERM
  * 
+ *      COLOR-CODING: MAGIC, and MONSTERS
+ *          The colors of the spells, monsters, hazards, and treasures should mean something...maybe?
+ *          A relationship between the colors and their effects and behaviors would be pleasing...maybe?
+ * 
  *      MAGICAL ALIGNMENT
  *          Dungeons can have a magical alignment which boots the effects of some spells or grant new ones
  *          Aligned dungeons are color-shifted (see method printToImage())
  *      
- * 
  *      PUSHING
- *      HUGE key that has to be pushed to the door
- *      HUGE chest that has to be pushed to the open door to be collected
+ *          HUGE key that has to be pushed to the door
+ *          HUGE chest that has to be pushed to the open door to be collected
  *      
- *      MONSTER that pushes PLAYER toward HOLES IN THE FLOOR
+ *      MONSTERS
+ *          MONSTER that PUSHED THE PLAYER
+ *          MONSTER which travels in one direction
+ *          MONSTER that EATS GOLD
+ *          ENRAGED! MONSTER that after being affected by a spell becomes SEEKING
+ *          LOS MONSTERS should CLOSE THEIR EYES when they can't see the player
  * 
- *      MONSTER which travels in one direction
+ *      HAZARDS
+ *          Acid pit that only a frog can cross
  *  
  * 
  *      Not for want of arcane power 
@@ -1968,7 +1977,7 @@ export class MazeScene extends Scene {
                     }
                 } else if (destinationOccupant.movement == EntityMovementType.ONLY_WHEN_PUSHED) {
 
-                    // Case 4: destination open, occupied, but occupant moves ONLY_WHEN_PUSHED
+                    // Case 4: destination is occupied by occupant that moves ONLY_WHEN_PUSHED
                     let neighborToObjectRoom = this.getAdjacentRoomByDirection(destination, direction);
                     if (neighborToObjectRoom == null) {
                         return;
@@ -2503,6 +2512,8 @@ export class MazeScene extends Scene {
 
         let availableRooms = this.allRooms.filter(room => {
             return room.isOpen == true
+            && this.entityManager.getEntityForRoom(room) == null
+            && this.entityManager.getEventForRoom(room) == null
         });
 
         if (avoidPlayerLos == true) {

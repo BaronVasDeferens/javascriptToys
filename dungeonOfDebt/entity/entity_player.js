@@ -30,6 +30,58 @@ export class PlayerEntity extends Entity {
 
     }
 
+    addSpellEffect(effect, turns) {
+
+        this.spellEffects.set(effect, turns);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = true;
+                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
+                break;
+
+            case SpellEffect.INVERT:
+                this.isActive = false;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                this.isTransmuted = true;
+                this.image = this.assetManager.getImage(ImageAsset.FROG);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    removeSpellEffect(effect) {
+
+        this.spellEffects.delete(effect);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = false;
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = false;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                this.image = this.assetManager.getImage(this.imageAssetId);
+                this.isTransmuted = false;
+                break;
+            default:
+                break;
+        }
+
+        if (this.spellEffects.size == 0) {
+            this.overlayImage = null;
+        }
+    }
+
     onTurnConclusion() {
 
         let expiredEffects = new Set();

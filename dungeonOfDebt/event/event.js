@@ -219,7 +219,11 @@ export class SnailTrailEvent extends EventEntity {
     }
 
     checkTrigger(entity) {
-        if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
+        if (this.isActive == true 
+            && entity != null 
+            && entity instanceof PlayerEntity
+            && entity.isTransmuted == false
+        ) {
             this.onTrigger();
             if (this.isOneShot == true) {
                 this.turnsBeforeDissolve = this.maxTurnsBeforeDissolve;

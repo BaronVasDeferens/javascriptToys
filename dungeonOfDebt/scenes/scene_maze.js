@@ -25,6 +25,11 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  * 
  * SHORT TERM
  * 
+ *      MAGICAL ALIGNMENT
+ *          Dungeons can have a magical alignment which boots the effects of some spells or grant new ones
+ *          Aligned dungeons are color-shifted (see method printToImage())
+ *      
+ * 
  *      PUSHING
  *      HUGE key that has to be pushed to the door
  *      HUGE chest that has to be pushed to the open door to be collected
@@ -34,17 +39,15 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  *      MONSTER which travels in one direction
  *  
  * 
- *      O sorcerer! Not for want of arcane power 
- *          hast thou been defeated
- * 
- *      Poor sorcerer! The level failed
+ *      Not for want of arcane power 
+ *          hast thou been defeated;
+ *      O sorcerer! The level failed
  *          and thou must again repeat it
  * 
  *      O sorcerer! What possessed thee to seek 
- *          thy fortune in such a place
+ *          thy fortune in such a place?
  *  * 
  *      O sorcerer! Ruin 
-
  *          thou hast been consumed by greed 
  *          and the labyrinth consumes the weak 
 
@@ -691,6 +694,9 @@ export class MazeScene extends Scene {
     concludePlayerTurn() {
 
         // Alert all entities that the current player turn has concluded; spell durations get shorter, etc.
+
+        this.player.onTurnConclusion();
+
         this.entityManager.getActiveMonsters()
             .forEach(ent => {
                 ent.onTurnConclusion();
@@ -854,12 +860,6 @@ export class MazeScene extends Scene {
         let playerRoom = this.entityManager.getPlayerRoom();
         let contactEntity = this.entityManager.getEntityForRoom(playerRoom) ? this.entityManager.getEntityForRoom(playerRoom) : this.entityManager.getEventForRoom(playerRoom)
 
-        if (contactEntity == null) {
-            console.error("contact entity is NULL?????")
-        } else {
-            console.log(`fatal entity: ${contactEntity.constructor.name} : ${contactEntity.id}`)
-        }
-
         // Hide all entities but the fatal entity and player
         this.entityManager.getActiveMonsters()
             .concat(this.entityManager.getActiveEvents())
@@ -867,8 +867,13 @@ export class MazeScene extends Scene {
                 entityOrEvent.setOpacity(EntityOpacityType.INVISIBLE);
                 entityOrEvent.setAlpha(0.0);
             })
-        contactEntity.setOpacity(EntityOpacityType.VISIBLE);
-        contactEntity.setAlpha(1.0);
+
+
+        // If the game ended because of entity contact, show the fatal entity
+        if (contactEntity != null) {
+            contactEntity.setOpacity(EntityOpacityType.VISIBLE);
+            contactEntity.setAlpha(1.0);
+        }
 
         // Use a driver to fade out the background
         this.stateDrivers.push(
@@ -1364,6 +1369,7 @@ export class MazeScene extends Scene {
             this.debug(`casting: ${this.getSpellEffectName(this.selectedSpellEffect)}`)
 
             let spellEffectOverlay = null;
+            let playerRoom = this.entityManager.getPlayerRoom();
 
             switch (this.selectedSpellEffect) {
 
@@ -1379,7 +1385,7 @@ export class MazeScene extends Scene {
                             occupant.addSpellEffect(SpellEffect.FREEZE, 5);
                         }
 
-                        if (room == this.entityManager.getPlayerRoom()) {
+                        if (room == playerRoom) {
                             this.player.addSpellEffect(SpellEffect.FREEZE, 5)
                         }
                     });
@@ -1412,22 +1418,26 @@ export class MazeScene extends Scene {
                     let wizardInverted = false;
 
                     this.highlightedGridSquares.forEach(highlighted => {
+
                         let room = highlighted.room;
                         room.setIsOpen(!room.isOpen);
 
                         // WIZARD DIES IF INVERTED
-                        if (room == this.entityManager.getPlayerRoom()) {
+                        if (room == playerRoom) {
                             this.player.addSpellEffect(SpellEffect.INVERT);
                             this.player.overlayImage = room.image;
+                        } else {
+
+                            let occupant = this.entityManager.getEntityForRoom(room);
+                            // TODO: invert occupant????
+
+                            let event = this.entityManager.getEventForRoom(room);
+                            if (event != null) {
+                                event.applySpellEffect(SpellEffect.INVERT);
+                            }
                         }
 
-                        let occupant = this.entityManager.getEntityForRoom(room);
-                        let event = this.entityManager.getEventForRoom(room);
 
-
-                        if (event != null) {
-                            event.applySpellEffect(SpellEffect.INVERT);
-                        }
                     });
 
                     this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms);
@@ -1457,12 +1467,18 @@ export class MazeScene extends Scene {
                 case SpellEffect.TRANSMUTE:
 
                     // Apply a TRANSMUTATION effect to every entity in the selected squares
-                    this.highlightedGridSquares.forEach(sq => {
-                        let gridSquare = this.getRoom(sq.row, sq.col);
-                        let occupant = this.entityManager.getEntityForRoom(gridSquare);
-                        if (occupant != null) {
-                            occupant.addSpellEffect(SpellEffect.TRANSMUTE, 5);
+                    this.highlightedGridSquares.forEach(highlightedRoom => {
+                        let room = highlightedRoom.room;
+
+                        if (highlightedRoom.room == playerRoom) {
+                            this.player.addSpellEffect(SpellEffect.TRANSMUTE, 5);
+                        } else {
+                            let occupant = this.entityManager.getEntityForRoom(room);
+                            if (occupant != null) {
+                                occupant.addSpellEffect(SpellEffect.TRANSMUTE, 5);
+                            }
                         }
+
                     });
 
                     // Create a spell effect overlay to flash the screen during this spell effect
@@ -1489,8 +1505,6 @@ export class MazeScene extends Scene {
                     break;
 
                 case SpellEffect.EXCHANGE:
-
-                    let playerRoom = this.entityManager.getPlayerRoom();
 
                     let rooms = this.highlightedGridSquares
                         .map(highlighted => {
@@ -1955,13 +1969,13 @@ export class MazeScene extends Scene {
                 } else if (destinationOccupant.movement == EntityMovementType.ONLY_WHEN_PUSHED) {
 
                     // Case 4: destination open, occupied, but occupant moves ONLY_WHEN_PUSHED
-                    let neighborToObject = this.getAdjacentRoomByDirection(destination, direction);
-                    if (neighborToObject == null) {
+                    let neighborToObjectRoom = this.getAdjacentRoomByDirection(destination, direction);
+                    if (neighborToObjectRoom == null) {
                         return;
                     }
 
-                    let sliderObject = this.entityManager.getEntityForRoom(destination);
-                    if (neighborToObject.isOpen && !neighborToObject.isOccupied) {
+                    let isNeighborOccupied = (this.entityManager.getEntityForRoom(neighborToObjectRoom) != null);
+                    if (neighborToObjectRoom.isOpen && isNeighborOccupied == false) {
 
                         primaryDriver = new EntityMovementDriver(
                             entity,
@@ -1980,18 +1994,15 @@ export class MazeScene extends Scene {
                         )
 
                         pushOnlyMove = new EntityMovementDriver(
-                            sliderObject,
-                            neighborToObject,
+                            destinationOccupant,
+                            neighborToObjectRoom,
                             rate,
                             () => {
                                 // onUpdate
                             },
                             () => {
                                 // onComplete
-                                // sliderObject.room.setOccupant(null);
-                                // sliderObject.setRoom(neighborToObject);
-                                // neighborToObject.setOccupant(sliderObject);
-                                this.entityManager.setEntityRoom(sliderObject, neighborToObject);
+                                this.entityManager.setEntityRoom(destinationOccupant, neighborToObjectRoom);
                             }
                         )
                     }
@@ -2311,14 +2322,27 @@ export class MazeScene extends Scene {
         }
     }
 
-    printToImage(canvas, image, renderables) {
+    printToImage(canvas, image, objectsToRender) {
+
         let context = canvas.getContext("2d");
         context.fillStyle = "#000000";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        renderables.forEach(renderMe => {
+        objectsToRender.forEach(renderMe => {
             renderMe.render(context, 0, 0);
         });
+
+        let isRedShift = false;
+        if (isRedShift) {
+            let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            for (let n = 0; n < imageData.data.length; n += 4) {
+                imageData.data[n] *= 2;
+                imageData.data[n + 1] = 0;
+                imageData.data[n + 2] = 0;
+                imageData.data[n + 3] = 128;
+            }
+            context.putImageData(imageData, 0, 0);
+        }
 
         image.src = canvas.toDataURL();
     }

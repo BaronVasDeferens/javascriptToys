@@ -21,13 +21,20 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  * 
  * 
  * BUGS
- *      wraith is always visible during GAME OVER except when he caused it :/
+ *      HUGE CHEST / STATUE sometimes stops moving when player pushes on it
  * 
  * SHORT TERM
  * 
  *      COLOR-CODING: MAGIC, and MONSTERS
  *          The colors of the spells, monsters, hazards, and treasures should mean something...maybe?
  *          A relationship between the colors and their effects and behaviors would be pleasing...maybe?
+ *          COLLECTABLE ROBES of differing colors empower certain color spells (found in CHESTS)
+ *          
+ *          Potential effects of different robes:
+ *              general, all-around
+ *              bigger zones, fewer spells
+ *              immune to certain hazards
+ *              self-teleport only, huge bonuses to gold
  * 
  *      MAGICAL ALIGNMENT
  *          Dungeons can have a magical alignment which boots the effects of some spells or grant new ones
@@ -47,18 +54,22 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  *      HAZARDS
  *          Acid pit that only a frog can cross
  *  
+ *      SPELLS and EFFECTS
+ *          Self-teleport does nothing-- it SHOULD! Maybe there are a few specially-marked tiles that will always 
+ *          be the RANSOM destination of a self-teleport. 
  * 
- *      Not for want of arcane power 
- *          hast thou been defeated;
- *      O sorcerer! The level failed
- *          and thou must again repeat it
- * 
- *      O sorcerer! What possessed thee to seek 
- *          thy fortune in such a place?
- *  * 
- *      O sorcerer! Ruin 
- *          thou hast been consumed by greed 
- *          and the labyrinth consumes the weak 
+ *      GAME OVER MESSAGES:
+ *          Not for want of arcane power 
+ *              hast thou been defeated;
+ *          O sorcerer! The level failed
+ *              and thou must again repeat it
+ *  
+ *          O sorcerer! What possessed thee to seek 
+ *              thy fortune in such a place?
+ *  *   
+ *          O sorcerer! Ruin 
+ *              thou hast been consumed by greed 
+ *              and the labyrinth consumes the weak 
 
  * 
         LEVELS
@@ -70,9 +81,6 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
                 Floors 10 - 19: crypts (undead and insects)
                 Floors 20 - 29: depths (demons and sorcerers)
 
- * 
- *      !!! FREEZE is too powerful-- should end turn after 1st use?
- * 
  *      !!! spell effects x monster types
  *              - can UNDEAD be TRANSMUTED?
  *              - can INCORPOREAL be FROZEN?

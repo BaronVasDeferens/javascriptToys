@@ -870,6 +870,7 @@ export class MazeScene extends Scene {
             .forEach(entityOrEvent => {
                 entityOrEvent.setOpacity(EntityOpacityType.INVISIBLE);
                 entityOrEvent.setAlpha(0.0);
+                entityOrEvent.overlayImage = null;
             })
 
 

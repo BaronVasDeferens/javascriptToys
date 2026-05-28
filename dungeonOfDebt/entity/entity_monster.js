@@ -378,17 +378,17 @@ export class MonsterVengefulSpirit extends MonsterEntity {
     }
 }
 
-export class MonsterWraith extends MonsterEntity {
+export class MonsterShadowMan extends MonsterEntity {
 
-    imageAsset = ImageAsset.MONSTER_WRAITH;
+    imageAsset = ImageAsset.MONSTER_SHADOW_MAN;
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.UNDEAD;
-    movement = EntityMovementType.RANDOM;
-    visibility = EntityOpacityType.VISIBLE;
+    movement = EntityMovementType.CHASE_LINE_OF_SIGHT;
+    visibility = EntityOpacityType.TRANSPARENT_HALF;
 
     constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_WRAITH, assetManager);
+        super(tileSize, ImageAsset.MONSTER_SHADOW_MAN, assetManager);
     }
 
     onPlayerContact(player) {
@@ -397,15 +397,12 @@ export class MonsterWraith extends MonsterEntity {
 
     render(context, mazeWindowX, mazeWindowY) {
 
-
-        // FIXME: when killing the player, this causes him to become invisible...
-
         if (this.alpha == 1.0) {
-            // The wraith is only visible on screen when NOT in the wizard's LoS
-            if (this.isVisibleToPlayer == true) {
+            // The Shadow Man is only visible on screen when NOT in the wizard's LoS
+            if (this.isVisibleToPlayer == true && this.isFrozen == false) {
                 this.visibility = EntityOpacityType.INVISIBLE;
             } else {
-                this.visibility = EntityOpacityType.VISIBLE;
+                this.visibility = EntityOpacityType.TRANSPARENT_HALF;
             }
             context.globalAlpha = this.visibility;
         } else {
@@ -419,7 +416,6 @@ export class MonsterWraith extends MonsterEntity {
         );
 
         if (this.overlayImage != null) {
-
             context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
             context.drawImage(
                 this.overlayImage,

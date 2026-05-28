@@ -3,7 +3,7 @@ import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver,
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { Entity } from "../entity/entity.js";
-import { MonsterPinkEye, MonsterWraith, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail, MonsterEntity, MonsterVengefulSpirit } from "../entity/entity_monster.js";
+import { MonsterPinkEye, MonsterShadowMan, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail, MonsterEntity, MonsterVengefulSpirit } from "../entity/entity_monster.js";
 import { EntityOpacityType } from "../entity/entity.js";
 import { EntityContactEffectType } from "../entity/entity.js";
 import { EntityMovementType } from "../entity/entity.js";
@@ -416,9 +416,11 @@ export class MazeScene extends Scene {
                 break;
 
             case 4:
-                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
-                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
-                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterShadowMan(this.tileSize, this.assetManager));
+                monsters.push(new MonsterShadowMan(this.tileSize, this.assetManager));
                 break;
 
             case 5:
@@ -439,9 +441,10 @@ export class MazeScene extends Scene {
                     monsters.push(new MonsterGhost(this.tileSize, this.assetManager));
                 }
 
-                let numMummies = Math.floor(this.levelCurrent / 4) + 1;
+                let numMummies = Math.floor(this.levelCurrent / 8) + 1;
                 for (let n = 0; n < numMummies; n++) {
                     monsters.push(new MonsterMummy(this.tileSize, this.assetManager));
+                    monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
                 }
                 break;
         }

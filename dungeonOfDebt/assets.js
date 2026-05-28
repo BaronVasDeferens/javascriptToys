@@ -68,7 +68,7 @@ export var ImageAsset = Object.freeze({
     MONSTER_SNAIL_TRAIL_4: "entity/monsters/3269.png",
     MONSTER_SNAIL_TRAIL_5: "entity/monsters/3270.png",
     MONSTER_TROLL: "entity/monsters/3945_zx.png",
-    MONSTER_WRAITH: "entity/monsters/3825_zx.png",
+    MONSTER_SHADOW_MAN: "entity/monsters/3825_zx.png",
     MONSTER_VENGEFUL_SPIRIT: "entity/monsters/4724_zx.png",
 
 

@@ -396,13 +396,8 @@ export class MazeScene extends Scene {
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-
-                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-                // monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 break;
 
             case 2:
@@ -421,12 +416,9 @@ export class MazeScene extends Scene {
                 break;
 
             case 4:
-                monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
+                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
+                monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
                 break;
 
             case 5:
@@ -435,11 +427,10 @@ export class MazeScene extends Scene {
 
             case 6:
                 monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
                 break;
 
             default:
@@ -474,13 +465,14 @@ export class MazeScene extends Scene {
             );
         }
 
-        eventList.push(
-            new TreasureChestMassive(
-                this.tileSize,
-                this.assetManager,
-                () => { console.log("!?!?!?!?") }
-            )
-        )
+        // HUGE CHEST...
+        // eventList.push(
+        //     new TreasureChestMassive(
+        //         this.tileSize,
+        //         this.assetManager,
+        //         () => { console.log("!?!?!?!?") }
+        //     )
+        // )
 
         // PORTALS...
         let exitPortal = new PortalStaircaseEvent(
@@ -1480,7 +1472,7 @@ export class MazeScene extends Scene {
                         let room = highlightedRoom.room;
 
                         if (highlightedRoom.room == playerRoom) {
-                            this.player.addSpellEffect(SpellEffect.TRANSMUTE, 5);
+                            this.player.addSpellEffect(SpellEffect.TRANSMUTE, 6);
                         } else {
                             let occupant = this.entityManager.getEntityForRoom(room);
                             if (occupant != null) {
@@ -1586,8 +1578,8 @@ export class MazeScene extends Scene {
 
         // Ineligible rooms will be those that another monster has set its sights on
         // TODO: ...but make the room that a monster is LEAVING eligible to the next monster
-        let ineligibleRooms = new Set();
-        let vacatedRooms = new Set();
+        let ineligibleRoomIds = new Set();
+        let vacatedRoomIds = new Set();
         let drivers = [];
 
         let playerRoom = this.entityManager.getPlayerRoom();
@@ -1606,12 +1598,12 @@ export class MazeScene extends Scene {
 
                         let neighbors = this.getAdjacentRooms(monsterRoom)
                             .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
-                            .filter(room => { return ineligibleRooms.has(room) == false })
+                            .filter(room => { return ineligibleRoomIds.has(room.id) == false })
                             .filter(room => {
                                 let occupant = this.entityManager.getEntityForRoom(room);
 
                                 if (occupant != null) {
-                                    return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
+                                    return (vacatedRoomIds.has(room.id) == true) || (occupant instanceof PlayerEntity)
                                 } else {
                                     return true
                                 }
@@ -1621,9 +1613,9 @@ export class MazeScene extends Scene {
                         destination = neighbors[Math.floor(Math.random() * neighbors.length)];
 
                         if (destination != null) {
-                            ineligibleRooms.add(destination);
-                            vacatedRooms.add(monsterRoom);
-                            vacatedRooms.delete(destination)
+                            ineligibleRoomIds.add(destination.id);
+                            vacatedRoomIds.add(monsterRoom.id);
+                            vacatedRoomIds.delete(destination.id)
                             let movementDriver = this.createEntityMovementDriver(monster, destination, this.movementRateDefaultMillis, () => { });
                             drivers.push(movementDriver);
                         }
@@ -1642,57 +1634,65 @@ export class MazeScene extends Scene {
                             Direction.LEFT,
                             Direction.RIGHT
                         ].map(dir => {
-                            let neighbor = this.getAdjacentRoomByDirection(monsterRoom, dir);
-                            if (neighbor != null && neighbor.isOpen == true) {
-                                return {
-                                    direction: dir,
-                                    room: neighbor
-                                }
-                            } else {
-                                return null
+                            return {
+                                direction: dir,
+                                room: this.getAdjacentRoomByDirection(monsterRoom, dir)
                             }
-                        }).filter(nbr => { return nbr != null });
+                        }).filter(obj => { return (obj.room != null) && (obj.room.isOpen == true) })
+                            .filter(obj => { return (ineligibleRoomIds.has(obj.room.id) == false) })
 
                         this.shuffleArray(possibleDirections);
 
-                        if (possibleDirections[0] == null) {
+                        let start = possibleDirections.shift();
+                        while (start == null && possibleDirections.length > 0) {
+                            start = possibleDirections.shift();
+                        }
+
+                        if (start == null) {
                             return
                         }
 
-                        let firstRoom = possibleDirections[0].room;
-                        let direction = possibleDirections[0].direction;
-
+                        let firstRoom = start.room;
+                        let direction = start.direction;
                         let path = [firstRoom];
                         let candidateRoom = this.getAdjacentRoomByDirection(firstRoom, direction);
                         let candidateOccupant = this.entityManager.getEntityForRoom(candidateRoom);
 
                         while (candidateRoom != null && candidateRoom.isOpen == true) {
                             if (candidateRoom == playerRoom) {
+                                // The monster has crossed paths with the player-- stop!
                                 path.push(candidateRoom);
                                 break;
-                            } else if (candidateOccupant?.isFrozen == true) {
+                            } else if (candidateOccupant != null || ineligibleRoomIds.has(candidateRoom.id)) {
                                 break;
                             } else {
                                 path.push(candidateRoom);
                                 candidateRoom = this.getAdjacentRoomByDirection(candidateRoom, direction);
                                 candidateOccupant = this.entityManager.getEntityForRoom(candidateRoom);
                             }
-
                         }
 
                         destination = path.pop();
-                        ineligibleRooms.add(destination);
 
-                        let driver = this.createEntityMovementDriver(
-                            monster,
-                            destination,
-                            Math.floor(this.movementRateDefaultMillis * (3 / 4)),
-                            () => {
-                                // onComplete 
-                            }
-                        )
+                        if (destination != null && destination.id != monsterRoom.id) {
+                            ineligibleRoomIds.add(destination.id);
+                            vacatedRoomIds.add(firstRoom.id)
 
-                        drivers.push(driver);
+                            let driver = this.createEntityMovementDriver(
+                                monster,
+                                destination,
+                                Math.floor(this.movementRateDefaultMillis * (3 / 4)),
+                                () => {
+                                    // onComplete
+                                    this.entityManager.setEntityRoom(monster, destination);
+                                }
+                            )
+
+                            drivers.push(driver);
+                        } else {
+                            console.log("huh?")
+                        }
+
                         break;
 
                     // ------------------------------------ CHASE (LINE of SIGHT) -------------------------------------
@@ -1712,12 +1712,12 @@ export class MazeScene extends Scene {
 
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
-                                .filter(room => { return ineligibleRooms.has(room) == false })
+                                .filter(room => { return ineligibleRoomIds.has(room.id) == false })
                                 .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
                                     let roomOccupant = this.entityManager.getEntityForRoom(room);
                                     if (roomOccupant != null) {
-                                        return (vacatedRooms.has(room) == true) || (roomOccupant instanceof PlayerEntity)
+                                        return (vacatedRoomIds.has(room.id) == true) || (roomOccupant instanceof PlayerEntity)
                                     } else {
                                         return true
                                     }
@@ -1739,9 +1739,9 @@ export class MazeScene extends Scene {
                             })[0];
 
                             if (destination != null) {
-                                ineligibleRooms.add(destination);
-                                vacatedRooms.add(monsterRoom);
-                                vacatedRooms.delete(destination)
+                                ineligibleRoomIds.add(destination.id);
+                                vacatedRoomIds.add(monsterRoom.id);
+                                vacatedRoomIds.delete(destination.id)
                                 let movementDriver = this.createEntityMovementDriver(
                                     monster,
                                     destination,
@@ -1765,11 +1765,11 @@ export class MazeScene extends Scene {
                         let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
                             .concat(monsterRoom)
                             .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
-                            .filter(room => { return ineligibleRooms.has(room) == false })
+                            .filter(room => { return ineligibleRoomIds.has(room.id) == false })
                             .filter(room => {
                                 let occupant = this.entityManager.getEntityForRoom(room);
                                 if (occupant != null) {
-                                    return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
+                                    return (vacatedRoomIds.has(room.id) == true) || (occupant instanceof PlayerEntity)
                                 } else {
                                     return true
                                 }
@@ -1789,9 +1789,9 @@ export class MazeScene extends Scene {
                         }
 
                         if (destination != null) {
-                            ineligibleRooms.add(destination);
-                            vacatedRooms.add(monsterRoom);
-                            vacatedRooms.delete(destination)
+                            ineligibleRoomIds.add(destination.id);
+                            vacatedRoomIds.add(monsterRoom.id);
+                            vacatedRoomIds.delete(destination.id)
                             let movementDriver = this.createEntityMovementDriver(
                                 monster,
                                 destination,
@@ -1809,12 +1809,12 @@ export class MazeScene extends Scene {
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
                                 .concat(monsterRoom)
-                                .filter(room => { return ineligibleRooms.has(room) == false })
+                                .filter(room => { return ineligibleRoomIds.has(room.id) == false })
                                 .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
                                     let occupant = this.entityManager.getEntityForRoom(monster);
                                     if (occupant != null) {
-                                        return (vacatedRooms.has(room) == true) || (occupant instanceof PlayerEntity)
+                                        return (vacatedRoomIds.has(room.id) == true) || (occupant instanceof PlayerEntity)
                                     } else {
                                         return true
                                     }
@@ -1838,9 +1838,9 @@ export class MazeScene extends Scene {
                             let destination = possibleDestinations[possibleDestinations.length - 1];
 
                             if (destination != null) {
-                                ineligibleRooms.add(destination);
-                                vacatedRooms.add(monsterRoom);
-                                vacatedRooms.delete(destination)
+                                ineligibleRoomIds.add(destination.id);
+                                vacatedRoomIds.add(monsterRoom.id);
+                                vacatedRoomIds.delete(destination.id)
                                 let movementDriver = this.createEntityMovementDriver(
                                     monster,
                                     destination,
@@ -2512,8 +2512,8 @@ export class MazeScene extends Scene {
 
         let availableRooms = this.allRooms.filter(room => {
             return room.isOpen == true
-            && this.entityManager.getEntityForRoom(room) == null
-            && this.entityManager.getEventForRoom(room) == null
+                && this.entityManager.getEntityForRoom(room) == null
+                && this.entityManager.getEventForRoom(room) == null
         });
 
         if (avoidPlayerLos == true) {

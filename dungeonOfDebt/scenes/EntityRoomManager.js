@@ -182,7 +182,6 @@ export class EntityRoomManager {
         return (this.roomIdToEventId.get(this.playerRoomId) != null);
     }
 
-
     // EVENTS
 
     setEventRoom(event, room) {

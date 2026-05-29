@@ -95,8 +95,6 @@ export class ComponentCard {
  */
 export class SpellZoneComponentCard extends ComponentCard {
 
-
-
     constructor(spellZone, onClick, canvas, row, col, tileSize, assetManager) {
         super(canvas, row, col, tileSize);
         this.onClick = onClick;
@@ -126,7 +124,9 @@ export class SpellZoneComponentCard extends ComponentCard {
         }
     }
 
-
+    onComponentClicked(card) {
+        this.onClick(card);
+    }
 
     render(context) {
 
@@ -177,6 +177,10 @@ export class SpellEffectComponentCard extends ComponentCard {
                 this.image = assetManager.getImage(ImageAsset.SPELL_CARD_EXCHANGE);
                 break;
         }
+    }
+
+    onComponentClicked(card) {
+        this.onClick(card);
     }
 
     render(context) {

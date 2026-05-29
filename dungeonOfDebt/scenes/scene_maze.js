@@ -265,6 +265,9 @@ export class MazeScene extends Scene {
 
     spellCardComponents = [];
     selectedSpellZone = null;
+
+    selectedSpellZones = new Set();
+
     selectedSpellEffect = null;
 
     highlightedGridSquares = [];
@@ -512,7 +515,23 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_SMALL,
-                () => { this.onSpellZoneSelected(SpellZone.CROSS_SMALL) },
+                (card) => {
+
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                    } else {
+                        card.setIsSelected(!card.isSelected)
+
+                        if (card.isSelected == true) {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                        }
+
+                        this.onSpellZoneSelected(SpellZone.CROSS_SMALL);
+                    }
+
+                },
                 this.canvasSecondary,
                 0,
                 0,
@@ -524,7 +543,22 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.ROW_FULL,
-                () => { this.onSpellZoneSelected(SpellZone.ROW_FULL) },
+                (card) => {
+
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                    } else {
+                        card.setIsSelected(!card.isSelected)
+
+                        if (card.isSelected == true) {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                        }
+
+                        this.onSpellZoneSelected(SpellZone.ROW_FULL);
+                    }
+                },
                 this.canvasSecondary,
                 0,
                 1,
@@ -536,7 +570,22 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.SELF_TARGET,
-                () => { this.onSpellZoneSelected(SpellZone.SELF_TARGET) },
+                (card) => {
+
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                    } else {
+                        card.setIsSelected(!card.isSelected)
+
+                        if (card.isSelected == true) {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                        }
+
+                        this.onSpellZoneSelected(SpellZone.SELF_TARGET);
+                    }
+                },
                 this.canvasSecondary,
                 0,
                 2,
@@ -548,7 +597,13 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.FREEZE,
-                () => { this.onSpellEffectSelected(SpellEffect.FREEZE) },
+                (card) => {
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                    } else {
+                        this.onSpellEffectSelected(SpellEffect.FREEZE);
+                    }
+                },
                 this.canvasSecondary,
                 0,
                 4,
@@ -560,7 +615,14 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.EXCHANGE,
-                () => { this.onSpellEffectSelected(SpellEffect.EXCHANGE) },
+                (card) => {
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                        return;
+                    } else {
+                        this.onSpellEffectSelected(SpellEffect.EXCHANGE);
+                    }
+                },
                 this.canvasSecondary,
                 0,
                 5,
@@ -572,7 +634,22 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.CROSS_INVERTED,
-                () => { this.onSpellZoneSelected(SpellZone.CROSS_INVERTED) },
+                (card) => {
+
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                    } else {
+                        card.setIsSelected(!card.isSelected)
+
+                        if (card.isSelected == true) {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                        }
+
+                        this.onSpellZoneSelected(SpellZone.CROSS_INVERTED);
+                    }
+                },
                 this.canvasSecondary,
                 1,
                 0,
@@ -584,7 +661,22 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellZoneComponentCard(
                 SpellZone.COLUMN_FULL,
-                () => { this.onSpellZoneSelected(SpellZone.COLUMN_FULL) },
+                (card) => {
+
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                    } else {
+                        card.setIsSelected(!card.isSelected)
+
+                        if (card.isSelected == true) {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_SELECTION);
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_CANCEL);
+                        }
+
+                        this.onSpellZoneSelected(SpellZone.COLUMN_FULL);
+                    }
+                },
                 this.canvasSecondary,
                 1,
                 1,
@@ -596,7 +688,14 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.TRANSMUTE,
-                () => { this.onSpellEffectSelected(SpellEffect.TRANSMUTE) },
+                (card) => {
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                        return;
+                    } else {
+                        this.onSpellEffectSelected(SpellEffect.TRANSMUTE);
+                    }
+                },
                 this.canvasSecondary,
                 1,
                 4,
@@ -608,7 +707,14 @@ export class MazeScene extends Scene {
         this.spellCardComponents.push(
             new SpellEffectComponentCard(
                 SpellEffect.INVERT,
-                () => { this.onSpellEffectSelected(SpellEffect.INVERT) },
+                (card) => {
+                    if (card.isActive == false) {
+                        this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                        return;
+                    } else {
+                        this.onSpellEffectSelected(SpellEffect.INVERT);
+                    }
+                },
                 this.canvasSecondary,
                 1,
                 5,
@@ -950,7 +1056,7 @@ export class MazeScene extends Scene {
         })[0];
 
         if (clickTarget != null) {
-            clickTarget.onClick();
+            clickTarget.onComponentClicked(clickTarget);
         }
     }
 
@@ -964,25 +1070,25 @@ export class MazeScene extends Scene {
 
     onMouseMoveSecondary(event) {
 
-        let hoverTarget = this.spellCardComponents
-            .filter(card => { return card.containsPoint(event) })[0];
+        // let hoverTarget = this.spellCardComponents
+        //     .filter(card => { return card.containsPoint(event) })[0];
 
-        if (hoverTarget != null) {
-            if (hoverTarget instanceof SpellEffectComponentCard) {
-                if (hoverTarget.spellEffect != this.selectedSpellEffect) {
-                    this.setHighlightedSquares(hoverTarget.spellEffect, this.selectedSpellZone)
-                }
-            } else if (hoverTarget instanceof SpellZoneComponentCard) {
-                // Don't update the zone on hover if a zone has already been selected
-                if (hoverTarget.spellZone != this.selectedSpellZone && this.selectedSpellZone == null) {
-                    this.setHighlightedSquares(this.selectedSpellEffect, hoverTarget.spellZone)
-                }
-            }
-        } else {
-            if (this.selectedSpellZone == null) {
-                this.setHighlightedSquares(this.selectedSpellEffect, null)
-            }
-        }
+        // if (hoverTarget != null) {
+        //     if (hoverTarget instanceof SpellEffectComponentCard) {
+        //         if (hoverTarget.spellEffect != this.selectedSpellEffect) {
+        //             this.setHighlightedSquares(hoverTarget.spellEffect, this.selectedSpellZone)
+        //         }
+        //     } else if (hoverTarget instanceof SpellZoneComponentCard) {
+        //         // Don't update the zone on hover if a zone has already been selected
+        //         if (hoverTarget.spellZone != this.selectedSpellZone && this.selectedSpellZone == null) {
+        //             this.setHighlightedSquares(this.selectedSpellEffect, hoverTarget.spellZone)
+        //         }
+        //     }
+        // } else {
+        //     if (this.selectedSpellZone == null) {
+        //         this.setHighlightedSquares(this.selectedSpellEffect, null)
+        //     }
+        // }
 
     }
 
@@ -1144,7 +1250,67 @@ export class MazeScene extends Scene {
 
     // -------------------------------------- MAGIC --------------------------------------
 
-    setHighlightedSquares(spellEffect, spellZone) {
+
+    processSpellHotkey(number) {
+
+    }
+
+    onSpellZoneSelected(spellZone) {
+
+        // The zone could have been activated or deactivated
+
+        let selectedZoneCard = this.spellCardComponents
+            .filter(card => { return card instanceof SpellZoneComponentCard })
+            .filter(card => { return card.spellZone == spellZone })[0];
+
+        // Sanity check
+        if (selectedZoneCard == null) {
+            debugger
+        }
+
+        if (selectedZoneCard.isSelected == true) {
+            this.selectedSpellZones.add(spellZone);
+        } else {
+            this.selectedSpellZones.delete(spellZone);
+        }
+
+        this.setHighlightedSquares();
+        this.updateMagicInterface();
+    }
+
+    onSpellEffectSelected(spellEffect) {
+        this.selectedSpellEffect = spellEffect;
+        this.resolveSpellCasting();
+    }
+
+    updateMagicInterface() {
+
+        let gameOver = this.currentGameSequence == GameSequence.GAME_OVER;
+        let isPlayerTransmuted = this.player.isTransmuted;
+
+        let isAtLeastOneZoneSelected = [...this.selectedSpellZones.entries()].length >= 1;
+
+        this.spellCardComponents.forEach(card => {
+
+            if (isPlayerTransmuted == true) {
+                card.setIsActive(false);
+                card.setIsSelected(false);
+            } else if (card instanceof SpellZoneComponentCard) {
+                if (card.isActive == false || isAtLeastOneZoneSelected == false) {
+                    card.setIsSelected(false);
+                }
+            } else if (card instanceof SpellEffectComponentCard) {
+                if (isAtLeastOneZoneSelected == false) {
+                    card.setIsActive(false);
+                    card.setIsSelected(false);
+                } else {
+                    card.setIsActive(true);
+                }
+            }
+        })
+    }
+
+    setHighlightedSquares() {
 
         this.highlightedGridSquares = [];
 
@@ -1156,79 +1322,84 @@ export class MazeScene extends Scene {
         let room = null;
         let playerRoom = this.entityManager.getPlayerRoom();
 
-        switch (spellZone) {
+        [...this.selectedSpellZones.values()].forEach(spellZone => {
 
-            case SpellZone.CANCEL:
-                this.selectedSpellZone = null;
-                break;
+            switch (spellZone) {
 
-            case SpellZone.COLUMN_FULL:
+                case SpellZone.CANCEL:
+                    this.selectedSpellZone = null;
+                    break;
 
-                // Rooms ABOVE player
-                room = this.getRoom(playerRoom.row - 1, playerRoom.col);
-                while (room != null) {
-                    rooms.push(room)
-                    room = this.getRoom(room.row - 1, room.col);
-                }
+                case SpellZone.COLUMN_FULL:
 
-                // Rooms BELOW player
-                room = this.getRoom(playerRoom.row + 1, playerRoom.col);
-                while (room != null) {
-                    rooms.push(room)
-                    room = this.getRoom(room.row + 1, room.col);
-                }
-                break;
+                    // Rooms ABOVE player
+                    room = this.getRoom(playerRoom.row - 1, playerRoom.col);
+                    while (room != null) {
+                        rooms.push(room)
+                        room = this.getRoom(room.row - 1, room.col);
+                    }
 
-            case SpellZone.ROW_FULL:
+                    // Rooms BELOW player
+                    room = this.getRoom(playerRoom.row + 1, playerRoom.col);
+                    while (room != null) {
+                        rooms.push(room)
+                        room = this.getRoom(room.row + 1, room.col);
+                    }
+                    break;
 
-                // Rooms TO RIGHT of player
-                room = this.getRoom(playerRoom.row, playerRoom.col + 1);
-                while (room != null) {
-                    rooms.push(room)
-                    room = this.getRoom(room.row, room.col + 1);
-                }
+                case SpellZone.ROW_FULL:
 
-                // Rooms TO LEFT of player
-                room = this.getRoom(playerRoom.row, playerRoom.col - 1);
-                while (room != null) {
-                    rooms.push(room)
-                    room = this.getRoom(room.row, room.col - 1);
-                }
-                break;
+                    // Rooms TO RIGHT of player
+                    room = this.getRoom(playerRoom.row, playerRoom.col + 1);
+                    while (room != null) {
+                        rooms.push(room)
+                        room = this.getRoom(room.row, room.col + 1);
+                    }
 
-            case SpellZone.CROSS_SMALL:
-                rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col));
-                rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col));
-                rooms.push(this.getRoom(playerRoom.row, playerRoom.col + 1));
-                rooms.push(this.getRoom(playerRoom.row, playerRoom.col - 1));
-                break;
+                    // Rooms TO LEFT of player
+                    room = this.getRoom(playerRoom.row, playerRoom.col - 1);
+                    while (room != null) {
+                        rooms.push(room)
+                        room = this.getRoom(room.row, room.col - 1);
+                    }
+                    break;
 
-            case SpellZone.CROSS_INVERTED:
-                rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col - 1));
-                rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col + 1));
-                rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col - 1));
-                rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col + 1));
-                break;
+                case SpellZone.CROSS_SMALL:
+                    rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col));
+                    rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col));
+                    rooms.push(this.getRoom(playerRoom.row, playerRoom.col + 1));
+                    rooms.push(this.getRoom(playerRoom.row, playerRoom.col - 1));
+                    break;
 
-            case SpellZone.SELF_TARGET:
-                rooms.push(playerRoom);
-                break;
+                case SpellZone.CROSS_INVERTED:
+                    rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col - 1));
+                    rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col + 1));
+                    rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col - 1));
+                    rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col + 1));
+                    break;
 
-            default:
-                break;
-        }
+                case SpellZone.SELF_TARGET:
+                    rooms.push(playerRoom);
+                    break;
+
+                default:
+                    break;
+            }
+        })
+
+
 
         // TODO: move this somewhere LESS volatile
-        let spellColorMap = new Map();
-        spellColorMap.set(SpellEffect.FREEZE, "#00a9FF")
-        spellColorMap.set(SpellEffect.INVERT, "#ffffff");
-        spellColorMap.set(SpellEffect.TRANSMUTE, "#00ff0d");
-        spellColorMap.set(SpellEffect.EXCHANGE, "#6d0088");
+        // let spellColorMap = new Map();
+        // spellColorMap.set(SpellEffect.FREEZE, "#00a9FF")
+        // spellColorMap.set(SpellEffect.INVERT, "#ffffff");
+        // spellColorMap.set(SpellEffect.TRANSMUTE, "#00ff0d");
+        // spellColorMap.set(SpellEffect.EXCHANGE, "#6d0088");
 
-        let color = spellColorMap.get(spellEffect);
-        if (color == null) {
-            color = "#FF0000";
-        }
+        // let color = spellColorMap.get(spellEffect);
+        // if (color == null) {
+        //     color = "#FF0000";
+        // }
 
         rooms
             .filter(rm => { return rm != null })
@@ -1246,8 +1417,8 @@ export class MazeScene extends Scene {
                         room: highlightedRoom,
                         tileSize: this.tileSize,
                         render: function (context) {
-                            context.fillStyle = color;
-                            context.globalAlpha = 0.5;
+                            context.fillStyle = "#FF0000";
+                            context.globalAlpha = 0.25;
                             context.fillRect(
                                 this.col * this.tileSize,
                                 this.row * this.tileSize,
@@ -1262,125 +1433,9 @@ export class MazeScene extends Scene {
             });
     }
 
-    onSpellEffectSelected(spellEffect) {
-
-        let playThisSound = null;
-
-        if (this.player.isTransmuted == true) {
-            playThisSound = SoundAsset.UI_INVALID;
-        } else if (this.selectedSpellEffect == null) {
-            // No other selection has been made
-            this.selectedSpellEffect = spellEffect;
-
-            if (this.selectedSpellZone == null) {
-                playThisSound = SoundAsset.UI_SELECTION;
-            }
-
-        } else {
-            if (this.selectedSpellEffect == spellEffect) {
-                // Double-selection of the same effect cancels everything
-                this.selectedSpellEffect = null;
-                this.highlightedGridSquares = [];
-                playThisSound = SoundAsset.UI_CANCEL;
-            } else {
-                this.selectedSpellEffect = spellEffect;
-                playThisSound = SoundAsset.UI_SELECTION;
-            }
-        }
-
-        if (playThisSound != null) {
-            this.soundPlayer.playOneShot(playThisSound);
-        }
-
-
-        this.updateMagicInterface();
-
-        if (this.selectedSpellEffect != null && this.selectedSpellZone != null) {
-            this.resolveSpellCasting();
-        } else {
-            this.setHighlightedSquares(this.selectedSpellEffect, this.selectedSpellZone)
-        }
-    }
-
-    onSpellZoneSelected(spellZone) {
-
-        let playThisSound = null;
-
-        if (this.player.isTransmuted == true) {
-            playThisSound = SoundAsset.UI_INVALID;
-        } else if (this.selectedSpellZone == null) {
-            // No prior effect was selected -> SELECT
-            this.selectedSpellZone = spellZone;
-            if (this.selectedSpellEffect == null) {
-                playThisSound = SoundAsset.UI_SELECTION;
-            }
-        } else {
-            if (this.selectedSpellZone == spellZone) {
-                // Selected the same options -> DESELECT
-                this.selectedSpellZone = null;
-                playThisSound = SoundAsset.UI_CANCEL;
-            } else {
-                // user changed their selection -> SELECT
-                this.selectedSpellZone = spellZone;
-                playThisSound = SoundAsset.UI_SELECTION;
-            }
-        }
-
-        if (playThisSound != null) {
-            this.soundPlayer.playOneShot(playThisSound);
-        }
-
-        this.updateMagicInterface();
-
-        if (this.selectedSpellEffect != null && this.selectedSpellZone != null) {
-            this.resolveSpellCasting();
-        } else {
-            this.setHighlightedSquares(this.selectedSpellEffect, this.selectedSpellZone)
-        }
-    }
-
-    processSpellHotkey(number) {
-
-    }
-
-    updateMagicInterface() {
-
-        let gameOver = this.currentGameSequence == GameSequence.GAME_OVER;
-
-        this.spellCardComponents.forEach(card => {
-
-            if (this.player.isTransmuted == true) {
-                card.setIsActive(false);
-                card.setIsSelected(false)
-            } else if (card instanceof SpellEffectComponentCard) {
-
-                if (gameOver == true) {
-                    // Effect cards aren't lit while the wizard is transmuted or defeated...
-                    card.setIsActive(false);
-                    card.setIsSelected(false);
-                } else {
-
-                    // ...otherwise, the effect cards are always lit
-                    card.setIsActive(true);
-                    card.setIsSelected((card.spellEffect == this.selectedSpellEffect))
-                }
-
-            } else if (card instanceof SpellZoneComponentCard) {
-
-                if (gameOver == true) {
-                    card.setIsActive(false);
-                    card.setIsSelected(false);
-                } else {
-                    card.setIsActive(true);
-                    card.setIsSelected((card.spellZone == this.selectedSpellZone));
-                }
-            }
-        });
-    }
-
     resolveSpellCasting() {
 
-        if (this.selectedSpellZone != null
+        if ([...this.selectedSpellZones.entries()].length >= 1
             && this.selectedSpellEffect != null) {
 
             this.debug(`casting: ${this.getSpellEffectName(this.selectedSpellEffect)}`)
@@ -1525,17 +1580,21 @@ export class MazeScene extends Scene {
 
                     let rooms = this.highlightedGridSquares
                         .map(highlighted => {
-                            return this.entityManager.getRoomById(highlighted.id)
-                        })
-                        .filter(room => {
-                            return this.entityManager.getEntityForRoom(room) != null
+                            return highlighted.room
+                        }).filter(room => {
+                            return (this.entityManager.getEntityForRoom(room) != null) || (room == playerRoom)
                         })
 
                     let entities = rooms.map(room => {
-                        return this.entityManager.getEntityForRoom(room)
-                    }).concat(this.player);
+                        if (room == playerRoom) {
+                            return this.player;
+                        } else {
+                            return this.entityManager.getEntityForRoom(room);
+                        }
 
-                    rooms = rooms.concat(playerRoom)
+                    }).filter(entity => {
+                        return entity != null
+                    });
 
                     let shuffledEntities = [];
                     entities.forEach(entity => {
@@ -1582,7 +1641,9 @@ export class MazeScene extends Scene {
             this.soundPlayer.playOneShot(SoundAsset.WIZARD_CAST_SPELL);
             this.selectedSpellEffect = null;
             this.selectedSpellZone = null;
+            this.selectedSpellZones.clear();
             this.highlightedGridSquares = [];
+
         }
 
         this.updateMagicInterface();

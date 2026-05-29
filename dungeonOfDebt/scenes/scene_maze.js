@@ -62,6 +62,8 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  *          Self-teleport does nothing-- it SHOULD! Maybe there are a few specially-marked tiles that will always 
  *          be the RANSOM destination of a self-teleport. 
  * 
+ *          The KEY does not flee when the wizard is TRANSMUTED
+ * 
  *      GAME OVER MESSAGES:
  *          Not for want of arcane power 
  *              hast thou been defeated;
@@ -1293,18 +1295,18 @@ export class MazeScene extends Scene {
         this.spellCardComponents.forEach(card => {
 
             if (isPlayerTransmuted == true) {
+                // No cast-y spells when turned into a frog!
                 card.setIsActive(false);
                 card.setIsSelected(false);
             } else if (card instanceof SpellZoneComponentCard) {
-                if (card.isActive == false || isAtLeastOneZoneSelected == false) {
-                    card.setIsSelected(false);
-                }
+                card.setIsActive(true);
             } else if (card instanceof SpellEffectComponentCard) {
-                if (isAtLeastOneZoneSelected == false) {
+                // At least on Spell Zone must be selected in order to activate the Effects
+                if (isAtLeastOneZoneSelected == true) {
+                    card.setIsActive(true);
+                } else {
                     card.setIsActive(false);
                     card.setIsSelected(false);
-                } else {
-                    card.setIsActive(true);
                 }
             }
         })

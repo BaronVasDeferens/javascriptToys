@@ -44,6 +44,10 @@ import { EntityRoomManager, MazeRoom } from "./EntityRoomManager.js";
  *          HUGE key that has to be pushed to the door
  *          HUGE chest that has to be pushed to the open door to be collected
  *      
+ *      ENVIRONMENT
+ *          IMMUTABLE blocks that will not allow spells to be cast when in an active spell zone
+ *          
+ * 
  *      MONSTERS
  *          MONSTER that PUSHED THE PLAYER
  *          MONSTER which travels in one direction

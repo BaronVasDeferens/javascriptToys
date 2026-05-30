@@ -1276,7 +1276,7 @@ export class MazeScene extends Scene {
             this.selectedSpellZones.delete(spellZone);
         }
 
-        this.setHighlightedSquares();
+        this.computeHighlightedSquares();
         this.updateMagicInterface();
     }
 
@@ -1312,7 +1312,7 @@ export class MazeScene extends Scene {
         })
     }
 
-    setHighlightedSquares() {
+    computeHighlightedSquares() {
 
         this.highlightedGridSquares = [];
 
@@ -1320,74 +1320,84 @@ export class MazeScene extends Scene {
             return;
         }
 
-        let rooms = [];
+        let rooms = new Set();
         let room = null;
         let playerRoom = this.entityManager.getPlayerRoom();
 
-        [...this.selectedSpellZones.values()].forEach(spellZone => {
+        let selectedZones = [...this.selectedSpellZones.values()];
 
-            switch (spellZone) {
+        if (selectedZones.length == Object.keys(SpellZone).length) {
+            // If all zones are selected, then HIGHLIGHT ALL ROOMS...
+            this.allRooms.forEach(room => { rooms.add(room) });
+        } else {
+            // ...otherwise, highlight only those rooms
+            selectedZones.forEach(spellZone => {
 
-                case SpellZone.CANCEL:
-                    this.selectedSpellZone = null;
-                    break;
+                switch (spellZone) {
 
-                case SpellZone.COLUMN_FULL:
+                    case SpellZone.CANCEL:
+                        this.selectedSpellZone = null;
+                        break;
 
-                    // Rooms ABOVE player
-                    room = this.getRoom(playerRoom.row - 1, playerRoom.col);
-                    while (room != null) {
-                        rooms.push(room)
-                        room = this.getRoom(room.row - 1, room.col);
-                    }
+                    case SpellZone.COLUMN_FULL:
 
-                    // Rooms BELOW player
-                    room = this.getRoom(playerRoom.row + 1, playerRoom.col);
-                    while (room != null) {
-                        rooms.push(room)
-                        room = this.getRoom(room.row + 1, room.col);
-                    }
-                    break;
+                        // Rooms ABOVE player
+                        room = this.getRoom(playerRoom.row - 1, playerRoom.col);
+                        while (room != null) {
+                            rooms.add(room)
+                            room = this.getRoom(room.row - 1, room.col);
+                        }
 
-                case SpellZone.ROW_FULL:
+                        // Rooms BELOW player
+                        room = this.getRoom(playerRoom.row + 1, playerRoom.col);
+                        while (room != null) {
+                            rooms.add(room)
+                            room = this.getRoom(room.row + 1, room.col);
+                        }
+                        break;
 
-                    // Rooms TO RIGHT of player
-                    room = this.getRoom(playerRoom.row, playerRoom.col + 1);
-                    while (room != null) {
-                        rooms.push(room)
-                        room = this.getRoom(room.row, room.col + 1);
-                    }
+                    case SpellZone.ROW_FULL:
 
-                    // Rooms TO LEFT of player
-                    room = this.getRoom(playerRoom.row, playerRoom.col - 1);
-                    while (room != null) {
-                        rooms.push(room)
-                        room = this.getRoom(room.row, room.col - 1);
-                    }
-                    break;
+                        // Rooms TO RIGHT of player
+                        room = this.getRoom(playerRoom.row, playerRoom.col + 1);
+                        while (room != null) {
+                            rooms.add(room)
+                            room = this.getRoom(room.row, room.col + 1);
+                        }
 
-                case SpellZone.CROSS_SMALL:
-                    rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col));
-                    rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col));
-                    rooms.push(this.getRoom(playerRoom.row, playerRoom.col + 1));
-                    rooms.push(this.getRoom(playerRoom.row, playerRoom.col - 1));
-                    break;
+                        // Rooms TO LEFT of player
+                        room = this.getRoom(playerRoom.row, playerRoom.col - 1);
+                        while (room != null) {
+                            rooms.add(room)
+                            room = this.getRoom(room.row, room.col - 1);
+                        }
+                        break;
 
-                case SpellZone.CROSS_INVERTED:
-                    rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col - 1));
-                    rooms.push(this.getRoom(playerRoom.row - 1, playerRoom.col + 1));
-                    rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col - 1));
-                    rooms.push(this.getRoom(playerRoom.row + 1, playerRoom.col + 1));
-                    break;
+                    case SpellZone.CROSS_SMALL:
+                        rooms.add(this.getRoom(playerRoom.row - 1, playerRoom.col));
+                        rooms.add(this.getRoom(playerRoom.row + 1, playerRoom.col));
+                        rooms.add(this.getRoom(playerRoom.row, playerRoom.col + 1));
+                        rooms.add(this.getRoom(playerRoom.row, playerRoom.col - 1));
+                        break;
 
-                case SpellZone.SELF_TARGET:
-                    rooms.push(playerRoom);
-                    break;
+                    case SpellZone.CROSS_INVERTED:
+                        rooms.add(this.getRoom(playerRoom.row - 1, playerRoom.col - 1));
+                        rooms.add(this.getRoom(playerRoom.row - 1, playerRoom.col + 1));
+                        rooms.add(this.getRoom(playerRoom.row + 1, playerRoom.col - 1));
+                        rooms.add(this.getRoom(playerRoom.row + 1, playerRoom.col + 1));
+                        break;
 
-                default:
-                    break;
-            }
-        })
+                    case SpellZone.SELF_TARGET:
+                        rooms.add(playerRoom);
+                        break;
+
+                    default:
+                        break;
+                }
+            })
+
+        }
+
 
 
 
@@ -1403,7 +1413,7 @@ export class MazeScene extends Scene {
         //     color = "#FF0000";
         // }
 
-        rooms
+        [...rooms.values()]
             .filter(rm => { return rm != null })
             .forEach(highlightedRoom => {
 
@@ -1641,6 +1651,11 @@ export class MazeScene extends Scene {
             }
 
             this.soundPlayer.playOneShot(SoundAsset.WIZARD_CAST_SPELL);
+
+
+            this.spellCardComponents.forEach( card => {
+                card.setIsSelected(false);
+            });
             this.selectedSpellEffect = null;
             this.selectedSpellZone = null;
             this.selectedSpellZones.clear();

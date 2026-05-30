@@ -2,7 +2,6 @@ import { ImageAsset } from "../assets.js";
 
 
 export const SpellZone = Object.freeze({
-    CANCEL: 0,
     CROSS_SMALL: 2,
     CROSS_INVERTED: 4,
     COLUMN_FULL: 5,

@@ -831,6 +831,7 @@ export class MazeScene extends Scene {
                 event.onTurnConclusion();
             })
 
+        this.computeHighlightedSquares();       // <-- !! this is done specifically to move any highlighted squares relative to the player       
         this.updateMagicInterface();
         this.updateSequenceOrGameOver(GameSequence.ENEMY_PLOTTING_MOVEMENT);
     }
@@ -1112,17 +1113,18 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.LEFT, this.movementRateDefaultMillis, () => {
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
 
-                if (driver != null) {
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
 
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1136,16 +1138,18 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.RIGHT, this.movementRateDefaultMillis, () => {
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
 
-                if (driver != null) {
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
+
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1159,16 +1163,18 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.UP, this.movementRateDefaultMillis, () => {
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
 
-                if (driver != null) {
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
+
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1182,16 +1188,18 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.DOWN, this.movementRateDefaultMillis, () => {
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
 
-                if (driver != null) {
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
                     } else {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
+
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1653,7 +1661,7 @@ export class MazeScene extends Scene {
             this.soundPlayer.playOneShot(SoundAsset.WIZARD_CAST_SPELL);
 
 
-            this.spellCardComponents.forEach( card => {
+            this.spellCardComponents.forEach(card => {
                 card.setIsSelected(false);
             });
             this.selectedSpellEffect = null;

@@ -1097,6 +1097,7 @@ export class MazeScene extends Scene {
 
     onKeyPressed(event) {
 
+        // The penalty for failure is control lockout!
         if (this.currentGameSequence == GameSequence.GAME_OVER) {
             return;
         }

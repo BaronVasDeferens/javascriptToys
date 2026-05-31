@@ -432,6 +432,11 @@ export class MazeScene extends Scene {
                 break;
 
             case 3:
+
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
@@ -440,6 +445,11 @@ export class MazeScene extends Scene {
                 break;
 
             case 4:
+
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
                 monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
@@ -448,10 +458,20 @@ export class MazeScene extends Scene {
                 break;
 
             case 5:
+
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
                 break;
 
             case 6:
+
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
                 monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
                 monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
@@ -460,6 +480,10 @@ export class MazeScene extends Scene {
                 break;
 
             default:
+
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
 
                 for (let n = 0; n < this.levelCurrent - 1; n++) {
                     monsters.push(new MonsterGhost(this.tileSize, this.assetManager));
@@ -1750,6 +1774,14 @@ export class MazeScene extends Scene {
                             }
                         }).filter(obj => { return (obj.room != null) && (obj.room.isOpen == true) })
                             .filter(obj => { return (ineligibleRoomIds.has(obj.room.id) == false) })
+                            .filter (candidate => {
+                                let blockingEntity = this.entityManager.getEntityForRoom(candidate.room);
+                                if (blockingEntity == null || blockingEntity == this.player) {
+                                    return true
+                                } else {
+                                    return false
+                                }
+                            })
 
                         this.shuffleArray(possibleDirections);
 
@@ -1787,6 +1819,7 @@ export class MazeScene extends Scene {
                         if (destination != null && destination.id != monsterRoom.id) {
                             ineligibleRoomIds.add(destination.id);
                             vacatedRoomIds.add(firstRoom.id)
+                            vacatedRoomIds.delete(destination.id);
 
                             let driver = this.createEntityMovementDriver(
                                 monster,
@@ -1949,7 +1982,7 @@ export class MazeScene extends Scene {
                             if (destination != null) {
                                 ineligibleRoomIds.add(destination.id);
                                 vacatedRoomIds.add(monsterRoom.id);
-                                vacatedRoomIds.delete(destination.id)
+                                vacatedRoomIds.delete(destination.id);
                                 let movementDriver = this.createEntityMovementDriver(
                                     monster,
                                     destination,

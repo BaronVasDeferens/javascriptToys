@@ -1,5 +1,5 @@
 import { Entity, EntityContactEffectType, EntityMovementType, EntityOpacityType } from "./entity.js";
-import { ImageAsset } from "../assets.js";
+import { ImageAsset, SoundAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
 
 
@@ -488,9 +488,10 @@ export class KeyFleeing extends MonsterCollectable {
     }
 }
 
-export class TreasureChestMassive extends MonsterCollectable {
+// TODO: this isn't collectable...
+export class StatueEntity extends MonsterCollectable {
 
-    imageAsset = ImageAsset.TREASURE_CHEST_LARGE;
+    imageAsset = ImageAsset.STATUE_DEMON;
 
     physicality = MonsterPhysicality.CORPOREAL;
     nature = MonsterNature.IMMORTAL;
@@ -499,6 +500,10 @@ export class TreasureChestMassive extends MonsterCollectable {
     contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
     constructor(tileSize, assetManager, onContact) {
-        super(tileSize, ImageAsset.TREASURE_CHEST_LARGE, assetManager, onContact);
+        super(tileSize, ImageAsset.STATUE_DEMON, assetManager, onContact);
+    }
+
+    playSound(soundPlayer) {
+        soundPlayer.playOneShotWithDetuneRange(SoundAsset.SCRAPE_STONE, -50, 0);
     }
 }

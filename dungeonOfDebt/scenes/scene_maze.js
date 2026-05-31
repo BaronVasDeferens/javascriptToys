@@ -3,7 +3,7 @@ import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver,
 import { Scene, SceneType } from "./scene.js";
 import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { Entity } from "../entity/entity.js";
-import { MonsterPinkEye, MonsterShadowMan, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, TreasureChestMassive, MonsterSnail, MonsterEntity, MonsterVengefulSpirit } from "../entity/entity_monster.js";
+import { MonsterPinkEye, MonsterShadowMan, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, StatueEntity, MonsterSnail, MonsterEntity, MonsterVengefulSpirit } from "../entity/entity_monster.js";
 import { EntityOpacityType } from "../entity/entity.js";
 import { EntityContactEffectType } from "../entity/entity.js";
 import { EntityMovementType } from "../entity/entity.js";
@@ -401,6 +401,7 @@ export class MazeScene extends Scene {
         switch (this.levelCurrent) {
 
             case 0:
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
                 break;
 
             case 1:
@@ -410,14 +411,20 @@ export class MazeScene extends Scene {
                 // monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
                 // monsters.push(new MonsterWraith(this.tileSize, this.assetManager));
 
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
                 break;
 
             case 2:
+
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+
                 monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
                 monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
                 monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
@@ -1114,6 +1121,11 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.LEFT, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
 
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
@@ -1121,11 +1133,6 @@ export class MazeScene extends Scene {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
 
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
-
-                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1139,6 +1146,11 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.RIGHT, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
 
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
@@ -1146,11 +1158,6 @@ export class MazeScene extends Scene {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
 
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
-
-                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1164,6 +1171,11 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.UP, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
 
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
@@ -1171,11 +1183,6 @@ export class MazeScene extends Scene {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
 
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
-
-                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1189,6 +1196,11 @@ export class MazeScene extends Scene {
                 }
 
                 driver = this.createMovementDriverByDirection(this.player, Direction.DOWN, this.movementRateDefaultMillis, () => {
+                    this.computeMazeWindow();
+                    this.concludePlayerTurn();
+                })
+
+                if (driver != null) {
 
                     if (this.player.isTransmuted == true) {
                         this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.FROG_HOP, -200, 200);
@@ -1196,11 +1208,6 @@ export class MazeScene extends Scene {
                         this.soundPlayer.playOneShot(SoundAsset.WIZARD_WALK);
                     }
 
-                    this.computeMazeWindow();
-                    this.concludePlayerTurn();
-                })
-
-                if (driver != null) {
                     this.updateGameSequence(GameSequence.PLAYER_MOVING);
                     this.stateDrivers.push(driver);
                 }
@@ -1911,11 +1918,10 @@ export class MazeScene extends Scene {
 
                             // Find all eligible neighbors
                             let eligibleNeighbors = this.getAdjacentRooms(monsterRoom)
-                                .concat(monsterRoom)
                                 .filter(room => { return ineligibleRoomIds.has(room.id) == false })
                                 .filter(room => { return (room.isOpen == true || monster.physicality == MonsterPhysicality.INCORPOREAL) })
                                 .filter(room => {
-                                    let occupant = this.entityManager.getEntityForRoom(monster);
+                                    let occupant = this.entityManager.getEntityForRoom(room);
                                     if (occupant != null) {
                                         return (vacatedRoomIds.has(room.id) == true) || (occupant instanceof PlayerEntity)
                                     } else {
@@ -2117,6 +2123,9 @@ export class MazeScene extends Scene {
                                 this.entityManager.setEntityRoom(destinationOccupant, neighborToObjectRoom);
                             }
                         )
+
+                        // LAAAAAAME but it works.
+                        destinationOccupant.playSound(this.soundPlayer);
                     }
 
                 } else {
@@ -2617,6 +2626,7 @@ export class MazeScene extends Scene {
             return room.isOpen == true
                 && this.entityManager.getEntityForRoom(room) == null
                 && this.entityManager.getEventForRoom(room) == null
+                && room != playerRoom
         });
 
         if (avoidPlayerLos == true) {

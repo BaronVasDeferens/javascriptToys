@@ -115,6 +115,9 @@ export var ImageAsset = Object.freeze({
     FLOOR_DARK_STONE_3: "tiles/floor/stone_dark_3.png",
     FLOOR_DARK_STONE_4: "tiles/floor/stone_dark_4.png",
 
+    // STATUES
+    STATUE_DEMON: "entity/monsters/806.png",
+
     // PORTALS
 
     PORTAL_DOOR_CLOSED: "tiles/portals/100.png",
@@ -200,6 +203,7 @@ export var SoundAsset = Object.freeze({
     SECRET_REVEALED: "reveal.wav",
     KICK: "kick.wav",
     ZIP: "zip.wav",
+    SCRAPE_STONE: "scrape_stone.wav",
 
     KEY_ACQUIRED: "key_acquired.wav",
     KEY_ACQUIRED_DOOR_CREAKS: "key_acquired_door_creaks.wav",

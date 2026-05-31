@@ -116,6 +116,10 @@ export class Entity {
     update(delta) {
 
     }
+
+    playSound(soundPlayer) {
+        
+    }
 }
 
 

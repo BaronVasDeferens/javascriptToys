@@ -940,7 +940,6 @@ export class MazeScene extends Scene {
         switch (entity.contactEffect) {
 
             case EntityContactEffectType.LETHAL:
-                entity.onPlayerContact(this.player);
                 this.player.isActive = false;
                 this.updateGameSequence(GameSequence.GAME_OVER);
                 break;

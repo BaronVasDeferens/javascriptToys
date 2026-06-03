@@ -30,6 +30,9 @@ const monsterVisibilityArray = [
 ];
 
 
+
+
+
 export class MonsterEntity extends Entity {
 
     imageAssetId = 0;
@@ -42,7 +45,6 @@ export class MonsterEntity extends Entity {
 
     isVisibleToPlayer = false;
 
-    onTargetContact = () => { console.log(`target contact!`) };
 
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
@@ -110,39 +112,8 @@ export class MonsterEntity extends Entity {
         return this.movement;
     }
 
-    getCurrentSeekTarget() {
-        if (this.seekTargets.length > 0) {
-            return this.seekTargets.filter(target => { return target.isActive == true })[0];
-        } else {
-            return null;
-        }
-    }
-
-    checkForTargetContact(entityManager) {
-
-        console.log(`checking for contact...`);
-
-        let target = this.getCurrentSeekTarget();
-        let monsterRoom = entityManager.getRoomForEntity(this);
-        let contact = false;
-        if (target != null) {
-
-            switch (target.entityType) {
-
-                case EntityType.COLLECTABLE_TREASURE:
-                    contact = (monsterRoom.id == entityManager.getRoomForEvent(target).id);
-                    break;
-
-                case EntityType.PLAYER:
-                    contact = (monsterRoom.id == entityManager.getPlayerRoom().id);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        return contact;
+    getCurrentSeekTarget(entityManager) {
+        return entityManager.getPlayer();
     }
 
     onTurnConclusion(entityManager) {
@@ -163,14 +134,6 @@ export class MonsterEntity extends Entity {
             this.removeSpellEffect(key);
         })
 
-    }
-
-    onPlayerContact(player) {
-
-    }
-
-    triggerTargetContact() {
-        this.onTargetContact();
     }
 
     render(context, mazeWindowX, mazeWindowY) {
@@ -267,7 +230,7 @@ export class MonsterGoldFrog extends MonsterEntity {
         if (targets[0] != null) {
             currentTarget = targets[0];
         } else {
-           currentTarget = entityManager.getActiveMonsters().filter(monster => {
+            currentTarget = entityManager.getActiveMonsters().filter(monster => {
                 return monster instanceof KeyFleeing && monster.isActive == true
             })[0];
         }

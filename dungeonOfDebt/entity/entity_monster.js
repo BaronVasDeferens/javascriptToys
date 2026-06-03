@@ -2,7 +2,7 @@ import { Entity, EntityContactEffectType, EntityMovementType, EntityOpacityType,
 import { ImageAsset, SoundAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
 import { PlayerEntity } from "./entity_player.js";
-import { EventEntity, SnailTrailEvent, GoldCoinCollectableEvent } from "../event/event.js";
+import { EventEntity, SnailTrailEvent, GoldCoinCollectableEvent, ChestCollectableEvent } from "../event/event.js";
 import { EntityRoomManager } from "../scenes/EntityRoomManager.js";
 
 
@@ -224,14 +224,14 @@ export class MonsterGoldFrog extends MonsterEntity {
         let currentTarget = null;
 
         let targets = entityManager.getActiveEvents().filter(event => {
-            return (event instanceof GoldCoinCollectableEvent) && (event.isActive == true)
+            return (event instanceof GoldCoinCollectableEvent || event instanceof ChestCollectableEvent) && (event.isActive == true)
         });
 
         if (targets[0] != null) {
             currentTarget = targets[0];
         } else {
             currentTarget = entityManager.getActiveMonsters().filter(monster => {
-                return monster instanceof KeyFleeing && monster.isActive == true
+                return (monster instanceof KeyFleeing) && monster.isActive == true
             })[0];
         }
 

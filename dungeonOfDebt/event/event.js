@@ -125,7 +125,7 @@ export class ChestCollectableEvent extends EventEntity {
     checkForEventTrigger(entity) {
         if (this.isActive == true
             && entity != null
-            && entity instanceof PlayerEntity
+            && (entity instanceof PlayerEntity || entity instanceof MonsterGoldFrog)
             && entity.isTransmuted == false
         ) {
             return true;

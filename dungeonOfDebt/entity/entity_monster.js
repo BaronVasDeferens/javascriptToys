@@ -219,6 +219,30 @@ export class MonsterGoldFrog extends MonsterEntity {
         super(tileSize, ImageAsset.MONSTER_GOLD_FROG, assetManager);
     }
 
+    addSpellEffect(effect, turns) {
+
+        this.spellEffects.set(effect, turns);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = true;
+                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = true;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                // Frog is already frog
+                break;
+
+            default:
+                break;
+        }
+    }
+
     getCurrentSeekTarget(entityManager) {
 
         let currentTarget = null;
@@ -408,9 +432,67 @@ export class MonsterSnail extends MonsterEntity {
         return this.movement
     }
 
+    addSpellEffect(effect, turns) {
+
+        this.spellEffects.set(effect, turns);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = true;
+                this.overlayImage = this.assetManager.getImage(ImageAsset.SPELL_EFFECT_FROZEN);
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = true;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                this.isTransmuted = true;
+                this.image = this.assetManager.getImage(ImageAsset.FROG);
+                this.movement = EntityMovementType.FLEE_LINE_OF_SIGHT;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    removeSpellEffect(effect) {
+
+        this.spellEffects.delete(effect);
+
+        switch (effect) {
+
+            case SpellEffect.FREEZE:
+                this.isFrozen = false;
+                break;
+
+            case SpellEffect.INVERT:
+                this.isInverted = false;
+                break;
+
+            case SpellEffect.TRANSMUTE:
+                this.image = this.assetManager.getImage(this.imageAssetId);
+                this.isTransmuted = false;
+                this.movement = EntityMovementType.RANDOM;
+                break;
+            default:
+                break;
+        }
+
+        if (this.spellEffects.size == 0) {
+            this.overlayImage = null;
+        }
+    }
+
     onMoveBegin(entityManager, soundPlayer) {
 
         // The Snail drops a slime event on the space its current space (typically as it is about to leave)
+
+        if (this.isTransmuted == true) {
+            return;
+        }
 
         let monsterRoom = entityManager.getRoomForEntity(this);
         let event = entityManager.getEventForRoom(monsterRoom);
@@ -572,10 +654,19 @@ export class StatueEntity extends MonsterCollectable {
     }
 
     onMoveBegin(entityManager, soundPlayer) {
+        
+        if (this.isTransmuted == true) {
+            return;
+        }
+
         soundPlayer.playOneShotWithDetuneRange(SoundAsset.SCRAPE_STONE, -25, 25);
     }
 
     onMoveComplete(entityManager) {
+
+        if (this.isTransmuted == true) {
+            return;
+        }
 
         // Pushing a statue over a Snail Trail clears it
         let room = entityManager.getRoomForEntity(this);

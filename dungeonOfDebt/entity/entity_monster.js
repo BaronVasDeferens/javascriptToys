@@ -1,6 +1,9 @@
-import { Entity, EntityContactEffectType, EntityMovementType, EntityOpacityType } from "./entity.js";
+import { Entity, EntityContactEffectType, EntityMovementType, EntityOpacityType, EntityType } from "./entity.js";
 import { ImageAsset, SoundAsset } from "../assets.js";
 import { Spell, SpellEffect } from "./entity_spell.js";
+import { PlayerEntity } from "./entity_player.js";
+import { EventEntity, SnailTrailEvent, GoldCoinCollectableEvent } from "../event/event.js";
+import { EntityRoomManager } from "../scenes/EntityRoomManager.js";
 
 
 /**
@@ -27,10 +30,6 @@ const monsterVisibilityArray = [
 ];
 
 
-
-
-
-
 export class MonsterEntity extends Entity {
 
     imageAssetId = 0;
@@ -42,6 +41,8 @@ export class MonsterEntity extends Entity {
     contactEffect = EntityContactEffectType.LETHAL;
 
     isVisibleToPlayer = false;
+
+    onTargetContact = () => { console.log(`target contact!`) };
 
     constructor(tileSize, imageAsset, assetManager) {
         super(tileSize, assetManager);
@@ -109,7 +110,42 @@ export class MonsterEntity extends Entity {
         return this.movement;
     }
 
-    onTurnConclusion() {
+    getCurrentSeekTarget() {
+        if (this.seekTargets.length > 0) {
+            return this.seekTargets.filter(target => { return target.isActive == true })[0];
+        } else {
+            return null;
+        }
+    }
+
+    checkForTargetContact(entityManager) {
+
+        console.log(`checking for contact...`);
+
+        let target = this.getCurrentSeekTarget();
+        let monsterRoom = entityManager.getRoomForEntity(this);
+        let contact = false;
+        if (target != null) {
+
+            switch (target.entityType) {
+
+                case EntityType.COLLECTABLE_TREASURE:
+                    contact = (monsterRoom.id == entityManager.getRoomForEvent(target).id);
+                    break;
+
+                case EntityType.PLAYER:
+                    contact = (monsterRoom.id == entityManager.getPlayerRoom().id);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return contact;
+    }
+
+    onTurnConclusion(entityManager) {
 
         let expiredEffects = new Set();
         let keys = this.spellEffects.keys()
@@ -131,6 +167,10 @@ export class MonsterEntity extends Entity {
 
     onPlayerContact(player) {
 
+    }
+
+    triggerTargetContact() {
+        this.onTargetContact();
     }
 
     render(context, mazeWindowX, mazeWindowY) {
@@ -198,6 +238,48 @@ export class MonsterGhost extends MonsterEntity {
             )
         }
     }
+}
+
+export class MonsterGoldFrog extends MonsterEntity {
+
+    entityType = EntityType.GOLD_FROG;
+
+    imageAsset = ImageAsset.MONSTER_GOLD_FROG;
+    imageAssetId = ImageAsset.MONSTER_GOLD_FROG;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.IMMORTAL;
+    movement = EntityMovementType.CHASE_OMNISCIENT;
+    visibility = EntityOpacityType.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_GOLD_FROG, assetManager);
+    }
+
+    getCurrentSeekTarget(entityManager) {
+
+        let currentTarget = null;
+
+        let targets = entityManager.getActiveEvents().filter(event => {
+            return (event instanceof GoldCoinCollectableEvent) && (event.isActive == true)
+        });
+
+        if (targets[0] != null) {
+            currentTarget = targets[0];
+        } else {
+           currentTarget = entityManager.getActiveMonsters().filter(monster => {
+                return monster instanceof KeyFleeing && monster.isActive == true
+            })[0];
+        }
+
+        if (currentTarget == null) {
+            this.movement = EntityMovementType.NONE;
+        }
+
+        return currentTarget;
+
+    }
+
 }
 
 export class MonsterMammoth extends MonsterEntity {
@@ -298,86 +380,6 @@ export class MonsterScorpion extends MonsterEntity {
     }
 }
 
-export class MonsterSnail extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_SNAIL;
-
-    physicality = MonsterPhysicality.CORPOREAL;
-    nature = MonsterNature.MORTAL;
-    movement = EntityMovementType.RANDOM;
-    visibility = EntityOpacityType.VISIBLE;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_SNAIL, assetManager);
-    }
-
-    getMovementBehavior() {
-        return this.movement
-    }
-
-    onTurnConclusion() {
-        super.onTurnConclusion();
-    }
-
-}
-
-export class MonsterTroll extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_TROLL;
-
-    physicality = MonsterPhysicality.CORPOREAL;
-    nature = MonsterNature.MORTAL;
-    movement = EntityMovementType.CHASE_OMNISCIENT;
-    visibility = EntityOpacityType.VISIBLE;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_TROLL, assetManager);
-    }
-}
-
-export class MonsterVengefulSpirit extends MonsterEntity {
-
-    imageAsset = ImageAsset.MONSTER_VENGEFUL_SPIRIT;
-
-    physicality = MonsterPhysicality.INCORPOREAL;
-    nature = MonsterNature.UNDEAD;
-    movement = EntityMovementType.CHASE_OMNISCIENT;
-    visibility = EntityOpacityType.TRANSPARENT_HALF;
-    contactEffect = EntityContactEffectType.LETHAL;
-
-    constructor(tileSize, assetManager) {
-        super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
-    }
-
-    render(context, mazeWindowX, mazeWindowY) {
-
-        if (!this.isActive) {
-            return
-        }
-
-        if (this.alpha == 1.0) {
-            context.globalAlpha = this.visibility;
-        } else {
-            context.globalAlpha = this.alpha;
-        }
-
-        context.drawImage(
-            this.image,
-            this.x + ((this.tileSize - this.image.width) / 2),
-            this.y + ((this.tileSize - this.image.height) / 2)
-        );
-
-        if (this.overlayImage != null) {
-            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
-            context.drawImage(
-                this.overlayImage,
-                this.x + ((this.tileSize - this.overlayImage.width) / 2),
-                this.y + ((this.tileSize - this.overlayImage.height) / 2)
-            )
-        }
-    }
-}
-
 export class MonsterShadowMan extends MonsterEntity {
 
     imageAsset = ImageAsset.MONSTER_SHADOW_MAN;
@@ -426,7 +428,110 @@ export class MonsterShadowMan extends MonsterEntity {
     }
 }
 
+export class MonsterSnail extends MonsterEntity {
 
+    imageAssetId = ImageAsset.MONSTER_SNAIL;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = EntityMovementType.RANDOM;
+    visibility = EntityOpacityType.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_SNAIL, assetManager);
+    }
+
+    getMovementBehavior() {
+        return this.movement
+    }
+
+    onMoveBegin(entityManager, soundPlayer) {
+
+        // The Snail drops a slime event on the space its current space (typically as it is about to leave)
+
+        let monsterRoom = entityManager.getRoomForEntity(this);
+        let event = entityManager.getEventForRoom(monsterRoom);
+        let player = entityManager.getPlayer();
+
+        if (event == null || event.isActive == false) {
+            entityManager.setEventRoom(
+                new SnailTrailEvent(
+                    this.tileSize,
+                    this.assetManager,
+                    (entity) => {
+                        player.isActive = false;
+                    }
+                ),
+                monsterRoom
+            )
+        }
+
+    }
+
+    onTurnConclusion() {
+        super.onTurnConclusion();
+    }
+
+}
+
+export class MonsterVengefulSpirit extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_VENGEFUL_SPIRIT;
+
+    physicality = MonsterPhysicality.INCORPOREAL;
+    nature = MonsterNature.UNDEAD;
+    movement = EntityMovementType.CHASE_OMNISCIENT;
+    visibility = EntityOpacityType.TRANSPARENT_HALF;
+    contactEffect = EntityContactEffectType.LETHAL;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_VENGEFUL_SPIRIT, assetManager);
+    }
+
+    render(context, mazeWindowX, mazeWindowY) {
+
+        if (!this.isActive) {
+            return
+        }
+
+        if (this.alpha == 1.0) {
+            context.globalAlpha = this.visibility;
+        } else {
+            context.globalAlpha = this.alpha;
+        }
+
+        context.drawImage(
+            this.image,
+            this.x + ((this.tileSize - this.image.width) / 2),
+            this.y + ((this.tileSize - this.image.height) / 2)
+        );
+
+        if (this.overlayImage != null) {
+            context.globalAlpha = (this.spellEffects.get(SpellEffect.FREEZE) / 6);  // TODO: fix this later
+            context.drawImage(
+                this.overlayImage,
+                this.x + ((this.tileSize - this.overlayImage.width) / 2),
+                this.y + ((this.tileSize - this.overlayImage.height) / 2)
+            )
+        }
+    }
+}
+
+export class MonsterTroll extends MonsterEntity {
+
+    imageAsset = ImageAsset.MONSTER_TROLL;
+
+    physicality = MonsterPhysicality.CORPOREAL;
+    nature = MonsterNature.MORTAL;
+    movement = EntityMovementType.CHASE_OMNISCIENT;
+    visibility = EntityOpacityType.VISIBLE;
+
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.MONSTER_TROLL, assetManager);
+    }
+}
+
+// ----------------------------- COLLECTABLES --------------------------------
 
 export class MonsterCollectable extends MonsterEntity {
 
@@ -499,11 +604,25 @@ export class StatueEntity extends MonsterCollectable {
     visibility = EntityOpacityType.VISIBLE;
     contactEffect = EntityContactEffectType.TRIGGER_EVENT;
 
-    constructor(tileSize, assetManager, onContact) {
-        super(tileSize, ImageAsset.STATUE_DEMON, assetManager, onContact);
+    constructor(tileSize, assetManager) {
+        super(tileSize, ImageAsset.STATUE_DEMON, assetManager);
     }
 
-    playSound(soundPlayer) {
-        soundPlayer.playOneShotWithDetuneRange(SoundAsset.SCRAPE_STONE, -50, 0);
+    onMoveBegin(entityManager, soundPlayer) {
+        soundPlayer.playOneShotWithDetuneRange(SoundAsset.SCRAPE_STONE, -25, 25);
     }
+
+    onMoveComplete(entityManager) {
+
+        // Pushing a statue over a Snail Trail clears it
+        let room = entityManager.getRoomForEntity(this);
+        let event = entityManager.getEventForRoom(room);
+        if (event != null && event instanceof SnailTrailEvent) {
+            event.isActive = false;
+        }
+    }
+
+
 }
+
+

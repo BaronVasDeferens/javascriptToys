@@ -1,6 +1,7 @@
 import { AssetManager, ImageAsset, SoundAsset } from "../assets.js";
-import { Entity } from "../entity/entity.js";
+import { Entity, EntityType } from "../entity/entity.js";
 import { EntityOpacityType } from "../entity/entity.js";
+import { MonsterGoldFrog } from "../entity/entity_monster.js";
 import { PlayerEntity } from "../entity/entity_player.js"
 import { SpellEffect } from "../entity/entity_spell.js";
 
@@ -17,35 +18,42 @@ export class EventEntity extends Entity {
         this.onTrigger = onTrigger;
     }
 
-    checkTrigger(entity) {
+    checkForEventTrigger(entity) {
         if (this.isActive == true && entity != null && entity instanceof PlayerEntity) {
-            this.onTrigger();
-            if (this.isOneShot == true) {
-                this.isActive = false;
-            }
             return true;
         } else {
             return false;
         }
     }
-    
+
+    triggerEventEffect() {
+        this.onTrigger(this);
+    }
+
 }
 
 
 
 
-export class TreasureCollectableEvent extends EventEntity {
+export class GoldCoinCollectableEvent extends EventEntity {
+
+    entityType = EntityType.COLLECTABLE_TREASURE;
+
+    isOneShot = true;
+    isActive = true;
 
     constructor(tileSize, assetManager, onTrigger) {
         super(tileSize, assetManager, onTrigger);
+
         let coinTiles = [
             ImageAsset.COIN_1,
             ImageAsset.COIN_2,
             ImageAsset.COIN_3,
             ImageAsset.COIN_4
         ];
-        let tile = coinTiles[Math.floor(coinTiles.length * Math.random())];
-        this.setImage(tile);
+
+        this.imageAssetId = coinTiles[Math.floor(coinTiles.length * Math.random())]
+        this.setImage(this.imageAssetId);
     }
 
     applySpellEffect(effect) {
@@ -67,6 +75,16 @@ export class TreasureCollectableEvent extends EventEntity {
 
             default:
                 break;
+        }
+    }
+
+    checkForEventTrigger(entity) {
+        if (this.isActive == true
+            && entity != null
+            && (entity instanceof PlayerEntity || entity instanceof MonsterGoldFrog)) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -104,6 +122,18 @@ export class ChestCollectableEvent extends EventEntity {
         }
     }
 
+    checkForEventTrigger(entity) {
+        if (this.isActive == true
+            && entity != null
+            && entity instanceof PlayerEntity
+            && entity.isTransmuted == false
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     render(context, mazeWindowX, mazeWindowY) {
 
         if (this.isActive == false) {
@@ -138,7 +168,7 @@ export class PortalStaircaseEvent extends EventEntity {
         }
     }
 
-    checkTrigger(entity) {
+    checkForEventTrigger(entity) {
         if (entity != null && entity instanceof PlayerEntity) {
             if (this.isLocked == false) {
                 this.onTrigger();
@@ -210,7 +240,7 @@ export class SnailTrailEvent extends EventEntity {
 
     }
 
-    onTurnConclusion() {
+    onTurnConclusion(entityManager) {
         this.turnsBeforeDissolve--;
         this.alpha = this.turnsBeforeDissolve / this.maxTurnsBeforeDissolve;
         if (this.turnsBeforeDissolve <= 0) {
@@ -218,17 +248,20 @@ export class SnailTrailEvent extends EventEntity {
         }
     }
 
-    checkTrigger(entity) {
-        if (this.isActive == true 
-            && entity != null 
+    checkForEventTrigger(entity) {
+        if (this.isActive == true
+            && entity != null
             && entity instanceof PlayerEntity
             && entity.isTransmuted == false
         ) {
-            this.onTrigger();
-            if (this.isOneShot == true) {
-                this.turnsBeforeDissolve = this.maxTurnsBeforeDissolve;
-            }
+            return true;
+        } else {
+            return false;
         }
+    }
+
+    triggerEventEffect() {
+        this.onTrigger(this);
     }
 
 

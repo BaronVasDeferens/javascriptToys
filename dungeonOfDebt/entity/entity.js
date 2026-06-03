@@ -1,17 +1,24 @@
 import { SpellEffect } from "./entity_spell.js";
 import { AssetManager, ImageAsset } from "../assets.js";
 
-
+export const EntityType = Object.freeze({
+    PLAYER: 0,
+    GOLD_FROG: 5,
+    SCORPION: 10,
+    STATUE: 20,
+    COLLECTABLE_TREASURE: 100
+});
 
 export const EntityMovementType = Object.freeze({
-    NONE: 0, // Does not move
-    RANDOM: 10, // Moves to a random adjacent square,
-    RANDOM_ROOK: 11, // Moves the maximum horizontal or vertical distance
-    CHASE_LINE_OF_SIGHT: 20, // Moves toward the player if it can draw LOS to him    
-    CHASE_OMNISCIENT: 30, // Moves toward the player regardless of LOS
-    FLEE_LINE_OF_SIGHT: 40, // Moves away from the player when in LOS
-    FLEE_OMNISCIENT: 50, // Moves away from the player regardless of LOS
-    ONLY_WHEN_PUSHED: 60, // Moves only when the wizard pushes it
+    NONE: 0,                        // Does not move
+    RANDOM: 10,                     // Moves to a random adjacent square,
+    RANDOM_ROOK: 11,                // Moves the maximum horizontal or vertical distance
+    CHASE_LINE_OF_SIGHT: 20,        // Moves toward the player if it can draw LOS to him    
+    CHASE_OMNISCIENT: 30,           // Moves toward the player regardless of LOS
+    FLEE_LINE_OF_SIGHT: 40,         // Moves away from the player when in LOS
+    FLEE_OMNISCIENT: 50,            // Moves away from the player regardless of LOS
+    ONLY_WHEN_PUSHED: 60,           // Moves only when the wizard pushes it
+    CYTOPLASMIC: 70,                // Extends one section of itself, then retracts another.
 });
 
 export const EntityContactEffectType = Object.freeze({
@@ -34,6 +41,8 @@ export const EntityOpacityType = Object.freeze({
 
 
 export class Entity {
+
+    entityType = null;
 
     id = crypto.randomUUID();
 
@@ -101,7 +110,15 @@ export class Entity {
 
     }
 
-    onTurnConclusion() {
+    onMoveBegin(entityManager, soundPlayer) {
+
+    }
+
+    onMoveComplete(entityManager) {
+
+    }
+
+    onTurnConclusion(entityManager) {
 
     }
 
@@ -121,6 +138,8 @@ export class Entity {
         
     }
 }
+
+
 
 
 

@@ -53,9 +53,11 @@ export var ImageAsset = Object.freeze({
 
     // MONSTERS
 
+    MONSTER_AMOEBA: "entity/monsters/3778_zx.png",
     MONSTER_CENTIPEDE: "entity/monsters/4160_sm_zx.png",
     MONSTER_CENTIPEDE_GIANT: "entity/monsters/4160_zx.png",
     MONSTER_GHOST: "entity/monsters/4725_sm_zx.png",
+    MONSTER_GOLD_FROG: "entity/monsters/4085_zx.png",
     MONSTER_MAMMOTH: "entity/monsters/4052_zx.png",
     MONSTER_MOSQUITO_GIANT: "entity/monsters/4079_zx.png",
     MONSTER_MUMMY: "entity/monsters/4737.png",
@@ -70,7 +72,6 @@ export var ImageAsset = Object.freeze({
     MONSTER_TROLL: "entity/monsters/3945_zx.png",
     MONSTER_SHADOW_MAN: "entity/monsters/3825_zx.png",
     MONSTER_VENGEFUL_SPIRIT: "entity/monsters/4724_zx.png",
-
 
     // SPELL EFFECT OVERLAY
 

@@ -82,7 +82,7 @@ export class PlayerEntity extends Entity {
         }
     }
 
-    onTurnConclusion() {
+    onTurnConclusion(entityManager) {
 
         let expiredEffects = new Set();
         let keys = this.spellEffects.keys()

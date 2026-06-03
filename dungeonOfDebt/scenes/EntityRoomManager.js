@@ -89,6 +89,10 @@ export class EntityRoomManager {
         }
     }
 
+    getPlayer() {
+        return this.player; 
+    }
+
     getPlayerRoom() {
         return this.roomIdToRoom.get(this.playerRoomId);
     }
@@ -202,6 +206,10 @@ export class EntityRoomManager {
         let eventId = this.roomIdToEventId.get(room.id);
         let event = this.eventIdToEvent.get(eventId);
         return event;
+    }
+
+    getRoomForEvent(event) {
+        return this.roomIdToRoom.get(this.eventIdToRoomId.get(event.id));
     }
 
     getAllEvents() {

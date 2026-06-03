@@ -396,9 +396,15 @@ export class MazeScene extends Scene {
                 new GoldCoinCollectableEvent(
                     this.tileSize,
                     this.assetManager,
-                    (treasure) => {
-                        this.soundPlayer.playOneShot(coinSound)
-                        treasure.isActive = false;
+                    (collector, self) => {
+                        // onCollect
+                        if (collector instanceof PlayerEntity) {
+                            this.soundPlayer.playOneShot(coinSound)
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                        }
+
+                        self.isActive = false;
                     }
                 )
             );
@@ -408,7 +414,12 @@ export class MazeScene extends Scene {
         let exitPortal = new PortalStaircaseEvent(
             this.tileSize,
             this.assetManager,
-            () => {
+            (entity, self) => {
+
+                if (self.isLocked == true) {
+                    return;
+                }
+
                 this.soundPlayer.playOneShot(SoundAsset.DESCEND_STAIRS);
                 this.levelCurrent += 1;
                 this.fadeOut(() => {
@@ -429,9 +440,11 @@ export class MazeScene extends Scene {
         let keyMonster = new KeyFleeing(
             this.tileSize,
             this.assetManager,
-            (keyMon) => {
+            (player, self) => {
+                // onPLayerContact
                 this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
                 exitPortal.setIsLocked(false);
+                self.isActive = false;
             },
         )
 
@@ -442,7 +455,10 @@ export class MazeScene extends Scene {
         switch (this.levelCurrent) {
 
             case 0:
-                monsters.push(this.entityFactory.createEntity(EntityType.STATUE));
+                //monsters.push(this.entityFactory.createEntity(EntityType.STATUE));
+
+                monsters.push(this.entityFactory.createEntity(EntityType.GOLD_FROG));
+                monsters.push(this.entityFactory.createEntity(EntityType.GOLD_FROG));
                 monsters.push(this.entityFactory.createEntity(EntityType.GOLD_FROG));
                 break;
 
@@ -872,7 +888,7 @@ export class MazeScene extends Scene {
             let event = this.entityManager.getEventForRoom(monsterRoom);
             if (event != null) {
                 if (event.checkForEventTrigger(monster) == true) {
-                    event.triggerEventEffect();
+                    event.triggerEventEffect(monster);
                 }
             }
         })
@@ -886,7 +902,7 @@ export class MazeScene extends Scene {
 
             let eventTriggered = event.checkForEventTrigger(this.player);
             if (eventTriggered == true) {
-                event.triggerEventEffect();
+                event.triggerEventEffect(this.player);
             }
 
             // CHECK: was that the last treasure?
@@ -905,10 +921,10 @@ export class MazeScene extends Scene {
                 let chest = new ChestCollectableEvent(
                     this.tileSize,
                     this.assetManager,
-                    (chest) => {
+                    (self) => {
                         // onTreasureCollected
                         this.soundPlayer.playOneShot(SoundAsset.BONUS);
-                        chest.isActive = false;
+                        self.isActive = false;
                         // TODO: award bonus
                     }
                 );

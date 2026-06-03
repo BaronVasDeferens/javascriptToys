@@ -26,8 +26,8 @@ export class EventEntity extends Entity {
         }
     }
 
-    triggerEventEffect() {
-        this.onTrigger(this);
+    triggerEventEffect(entity) {
+        this.onTrigger(entity, this);
     }
 
 }
@@ -52,7 +52,7 @@ export class GoldCoinCollectableEvent extends EventEntity {
             ImageAsset.COIN_4
         ];
 
-        this.imageAssetId = coinTiles[Math.floor(coinTiles.length * Math.random())]
+        this.imageAssetId = coinTiles[Math.floor(coinTiles.length * Math.random())];
         this.setImage(this.imageAssetId);
     }
 
@@ -169,11 +169,7 @@ export class PortalStaircaseEvent extends EventEntity {
     }
 
     checkForEventTrigger(entity) {
-        if (entity != null && entity instanceof PlayerEntity) {
-            if (this.isLocked == false) {
-                this.onTrigger();
-            }
-        }
+        return (entity != null && entity instanceof PlayerEntity);
     }
 
     applySpellEffect(effect) {
@@ -260,8 +256,8 @@ export class SnailTrailEvent extends EventEntity {
         }
     }
 
-    triggerEventEffect() {
-        this.onTrigger(this);
+    triggerEventEffect(entity) {
+        this.onTrigger(entity, this);
     }
 
 

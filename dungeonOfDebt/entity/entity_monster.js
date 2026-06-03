@@ -631,10 +631,7 @@ export class KeyFleeing extends MonsterCollectable {
     }
 
     onPlayerContact(player) {
-        if (this.isActive == true) {
-            this.onContact();
-            this.isActive = false;
-        }
+        this.onContact(player, this);
     }
 }
 

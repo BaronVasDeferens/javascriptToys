@@ -442,9 +442,11 @@ export class MazeScene extends Scene {
             this.assetManager,
             (player, self) => {
                 // onPLayerContact
-                this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
-                exitPortal.setIsLocked(false);
-                self.isActive = false;
+                if (self.isActive == true) {
+                    this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
+                    exitPortal.setIsLocked(false);
+                    self.isActive = false;
+                }
             },
         )
 
@@ -921,7 +923,7 @@ export class MazeScene extends Scene {
                 let chest = new ChestCollectableEvent(
                     this.tileSize,
                     this.assetManager,
-                    (self) => {
+                    (entity, self) => {
                         // onTreasureCollected
                         this.soundPlayer.playOneShot(SoundAsset.BONUS);
                         self.isActive = false;

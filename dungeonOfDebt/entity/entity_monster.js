@@ -251,20 +251,22 @@ export class MonsterGoldFrog extends MonsterEntity {
             return (event instanceof GoldCoinCollectableEvent || event instanceof ChestCollectableEvent) && (event.isActive == true)
         });
 
+        // Priority 1: gold coins and/or chests
         if (targets[0] != null) {
             currentTarget = targets[0];
         } else {
+            // Priority 2: chase (but never consume) the key
             currentTarget = entityManager.getActiveMonsters().filter(monster => {
                 return (monster instanceof KeyFleeing) && monster.isActive == true
             })[0];
         }
 
+        // Priority 3: sit around
         if (currentTarget == null) {
             this.movement = EntityMovementType.NONE;
         }
 
         return currentTarget;
-
     }
 
 }

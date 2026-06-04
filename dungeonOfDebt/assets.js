@@ -200,6 +200,8 @@ export var SoundAsset = Object.freeze({
     COIN_2: "coin_2.wav",
     COIN_3: "coin_3.wav",
 
+    MONSTER_EATS: "monster_eats.wav",
+
     BONUS: "bonus.wav",
     SECRET_REVEALED: "reveal.wav",
     KICK: "kick.wav",

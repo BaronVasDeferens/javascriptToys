@@ -401,7 +401,7 @@ export class MazeScene extends Scene {
                         if (collector instanceof PlayerEntity) {
                             this.soundPlayer.playOneShot(coinSound)
                         } else {
-                            this.soundPlayer.playOneShot(SoundAsset.UI_INVALID);
+                            this.soundPlayer.playOneShot(SoundAsset.MONSTER_EATS);
                         }
 
                         self.isActive = false;
@@ -409,6 +409,8 @@ export class MazeScene extends Scene {
                 )
             );
         }
+
+        // TODO: hide the treasure chest/chests here, now rather than later
 
         // PORTAL...
         let exitPortal = new PortalStaircaseEvent(
@@ -441,7 +443,7 @@ export class MazeScene extends Scene {
             this.tileSize,
             this.assetManager,
             (player, self) => {
-                // onPLayerContact
+                // onPlayerContact
                 if (self.isActive == true) {
                     this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
                     exitPortal.setIsLocked(false);
@@ -925,7 +927,11 @@ export class MazeScene extends Scene {
                     this.assetManager,
                     (entity, self) => {
                         // onTreasureCollected
-                        this.soundPlayer.playOneShot(SoundAsset.BONUS);
+                        if (entity instanceof PlayerEntity) {
+                            this.soundPlayer.playOneShot(SoundAsset.BONUS);
+                        } else {
+                            this.soundPlayer.playOneShot(SoundAsset.MONSTER_EATS);
+                        }
                         self.isActive = false;
                         // TODO: award bonus
                     }

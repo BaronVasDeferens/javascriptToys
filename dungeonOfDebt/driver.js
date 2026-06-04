@@ -121,6 +121,8 @@ export class OverlayDriver extends Driver {
             return;
         }
 
+        this.onUpdate(deltaMillis);
+
         this.totalTimeMillis += deltaMillis;
 
         if (this.coefficient < 0) {
@@ -133,6 +135,36 @@ export class OverlayDriver extends Driver {
             this.overlay.alpha = 0.0;
         } else if (this.overlay.alpha > 1) {
             this.overlay.alpha = 1;
+        }
+
+        if (this.totalTimeMillis >= this.durationMillis) {
+            this.isFinished = true;
+            this.onComplete();
+        }
+    }
+}
+
+export class KeyholeOverlayDriver extends OverlayDriver {
+
+    constructor(overlay, centerX, centerY, isShrink, durationMillis, onUpdate, onComplete) {
+        super(overlay, 1.0, 1.0, durationMillis, onUpdate, onComplete);
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.isShrink = isShrink;
+    }
+
+    update(deltaMillis) {
+
+        if (this.isFinished == true) {
+            return;
+        }
+
+        this.totalTimeMillis += deltaMillis;
+
+        if (this.isShrink == true) {
+            this.overlay.shrinkRadius(this.totalTimeMillis / this.durationMillis);
+        } else {
+            this.overlay.growRadius(this.totalTimeMillis / this.durationMillis);
         }
 
         if (this.totalTimeMillis >= this.durationMillis) {
@@ -184,31 +216,4 @@ export class EntityImageOpacityUpdateDriver extends Driver {
 
 }
 
-// export class Renderable {
-
-//     x = 0;
-//     y = 0;
-//     image = null;
-//     driver = null;
-
-//     alpha = 1.0;
-
-//     constructor(x, y, image, tileSize, driver) {
-//         this.x = x;
-//         this.y = y;
-//         this.image = image;
-//         this.tileSize = tileSize;
-//         this.driver = driver;
-//     }
-
-//     render(context) {
-//         context.globalAlpha = this.alpha;
-//         context.drawImage(
-//             this.image,
-//             this.x + ((this.tileSize - this.image.width) / 2),
-//             this.y + ((this.tileSize - this.image.height) / 2)
-//         );
-//     }
-
-// }
 

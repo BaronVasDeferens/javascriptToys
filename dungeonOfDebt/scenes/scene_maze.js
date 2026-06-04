@@ -1,7 +1,7 @@
 import { AssetManager, SoundAsset } from "../assets.js";
-import { EntityMovementDriver, Driver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
+import { EntityMovementDriver, Driver, KeyholeOverlayDriver, MultiEntityMovementDriver, OverlayDriver, EntityImageOpacityUpdateDriver } from "../driver.js";
 import { Scene, SceneType } from "./scene.js";
-import { Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
+import { KeyholeEffectOverlay, Spell, SpellEffect, SpellEffectComponentCard, SpellEffectOverlay, SpellZone, SpellZoneComponentCard } from "../entity/entity_spell.js";
 import { Entity } from "../entity/entity.js";
 import { MonsterPinkEye, MonsterShadowMan, MonsterScorpion, MonsterMammoth, MonsterGhost, MonsterMosquitoGiant, MonsterPhysicality, MonsterMummy, MonsterTroll, KeyFleeing, KeyNormal, StatueEntity, MonsterSnail, MonsterEntity, MonsterVengefulSpirit, MonsterGoldFrog } from "../entity/entity_monster.js";
 import { EntityType } from "../entity/entity.js";
@@ -252,7 +252,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 0;
+    levelCurrent = -1;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -386,7 +386,7 @@ export class MazeScene extends Scene {
 
         let eventList = [];
 
-        // TREASURES...
+        // --- TREASURES...
         let treasureTotal = 5;
         for (let n = 0; n < treasureTotal; n++) {
 
@@ -410,6 +410,7 @@ export class MazeScene extends Scene {
             );
         }
 
+        // --- PORTAL
         // TODO: hide the treasure chest/chests here, now rather than later
 
         // PORTAL...
@@ -424,22 +425,26 @@ export class MazeScene extends Scene {
 
                 this.soundPlayer.playOneShot(SoundAsset.DESCEND_STAIRS);
                 this.levelCurrent += 1;
-                this.fadeOut(() => {
-                    this.initialize();
-                    this.computeMazeWindow();
-                });
+                this.keyholeOut(
+                    entity.x,
+                    entity.y,
+                    () => {
+                        // onComplete
+                        this.initialize();
+                        this.computeMazeWindow();
+                    });
             }
         );
 
         eventList.push(exitPortal);
         this.distributeAcrossOpenRooms(eventList, false);
 
-        // MONSTERS...
+        // --- MONSTERS...
 
         let monsters = [];
 
-        // KEY...
-        let keyMonster = new KeyFleeing(
+        // --- KEY...
+        let keyMonster = new KeyNormal(
             this.tileSize,
             this.assetManager,
             (player, self) => {
@@ -777,7 +782,6 @@ export class MazeScene extends Scene {
         });
 
         this.updateMagicInterface();
-
     }
 
     // -------------------------------------- MAIN LOOP --------------------------------------
@@ -1288,7 +1292,10 @@ export class MazeScene extends Scene {
                 break;
 
             case "+":
-                this.fadeOut(() => {
+                this.keyholeOut(
+                    this.player.x,
+                    this.player.y,
+                    () => {
                     this.levelCurrent += 1;
                     this.initialize();
                     this.computeMazeWindow();
@@ -1297,7 +1304,10 @@ export class MazeScene extends Scene {
                 break;
 
             case "-":
-                this.fadeOut(() => {
+                this.keyholeOut(
+                    this.player.x,
+                    this.player.y,
+                    () => {
                     this.levelCurrent -= 1;
                     this.initialize();
                     this.computeMazeWindow();
@@ -1313,10 +1323,13 @@ export class MazeScene extends Scene {
                 break;
 
             case 'Escape':
-                this.fadeOut(() => {
-                    this.initialize();
-                    this.computeMazeWindow();
-                });
+                this.keyholeOut(
+                    this.player.x,
+                    this.player.y,
+                    () => {
+                        this.initialize();
+                        this.computeMazeWindow();
+                    });
 
                 break;
 
@@ -1371,7 +1384,7 @@ export class MazeScene extends Scene {
 
         this.spellCardComponents.forEach(card => {
 
-            if (isPlayerTransmuted == true) {
+            if (isPlayerTransmuted == true || gameOver == true) {
                 // No cast-y spells when turned into a frog!
                 card.setIsActive(false);
                 card.setIsSelected(false);
@@ -2693,7 +2706,63 @@ export class MazeScene extends Scene {
                 0.0,
                 1.0,
                 500,
+                (deltaMillis) => {
+                    // onUpdate
+                },
                 () => {
+                    // onComplete
+                    onComplete();
+                }
+            )
+        )
+    }
+
+    keyholeIn(centerX, centerY, onComplete) {
+
+        let spellEffectOverlay = new KeyholeEffectOverlay(
+            this.canvasPrimary,
+            centerX,
+            centerY,
+            this.tileSize,
+            "#000000"
+        );
+
+        this.stateDrivers.push(
+            new KeyholeOverlayDriver(
+                spellEffectOverlay,
+                centerX,
+                centerY,
+                false,
+                750,
+                (deltaMillis) => {
+                    // onUpdate
+                },
+                () => {
+                    // onComplete
+                    onComplete();
+                }
+            )
+        )
+    }
+
+    keyholeOut(centerX, centerY, onComplete) {
+
+        let spellEffectOverlay = new KeyholeEffectOverlay(
+            this.canvasPrimary,
+            centerX,
+            centerY,
+            this.tileSize,
+            "#000000"
+        );
+
+        this.stateDrivers.push(
+            new KeyholeOverlayDriver(
+                spellEffectOverlay,
+                centerX,
+                centerY,
+                true,
+                750,
+                (deltaMillis) => {
                     // onUpdate
                 },
                 () => {

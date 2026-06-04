@@ -614,7 +614,7 @@ export class KeyNormal extends MonsterCollectable {
     }
 
     onPlayerContact(player) {
-        this.isActive = false;
+        this.onContact(player, this);
     }
 }
 

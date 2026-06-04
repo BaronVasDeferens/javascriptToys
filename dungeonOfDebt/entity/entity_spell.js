@@ -209,7 +209,7 @@ export class SpellEffectOverlay {
         this.color = color;
     }
 
-    update(deltaMillis) {
+    update(elapsedMillis, totalMillis) {
 
     }
 
@@ -218,6 +218,56 @@ export class SpellEffectOverlay {
         context.fillStyle = this.color;
         context.fillRect(0, 0, this.canvas.width, this.canvas.height)
         context.globalAlpha = 1.0;
+    }
+
+}
+
+export class KeyholeEffectOverlay {
+
+    alpha = 1.0;
+
+    constructor(canvas, centerX, centerY, tileSize, color) {
+        this.canvas = canvas;
+        this.color = color;
+        this.tileSize = tileSize;
+
+        this.centerX = centerX + (this.tileSize / 2);
+        this.centerY = centerY + (this.tileSize / 2);
+
+        this.keyholeRadius = Math.max(canvas.width, canvas.height);
+        this.minRadius = 0;
+        this.maxRadius = Math.max(canvas.width, canvas.height);
+    }
+
+    shrinkRadius(pctComplete) {
+        this.keyholeRadius = this.maxRadius - Math.floor(this.maxRadius * pctComplete);
+        if (this.keyholeRadius < 0.00) {
+            this.keyholeRadius = 0.00;
+        }
+    }
+
+    growRadius(pctComplete) {
+        this.keyholeRadius = Math.floor(this.maxRadius * pctComplete);
+        if (this.keyholeRadius > this.maxRadius) {
+            this.keyholeRadius = this.maxRadius;
+        }
+    }
+
+    render(context) {
+
+        if (this.keyholeRadius <= 0) {
+            return;
+        } else if (this.keyholeRadius >= this.maxRadius) {
+            return;
+        } else {
+            context.globalAlpha = this.alpha;
+            context.save();
+            context.globalCompositeOperation = "destination-in"; // This makes the keyhole transparent
+            context.beginPath();
+            context.arc(this.centerX, this.centerY, this.keyholeRadius, 0, Math.PI * 2);
+            context.fill();
+            context.restore();
+        }
     }
 
 }

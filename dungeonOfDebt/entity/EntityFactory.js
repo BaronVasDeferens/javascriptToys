@@ -1,4 +1,4 @@
-import { KeyFleeing, MonsterGoldFrog, MonsterMosquitoGiant, MonsterPinkEye, MonsterScorpion, MonsterShadowMan, MonsterSnail, MonsterTroll, StatueEntity } from "./entity_monster.js";
+import { KeyFleeing, MonsterGhost, MonsterGoldFrog, MonsterMosquitoGiant, MonsterPinkEye, MonsterScorpion, MonsterShadowMan, MonsterSnail, MonsterTroll, StatueEntity } from "./entity_monster.js";
 import { GoldCoinCollectableEvent } from "./../event/event.js";
 import { EntityType } from "./entity.js";
 import { PortalStaircaseEvent } from "./../event/event.js";
@@ -26,6 +26,13 @@ export class EntityFactory {
 
         switch (monsterType) {
 
+            case EntityType.GHOST:
+                entity = new MonsterGhost(
+                    this.tileSize,
+                    this.assetManager
+                );
+                break;
+            
             case EntityType.GOLD_FROG:
                 entity = new MonsterGoldFrog(
                     this.tileSize,

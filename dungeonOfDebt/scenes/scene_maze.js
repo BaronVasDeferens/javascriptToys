@@ -252,7 +252,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = 0;
+    levelCurrent = 1;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -392,61 +392,63 @@ export class MazeScene extends Scene {
 
             case 0:
 
-                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.GOLD_FROG, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 break;
 
             case 1:
 
-                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
-                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SNAIL, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.GOLD_FROG, 3));
                 break;
 
             case 2:
+
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SNAIL, 5));
+                break;
+
+            case 3:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SCORPION, 3));
                 monstersAndEvents.push(this.entityFactory.createEntity(EntityType.TROLL));
                 break;
 
-            case 3:
+            case 5:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.PINK_EYE, 5));
                 break;
 
-            case 4:
+            case 5:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.PINK_EYE, 4));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SHADOW_MAN, 1));
                 break;
 
-            case 5:
+            case 6:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.MOSQUITO_GIANT, 1));
                 break;
 
-            case 6:
+            case 7:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.MOSQUITO_GIANT, 5));
                 break;
 
+            case 8:
+
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.GHOST, 7));
+                break;
+
             default:
 
-                monstersAndEvents.push(new StatueEntity(this.tileSize, this.assetManager));
-                monstersAndEvents.push(new StatueEntity(this.tileSize, this.assetManager));
-                monstersAndEvents.push(new StatueEntity(this.tileSize, this.assetManager));
-
-                for (let n = 0; n < this.levelCurrent - 1; n++) {
-                    monstersAndEvents.push(new MonsterGhost(this.tileSize, this.assetManager));
-                }
-
-                let numMummies = Math.floor(this.levelCurrent / 8) + 1;
-                for (let n = 0; n < numMummies; n++) {
-                    monstersAndEvents.push(new MonsterMummy(this.tileSize, this.assetManager));
-                    monstersAndEvents.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
+                let types = Object.values(EntityType);
+                for (let i = 0; i < this.levelCurrent - 2; i++) {
+                    let type = types[Math.floor(Math.random() * types.length)];
+                    monstersAndEvents.push(this.entityFactory.createEntity(type));
                 }
                 break;
         }

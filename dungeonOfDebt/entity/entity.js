@@ -3,6 +3,7 @@ import { AssetManager, ImageAsset } from "../assets.js";
 
 export const EntityType = Object.freeze({
     PLAYER: 0,
+    GHOST: 5,
     GOLD_FROG: 10,
     MOSQUITO_GIANT: 20,
     PINK_EYE: 30,

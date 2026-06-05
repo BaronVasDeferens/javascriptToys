@@ -3,10 +3,15 @@ import { AssetManager, ImageAsset } from "../assets.js";
 
 export const EntityType = Object.freeze({
     PLAYER: 0,
-    GOLD_FROG: 5,
-    SCORPION: 10,
-    STATUE: 20,
-    COLLECTABLE_TREASURE: 100
+    GOLD_FROG: 10,
+    MOSQUITO_GIANT: 20,
+    PINK_EYE: 30,
+    SCORPION: 40,
+    SHADOW_MAN: 50,
+    SNAIL: 60,
+    STATUE: 70,
+    TROLL: 80,
+    TREASURE_GOLD_COIN: 100
 });
 
 export const EntityMovementType = Object.freeze({

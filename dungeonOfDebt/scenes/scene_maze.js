@@ -252,7 +252,7 @@ export class MazeScene extends Scene {
     mazeWindowY = 0;
 
     player = null;
-    levelCurrent = -1;
+    levelCurrent = 0;
     levelMax = 9;
 
     movementRateDefaultMillis = 75;         // time to traverse from one grid section to the next 
@@ -262,11 +262,7 @@ export class MazeScene extends Scene {
     audioContext = new AudioContext();      // AudioContext must be initialized after interactions
 
     soundPlayer = null;
-    coinSounds = [
-        SoundAsset.COIN_1,
-        SoundAsset.COIN_2,
-        SoundAsset.COIN_3
-    ];
+
 
     spellCardComponents = [];
     selectedSpellZone = null;
@@ -384,184 +380,83 @@ export class MazeScene extends Scene {
         this.entityManager.setPlayer(this.player);
         this.entityManager.setEntityRoom(this.player, playerStartRoom);
 
-        let eventList = [];
+
+        let monstersAndEvents = [];
 
         // --- TREASURES...
-        let treasureTotal = 5;
-        for (let n = 0; n < treasureTotal; n++) {
-
-            let coinSound = this.coinSounds[Math.floor(this.coinSounds.length * Math.random())];
-
-            eventList.push(
-                new GoldCoinCollectableEvent(
-                    this.tileSize,
-                    this.assetManager,
-                    (collector, self) => {
-                        // onCollect
-                        if (collector instanceof PlayerEntity) {
-                            this.soundPlayer.playOneShot(coinSound)
-                        } else {
-                            this.soundPlayer.playOneShot(SoundAsset.MONSTER_EATS);
-                        }
-
-                        self.isActive = false;
-                    }
-                )
-            );
-        }
-
-        // --- PORTAL
-        // TODO: hide the treasure chest/chests here, now rather than later
-
-        // PORTAL...
-        let exitPortal = new PortalStaircaseEvent(
-            this.tileSize,
-            this.assetManager,
-            (entity, self) => {
-
-                if (self.isLocked == true) {
-                    return;
-                }
-
-                this.soundPlayer.playOneShot(SoundAsset.DESCEND_STAIRS);
-                this.levelCurrent += 1;
-                this.keyholeOut(
-                    entity.x,
-                    entity.y,
-                    () => {
-                        // onComplete
-                        this.initialize();
-                        this.computeMazeWindow();
-                    });
-            }
-        );
-
-        eventList.push(exitPortal);
-        this.distributeAcrossOpenRooms(eventList, false);
+        monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.TREASURE_GOLD_COIN, 5));
 
         // --- MONSTERS...
-
-        let monsters = [];
-
-        // --- KEY...
-        let keyMonster = new KeyNormal(
-            this.tileSize,
-            this.assetManager,
-            (player, self) => {
-                // onPlayerContact
-                if (self.isActive == true) {
-                    this.soundPlayer.playOneShot(SoundAsset.KEY_ACQUIRED_DOOR_CREAKS);
-                    exitPortal.setIsLocked(false);
-                    self.isActive = false;
-                }
-            },
-        )
-
-        monsters.push(
-            keyMonster
-        )
 
         switch (this.levelCurrent) {
 
             case 0:
-                //monsters.push(this.entityFactory.createEntity(EntityType.STATUE));
 
-                monsters.push(this.entityFactory.createEntity(EntityType.GOLD_FROG));
-                monsters.push(this.entityFactory.createEntity(EntityType.GOLD_FROG));
-                monsters.push(this.entityFactory.createEntity(EntityType.GOLD_FROG));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.GOLD_FROG, 3));
                 break;
 
             case 1:
 
-                monsters.push(this.entityFactory.createEntity(EntityType.STATUE));
-                monsters.push(this.entityFactory.createEntity(EntityType.STATUE));
-                monsters.push(this.entityFactory.createEntity(EntityType.STATUE));
-
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
-                monsters.push(new MonsterSnail(this.tileSize, this.assetManager));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SNAIL, 3));
                 break;
 
             case 2:
 
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-
-                monsters.push(new MonsterTroll(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
-                monsters.push(new MonsterScorpion(this.tileSize, this.assetManager));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SCORPION, 3));
+                monstersAndEvents.push(this.entityFactory.createEntity(EntityType.TROLL));
                 break;
 
             case 3:
 
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.PINK_EYE, 5));
                 break;
 
             case 4:
 
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterPinkEye(this.tileSize, this.assetManager));
-                monsters.push(new MonsterShadowMan(this.tileSize, this.assetManager));
-                monsters.push(new MonsterShadowMan(this.tileSize, this.assetManager));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.PINK_EYE, 4));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.SHADOW_MAN, 1));
                 break;
 
             case 5:
 
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-
-                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.MOSQUITO_GIANT, 1));
                 break;
 
             case 6:
 
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-
-                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
-                monsters.push(new MonsterMosquitoGiant(this.tileSize, this.assetManager));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.MOSQUITO_GIANT, 5));
                 break;
 
             default:
 
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
-                monsters.push(new StatueEntity(this.tileSize, this.assetManager));
+                monstersAndEvents.push(new StatueEntity(this.tileSize, this.assetManager));
+                monstersAndEvents.push(new StatueEntity(this.tileSize, this.assetManager));
+                monstersAndEvents.push(new StatueEntity(this.tileSize, this.assetManager));
 
                 for (let n = 0; n < this.levelCurrent - 1; n++) {
-                    monsters.push(new MonsterGhost(this.tileSize, this.assetManager));
+                    monstersAndEvents.push(new MonsterGhost(this.tileSize, this.assetManager));
                 }
 
                 let numMummies = Math.floor(this.levelCurrent / 8) + 1;
                 for (let n = 0; n < numMummies; n++) {
-                    monsters.push(new MonsterMummy(this.tileSize, this.assetManager));
-                    monsters.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
+                    monstersAndEvents.push(new MonsterMummy(this.tileSize, this.assetManager));
+                    monstersAndEvents.push(new MonsterVengefulSpirit(this.tileSize, this.assetManager));
                 }
                 break;
         }
 
-        this.distributeAcrossOpenRooms(monsters, true);
+        let keyPortal = this.entityFactory.createKeyPortal(this, this.levelCurrent + 1);
+        monstersAndEvents.push(keyPortal.key);
+        monstersAndEvents.push(keyPortal.portal);
 
 
+        this.distributeAcrossOpenRooms(monstersAndEvents, true);
 
 
         // -------- USER INTERFACE ----------
@@ -1296,10 +1191,10 @@ export class MazeScene extends Scene {
                     this.player.x,
                     this.player.y,
                     () => {
-                    this.levelCurrent += 1;
-                    this.initialize();
-                    this.computeMazeWindow();
-                });
+                        this.levelCurrent += 1;
+                        this.initialize();
+                        this.computeMazeWindow();
+                    });
 
                 break;
 
@@ -1308,10 +1203,10 @@ export class MazeScene extends Scene {
                     this.player.x,
                     this.player.y,
                     () => {
-                    this.levelCurrent -= 1;
-                    this.initialize();
-                    this.computeMazeWindow();
-                });
+                        this.levelCurrent -= 1;
+                        this.initialize();
+                        this.computeMazeWindow();
+                    });
 
                 break;
 

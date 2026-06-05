@@ -37,7 +37,7 @@ export class EventEntity extends Entity {
 
 export class GoldCoinCollectableEvent extends EventEntity {
 
-    entityType = EntityType.COLLECTABLE_TREASURE;
+    entityType = EntityType.TREASURE_GOLD_COIN;
 
     isOneShot = true;
     isActive = true;

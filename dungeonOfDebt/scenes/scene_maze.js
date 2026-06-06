@@ -413,7 +413,7 @@ export class MazeScene extends Scene {
                 monstersAndEvents.push(this.entityFactory.createEntity(EntityType.TROLL));
                 break;
 
-            case 5:
+            case 4:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.STATUE, 3));
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.PINK_EYE, 5));

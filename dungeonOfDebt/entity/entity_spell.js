@@ -255,19 +255,13 @@ export class KeyholeEffectOverlay {
 
     render(context) {
 
-        if (this.keyholeRadius <= 0) {
-            return;
-        } else if (this.keyholeRadius >= this.maxRadius) {
-            return;
-        } else {
-            context.globalAlpha = this.alpha;
-            context.save();
-            context.globalCompositeOperation = "destination-in"; // This makes the keyhole transparent
-            context.beginPath();
-            context.arc(this.centerX, this.centerY, this.keyholeRadius, 0, Math.PI * 2);
-            context.fill();
-            context.restore();
-        }
+        context.globalAlpha = this.alpha;
+        context.save();
+        context.globalCompositeOperation = "destination-in";
+        context.beginPath();
+        context.arc(this.centerX, this.centerY, this.keyholeRadius, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
     }
 
 }

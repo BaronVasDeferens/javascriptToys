@@ -296,11 +296,18 @@ export class MazeScene extends Scene {
 
 
         this.initialize();
+
+        this.fadeIn(
+            () => {
+                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+            });
     }
 
     initialize() {
 
         this.updateGameSequence(GameSequence.INITIALIZING);
+
+        this.clearBackground();
 
         this.setLevel(this.levelCurrent);
 
@@ -360,17 +367,11 @@ export class MazeScene extends Scene {
 
         // PLAYER...
         // Find an UNOCCUPIED, NO EVENT square near the top...
-        let playerStartRoom = this.allRooms
+        let possibleRooms = this.allRooms
             .filter(room => { return room.isOpen == true })
-            .sort((a, b) => {
-                if ((a.col + a.row) < (b.col + b.row)) {
-                    return -1;
-                } else if ((a.col + a.row) > (b.col + b.row)) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            })[5];      // ...left-ish
+
+        this.shuffleArray(possibleRooms);
+        let playerStartRoom = possibleRooms[0];
 
         this.player = new PlayerEntity(
             this.tileSize,
@@ -453,13 +454,12 @@ export class MazeScene extends Scene {
                 break;
         }
 
+        // KEYS and PORTALS
         let keyPortal = this.entityFactory.createKeyPortal(this, this.levelCurrent + 1);
         monstersAndEvents.push(keyPortal.key);
         monstersAndEvents.push(keyPortal.portal);
 
-
         this.distributeAcrossOpenRooms(monstersAndEvents, true);
-
 
         // -------- USER INTERFACE ----------
 
@@ -674,11 +674,17 @@ export class MazeScene extends Scene {
             )
         );
 
-        this.fadeIn(() => {
-            this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
-        });
-
         this.updateMagicInterface();
+    }
+
+    startLevel() {
+        this.keyholeIn(
+            this.player.x,
+            this.player.y,
+            () => {
+                this.updateGameSequence(GameSequence.PLAYER_AWAITING_MOVEMENT);
+            }
+        )
     }
 
     // -------------------------------------- MAIN LOOP --------------------------------------
@@ -688,7 +694,7 @@ export class MazeScene extends Scene {
         let driver = this.stateDrivers[0];
         if (driver != null) {
             if (driver.isFinished == true) {
-                this.stateDrivers.shift()
+                this.stateDrivers.shift();
             } else {
                 driver.update(delta)
             }
@@ -698,9 +704,6 @@ export class MazeScene extends Scene {
     render(contextPrimary, contextSecondary) {
 
         contextPrimary.globalAlpha = 1.0;
-        contextPrimary.fillStyle = "#000000";
-        contextPrimary.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
-
         contextPrimary.globalAlpha = this.backgroundOpacity;
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
 
@@ -991,6 +994,7 @@ export class MazeScene extends Scene {
         this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => {
             this.fadeOut(() => {
                 this.initialize();
+                this.startLevel();
             });
         });
 
@@ -1041,26 +1045,6 @@ export class MazeScene extends Scene {
     }
 
     onMouseMoveSecondary(event) {
-
-        // let hoverTarget = this.spellCardComponents
-        //     .filter(card => { return card.containsPoint(event) })[0];
-
-        // if (hoverTarget != null) {
-        //     if (hoverTarget instanceof SpellEffectComponentCard) {
-        //         if (hoverTarget.spellEffect != this.selectedSpellEffect) {
-        //             this.setHighlightedSquares(hoverTarget.spellEffect, this.selectedSpellZone)
-        //         }
-        //     } else if (hoverTarget instanceof SpellZoneComponentCard) {
-        //         // Don't update the zone on hover if a zone has already been selected
-        //         if (hoverTarget.spellZone != this.selectedSpellZone && this.selectedSpellZone == null) {
-        //             this.setHighlightedSquares(this.selectedSpellEffect, hoverTarget.spellZone)
-        //         }
-        //     }
-        // } else {
-        //     if (this.selectedSpellZone == null) {
-        //         this.setHighlightedSquares(this.selectedSpellEffect, null)
-        //     }
-        // }
 
     }
 
@@ -1196,6 +1180,7 @@ export class MazeScene extends Scene {
                         this.levelCurrent += 1;
                         this.initialize();
                         this.computeMazeWindow();
+                        this.startLevel();
                     });
 
                 break;
@@ -1208,6 +1193,7 @@ export class MazeScene extends Scene {
                         this.levelCurrent -= 1;
                         this.initialize();
                         this.computeMazeWindow();
+                        this.startLevel();
                     });
 
                 break;
@@ -1226,6 +1212,7 @@ export class MazeScene extends Scene {
                     () => {
                         this.initialize();
                         this.computeMazeWindow();
+                        this.startLevel();
                     });
 
                 break;
@@ -2716,6 +2703,10 @@ export class MazeScene extends Scene {
 
     getSpellEffectName(effect) {
         return Object.keys(SpellEffect).find(k => SpellEffect[k] === effect);
+    }
+
+    clearBackground() {
+        this.backgroundImage = new Image();
     }
 
     debug(msg) {

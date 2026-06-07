@@ -145,6 +145,7 @@ export class EntityFactory {
                         // onComplete
                         context.initialize();
                         context.computeMazeWindow();
+                        context.startLevel();
                     });
             }
         );

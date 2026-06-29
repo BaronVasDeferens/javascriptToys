@@ -1,0 +1,282 @@
+import { ImageAsset } from "../assets.js";
+
+
+export const SpellZone = Object.freeze({
+    CROSS_SMALL: 2,
+    CROSS_INVERTED: 4,
+    COLUMN_FULL: 5,
+    ROW_FULL: 6,
+    SELF_TARGET: 7
+    // TODO: LINE_OF_SIGHT?
+});
+
+export const SpellEffect = Object.freeze({
+    CANCEL: 0,
+    FREEZE: 2,              // Places monster in temporary stasis; makes them visible, and movable by pushing
+    BLAZE: 3,
+    PHASE: 4,
+    INVERT: 5,              // Transforms maze cells: open spaces become blocks and vice versa. No effect on monsters or player...?
+    TRANSMUTE: 6,       // Transforms any entity into a harmless frog for a few turns.
+    EXCHANGE: 7,            // All entities exchange rooms
+});
+
+/*
+    spell ideas
+        break apart walls
+        light (maze is dark otherwise, monsters harder to see)
+*/
+
+export class ComponentCard {
+
+    image = null;
+    discharged = false;
+
+    isActive = true;         // TRUE: this card is fully opaque and clickable; FALSE: semi-opaque not clickable
+    isSelected = false;
+
+    alpha = 1.0;
+
+    constructor(canvas, row, col, tileSize) {
+        this.canvas = canvas;
+        this.x = col * tileSize;
+        this.y = row * tileSize;
+        this.tileSize = tileSize;
+    }
+
+    setIsSelected(isSelected) {
+        if (this.discharged == true) {
+            this.isSelected = false;
+            this.isActive = false;
+            return;
+        }
+
+        this.isSelected = isSelected;
+    }
+
+    setIsActive(isActive) {
+
+        if (this.discharged == true) {
+            this.isActive = false;
+            return;
+        }
+
+        this.isActive = isActive;
+
+        if (this.isActive == true) {
+            this.alpha = 1.0;
+        } else {
+            this.alpha = 0.25;
+        }
+    }
+
+    containsPoint(click) {
+        if (click.offsetX >= this.x
+            && click.offsetX <= this.x + this.tileSize
+            && click.offsetY >= this.y
+            && click.offsetY <= this.y + this.tileSize
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    render(context) {
+        context.globalAlpha = this.alpha;
+        context.drawImage(this.image, this.x, this.y);
+    }
+}
+
+/**
+ * Spell Zone Component Card
+ * A clickable UI element which allows the user to specify a zone (set of squares)
+ * for a spell effect
+ */
+export class SpellZoneComponentCard extends ComponentCard {
+
+    constructor(spellZone, onClick, canvas, row, col, tileSize, assetManager) {
+        super(canvas, row, col, tileSize);
+        this.onClick = onClick;
+        this.spellZone = spellZone;
+        this.assetManager = assetManager;
+
+        switch (spellZone) {
+
+            case SpellZone.CANCEL:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CANCEL);
+                break;
+            case SpellZone.CROSS_SMALL:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_CROSS);
+                break;
+            case SpellZone.CROSS_INVERTED:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_CROSS_INVERTED);
+                break;
+            case SpellZone.COLUMN_FULL:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_COLUMN);
+                break;
+            case SpellZone.ROW_FULL:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_ROW);
+                break;
+            case SpellZone.SELF_TARGET:
+                this.image = assetManager.getImage(ImageAsset.SPELL_ZONE_WIZARD_ONLY);
+                break;
+        }
+    }
+
+    onComponentClicked(card) {
+        this.onClick(card);
+    }
+
+    render(context) {
+
+        super.render(context)
+
+        if (this.isSelected == true) {
+            context.globalAlpha = 1.0;
+            context.drawImage(this.assetManager.getImage(ImageAsset.SPELL_SECTION_OVERLAY), this.x, this.y);
+        }
+    }
+}
+
+/**
+ * Spell Effect Component Card
+ * A clickable UI element which represents a spell effect (e.g. freeze) 
+ */
+export class SpellEffectComponentCard extends ComponentCard {
+
+    spellEffect = null;
+
+    constructor(spellEffect, onClick, canvas, row, col, tileSize, assetManager) {
+        super(canvas, row, col, tileSize);
+        this.onClick = onClick;
+        this.spellEffect = spellEffect;
+        this.assetManager = assetManager;
+
+        switch (spellEffect) {
+
+            case SpellEffect.CANCEL:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CANCEL);
+                break;
+            case SpellEffect.BLAZE:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_BLAZE);
+                break;
+            case SpellEffect.FREEZE:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_FREEZE);
+                break;
+            case SpellEffect.PHASE:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_PHASE);
+                break;
+            case SpellEffect.INVERT:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_INVERT);
+                break;
+            case SpellEffect.TRANSMUTE:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_TRANSMUTATION);
+                break;
+            case SpellEffect.EXCHANGE:
+                this.image = assetManager.getImage(ImageAsset.SPELL_CARD_EXCHANGE);
+                break;
+        }
+    }
+
+    onComponentClicked(card) {
+        this.onClick(card);
+    }
+
+    render(context) {
+
+        super.render(context)
+
+        if (this.isSelected == true) {
+            context.globalAlpha = 1.0;
+            context.drawImage(this.assetManager.getImage(ImageAsset.SPELL_SECTION_OVERLAY), this.x, this.y);
+        }
+
+    }
+}
+
+
+/**
+ * Spell Effect Overlay
+ * Draws color over the top of the specified canvas.
+ * Driven by the SpellEffectOverlayDriver (see drivers.js)
+ */
+export class SpellEffectOverlay {
+
+    alpha = 1.0;
+
+    constructor(canvas, color) {
+        this.canvas = canvas;
+        this.color = color;
+    }
+
+    update(elapsedMillis, totalMillis) {
+
+    }
+
+    render(context) {
+        context.globalAlpha = this.alpha;
+        context.fillStyle = this.color;
+        context.fillRect(0, 0, this.canvas.width, this.canvas.height)
+        context.globalAlpha = 1.0;
+    }
+
+}
+
+export class KeyholeEffectOverlay {
+
+    alpha = 1.0;
+
+    constructor(canvas, centerX, centerY, tileSize, color) {
+        this.canvas = canvas;
+        this.color = color;
+        this.tileSize = tileSize;
+
+        this.centerX = centerX + (this.tileSize / 2);
+        this.centerY = centerY + (this.tileSize / 2);
+
+        this.keyholeRadius = Math.max(canvas.width, canvas.height);
+        this.minRadius = 0;
+        this.maxRadius = Math.max(canvas.width, canvas.height);
+    }
+
+    shrinkRadius(pctComplete) {
+        this.keyholeRadius = this.maxRadius - Math.floor(this.maxRadius * pctComplete);
+        if (this.keyholeRadius < 0.00) {
+            this.keyholeRadius = 0.00;
+        }
+    }
+
+    growRadius(pctComplete) {
+        this.keyholeRadius = Math.floor(this.maxRadius * pctComplete);
+        if (this.keyholeRadius > this.maxRadius) {
+            this.keyholeRadius = this.maxRadius;
+        }
+    }
+
+    render(context) {
+
+        context.globalAlpha = this.alpha;
+        context.save();
+        context.globalCompositeOperation = "destination-in";
+        context.beginPath();
+        context.arc(this.centerX, this.centerY, this.keyholeRadius, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+    }
+
+}
+
+
+
+export class Spell {
+
+    constructor(spellEffect, spellZone) {
+        this.spellEffect = spellEffect;
+        this.spellZone = spellZone;
+    }
+
+    render(context) {
+
+    }
+
+}

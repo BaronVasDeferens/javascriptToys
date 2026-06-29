@@ -1,0 +1,75 @@
+<html lang="en">
+
+<head>
+  <title>Dance, Puppets, Dance!!!</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .flex-container {
+      display: flex;
+      flex-direction: column;
+      font-size: 30px;
+      text-align: center;
+    }
+
+    .flex-item-left {
+      background-color: #f1f1f1;
+      padding: 10px;
+      flex: 50%;
+    }
+
+    .flex-item-right {
+      background-color: dodgerblue;
+      padding: 10px;
+      flex: 50%;
+    }
+
+    /* Responsive layout - makes a one column-layout instead of two-column layout */
+    @media (max-width: 800px) {
+      .flex-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript" src="remoteTriggers.js"></script>
+
+  <div class="flex-container">
+
+    <P>Send Commands</P>
+
+    <div class="flex-item-left">
+      Add devices
+      <input type="text" id="deviceIdText" name="key" size="30" value="dragonfly" />
+      <button type="button" onclick="addDeviceId()">ADD</button>
+    </div>
+
+    <div class="flex-item-left">
+      Choose device or devices
+      <select name="deviceIdSelection" id="deviceIdSelection">
+        <option value="ALL">ALL</option>
+      </select>
+    </div>
+
+    <div class="flex-item-left">
+      Set command
+      <select name="commandAction" id="commandActionSelect">
+        <option value="BACKGROUND_COLOR_RANDOM">Random background color</option>
+        <option value="BUZZ_START">Start buzzing</option>
+        <option value="BUZZ_STOP">Stop buzzing</option>
+      </select>
+
+      <button type="button" onclick="sendCommand()">Send Command</button>
+    </div>
+
+
+
+  </div>
+
+</body>
+
+</html>

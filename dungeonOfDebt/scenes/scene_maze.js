@@ -307,8 +307,6 @@ export class MazeScene extends Scene {
 
         this.updateGameSequence(GameSequence.INITIALIZING);
 
-        this.clearBackground();
-
         this.setLevel(this.levelCurrent);
 
         this.selectedSpellEffect = null;
@@ -325,6 +323,7 @@ export class MazeScene extends Scene {
         this.allRooms = [];
         this.mazeArray = [];
 
+        this.backgroundImage = new Image();
         this.backgroundOpacity = 1.0;
 
 
@@ -345,12 +344,8 @@ export class MazeScene extends Scene {
 
         // Change a number of tiles from closed to open
         let closedRooms = this.allRooms.filter(room => { return room.isOpen == false });
+        let numRoomsToOpen = closedRooms[Math.floor(Math.random() * closedRooms.length)];
         this.shuffleArray(closedRooms);
-
-        let numRoomsToOpen = 20 - (2 * this.levelCurrent);
-        if (numRoomsToOpen < 0) {
-            numRoomsToOpen = 0
-        }
         for (let n = 0; n < numRoomsToOpen; n++) {
             closedRooms[n].setIsOpen(true);
         }
@@ -399,6 +394,7 @@ export class MazeScene extends Scene {
             case 1:
 
                 monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.GOLD_FROG, 3));
+                monstersAndEvents.push(...this.entityFactory.createEntities(EntityType.TREASURE_GOLD_COIN, 15));
                 break;
 
             case 2:
@@ -703,8 +699,9 @@ export class MazeScene extends Scene {
 
     render(contextPrimary, contextSecondary) {
 
-        contextPrimary.globalAlpha = 1.0;
-        contextPrimary.globalAlpha = this.backgroundOpacity;
+        contextPrimary.clearRect(0,0,this.canvasPrimary.width, contextPrimary.height);
+        //contextPrimary.globalAlpha = this.backgroundOpacity;
+        contextPrimary.globalAlpha = 1.0
         contextPrimary.drawImage(this.backgroundImage, 0, 0);
 
         // Render events
@@ -973,22 +970,8 @@ export class MazeScene extends Scene {
             contactEntity.setAlpha(1.0);
         }
 
-        // Use a driver to fade out the background
-        this.stateDrivers.push(
-            new Driver(
-                1000,
-                (pctComplete) => {
-                    // onUpdated
-                    if (pctComplete <= 1.0) {
-                        let opacity = 1 - pctComplete;
-                        this.backgroundOpacity = opacity;
-                    }
-                },
-                () => {
-                    // onComplete 
-                }
-            )
-        )
+
+        this.printToImage(this.canvasPrimary, this.backgroundImage, this.allRooms, true)
 
         // Play the "BBQ's over" sound and INITIALIZE when it finishes
         this.soundPlayer.playOneShot(SoundAsset.GAME_OVER, () => {
@@ -1001,6 +984,10 @@ export class MazeScene extends Scene {
         // Lock the controls
         this.updateGameSequence(GameSequence.GAME_OVER);
         this.updateMagicInterface();
+
+
+
+
     }
 
     // -------------------------------------- SCENE STUFF --------------------------------------
@@ -2433,7 +2420,7 @@ export class MazeScene extends Scene {
         }
     }
 
-    printToImage(canvas, image, objectsToRender) {
+    printToImage(canvas, image, objectsToRender, isRedShift) {
 
         let context = canvas.getContext("2d");
         context.fillStyle = "#000000";
@@ -2443,8 +2430,7 @@ export class MazeScene extends Scene {
             renderMe.render(context, 0, 0);
         });
 
-        let isRedShift = false;
-        if (isRedShift) {
+        if (isRedShift == true) {
             let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             for (let n = 0; n < imageData.data.length; n += 4) {
                 imageData.data[n] *= 2;
@@ -2705,9 +2691,6 @@ export class MazeScene extends Scene {
         return Object.keys(SpellEffect).find(k => SpellEffect[k] === effect);
     }
 
-    clearBackground() {
-        this.backgroundImage = new Image();
-    }
 
     debug(msg) {
         if (this.debugMode == true) {

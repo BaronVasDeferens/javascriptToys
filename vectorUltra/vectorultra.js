@@ -56,6 +56,7 @@ const context = canvas.getContext('2d');
 
 // ------------------------------ GAME DETAILS -------------------------------------
 
+
 export const Stage = Object.freeze({
     AWAITING_INTERACTION: "AWAITING_INTERACTION",
     INITIALIZING: "INITIALIZING",
@@ -116,7 +117,7 @@ var playerEntity = new Entity(0, 0, backgroundImage);
 
 const healthMax = 10;
 var healthCurrent = 10;
-var isPlayerInvulerable = false;
+var isPlayerInvulnerable = false;
 
 export const VisionMode = Object.freeze({
     NORMAL: 0,
@@ -284,6 +285,19 @@ function processIncomingGameStateData(update) {
     }
 }
 
+/*
+
+data class PlayerControllerInput(
+    val playerId: String,
+    val millis: Long,
+    val deltaX: Float,
+    val deltaY: Float,
+    val visionMode: VisionModeStatus,
+    val weaponStatus: WeaponStatus
+)
+
+*/
+
 function updatePlayerPosition(playerPos) {
     playerEntity.x -= (4 * playerPos.deltaX);
     playerEntity.y -= (4 * playerPos.deltaY);
@@ -345,7 +359,7 @@ function updateStage(newStage) {
 
             case Stage.INSERT_COIN:
 
-                //soundPlayer.playBackgroundMusic(SoundAsset.THEME_1);
+                soundPlayer.playBackgroundMusic(SoundAsset.THEME_1);
 
                 speedCurrent = speedDefault;
                 levelManager.init(speedDefault);
@@ -552,7 +566,7 @@ function handleObstacleCollision() {
 
     sendVibration(true);
 
-    if (isPlayerInvulerable == true) {
+    if (isPlayerInvulnerable == true) {
         // Ignore damage while invulnerable
     } else {
 
@@ -575,7 +589,7 @@ function handleObstacleCollision() {
 function handleEntityCollision(entity) {
     sendVibration(true);
 
-    if (isPlayerInvulerable == true) {
+    if (isPlayerInvulnerable == true) {
         // Ignore damage while invulnerable
     } else {
         // !!! Collison!!!
@@ -718,9 +732,9 @@ function renderDebug(context) {
         milliseconds = now;
     } else {
         let framesPerSecond = Math.floor(frames / (delta / 1000));
-            context.fillStyle = "#FFFFFF";
-            context.font = "16px arial";
-            context.fillText(`fps: ${framesPerSecond}`, 50, 100);
+        context.fillStyle = "#FFFFFF";
+        context.font = "16px arial";
+        context.fillText(`fps: ${framesPerSecond}`, 50, 100);
     }
 
     // let highlightedSections = roadManager.findRoadSectionsForEntityPosition(playerEntity);
@@ -748,7 +762,7 @@ function randomInRange(min, max) {
 function setPlayerInvulnerable(seconds) {
 
     // Give the player a few seconds of invulnerability
-    isPlayerInvulerable = true;
+    isPlayerInvulnerable = true;
 
     let invulnerableMillis = seconds * 1000;
     let divisions = 100;
@@ -789,7 +803,7 @@ function setPlayerInvulnerable(seconds) {
             Date.now() + invulnerableMillis + 100,
             function () { }, // on every update
             function () {   // on finish
-                isPlayerInvulerable = false;
+                isPlayerInvulnerable = false;
                 playerEntity.alpha = 1.0;
             }
         )
@@ -949,74 +963,174 @@ document.addEventListener('mousedown', (click) => {
 
 });
 
-// Mouse MOVE
-document.addEventListener('mousemove', (click) => {
-    switch (stage) {
-        default:
-            break;
-    }
-});
-
-// Mouse UP
-document.addEventListener('mouseup', (click) => {
-
-});
-
 document.addEventListener('keydown', (event) => {
 
-    switch (event.key) {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 
-        case 'd':
-            toggleDebug();
+    switch (stage) {
+
+        case Stage.INSERT_COIN:
+            updateStage(Stage.GAME_ACTIVE);
             break;
 
-        case 'e':
-            addEnemy();
-            break;
+        case Stage.GAME_ACTIVE:
 
-        case 'j':
-            roadManager.shiftRoad(-1);
-            break;
 
-        case 'l':
-            roadManager.shiftRoad(1);
-            break;
+            switch (event.code) {
 
-        case 'i':
-            roadManager.modifyWidth(1);
-            break;
+                case "KeyA":
+                    updatePlayerPosition(
+                        {
+                            deltaX: 5,
+                            deltaY: 0
+                        }
+                    )
+                    break;
 
-        case 'k':
-            roadManager.modifyWidth(-1);
-            break;
+                case "KeyD":
+                    updatePlayerPosition(
+                        {
+                            deltaX: -5,
+                            deltaY: 0
+                        }
+                    )
+                    break;
 
-        case 'm':
-            soundPlayer.toggleMute();
-            break;
+                case "KeyW":
+                    updatePlayerPosition(
+                        {
+                            deltaX: 0,
+                            deltaY: 5
+                        }
+                    )
+                    break;
 
-        case 'w':
-            speedCurrent += speedIncrement;
-            if (speedCurrent >= speedMax) {
-                speedCurrent = speedMax;
+                case "KeyS":
+
+                    updatePlayerPosition(
+                        {
+                            deltaX: 0,
+                            deltaY: -5
+                        }
+                    )
+                    break;
+
+                case "Space":
+                    updateWeaponStatus(
+                        { weaponStatus: WeaponStatus.FIRING }
+                    );
+                    break;
+
+                case "KeyV":
+                    toggleVisionMode();
+                    break;
+
+                default:
+                    break;
             }
-            roadManager.updateSpeed(speedCurrent);
-            console.log(`speed: ${speedCurrent}`);
+    }
+
+    // switch (event.key) {
+
+    //     case 'a':
+    //         updatePlayerPosition(
+    //             {
+    //                 deltaX: -5,
+    //                 deltaY: 0
+    //             }
+    //         )
+    //         break;
+
+    //     case 'd':
+    //         updatePlayerPosition(
+    //             {
+    //                 deltaX: 5,
+    //                 deltaY: 0
+    //             }
+    //         )
+    //         break;
+
+    // case 'd':
+    //     toggleDebug();
+    //     break;
+
+    // case 'e':
+    //     addEnemy();
+    //     break;
+
+    // case 'j':
+    //     roadManager.shiftRoad(-1);
+    //     break;
+
+    // case 'l':
+    //     roadManager.shiftRoad(1);
+    //     break;
+
+    // case 'i':
+    //     roadManager.modifyWidth(1);
+    //     break;
+
+    // case 'k':
+    //     roadManager.modifyWidth(-1);
+    //     break;
+
+    // case 'm':
+    //     soundPlayer.toggleMute();
+    //     break;
+
+    // case 'w':
+    //     speedCurrent += speedIncrement;
+    //     if (speedCurrent >= speedMax) {
+    //         speedCurrent = speedMax;
+    //     }
+    //     roadManager.updateSpeed(speedCurrent);
+    //     console.log(`speed: ${speedCurrent}`);
+    //     break;
+
+    // case 's':
+    //     speedCurrent -= speedIncrement;
+    //     if (speedCurrent < speedMin) {
+    //         speedCurrent = speedMin;
+    //     }
+    //     roadManager.updateSpeed(speedCurrent);
+    //     console.log(`speed: ${speedCurrent}`);
+    //     break;
+
+    //     case 'v':
+    //         toggleVisionMode();
+    //         break;
+
+    //     default:
+    //         break;
+    // }
+});
+
+document.addEventListener('keyup', (event) => {
+
+    switch (stage) {
+
+        case Stage.INSERT_COIN:
             break;
 
-        case 's':
-            speedCurrent -= speedIncrement;
-            if (speedCurrent < speedMin) {
-                speedCurrent = speedMin;
+        case Stage.GAME_ACTIVE:
+
+            switch (event.code) {
+
+                case "Space":
+                    updateWeaponStatus(
+                        { weaponStatus: WeaponStatus.IDLE }
+                    );
+                    break;
+
+
+                default:
+                    break;
             }
-            roadManager.updateSpeed(speedCurrent);
-            console.log(`speed: ${speedCurrent}`);
-            break;
-
-        case 'v':
-            toggleVisionMode();
-            break;
 
         default:
             break;
     }
+
 });

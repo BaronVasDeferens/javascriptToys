@@ -16,7 +16,7 @@ export class Level {
     }
 
     nextSection() {
-        this.sectionsTraversed++;
+        //this.sectionsTraversed++;
         if (this.sectionsTraversed > this.lengthInSections) {
             this.isComplete = true;
             console.log(`--- LEVEL ${this.levelNumber} COMPLETE ---`)

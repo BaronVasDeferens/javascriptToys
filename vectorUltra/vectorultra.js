@@ -319,6 +319,14 @@ function updatePlayerPosition(playerPos) {
     }
 }
 
+function toggleVisionMode() {
+    if (visionMode == VisionMode.NORMAL) {
+        updateVisionStatus(VisionMode.INFRARED);
+    } else {
+        updateVisionStatus(VisionMode.NORMAL);
+    }
+}
+
 function updateWeaponStatus(update) {
     if (update.weaponStatus != weaponStatus) {
         weaponStatus = update.weaponStatus;
@@ -332,10 +340,11 @@ function updateWeaponStatus(update) {
     }
 }
 
-function updateVisionStatus(update) {
-    let newMode = VisionMode[update.visionMode];
-    if (newMode != null && newMode != visionMode) {
-        visionMode = newMode;
+function updateVisionStatus(mode) {
+
+    if (mode != null && mode != visionMode) {
+        visionMode = mode;
+        log(visionMode)
     }
 }
 
@@ -507,7 +516,7 @@ function update() {
 
                 // --- MONSTER COLLISIONS
                 if (enemy.isAlive == true && enemy.isCollideWithEntity(playerEntity)) {
-                    sendVibration(true);
+                    //sendVibration(true);
                     handleEntityCollision(enemy);
                 }
             });
@@ -564,7 +573,7 @@ function update() {
 
 function handleObstacleCollision() {
 
-    sendVibration(true);
+    //sendVibration(true);
 
     if (isPlayerInvulnerable == true) {
         // Ignore damage while invulnerable
@@ -587,12 +596,12 @@ function handleObstacleCollision() {
 }
 
 function handleEntityCollision(entity) {
-    sendVibration(true);
+    //sendVibration(true);
 
     if (isPlayerInvulnerable == true) {
         // Ignore damage while invulnerable
     } else {
-        // !!! Collison!!!
+        // !!! Collision!!!
         // Punt the player in a random direction...
         playerEntity.x += randomInRange(-5, 5);
         playerEntity.y += randomInRange(-5, 5);
@@ -810,20 +819,6 @@ function setPlayerInvulnerable(seconds) {
     )
 }
 
-function toggleVisionMode() {
-    switch (visionMode) {
-        case VisionMode.NORMAL:
-            visionMode = VisionMode.INFRARED;
-            break;
-        case VisionMode.INFRARED:
-            visionMode = VisionMode.NORMAL;
-            break;
-        default:
-            console.log(`what is ${visionMode} ???`);
-            break;
-    }
-}
-
 function addEnemy() {
 
     let startX = 0;
@@ -1008,7 +1003,6 @@ document.addEventListener('keydown', (event) => {
                     break;
 
                 case "KeyS":
-
                     updatePlayerPosition(
                         {
                             deltaX: 0,
@@ -1025,6 +1019,10 @@ document.addEventListener('keydown', (event) => {
 
                 case "KeyV":
                     toggleVisionMode();
+                    break;
+
+                case "KeyP":
+                    toggleDebug();
                     break;
 
                 case "Escape":

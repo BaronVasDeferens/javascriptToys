@@ -239,7 +239,7 @@ function initialize() {
 
     soundLooper = new SoundLooper(SoundAsset.MACHINEGUN_2, assetManager, audioContext);
 
-    beginWebSocket();
+    //beginWebSocket();
 
     roadManager.init();
     levelManager.init(speedDefault);
@@ -1025,6 +1025,10 @@ document.addEventListener('keydown', (event) => {
 
                 case "KeyV":
                     toggleVisionMode();
+                    break;
+
+                case "Escape":
+                    initialize();
                     break;
 
                 default:

@@ -18,7 +18,7 @@ const hexmap = new HexMap(10, 15);
 })()
 
 canvas.addEventListener('mousedown', event => {
-    console.log(event);
+
     var target = hexmap.findHexAtClick(event);
     if (target != null) {
         target.isSelected = !target.isSelected;
@@ -28,6 +28,18 @@ canvas.addEventListener('mousedown', event => {
     }
 });
 
+canvas.addEventListener('wheel', event => {
+
+    if (event.wheelDelta > 0) {
+        hexmap.increaseSize();
+    } else {
+        hexmap.decreaseSize();
+    }
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    hexmap.draw(ctx);
+});
 
 
 

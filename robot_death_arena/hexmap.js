@@ -19,17 +19,34 @@ export class HexMap {
     }
 
     draw(context) {
-        this.map.flat().forEach( hex => {
+        this.map.flat().forEach(hex => {
             hex.render(context)
-        })
+        });
+    }
+
+    increaseSize() {
+        this.hexSize += 2;
+        this.map.flat().forEach(hex => {
+            hex.setSize(this.hexSize);
+        });
+    }
+
+    decreaseSize() {
+        this.hexSize -= 2;
+        this.map.flat().forEach(hex => {
+            hex.setSize(this.hexSize);
+        });
     }
 
     findHexAtClick(click) {
 
-        return null;
+        let clickedHex = this.map.flat().filter( hex => {
+            return click.x >= hex.origin.x 
+            && click.x <= hex.points[1].x
+            && click.y >= hex.origin.y
+            && click.y <= hex.points[4].y
+        })[0];
 
+        return clickedHex;
     }
-
-
-
 }

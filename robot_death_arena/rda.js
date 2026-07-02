@@ -8,14 +8,24 @@ const ctx = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const hexmap = new HexMap(7,7);
-hexmap.draw(ctx);
+const hexmap = new HexMap(10, 15);
+
+
+(function init() {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    hexmap.draw(ctx);
+})()
 
 canvas.addEventListener('mousedown', event => {
     console.log(event);
-    hexmap.findHex(event);
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    hexmap.draw(ctx);
+    var target = hexmap.findHexAtClick(event);
+    if (target != null) {
+        target.isSelected = !target.isSelected;
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        hexmap.draw(ctx);
+    }
 });
 
 

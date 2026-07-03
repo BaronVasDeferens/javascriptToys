@@ -21,7 +21,7 @@ const hexSizeDefault = 50;
 function redraw() {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    hexMap.draw(context);
+    hexMap.render(context);
 }
 
 document.addEventListener('keydown', event => {
@@ -44,7 +44,7 @@ document.addEventListener('mousedown', event => {
         target.isSelected = !target.isSelected;
         context.fillStyle = "#000000";
         context.fillRect(0, 0, canvas.width, canvas.height);
-        hexMap.draw(context);
+        hexMap.render(context);
     }
 });
 
@@ -57,7 +57,7 @@ document.addEventListener('wheel', event => {
 
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    hexMap.draw(context);
+    hexMap.render(context);
 });
 
 

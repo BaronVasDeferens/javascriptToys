@@ -25,7 +25,7 @@ export class HexMap {
         this.allHexes = this.map.flat();
     }
 
-    draw(context) {
+    render(context) {
         this.allHexes.forEach(hex => {
             hex.render(context)
         });

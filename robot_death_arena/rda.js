@@ -3,42 +3,61 @@
 import { HexMap } from './hexmap.js';
 
 const canvas = document.querySelector('canvas');
-const ctx = canvas.getContext('2d');
+const context = canvas.getContext('2d');
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-const hexmap = new HexMap(10, 15);
-
+var hexMap = null;
+const hexSizeDefault = 50;
 
 (function init() {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    hexmap.draw(ctx);
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    hexMap = new HexMap(10, 15, hexSizeDefault);
+    redraw();
 })()
 
-canvas.addEventListener('mousedown', event => {
+function redraw() {
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    hexMap.draw(context);
+}
 
-    var target = hexmap.findHexAtClick(event);
-    if (target != null) {
-        target.isSelected = !target.isSelected;
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        hexmap.draw(ctx);
+document.addEventListener('keydown', event => {
+    switch (event.code) {
+
+        case "Escape":
+            console.log("Resetting...");
+            hexMap.initialize();
+            redraw();
+            break;
+
+        default:
+            break;
     }
 });
 
-canvas.addEventListener('wheel', event => {
+document.addEventListener('mousedown', event => {
+    var target = hexMap.findHexAtClick(event);
+    if (target != null) {
+        target.isSelected = !target.isSelected;
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        hexMap.draw(context);
+    }
+});
 
+document.addEventListener('wheel', event => {
     if (event.wheelDelta > 0) {
-        hexmap.increaseSize();
+        hexMap.increaseSize();
     } else {
-        hexmap.decreaseSize();
+        hexMap.decreaseSize();
     }
 
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    hexmap.draw(ctx);
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    hexMap.draw(context);
 });
 
 

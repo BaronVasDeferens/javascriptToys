@@ -2,31 +2,38 @@ import { Hex } from "./hex.js";
 
 export class HexMap {
 
-    map = new Array();
-
     hexSize = 48;
 
-    constructor(rows, cols) {
+    map = [];
+    allHexes = [];
+
+    constructor(rows, cols, hexSize) {
         this.rows = rows;
         this.cols = cols;
+        this.hexSize = hexSize;
+        this.initialize();
+    }
 
-        for (var i = 0; i < rows; i++) {
-            this.map[i] = new Array(cols);
-            for (var j = 0; j < cols; j++) {
+    initialize() {
+        this.map = [];
+        for (let i = 0; i < this.rows; i++) {
+            this.map[i] = new Array(this.rows);
+            for (var j = 0; j < this.cols; j++) {
                 this.map[i][j] = new Hex(i, j, this.hexSize);
             }
         }
+        this.allHexes = this.map.flat();
     }
 
     draw(context) {
-        this.map.flat().forEach(hex => {
+        this.allHexes.forEach(hex => {
             hex.render(context)
         });
     }
 
     increaseSize() {
         this.hexSize += 2;
-        this.map.flat().forEach(hex => {
+        this.allHexes.forEach(hex => {
             hex.setSize(this.hexSize);
         });
     }
@@ -40,11 +47,11 @@ export class HexMap {
 
     findHexAtClick(click) {
 
-        let clickedHex = this.map.flat().filter( hex => {
-            return click.x >= hex.origin.x 
-            && click.x <= hex.points[1].x
-            && click.y >= hex.origin.y
-            && click.y <= hex.points[4].y
+        let clickedHex = this.map.flat().filter(hex => {
+            return click.offsetX >= hex.origin.x
+                && click.offsetX <= hex.points[1].x
+                && click.offsetY >= hex.origin.y
+                && click.offsetY <= hex.points[4].y
         })[0];
 
         return clickedHex;

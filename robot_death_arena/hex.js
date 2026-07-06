@@ -24,13 +24,20 @@ export class Hex {
             y: (this.row * 2 * (this.hexSize * 0.8660)) + (((this.col % 2)) * Math.floor(0.8660 * this.hexSize))
         };
 
-        // ...then comput the points ONCE
+        // ...then compute the points ONCE
         this.points.push({ x: this.origin.x, y: this.origin.y });
         this.points.push({ x: this.origin.x + this.hexSize, y: this.origin.y });
         this.points.push({ x: this.origin.x + this.hexSize + this.halfSize, y: this.origin.y + (this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x + this.hexSize, y: this.origin.y + (2 * this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x, y: this.origin.y + (2 * this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x - this.halfSize, y: this.origin.y + (this.hexSize * 0.8660) });
+    }
+
+    getExtrema() {
+        return {
+            minX: this.points[5].x,
+            maxX: this.points[2].x
+        }
     }
 
     setSize(newSize) {
@@ -54,12 +61,13 @@ export class Hex {
         context.lineTo(this.points[4].x, this.points[4].y);
         context.lineTo(this.points[5].x, this.points[5].y);
         context.closePath();
-        
+
         if (this.isSelected) {
             context.fillStyle = "#FF0000"
             context.fill();
-        } 
+        }
         context.strokeStyle = 'blue';
+        context.lineWidth = 2;
         context.stroke();
 
         // Draw center point

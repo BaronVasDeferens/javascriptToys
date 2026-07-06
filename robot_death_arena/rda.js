@@ -5,16 +5,13 @@ import { HexMap } from './hexmap.js';
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-
 var hexMap = null;
 const hexSizeDefault = 50;
 
 (function init() {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    hexMap = new HexMap(10, 15, hexSizeDefault);
+    hexMap = new HexMap(10, 15, hexSizeDefault, canvas);
     redraw();
 })()
 
@@ -29,6 +26,7 @@ document.addEventListener('keydown', event => {
 
         case "Escape":
             console.log("Resetting...");
+            hexMap.hexSize = hexSizeDefault;
             hexMap.initialize();
             redraw();
             break;
@@ -48,7 +46,12 @@ document.addEventListener('mousedown', event => {
     }
 });
 
+document.addEventListener('mousemove', event => {
+    console.log(`${event.offsetX}`)
+})
+
 document.addEventListener('wheel', event => {
+    event.preventDefault();
     if (event.wheelDelta > 0) {
         hexMap.increaseSize();
     } else {
@@ -58,7 +61,7 @@ document.addEventListener('wheel', event => {
     context.fillStyle = "#000000";
     context.fillRect(0, 0, canvas.width, canvas.height);
     hexMap.render(context);
-});
+}, { passive: false });
 
 
 

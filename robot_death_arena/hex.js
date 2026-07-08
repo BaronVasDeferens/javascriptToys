@@ -4,7 +4,9 @@ export class Hex {
     isSelected = false;
 
     origin = null;                      // the first point in the hexagon
+    center = null;
     points = [];
+    
 
     halfSize = 0;
 
@@ -18,19 +20,25 @@ export class Hex {
     computePoints() {
         this.points = [];
 
-        // Compute the leftmost top point...
+        // Compute the origin (upper left) point...
         this.origin = {
             x: this.halfSize + (this.col * (this.hexSize + this.halfSize)),
             y: (this.row * 2 * (this.hexSize * 0.8660)) + (((this.col % 2)) * Math.floor(0.8660 * this.hexSize))
         };
 
-        // ...then compute the points ONCE
+        // ...then compute the perimeter points, going clockwise from the origin
         this.points.push({ x: this.origin.x, y: this.origin.y });
         this.points.push({ x: this.origin.x + this.hexSize, y: this.origin.y });
         this.points.push({ x: this.origin.x + this.hexSize + this.halfSize, y: this.origin.y + (this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x + this.hexSize, y: this.origin.y + (2 * this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x, y: this.origin.y + (2 * this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x - this.halfSize, y: this.origin.y + (this.hexSize * 0.8660) });
+    
+        // ...finally, compute the center point
+        this.center = {
+            x: this.points[0].x + this.halfSize,
+            y: this.points[5].y
+        }
     }
 
     getExtrema() {
@@ -72,7 +80,7 @@ export class Hex {
 
         // Draw center point
         context.fillStyle = "#ff0000"
-        context.fillRect(this.origin.x + this.halfSize, this.origin.y + (this.hexSize * 0.8660), 2, 2);
+        context.fillRect(this.center.x, this.center.y, 2, 2);
     }
 
 }

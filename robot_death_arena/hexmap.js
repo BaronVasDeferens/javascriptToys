@@ -4,6 +4,8 @@ export class HexMap {
 
     hexSize = 50;
 
+    zoomFactor = 4;
+
     map = [];
     allHexes = [];
 
@@ -46,15 +48,15 @@ export class HexMap {
     }
 
     increaseSize() {
-        this.hexSize += 2;
+        this.hexSize += this.zoomFactor;
         this.allHexes.forEach(hex => {
             hex.setSize(this.hexSize);
         });
     }
 
     decreaseSize() {
-        this.hexSize -= 2;
-        this.map.flat().forEach(hex => {
+        this.hexSize -= this.zoomFactor;
+        this.allHexes.forEach(hex => {
             hex.setSize(this.hexSize);
         });
     }
@@ -64,51 +66,48 @@ export class HexMap {
         console.log(click)
 
         let clickedHex = null;
+        let column = this.computeColumnForClick(click);
+        if (column != null) {
+            clickedHex = this.computeHexForClickAndColumn(click, column);
+        }
 
+        return clickedHex;
+    }
+
+    computeColumnForClick(click) {
+
+        let columnNumber = null;
+        let halfSize = this.hexSize / 2;
         let clickX = click.offsetX;
+
+        for (let i = 0; i < this.cols; i++) {
+            let hex = this.map[0][i];
+            if (clickX > hex.points[0].x && clickX < hex.points[1].x) {
+                columnNumber = i;
+                break;
+            }
+        }
+
+        return columnNumber;
+    }
+
+    computeHexForClickAndColumn(click, column) {
+
+        let clickedHex = null;
         let clickY = click.offsetY;
 
-        let minColumn = Math.floor(Math.floor(clickX / (this.hexSize / 2)) / 4);
-        let maxColumn = minColumn + 1;
-
-        let minColHex = this.getHex(0, minColumn);
-        if (clickX <= minColHex.points[1].x) {
-            maxColumn = minColumn;
+        let hexHeader = this.map[0][column];
+        if (hexHeader == null) {
+            return null
         }
 
-        if (maxColumn == minColumn) {
-            // When the min and max are the same, we know that we are in the "click column."
-            clickedHex = this.getHexesForColumn(maxColumn).filter(hex => {
-                return (clickY >= hex.origin.y) && (clickY <= hex.points[4].y)
-            })[0];
-        } else {
-            // When the min and maxColumn are different, the click was in the seam between two columns
+        for (let i = 0; i < this.rows; i++) {
+            let hex = this.map[i][column];
+            if (clickY > hex.points[0].y && clickY < hex.points[4].y) {
+                clickedHex = hex;
+                break;
+            }
         }
-
-
-
-        // let minColumn = Math.floor(Math.floor(clickX / (this.hexSize / 2)) / 4);
-        // let maxColumn =minColumn + 1;
-        // console.log(`clickX: ${clickX} minCol: ${minColumn} maxCol: ${maxColumn}`); 
-
-        // let headerHex = this.getHex(0, minColumn);
-        // let minColX = headerHex.points[1].x;
-        // let leftmost
-        // let isClickInSeam = false;
-        // console.log(`minColX: ${minColX}`)
-        // if (clickX >= ) && clickX <= (minColX + (this.hexSize / 2))) {
-        //     isClickInSeam = true;
-        // }
-
-        // console.log(`isClickInSeam: ${isClickInSeam}`);
-        // console.log(`headerHex (r,c): (${headerHex.row}, ${headerHex.col})`)
-
-        // let clickedHex = this.map.flat().filter(hex => {
-        //     return click.offsetX >= hex.origin.x
-        //         && click.offsetX <= hex.points[1].x
-        //         && click.offsetY >= hex.origin.y
-        //         && click.offsetY <= hex.points[4].y
-        // })[0];
 
         return clickedHex;
     }

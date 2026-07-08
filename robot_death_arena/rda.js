@@ -47,7 +47,7 @@ document.addEventListener('mousedown', event => {
 });
 
 document.addEventListener('mousemove', event => {
-    console.log(`${event.offsetX}`)
+    // console.log(`${event.offsetX}`)
 })
 
 document.addEventListener('wheel', event => {

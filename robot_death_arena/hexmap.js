@@ -76,22 +76,43 @@ export class HexMap {
 
     computeColumnForClick(click) {
 
+        let clickX = click.offsetX;
+
         let columnNumber = null;
         let halfSize = this.hexSize / 2;
-        let clickX = click.offsetX;
+
+        let isInSeamLeft = false;
+        let isInSeamRight = false;
 
         for (let i = 0; i < this.cols; i++) {
             let hex = this.map[0][i];
+
             if (clickX > hex.points[0].x && clickX < hex.points[1].x) {
+                // Determine if the click is fully within the hex (not in the seam)
                 columnNumber = i;
                 break;
+            } else {
+                // Determine whether the click falls into the seam
+
+                if (clickX < hex.points[0].x && clickX > hex.points[5].x) {
+                    isInSeamLeft = true;
+                } else if (clickX > hex.points[1].x && clickX < hex.points[2].x) {
+                    isInSeamRight = true;
+                }
+
+                if (isInSeamLeft || isInSeamRight) {
+                    console.log(`seamLeft: ${isInSeamLeft} seamRight: ${isInSeamRight}`)
+                    break;
+                }
             }
         }
 
         return columnNumber;
     }
 
+
     computeHexForClickAndColumn(click, column) {
+
 
         let clickedHex = null;
         let clickY = click.offsetY;

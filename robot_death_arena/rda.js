@@ -39,7 +39,7 @@ document.addEventListener('keydown', event => {
 document.addEventListener('mousedown', event => {
     var target = hexMap.findHexAtClick(event);
     if (target != null) {
-        target.isSelected = !target.isSelected;
+        target.setIsSelected(!target.isSelected);
         context.fillStyle = "#000000";
         context.fillRect(0, 0, canvas.width, canvas.height);
         hexMap.render(context);

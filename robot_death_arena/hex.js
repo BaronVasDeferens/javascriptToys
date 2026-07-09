@@ -41,6 +41,11 @@ export class Hex {
         }
     }
 
+    setIsSelected(isSelected) {
+        this.isSelected = isSelected;
+        console.log(`${this.row}, ${this.col}: ${isSelected}`)
+    }
+
     getExtrema() {
         return {
             minX: this.points[5].x,
@@ -81,6 +86,10 @@ export class Hex {
         // Draw center point
         context.fillStyle = "#ff0000"
         context.fillRect(this.center.x, this.center.y, 2, 2);
+
+        context.strokeStyle = "#FFFF00"
+        context.lineWidth = 0.5;
+        context.strokeText(`${this.row}, ${this.col}`, this.center.x, this.center.y - this.hexSize / 2)
     }
 
 }

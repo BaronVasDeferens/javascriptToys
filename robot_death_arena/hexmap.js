@@ -63,102 +63,29 @@ export class HexMap {
 
     findHexAtClick(click) {
 
-        console.log(click)
-
-        let clickedHex = null;
-        let column = this.computeColumnForClick(click);
-        if (column != null) {
-            clickedHex = this.computeHexForClickAndColumn(click, column);
-        } else {
-            clickedHex = this.computeHexForClickedSeam(click);
-        }
-
-        return clickedHex;
-    }
-
-    computeColumnForClick(click) {
-
         let clickX = click.offsetX;
-
-        let columnNumber = null;
-        let halfSize = this.hexSize / 2;
-
-        for (let i = 0; i < this.cols; i++) {
-            let hex = this.map[0][i];
-
-            if (clickX > hex.points[0].x && clickX < hex.points[1].x) {
-                // Determine if the click is fully within the hex (not in the seam);
-                // if the click is squarely in the center area of the hex, we have our column
-                columnNumber = i;
-                break;
-            }
-        }
-
-        return columnNumber;
-    }
-
-
-    computeHexForClickAndColumn(click, column) {
-
-        let clickedHex = null;
         let clickY = click.offsetY;
 
-        let hexHeader = this.map[0][column];
-        if (hexHeader == null) {
-            return null
-        }
+        let candidateHex = null;
+        let priorDist = 1000000; 
 
+        // INEFFICIENT! We check EVERY hex in the map!!!! 
+        // TODO: find approximate row/col values FIRST
         for (let i = 0; i < this.rows; i++) {
-            let hex = this.map[i][column];
-            if (clickY > hex.points[0].y && clickY < hex.points[4].y) {
-                clickedHex = hex;
-                break;
-            }
-        }
 
-        return clickedHex;
-    }
+            for (let j = 0; j < this.cols; j++) {
 
-    computeHexForClickedSeam(click) {
-        let clickedHex = null;
+                let hex = this.map[i][j];
+                let distance = Math.sqrt(Math.pow(clickY - hex.center.y, 2) + Math.pow(clickX - hex.center.x, 2));
 
-        let clickX = click.offsetX;
-        let clickY = click.offsetY;
-
-        let approxRow = Math.floor(clickY / (2 * 0.8660 * this.hexSize));
-        if (approxRow >= this.rows) {
-            approxRow = this.rows - 1;
-        } else if (approxRow < 0) {
-            approxRow = 0;
-        }
-
-        console.log(`approxRow: ${approxRow}`)
-
-        for (let i = 0; i < this.cols; i++) {
-
-            let hex = this.map[approxRow][i];
-
-            // Determine whether the click falls into the seam...
-            if (clickX < hex.points[0].x && clickX > hex.points[5].x) {
-                // Click's X value falls between points A and F (left);
-                // Determine if it is in the upper or lower triangle:
-                if (clickY < hex.center.y) {
-                    console.log(`${hex.row} ${hex.col} left upper`)
-                } else {
-                    console.log(`${hex.row} ${hex.col} left lower`)
-                }
-
-            } else if (clickX > hex.points[1].x && clickX < hex.points[2].x) {
-                // Click's X value falls between points B and C (right);
-                // Determine if it is in the upper or lower triangle:
-                if (clickY < hex.center.y) {
-                    console.log(`${hex.row} ${hex.col} right upper`)
-                } else {
-                    console.log(`${hex.row} ${hex.col} right lower`)
+                if (distance < priorDist) {
+                    candidateHex = hex
+                    priorDist = distance;
                 }
             }
         }
 
-        return clickedHex;
+        return candidateHex;
     }
+
 }

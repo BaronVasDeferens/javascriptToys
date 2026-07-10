@@ -21,7 +21,10 @@ function redraw() {
     hexMap.render(context);
 }
 
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
 document.addEventListener('keydown', event => {
+
     switch (event.code) {
 
         case "KeyD":
@@ -42,21 +45,29 @@ document.addEventListener('keydown', event => {
 });
 
 document.addEventListener('mousedown', event => {
-    var target = hexMap.findHexAtClick(event);
-    if (target != null) {
-        target.setIsSelected(!target.isSelected);
-        context.fillStyle = "#000000";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        hexMap.render(context);
+
+    event.preventDefault();
+
+    if (event.buttons == 1) {
+        let target = hexMap.findHexAtClick(event);
+        if (target != null) {
+            target.setIsSelected(!target.isSelected);
+            context.fillStyle = "#000000";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            hexMap.render(context);
+        }
     }
-});
+
+}, { passive: false });
 
 document.addEventListener('mousemove', event => {
     // console.log(`${event.offsetX}`)
 })
 
 document.addEventListener('wheel', event => {
+
     event.preventDefault();
+
     if (event.wheelDelta > 0) {
         hexMap.increaseSize();
     } else {

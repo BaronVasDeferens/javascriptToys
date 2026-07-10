@@ -19,6 +19,7 @@ export class HexMap {
         this.rows = rows;
         this.cols = cols;
         this.hexSize = hexSize;
+        this.canvas = canvas;
         this.boundingRectangle = canvas.getBoundingClientRect();
         this.initialize();
     }
@@ -39,6 +40,9 @@ export class HexMap {
     }
 
     render(context) {
+
+        context.fillStyle = "#000000";
+        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.hexesFlat.forEach(hex => {
             hex.render(context)
         });
@@ -46,7 +50,7 @@ export class HexMap {
 
     toggleDebug() {
         this.isDebug = !this.isDebug;
-        this.hexesFlat.forEach( hex => {
+        this.hexesFlat.forEach(hex => {
             hex.toggleDebug();
         })
     }
@@ -76,21 +80,21 @@ export class HexMap {
             approximateRow - 1,
             approximateRow,
             approximateRow + 1
-        ].filter ( num => {
+        ].filter(num => {
             return (num >= 0) && (num < this.rows)
         });
 
-        let approximateCol = Math.floor (clickX / ((3/2) * this.hexSize));
+        let approximateCol = Math.floor(clickX / ((3 / 2) * this.hexSize));
         let columnIds = [
             approximateCol - 1,
             approximateCol,
             approximateCol + 1
-        ].filter( num => {
-            return (num >= 0) && (num < this.cols) 
+        ].filter(num => {
+            return (num >= 0) && (num < this.cols)
         });
 
         let candidateHex = null;
-        let priorDist = 1000000; 
+        let priorDist = 1000000;
 
         // Compute the distance from the click to the center of each hex; the shortest 
         // path will determine which hex was clicked

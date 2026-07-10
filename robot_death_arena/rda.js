@@ -6,21 +6,19 @@ const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
 var hexMap = null;
-const hexSizeDefault = 50;
+const hexSizeDefault = 42;
 
+// --- STARTUP / INIT ---
 (function init() {
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    hexMap = new HexMap(10, 15, hexSizeDefault, canvas);
+    hexMap = new HexMap(11, 15, hexSizeDefault, canvas);
     redraw();
 })()
 
 function redraw() {
-    context.fillStyle = "#000000";
-    context.fillRect(0, 0, canvas.width, canvas.height);
     hexMap.render(context);
 }
 
+// Prevent right-click from summoning the context menu
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 document.addEventListener('keydown', event => {
@@ -52,8 +50,6 @@ document.addEventListener('mousedown', event => {
         let target = hexMap.findHexAtClick(event);
         if (target != null) {
             target.setIsSelected(!target.isSelected);
-            context.fillStyle = "#000000";
-            context.fillRect(0, 0, canvas.width, canvas.height);
             hexMap.render(context);
         }
     }
@@ -61,7 +57,7 @@ document.addEventListener('mousedown', event => {
 }, { passive: false });
 
 document.addEventListener('mousemove', event => {
-    // console.log(`${event.offsetX}`)
+    
 })
 
 document.addEventListener('wheel', event => {

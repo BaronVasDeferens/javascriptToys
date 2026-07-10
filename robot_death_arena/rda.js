@@ -24,6 +24,11 @@ function redraw() {
 document.addEventListener('keydown', event => {
     switch (event.code) {
 
+        case "KeyD":
+            hexMap.toggleDebug();
+            redraw();
+            break;
+
         case "Escape":
             console.log("Resetting...");
             hexMap.hexSize = hexSizeDefault;

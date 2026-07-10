@@ -1,12 +1,14 @@
 export class Hex {
 
-    color = 'blue'
+    colorOutline = '#777777'
+    colorSelected = "#FF0000"
+
     isSelected = false;
+    isDebug = false;
 
     origin = null;                      // the first point in the hexagon
     center = null;
     points = [];
-    
 
     halfSize = 0;
 
@@ -33,7 +35,7 @@ export class Hex {
         this.points.push({ x: this.origin.x + this.hexSize, y: this.origin.y + (2 * this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x, y: this.origin.y + (2 * this.hexSize * 0.8660) });
         this.points.push({ x: this.origin.x - this.halfSize, y: this.origin.y + (this.hexSize * 0.8660) });
-    
+
         // ...finally, compute the center point
         this.center = {
             x: this.points[0].x + this.halfSize,
@@ -43,15 +45,8 @@ export class Hex {
 
     setIsSelected(isSelected) {
         this.isSelected = isSelected;
-        console.log(`${this.row}, ${this.col}: ${isSelected}`)
     }
 
-    getExtrema() {
-        return {
-            minX: this.points[5].x,
-            maxX: this.points[2].x
-        }
-    }
 
     setSize(newSize) {
         this.hexSize = newSize;
@@ -59,8 +54,12 @@ export class Hex {
         this.computePoints();
     }
 
+    toggleDebug() {
+        this.isDebug = !this.isDebug;
+    }
+
     setColor(newColor) {
-        this.color = newColor;
+        this.colorOutline = newColor;
     }
 
     render(context) {
@@ -76,20 +75,24 @@ export class Hex {
         context.closePath();
 
         if (this.isSelected) {
-            context.fillStyle = "#FF0000"
+            context.fillStyle = this.colorSelected
             context.fill();
         }
-        context.strokeStyle = 'blue';
+
+        context.strokeStyle = this.colorOutline;
         context.lineWidth = 2;
         context.stroke();
 
-        // Draw center point
-        context.fillStyle = "#ff0000"
-        context.fillRect(this.center.x, this.center.y, 2, 2);
+        if (this.isDebug) {
+            // Draw center point
+            context.fillStyle = "#ff0000"
+            context.fillRect(this.center.x, this.center.y, 2, 2);
 
-        context.strokeStyle = "#FFFF00"
-        context.lineWidth = 0.5;
-        context.strokeText(`${this.row}, ${this.col}`, this.center.x, this.center.y - this.hexSize / 2)
+            context.strokeStyle = "#FFFF00"
+            context.lineWidth = 0.5;
+            context.strokeText(`${this.row}, ${this.col}`, this.center.x, this.center.y - this.hexSize / 2);
+        }
+
     }
 
 }

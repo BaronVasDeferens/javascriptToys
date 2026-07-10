@@ -3,8 +3,9 @@ import { Hex } from "./hex.js";
 export class HexMap {
 
     hexSize = 50;
-
     zoomFactor = 4;
+
+    isDebug = false;
 
     map = [];
     allHexes = [];
@@ -32,19 +33,17 @@ export class HexMap {
         return this.map[row][col];
     }
 
-    getHexesForColumn(whichColumn) {
-        let hexes = [];
-        for (let n = 0; n < this.rows; n++) {
-            hexes.push(this.map[n][whichColumn])
-        }
-
-        return hexes;
-    }
-
     render(context) {
         this.allHexes.forEach(hex => {
             hex.render(context)
         });
+    }
+
+    toggleDebug() {
+        this.isDebug = !this.isDebug;
+        this.allHexes.forEach( hex => {
+            hex.toggleDebug();
+        })
     }
 
     increaseSize() {

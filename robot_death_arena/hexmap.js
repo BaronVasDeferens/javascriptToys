@@ -36,7 +36,11 @@ export class HexMap {
     }
 
     getHex(row, col) {
-        return this.hexes[row][col];
+        try {
+            return this.hexes[row][col];
+        } catch (exception) {
+            return null;
+        }
     }
 
     render(context) {
@@ -114,6 +118,37 @@ export class HexMap {
         }
 
         return candidateHex;
+    }
+
+    getAdjacentHexes(hex) {
+
+        switch (hex.col % 2) {
+            
+            case 0:
+                return [
+                    this.getHex(hex.row - 1, hex.col),
+                    this.getHex(hex.row + 1, hex.col),
+                    this.getHex(hex.row - 1, hex.col - 1),
+                    this.getHex(hex.row, hex.col - 1),
+                    this.getHex(hex.row - 1, hex.col + 1),
+                    this.getHex(hex.row, hex.col + 1),
+                ].filter(hx => {
+                    return hx != null
+                });
+
+            default:
+                return [
+                    this.getHex(hex.row - 1, hex.col),
+                    this.getHex(hex.row + 1, hex.col),
+                    this.getHex(hex.row, hex.col - 1),
+                    this.getHex(hex.row, hex.col + 1),
+                    this.getHex(hex.row + 1, hex.col + 1),
+                    this.getHex(hex.row + 1, hex.col - 1),
+                ].filter(hx => {
+                    return hx != null
+                });
+                break;
+        }
     }
 
 }

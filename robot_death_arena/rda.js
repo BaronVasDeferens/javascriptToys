@@ -50,6 +50,9 @@ document.addEventListener('mousedown', event => {
         let target = hexMap.findHexAtClick(event);
         if (target != null) {
             target.setIsSelected(!target.isSelected);
+            hexMap.getAdjacentHexes(target).forEach( hex => {
+                hex.setIsSelected(!hex.isSelected);
+            });
             hexMap.render(context);
         }
     }

@@ -77,20 +77,25 @@ export class Hex {
         if (this.isSelected) {
             context.fillStyle = this.colorSelected
             context.fill();
+
+            context.strokeStyle = "#000000";
+            context.lineWidth = 2;
+            context.stroke();
+        } else {
+            context.strokeStyle = "#FF0000";
+            context.lineWidth = 2;
+            context.stroke();
         }
 
-        context.strokeStyle = this.colorOutline;
-        context.lineWidth = 2;
-        context.stroke();
 
         if (this.isDebug) {
             // Draw center point
-            context.fillStyle = "#ff0000"
+            context.fillStyle = "#0000FFd"
             context.fillRect(this.center.x, this.center.y, 2, 2);
 
             context.strokeStyle = "#FFFF00"
             context.lineWidth = 0.5;
-            context.strokeText(`${this.row}, ${this.col}`, this.center.x, this.center.y - this.hexSize / 2);
+            context.strokeText(`${this.row}, ${this.col}`, this.points[0].x, this.center.y - this.hexSize / 2);
         }
 
     }

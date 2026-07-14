@@ -90,7 +90,7 @@ export class Hex {
 
         if (this.isDebug) {
             // Draw center point
-            context.fillStyle = "#0000FFd"
+            context.fillStyle = "#0000FF"
             context.fillRect(this.center.x, this.center.y, 2, 2);
 
             context.strokeStyle = "#FFFF00"

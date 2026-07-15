@@ -1,6 +1,7 @@
 // Load classes-- requires webserver to run "http-server ."
 
 import { HexMap } from './hexmap.js';
+import { PathTracker } from './pathtracker.js';
 
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
@@ -16,7 +17,7 @@ var overlayImage = null;
 var hexMap = null;
 const hexSizeDefault = 42;
 
-var pathHexes = new Set();
+var pathTracker = new PathTracker();;
 
 const GameState = Object.freeze({
     IDLE: "IDLE",
@@ -25,15 +26,35 @@ const GameState = Object.freeze({
 
 var gameState = GameState.IDLE;
 
-// --------------------------------------------------------------------
+// ------------------------------ CORE LOOP --------------------------
 // --- STARTUP / INIT ---
 (function init() {
+    pathTracker.clear();
     backgroundImage = new Image();
     overlayImage = new Image();
     hexMap = new HexMap(11, 15, hexSizeDefault, canvas);
     printBackground();
     render();
 })()
+
+
+function render() {
+    context.drawImage(backgroundImage, 0, 0);
+
+    let markerRadius = 10;
+    pathTracker.pathSet.forEach(hex => {
+        context.fillStyle = "#FF00FF"
+        context.beginPath();
+        context.arc(
+            hex.center.x,
+            hex.center.y,
+            markerRadius,
+            0,
+            2 * Math.PI);
+        context.fill();
+    });
+}
+
 // --------------------------------------------------------------------
 
 function updateGameState(newState) {
@@ -49,23 +70,33 @@ function printBackground() {
     backgroundImage.src = updatedSrc;
 }
 
-function render() {
-    context.drawImage(backgroundImage, 0, 0);
+function modifyHexPath(hex) {
 
-    let markerRadius = 10;
-    pathHexes.forEach(hex => {
-        context.fillStyle = "#FF00FF"
-        context.beginPath();
-        context.arc(
-            hex.center.x,
-            hex.center.y,
-            markerRadius,
-            0,
-            2 * Math.PI);
-        context.fill();
-    });
+    if (hex == null) {
+        return
+    }
+
+
+    if (pathTracker.size() == 0) {
+        pathTracker.add(hex);
+    } else if (pathTracker.size() == 1 && !pathTracker.has(hex)) {
+        pathTracker.add(hex);
+    } else {
+
+        let indexOfHex = pathTracker.indexOf(hex);
+
+        console.log(`indexOfHex: ${indexOfHex} size: ${pathTracker.size()}`);
+
+        if (pathTracker.has(hex) && pathTracker.indexOf(hex) != pathTracker.size() - 1) {
+            pathTracker.deleteHex(pathTracker.getAtIndex(indexOfHex + 1))
+        } else {
+            pathTracker.add(hex)
+        }
+    }
+
+    render();
+
 }
-
 
 
 // Prevent right-click from summoning the context menu
@@ -84,6 +115,7 @@ document.addEventListener('keydown', event => {
         case "Escape":
             console.log("Resetting...");
             hexMap.hexSize = hexSizeDefault;
+            pathTracker.clear();
             hexMap.initialize();
             render();
             break;
@@ -102,11 +134,7 @@ document.addEventListener('mousedown', event => {
         let hex = hexMap.findHexAtClick(event);
         if (hex != null) {
             updateGameState(GameState.UNIT_SELECT_MOVE);
-            hex.setIsSelected(!hex.isSelected);
-            if (!pathHexes.has(hex)) {
-                pathHexes.add(hex);
-                render();
-            }
+            modifyHexPath(hex);
         }
     }
 
@@ -123,7 +151,7 @@ document.addEventListener('mouseup', event => {
     }
 
     updateGameState(GameState.IDLE);
-    pathHexes.clear();
+    pathTracker.clear();
     render();
 
 });
@@ -134,13 +162,7 @@ document.addEventListener('mousemove', event => {
     switch (gameState) {
 
         case GameState.UNIT_SELECT_MOVE:
-
-            let hex = hexMap.findHexAtClick(event);
-            if (hex != null && !pathHexes.has(hex)) {
-                pathHexes.add(hex);
-                render();
-            }
-
+            modifyHexPath(hexMap.findHexAtClick(event));
             break;
 
         default:
@@ -164,7 +186,5 @@ document.addEventListener('wheel', event => {
     // hexMap.render(context);
 
 }, { passive: false });
-
-
 
 

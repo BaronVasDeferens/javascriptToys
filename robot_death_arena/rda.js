@@ -51,9 +51,18 @@ function printBackground() {
 
 function render() {
     context.drawImage(backgroundImage, 0, 0);
+
+    let markerRadius = 10;
     pathHexes.forEach(hex => {
         context.fillStyle = "#FF00FF"
-        context.fillRect(hex.center.x, hex.center.y, 10, 10);
+        context.beginPath();
+        context.arc(
+            hex.center.x,
+            hex.center.y,
+            markerRadius,
+            0,
+            2 * Math.PI);
+        context.fill();
     });
 }
 

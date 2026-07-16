@@ -26,7 +26,7 @@ const GameState = Object.freeze({
 
 var gameState = GameState.IDLE;
 
-// ------------------------------ CORE LOOP --------------------------
+// ------------------------------ BEGIN CORE LOOP --------------------------
 // --- STARTUP / INIT ---
 (function init() {
     pathTracker.clear();
@@ -55,7 +55,7 @@ function render() {
     });
 }
 
-// --------------------------------------------------------------------
+// ---------------------------- END CORE LOOP ------------------------------
 
 function updateGameState(newState) {
     if (newState != gameState) {
@@ -73,9 +73,9 @@ function printBackground() {
 function modifyHexPath(hex) {
 
     if (hex == null) {
-        return
+        console.error(`cannot modify hexPath: hex is NULL!`);
+        return;
     }
-
 
     if (pathTracker.size() == 0) {
         pathTracker.add(hex);
@@ -84,8 +84,6 @@ function modifyHexPath(hex) {
     } else {
 
         let indexOfHex = pathTracker.indexOf(hex);
-
-        console.log(`indexOfHex: ${indexOfHex} size: ${pathTracker.size()}`);
 
         if (pathTracker.has(hex) && pathTracker.indexOf(hex) != pathTracker.size() - 1) {
             pathTracker.deleteHex(pathTracker.getAtIndex(indexOfHex + 1))

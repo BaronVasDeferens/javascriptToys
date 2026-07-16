@@ -21,7 +21,13 @@ export class PathTracker {
     }
 
     add(hex) {
-        console.log(`add`)
+
+        if (hex == null) {
+            console.error(`cannot ADD NULL hex!`);
+            return;
+        }
+
+    
         if (!this.pathSet.has(hex)) {
             this.pathSet.add(hex);
             let position = this.pathSet.size - 1;
@@ -40,19 +46,22 @@ export class PathTracker {
 
 
     deleteHex(hex) {
-        console.log(`delete`)
+
+        if (hex == null) {
+            console.error(`cannot DELETE NULL hex!`)
+            return;
+        }
 
         let position = this.hexToOrderMap.get(hex);
-        for (let n = position; n <= this.pathSet.size - 1; n++) {
-            let currentHex = this.orderToHexMap.get(position);
+        let size = this.pathSet.size;
+        for (let n = position; n < size; n++) {
+            let currentHex = this.orderToHexMap.get(n);
             this.pathSet.delete(currentHex);
             this.hexToOrderMap.delete(currentHex);
         }
 
         for (let n = position; n < this.orderToHexMap.size; n++) {
-            this.orderToHexMap.delete(n)
+            this.orderToHexMap.delete(n);
         }
-        
-
     }
 }

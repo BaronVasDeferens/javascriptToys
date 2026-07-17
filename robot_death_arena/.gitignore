@@ -1,0 +1,18 @@
+
+# VSCode - machine specific
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
+
+# Keep settings.json tracked (remove this line if you change your mind)
+# .vscode/settings.json
+
+# Dependencies
+node_modules/
+
+# Browser-sync
+.firefox-debug-profile/
+
+# OS clutter
+.DS_Store
+Thumbs.db

@@ -1,4 +1,4 @@
-import { AssetManager, ImageAsset, ImageLoader, SoundAsset, SoundLoader } from "./assets.js";
+import { ImageAsset, SoundAsset } from "./ResourceManager.js";
 
 export class SoundPlayer {
 

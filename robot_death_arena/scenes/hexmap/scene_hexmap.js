@@ -2,6 +2,7 @@ import { Scene, SceneType } from "../scene.js";
 import { PathTracker } from "./pathtracker.js";
 import { HexMap } from "./hexmap.js";
 import { Hex } from "./hex.js";
+import { SoundAsset } from "../../resources/ResourceManager.js";
 
 const GameState = Object.freeze({
     IDLE: "IDLE",
@@ -59,19 +60,26 @@ export class HexMapScene extends Scene {
             return;
         }
 
+        let playSound = false;
+
         if (this.pathTracker.size() == 0) {
-            this.pathTracker.add(hex);
+            playSound = this.pathTracker.add(hex);
         } else if (this.pathTracker.size() == 1 && !this.pathTracker.has(hex)) {
-            this.pathTracker.add(hex);
+            playSound = this.pathTracker.add(hex);
         } else {
 
             let indexOfHex = this.pathTracker.indexOf(hex);
 
             if (this.pathTracker.has(hex) && this.pathTracker.indexOf(hex) != this.pathTracker.size() - 1) {
-                this.pathTracker.deleteHex(this.pathTracker.getAtIndex(indexOfHex + 1))
+                this.pathTracker.deleteHex(this.pathTracker.getAtIndex(indexOfHex + 1));
+                playSound = true;
             } else {
-                this.pathTracker.add(hex)
+                playSound = this.pathTracker.add(hex);
             }
+        }
+
+        if (playSound) {
+            this.soundPlayer.playOneShot(SoundAsset.CLICK);
         }
     }
 

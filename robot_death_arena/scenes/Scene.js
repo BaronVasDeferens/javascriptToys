@@ -11,6 +11,12 @@ export const SceneType = Object.freeze({
 
 export class Scene {
 
+    sceneType = null;
+    canvasPrimary = null;
+    canvasSecondary = null;
+    assetManager = null;
+    soundPlayer = null;
+
     backgroundImage = new Image();
 
     constructor(sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
@@ -38,7 +44,7 @@ export class Scene {
     }
 
     onMouseDownSecondary(event) {
-        
+
     }
 
     onMouseUp(click) {

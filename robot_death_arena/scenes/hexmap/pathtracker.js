@@ -27,13 +27,16 @@ export class PathTracker {
             return;
         }
 
-    
+        let wasItemAdded = false;
         if (!this.pathSet.has(hex)) {
             this.pathSet.add(hex);
             let position = this.pathSet.size - 1;
             this.orderToHexMap.set(position, hex);
             this.hexToOrderMap.set(hex, position);
+            wasItemAdded = true;
         }
+
+        return wasItemAdded;
     }
 
     getAtIndex(index) {

@@ -92,7 +92,8 @@ export class ImageLoader {
 
 export var SoundAsset = Object.freeze({
 
-    FROG_HOP: "frog.wav"
+    FROG_HOP: "frog.wav",
+    CLICK: "click.wav"
     
 });
 

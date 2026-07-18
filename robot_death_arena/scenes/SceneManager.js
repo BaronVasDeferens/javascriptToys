@@ -7,6 +7,11 @@ import { HexMapScene } from "./hexmap/scene_hexmap.js"
 
 export class SceneManager {
 
+    canvasPrimary = null;
+    tileSize = null;
+    assetManager = null;
+    soundPlayer = null;
+
     sceneMap = new Map();
     currentSceneType = SceneType.NO_SCENE;
 
@@ -23,7 +28,7 @@ export class SceneManager {
         // !!! IMPORTANT !!!
         // This method should only be called after the assetManager has been initialized!
         this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvasPrimary, null, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.HEX_MAP, new HexMapScene (this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.HEX_MAP, new HexMapScene(this.canvasPrimary, null, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {
@@ -32,7 +37,7 @@ export class SceneManager {
 
             // Create a transition
             this.transitions.push(
-                
+
                 new FadeTransition(
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),

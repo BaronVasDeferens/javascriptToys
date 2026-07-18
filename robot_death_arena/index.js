@@ -1,6 +1,7 @@
 import { ResourceManager } from "./resources/ResourceManager.js";
 import { SceneType } from "./scenes/scene.js";
 import { SceneManager } from "./scenes/SceneManager.js";
+import { SoundPlayer } from "./resources/SoundPlayer.js";
 
 
 // ------------------------------------- HTML ELEMENTS -------------------------------------
@@ -9,11 +10,12 @@ const canvasPrimary = document.getElementById('primary');
 const contextPrimary = canvasPrimary.getContext('2d');
 
 var audioContext = new AudioContext(); // AudioContext must be initialized after interactions
+var soundPlayer = null;
 
 const tileSize = 64;
 
 const resourceManager = new ResourceManager(audioContext);
-const sceneManager = new SceneManager(canvasPrimary, null, tileSize, resourceManager, null);
+const sceneManager = new SceneManager(canvasPrimary, null, tileSize, resourceManager, soundPlayer);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------
@@ -37,7 +39,8 @@ var lastRenderMillis = Date.now();
 var setup = function () {
     updateStage(Stage.LOAD_START);
     resourceManager.loadAssets(() => {
-
+        soundPlayer = new SoundPlayer(resourceManager, audioContext);
+        sceneManager.soundPlayer = soundPlayer;
         sceneManager.initialize();
 
         updateStage(Stage.LOAD_COMPLETE);

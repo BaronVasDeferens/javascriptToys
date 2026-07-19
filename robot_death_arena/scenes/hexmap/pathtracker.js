@@ -1,3 +1,4 @@
+import { Pip, PipType } from "./pip.js";
 
 
 export class PathTracker {
@@ -5,6 +6,8 @@ export class PathTracker {
     pathSet = new Set();
     orderToHexMap = new Map();
     hexToOrderMap = new Map();
+
+    pips = [];
 
     size() {
         return this.pathSet.size;
@@ -14,6 +17,7 @@ export class PathTracker {
         this.pathSet.clear();
         this.orderToHexMap.clear();
         this.hexToOrderMap.clear();
+        this.pips = [];
     }
 
     has(hex) {
@@ -33,6 +37,7 @@ export class PathTracker {
             let position = this.pathSet.size - 1;
             this.orderToHexMap.set(position, hex);
             this.hexToOrderMap.set(hex, position);
+            this.computePips();
             wasItemAdded = true;
         }
 
@@ -46,7 +51,6 @@ export class PathTracker {
     indexOf(hex) {
         return this.hexToOrderMap.get(hex);
     }
-
 
     deleteHex(hex) {
 
@@ -66,5 +70,22 @@ export class PathTracker {
         for (let n = position; n < this.orderToHexMap.size; n++) {
             this.orderToHexMap.delete(n);
         }
+
+        this.computePips();
+    }
+
+    computePips() {
+        this.pips = [];
+        this.pathSet.values().forEach((hex, index) => {
+
+            let type = PipType.TRIANGLE_FILLED;
+            if (index == 0) {
+                type = PipType.CIRCLE_OUTLINE;
+            }
+
+            this.pips.push(
+                new Pip(hex, type, null)
+            )
+        });
     }
 }

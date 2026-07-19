@@ -94,16 +94,8 @@ export class HexMapScene extends Scene {
         context.drawImage(this.backgroundImage, 0, 0);
 
         let markerRadius = 10;
-        this.pathTracker.pathSet.forEach(hex => {
-            context.fillStyle = "#FF00FF"
-            context.beginPath();
-            context.arc(
-                hex.center.x,
-                hex.center.y,
-                markerRadius,
-                0,
-                2 * Math.PI);
-            context.fill();
+        this.pathTracker.pips.forEach( pip => {
+            pip.render(context)
         });
     }
 

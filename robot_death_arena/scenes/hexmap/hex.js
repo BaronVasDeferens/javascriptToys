@@ -95,7 +95,7 @@ export class Hex {
             context.lineWidth = 2;
             context.stroke();
         } else {
-            context.strokeStyle = "#FF0000";
+            context.strokeStyle = this.colorOutline;
             context.lineWidth = 2;
             context.stroke();
         }

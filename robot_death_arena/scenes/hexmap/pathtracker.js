@@ -78,7 +78,7 @@ export class PathTracker {
         this.pips = [];
         this.pathSet.values().forEach((hex, index) => {
 
-            let type = PipType.TRIANGLE_FILLED;
+            let type = PipType.CIRCLE_FILLED;
             if (index == 0) {
                 type = PipType.CIRCLE_OUTLINE;
             }

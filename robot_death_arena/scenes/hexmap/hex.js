@@ -13,6 +13,8 @@ export const HexFace = Object.freeze({
 
 export class Hex {
 
+    id = crypto.randomUUID();
+
     colorOutline = '#777777'
     colorSelected = "#FF0000"
 

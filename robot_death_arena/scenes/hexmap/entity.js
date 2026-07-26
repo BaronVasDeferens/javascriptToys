@@ -1,4 +1,4 @@
-
+import { ImageAsset } from "../../resources/ResourceManager.js";
 
 export class Entity {
 
@@ -13,14 +13,14 @@ export class Entity {
     image = null;
     imageAssetId = null;
 
-    constructor(imageAssetId, assetManager) {
-        this.assetManager = assetManager;
-        this.setImage(imageAssetId);
+    constructor(imageAssetId, resourceManager) {
+        this.resourceManager = resourceManager;
+        this.imageAssetId = imageAssetId;
+        this.setImage(this.imageAssetId);
     }
 
-    setImage(imageAssetId) {
-        this.imageAssetId = imageAssetId;
-        this.image = this.assetManager.getImage(imageAssetId);
+    setImage(assetId) {
+        this.image = this.resourceManager.getImage(assetId);
     }
 
     toggleDebug() {

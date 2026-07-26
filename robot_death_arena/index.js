@@ -15,7 +15,7 @@ var soundPlayer = null;
 const tileSize = 64;
 
 const resourceManager = new ResourceManager(audioContext);
-const sceneManager = new SceneManager(canvasPrimary, null, tileSize, resourceManager, soundPlayer);
+const sceneManager = new SceneManager(canvasPrimary, tileSize, resourceManager, soundPlayer);
 
 
 // ------------------------------------- GAME DETAILS -------------------------------------

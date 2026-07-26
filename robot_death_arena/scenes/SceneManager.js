@@ -9,7 +9,7 @@ export class SceneManager {
 
     canvasPrimary = null;
     tileSize = null;
-    assetManager = null;
+    resourceManager = null;
     soundPlayer = null;
 
     sceneMap = new Map();
@@ -17,18 +17,18 @@ export class SceneManager {
 
     transitions = [];
 
-    constructor(canvasPrimary, tileSize, assetManager, soundPlayer) {
+    constructor(canvasPrimary, tileSize, resourceManager, soundPlayer) {
         this.canvasPrimary = canvasPrimary;
         this.tileSize = tileSize;
-        this.assetManager = assetManager;
+        this.resourceManager = resourceManager;
         this.soundPlayer = soundPlayer;
     }
 
     initialize() {
         // !!! IMPORTANT !!!
-        // This method should only be called after the assetManager has been initialized!
-        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvasPrimary, null, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.HEX_MAP, new HexMapScene(this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        // This method should only be called after the resourceManager has been initialized!
+        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvasPrimary, null, this.resourceManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.HEX_MAP, new HexMapScene(this.canvasPrimary, null, this.resourceManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {

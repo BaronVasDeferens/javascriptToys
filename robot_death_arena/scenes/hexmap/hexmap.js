@@ -151,4 +151,11 @@ export class HexMap {
         }
     }
 
+    getRandomHex() {
+        return this.getHex(
+            Math.floor(Math.random() * this.rows),
+            Math.floor(Math.random() * this.cols)
+        )
+    }
+
 }

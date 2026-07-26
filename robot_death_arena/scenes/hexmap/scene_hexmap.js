@@ -2,7 +2,9 @@ import { Scene, SceneType } from "../scene.js";
 import { PathTracker } from "./pathtracker.js";
 import { HexMap } from "./hexmap.js";
 import { Hex } from "./hex.js";
-import { SoundAsset } from "../../resources/ResourceManager.js";
+import { ImageAsset, SoundAsset } from "../../resources/ResourceManager.js";
+import { EntityPositionManager } from "./entitypositionmanager.js";
+import { Entity } from "./entity.js";
 
 const GameState = Object.freeze({
     IDLE: "IDLE",
@@ -15,13 +17,17 @@ export class HexMapScene extends Scene {
 
     hexMap = null;
     hexSizeDefault = 42;
+
+    entityPositionMgr = new EntityPositionManager();
+    entities = [];
+
     pathTracker = new PathTracker();
 
     backgroundImage = null;
     overlayImage = null;
 
-    constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
-        super(SceneType.HEX_MAP, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
+    constructor(canvasPrimary, canvasSecondary, resourceManager, soundPlayer) {
+        super(SceneType.HEX_MAP, canvasPrimary, canvasSecondary, resourceManager, soundPlayer);
     }
 
     onStart() {
@@ -33,11 +39,29 @@ export class HexMapScene extends Scene {
     }
 
     initialize() {
-        this.pathTracker.clear();
+
+        this.entities = [];
+
         this.backgroundImage = new Image();
         this.overlayImage = new Image();
+
         this.hexMap = new HexMap(11, 15, this.hexSizeDefault, this.canvasPrimary);
         this.printBackground();
+
+        this.pathTracker.clear();
+
+        this.entityPositionMgr.clear();
+        this.entityPositionMgr.setHexes(this.hexMap.hexes);
+
+
+
+        let testEntity = new Entity(ImageAsset.FROG, this.resourceManager);
+        this.entities.push(testEntity);
+        this.entityPositionMgr.addEntity(testEntity);
+        let testHex = this.hexMap.getRandomHex();
+        this.entityPositionMgr.setEntityHex(testEntity, testHex);
+
+
     }
 
     updateGameState(newState) {
@@ -93,8 +117,12 @@ export class HexMapScene extends Scene {
         context.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
         context.drawImage(this.backgroundImage, 0, 0);
 
+        this.entities.forEach( entity => {
+            entity.render(context);
+        })
+
         let markerRadius = 10;
-        this.pathTracker.pips.forEach( pip => {
+        this.pathTracker.pips.forEach(pip => {
             pip.render(context)
         });
     }

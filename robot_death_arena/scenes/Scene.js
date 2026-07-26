@@ -14,16 +14,16 @@ export class Scene {
     sceneType = null;
     canvasPrimary = null;
     canvasSecondary = null;
-    assetManager = null;
+    resourceManager = null;
     soundPlayer = null;
 
     backgroundImage = new Image();
 
-    constructor(sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+    constructor(sceneType, canvasPrimary, canvasSecondary, resourceManager, soundPlayer) {
         this.sceneType = sceneType;
         this.canvasPrimary = canvasPrimary;
         this.canvasSecondary = canvasSecondary;
-        this.assetManager = assetManager;
+        this.resourceManager = resourceManager;
         this.soundPlayer = soundPlayer;
     }
 

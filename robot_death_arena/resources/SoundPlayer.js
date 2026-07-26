@@ -6,8 +6,8 @@ export class SoundPlayer {
 
     backgroundMusic = null;
 
-    constructor(assetManager, audioContext) {
-        this.assetManager = assetManager;
+    constructor(resourceManager, audioContext) {
+        this.resourceManager = resourceManager;
         this.audioContext = audioContext;
     }
 
@@ -24,7 +24,7 @@ export class SoundPlayer {
 
     playBackgroundMusic(soundAsset) {
         this.stopBackgroundMusic();
-        this.backgroundMusic = this.assetManager.getSound(soundAsset);
+        this.backgroundMusic = this.resourceManager.getSound(soundAsset);
         this.backgroundMusic.start();
     }
 
@@ -36,7 +36,7 @@ export class SoundPlayer {
     }
 
     playOneShot(soundAsset, onComplete) {
-        let sound = this.assetManager.getSound(soundAsset, false);
+        let sound = this.resourceManager.getSound(soundAsset, false);
 
         if (onComplete != null) {
             sound.addEventListener("ended", evt => {
@@ -48,7 +48,7 @@ export class SoundPlayer {
     }
 
     playOneShotWithDetuneRange(soundAsset, detuneMin, detuneMax) {
-        let sound = this.assetManager.getSound(soundAsset, false);
+        let sound = this.resourceManager.getSound(soundAsset, false);
         sound.detune.value = this.randomInRange(detuneMin, detuneMax);
         sound.start();
     }
@@ -66,10 +66,10 @@ export class SoundLooper {
     buffer = null;
     source = null;
 
-    constructor(soundAsset, assetManager, audioContext) {
-        this.assetManager = assetManager;
+    constructor(soundAsset, resourceManager, audioContext) {
+        this.resourceManager = resourceManager;
         this.audioContext = audioContext;
-        this.buffer = this.assetManager.getBuffer(soundAsset);
+        this.buffer = this.resourceManager.getBuffer(soundAsset);
     }
 
     play() {

@@ -4,7 +4,8 @@ export const PipType = Object.freeze({
     CIRCLE_OUTLINE: "CIRCLE_OUTLINE",
     CIRCLE_FILLED: "CIRCLE_FILLED",
     TRIANGLE_OUTLINE: "TRIANGLE_OUTLINE",
-    TRIANGLE_FILLED: "TRIANGLE_FILLED"
+    TRIANGLE_FILLED: "TRIANGLE_FILLED",
+    HEX_OUTLINE: "HEX_OUTLINE"
 });
 
 
@@ -108,6 +109,25 @@ export class Pip {
                         this.radius,
                         0,
                         2 * Math.PI);
+                    context.stroke();
+                }
+
+                break;
+
+            case PipType.HEX_OUTLINE:
+
+                this.render = function (context) {
+                    context.beginPath();
+                    context.moveTo(this.hex.points[0].x, this.hex.points[0].y);
+                    context.lineTo(this.hex.points[1].x, this.hex.points[1].y);
+                    context.lineTo(this.hex.points[2].x, this.hex.points[2].y);
+                    context.lineTo(this.hex.points[3].x, this.hex.points[3].y);
+                    context.lineTo(this.hex.points[4].x, this.hex.points[4].y);
+                    context.lineTo(this.hex.points[5].x, this.hex.points[5].y);
+                    context.closePath();
+
+                    context.strokeStyle = "#FF00FF";
+                    context.lineWidth = 2;
                     context.stroke();
                 }
 

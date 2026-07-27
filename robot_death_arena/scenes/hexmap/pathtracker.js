@@ -80,7 +80,7 @@ export class PathTracker {
 
             let type = PipType.CIRCLE_FILLED;
             if (index == 0) {
-                type = PipType.CIRCLE_OUTLINE;
+                type = PipType.HEX_OUTLINE;
             }
 
             this.pips.push(

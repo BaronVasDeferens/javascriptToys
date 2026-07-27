@@ -26,6 +26,8 @@ export class HexMapScene extends Scene {
     backgroundImage = null;
     overlayImage = null;
 
+    selectedEntity = null;
+
     constructor(canvasPrimary, canvasSecondary, resourceManager, soundPlayer) {
         super(SceneType.HEX_MAP, canvasPrimary, canvasSecondary, resourceManager, soundPlayer);
     }
@@ -54,13 +56,11 @@ export class HexMapScene extends Scene {
         this.entityPositionMgr.setHexes(this.hexMap.hexes);
 
 
-
         let testEntity = new Entity(ImageAsset.FROG, this.resourceManager);
         this.entities.push(testEntity);
         this.entityPositionMgr.addEntity(testEntity);
         let testHex = this.hexMap.getRandomHex();
         this.entityPositionMgr.setEntityHex(testEntity, testHex);
-
 
     }
 
@@ -112,12 +112,13 @@ export class HexMapScene extends Scene {
     }
 
     render(context, contextSecondary) {
+        
         context.fillStyle = "#000000";
         context.globalAlpha = 1.0;
         context.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
         context.drawImage(this.backgroundImage, 0, 0);
 
-        this.entities.forEach( entity => {
+        this.entities.forEach(entity => {
             entity.render(context);
         })
 
@@ -155,7 +156,9 @@ export class HexMapScene extends Scene {
         if (event.button == 0) {
 
             let hex = this.hexMap.findHexAtClick(event);
-            if (hex != null) {
+            let entity = this.entityPositionMgr.getEntityForHex(hex);
+            if (entity != null) {
+                this.selectedEntity = entity;
                 this.updateGameState(GameState.UNIT_SELECT_MOVE);
                 this.modifyHexPath(hex);
             }
@@ -165,12 +168,15 @@ export class HexMapScene extends Scene {
     onMouseUp(event) {
 
         if (event.button == 0) {
-            let hex = this.hexMap.findHexAtClick(event);
-            if (hex != null) {
+            let destinationHex = this.hexMap.findHexAtClick(event);
+            let residentEntity = this.entityPositionMgr.getEntityForHex(destinationHex);
+            if (this.selectedEntity!= null && destinationHex != null && residentEntity == null) {
                 // TODO: Trigger movement
+                this.entityPositionMgr.setEntityHex(this.selectedEntity, destinationHex);
             }
         }
 
+        this.selectedEntity = null;
         this.updateGameState(GameState.IDLE);
         this.pathTracker.clear();
     }

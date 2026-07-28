@@ -59,6 +59,9 @@ export class HexMap {
 
         context.fillStyle = "#000000";
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        context.globalAlpha = 0.75;
+
         this.hexesFlat.forEach(hex => {
             hex.render(context)
         });

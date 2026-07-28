@@ -15,8 +15,8 @@ export class Hex {
 
     id = crypto.randomUUID();
 
-    colorOutline = '#777777'
-    colorSelected = "#FF0000"
+    colorOutline =  "#000000"; // "#777777";
+    colorSelected = "#FF0000";
 
     image = null;
 

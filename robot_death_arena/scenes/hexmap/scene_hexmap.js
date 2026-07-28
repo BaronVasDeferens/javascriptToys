@@ -56,11 +56,14 @@ export class HexMapScene extends Scene {
         this.entityPositionMgr.setHexes(this.hexMap.hexes);
 
 
-        let testEntity = new Entity(ImageAsset.FROG, this.resourceManager);
-        this.entities.push(testEntity);
-        this.entityPositionMgr.addEntity(testEntity);
-        let testHex = this.hexMap.getRandomHex();
-        this.entityPositionMgr.setEntityHex(testEntity, testHex);
+        for (let n = 0; n < 5; n++) {
+            let testEntity = new Entity(ImageAsset.FROG, this.resourceManager);
+            this.entities.push(testEntity);
+            this.entityPositionMgr.addEntity(testEntity);
+            let testHex = this.hexMap.getRandomHex();
+            this.entityPositionMgr.setEntityHex(testEntity, testHex);
+        }
+
 
     }
 
@@ -112,12 +115,13 @@ export class HexMapScene extends Scene {
     }
 
     render(context, contextSecondary) {
-        
+
         context.fillStyle = "#000000";
-        context.globalAlpha = 1.0;
+        context.globalAlpha = 0.75;
         context.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
         context.drawImage(this.backgroundImage, 0, 0);
 
+        context.globalAlpha = 1.0;
         this.entities.forEach(entity => {
             entity.render(context);
         })
@@ -170,7 +174,7 @@ export class HexMapScene extends Scene {
         if (event.button == 0) {
             let destinationHex = this.hexMap.findHexAtClick(event);
             let residentEntity = this.entityPositionMgr.getEntityForHex(destinationHex);
-            if (this.selectedEntity!= null && destinationHex != null && residentEntity == null) {
+            if (this.selectedEntity != null && destinationHex != null && residentEntity == null) {
                 // TODO: Trigger movement
                 this.entityPositionMgr.setEntityHex(this.selectedEntity, destinationHex);
             }

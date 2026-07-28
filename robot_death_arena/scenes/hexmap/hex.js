@@ -98,7 +98,7 @@ export class Hex {
     render(context) {
 
         context.strokeStyle = this.colorOutline;
-        context.lineWidth = 2;
+        context.lineWidth = 3;
         context.stroke(this.path);
 
         context.save();

@@ -47,7 +47,13 @@ export class ResourceManager {
 export var ImageAsset = Object.freeze({
 
     FROG: "4071_zx.png",
-    TEST: "test_84x84.png"
+    JUNGLE_1: "jungle_1_84x84.png",
+    JUNGLE_2: "jungle_2_84x84.png",
+    JUNGLE_3: "jungle_3_84x84.png",
+    JUNGLE_4: "jungle_4_84x84.png",
+    JUNGLE_5: "jungle_5_84x84.png",
+    JUNGLE_6: "jungle_6_84x84.png",
+    TEST: "sand_84x84.png"
 
 });
 

@@ -27,11 +27,21 @@ export class HexMap {
     }
 
     initialize() {
+
+        let imageIds = [
+            ImageAsset.JUNGLE_1,
+            ImageAsset.JUNGLE_2,
+            ImageAsset.JUNGLE_3,
+            ImageAsset.JUNGLE_4,
+            ImageAsset.JUNGLE_5,
+            ImageAsset.JUNGLE_6,
+        ];
+
         this.map = [];
         for (let i = 0; i < this.rows; i++) {
             this.hexes[i] = new Array(this.rows);
             for (let j = 0; j < this.cols; j++) {
-                this.hexes[i][j] = new Hex(i, j, this.hexSize, this.resourceManager.getImage(ImageAsset.TEST));
+                this.hexes[i][j] = new Hex(i, j, this.hexSize, this.resourceManager.getImage(imageIds[Math.floor(imageIds.length * Math.random())]));
             }
         }
         this.hexesFlat = this.hexes.flat();
@@ -125,7 +135,7 @@ export class HexMap {
     getAdjacentHexes(hex) {
 
         switch (hex.col % 2) {
-            
+
             case 0:
                 return [
                     this.getHex(hex.row - 1, hex.col),

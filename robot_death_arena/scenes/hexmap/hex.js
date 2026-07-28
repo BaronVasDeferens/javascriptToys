@@ -18,6 +18,8 @@ export class Hex {
     colorOutline = '#777777'
     colorSelected = "#FF0000"
 
+    image = null;
+
     isSelected = false;
     isDebug = false;
 
@@ -26,10 +28,13 @@ export class Hex {
     points = [];
 
     halfSize = 0;
+    hexWidth = 0;
+    hexHeight = 0;
 
-    constructor(row, col, hexSize) {
+    constructor(row, col, hexSize, image) {
         this.row = row;
         this.col = col;
+        this.image = image;
         this.setSize(hexSize);
         this.computePoints;
     }
@@ -56,6 +61,15 @@ export class Hex {
             x: this.points[0].x + this.halfSize,
             y: this.points[5].y
         }
+
+        this.path = new Path2D();
+        this.path.moveTo(this.points[0].x, this.points[0].y);
+        this.path.lineTo(this.points[1].x, this.points[1].y);
+        this.path.lineTo(this.points[2].x, this.points[2].y);
+        this.path.lineTo(this.points[3].x, this.points[3].y);
+        this.path.lineTo(this.points[4].x, this.points[4].y);
+        this.path.lineTo(this.points[5].x, this.points[5].y);
+        this.path.closePath();
     }
 
     setIsSelected(isSelected) {
@@ -66,6 +80,10 @@ export class Hex {
     setSize(newSize) {
         this.hexSize = newSize;
         this.halfSize = this.hexSize / 2;
+        this.hexWidth = 2 * this.hexSize;
+        this.hexHeight = 2 * this.hexSize * 0.8660;
+        this.xOffset = (this.image.width - this.hexWidth) / 2;
+        this.yOffset = (this.image.height - this.hexHeight) / 2;
         this.computePoints();
     }
 
@@ -79,29 +97,14 @@ export class Hex {
 
     render(context) {
 
-        // Draw hex
-        context.beginPath();
-        context.moveTo(this.points[0].x, this.points[0].y);
-        context.lineTo(this.points[1].x, this.points[1].y);
-        context.lineTo(this.points[2].x, this.points[2].y);
-        context.lineTo(this.points[3].x, this.points[3].y);
-        context.lineTo(this.points[4].x, this.points[4].y);
-        context.lineTo(this.points[5].x, this.points[5].y);
-        context.closePath();
+        context.strokeStyle = this.colorOutline;
+        context.lineWidth = 2;
+        context.stroke(this.path);
 
-        if (this.isSelected) {
-            context.fillStyle = this.colorSelected
-            context.fill();
-
-            context.strokeStyle = "#000000";
-            context.lineWidth = 2;
-            context.stroke();
-        } else {
-            context.strokeStyle = this.colorOutline;
-            context.lineWidth = 2;
-            context.stroke();
-        }
-
+        context.save();
+        context.clip(this.path);
+        context.drawImage(this.image, this.points[0].x - this.halfSize - this.xOffset, this.points[0].y - this.yOffset);
+        context.restore();
 
         if (this.isDebug) {
             // Draw center point

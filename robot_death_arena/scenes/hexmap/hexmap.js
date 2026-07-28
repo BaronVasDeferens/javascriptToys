@@ -1,10 +1,11 @@
+import { ImageAsset } from "../../resources/ResourceManager.js";
 import { Hex } from "./hex.js";
 
 export class HexMap {
 
     rows = 10;
     cols = 10;
-    hexSize = 50;
+    hexSize = 42;
     zoomFactor = 4;
 
     isDebug = false;
@@ -15,10 +16,11 @@ export class HexMap {
     // hexesFlat: a flat list of hexes
     hexesFlat = [];
 
-    constructor(rows, cols, hexSize, canvas) {
+    constructor(rows, cols, hexSize, resourceManager, canvas) {
         this.rows = rows;
         this.cols = cols;
         this.hexSize = hexSize;
+        this.resourceManager = resourceManager;
         this.canvas = canvas;
         this.boundingRectangle = canvas.getBoundingClientRect();
         this.initialize();
@@ -28,8 +30,8 @@ export class HexMap {
         this.map = [];
         for (let i = 0; i < this.rows; i++) {
             this.hexes[i] = new Array(this.rows);
-            for (var j = 0; j < this.cols; j++) {
-                this.hexes[i][j] = new Hex(i, j, this.hexSize);
+            for (let j = 0; j < this.cols; j++) {
+                this.hexes[i][j] = new Hex(i, j, this.hexSize, this.resourceManager.getImage(ImageAsset.TEST));
             }
         }
         this.hexesFlat = this.hexes.flat();

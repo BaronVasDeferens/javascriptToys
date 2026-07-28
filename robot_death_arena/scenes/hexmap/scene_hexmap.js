@@ -47,7 +47,7 @@ export class HexMapScene extends Scene {
         this.backgroundImage = new Image();
         this.overlayImage = new Image();
 
-        this.hexMap = new HexMap(11, 15, this.hexSizeDefault, this.canvasPrimary);
+        this.hexMap = new HexMap(11, 15, this.hexSizeDefault, this.resourceManager, this.canvasPrimary);
         this.printBackground();
 
         this.pathTracker.clear();

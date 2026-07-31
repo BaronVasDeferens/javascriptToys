@@ -198,4 +198,17 @@ export class HexMapScene extends Scene {
         }
 
     }
+
+    onMouseWheel(event) {
+
+        // Do nothing for now!
+
+        // if (event.wheelDelta > 0) {
+        //     this.hexMap.increaseSize();
+        // } else {
+        //     this.hexMap.decreaseSize();
+        // }
+
+        // this.printBackground();
+    }
 }

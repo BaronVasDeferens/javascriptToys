@@ -222,3 +222,8 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('visibilitychange', () => {
     sceneManager.onVisibilityStateChanged(document.visibilityState)
 });
+
+document.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    sceneManager.onMouseWheel(event);
+}, { passive: false });

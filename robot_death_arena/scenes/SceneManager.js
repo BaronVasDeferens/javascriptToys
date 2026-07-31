@@ -112,6 +112,10 @@ export class SceneManager {
         this.getCurrentScene().onMouseMoveSecondary(event);
     }
 
+    onMouseWheel(event) {
+        this.getCurrentScene().onMouseWheel(event);
+    }
+
     onKeyPressed(event) {
 
         if (this.getCurrentScene() == null) {

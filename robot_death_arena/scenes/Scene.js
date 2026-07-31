@@ -59,6 +59,10 @@ export class Scene {
 
     }
 
+    onMouseWheel(event) {
+        
+    }
+
     onKeyPressed(event) {
 
     }

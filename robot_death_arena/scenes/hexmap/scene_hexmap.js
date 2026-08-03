@@ -192,34 +192,56 @@ export class HexMapScene extends Scene {
     onMouseUp(event) {
 
         if (this.gameState != GameState.UNIT_SELECT_MOVE) {
-            return
+            return;
         }
 
         if (event.button == 0) {
+
             let destinationHex = this.hexMap.findHexAtClick(event);
+
+            if (this.selectedEntity == null || destinationHex == null) {
+                this.pathTracker.clear();
+                this.updateGameState(GameState.IDLE);
+                return;
+            }
+
+            if (this.pathTracker.getPath().length <= 1) {
+                this.pathTracker.clear();
+                this.updateGameState(GameState.IDLE);
+                return;
+            }
+
             let residentEntity = this.entityPositionMgr.getEntityForHex(destinationHex);
-            if (this.selectedEntity != null && destinationHex != null && residentEntity == null) {
-                // TODO: Trigger movement
-                //this.entityPositionMgr.setEntityHex(this.selectedEntity, destinationHex);
+            if (residentEntity == null) {
 
                 this.updateGameState(GameState.ANIMATING);
+
                 let entity = this.selectedEntity;
-                this.pathTracker.getPath().forEach(hex => {
+                let path = this.pathTracker.getPath();
+
+                // For each node in the path, create a MotionDriver that moves the entity
+                for (let index = 0; index < path.length - 1; index++) {
+
+                    let source = path[index];
+                    let destination = path[index + 1];
 
                     this.drivers.push(
 
                         new EntityMotionDriver(
                             this.selectedEntity,
-                            hex,
-                            500,
+                            source,
+                            destination,
+                            100,
                             () => { },
                             () => {
-                                this.entityPositionMgr.setEntityHex(entity, hex);
+                                this.entityPositionMgr.setEntityHex(entity, destination);
                             }
                         )
                     )
-                });
 
+                }
+
+                // Once the MotionDrivers have completed, update the GameState
                 this.drivers.push(
                     new Driver(
                         0,
@@ -234,7 +256,6 @@ export class HexMapScene extends Scene {
         }
 
         this.pathTracker.clear();
-
     }
 
     onMouseMove(event) {

@@ -33,15 +33,15 @@ export class EntityMotionDriver extends Driver {
 
     progress = 0;
 
-    constructor(entity, destinationHex, durationMillis, onUpdate, onComplete) {
+    constructor(entity, sourceHex, destinationHex, durationMillis, onUpdate, onComplete) {
         super(durationMillis, onUpdate, onComplete);
         this.entity = entity;
-        this.destinationX = destinationHex.center.x - (entity.image.width / 2);
-        this.destinationY = destinationHex.center.y - (entity.image.height / 2);
+        this.destinationX = destinationHex.center.x;
+        this.destinationY = destinationHex.center.y;
         this.destinationHex = destinationHex;
 
-        this.totalDistanceX = (this.destinationX - this.entity.x);
-        this.totalDistanceY = (this.destinationY - this.entity.y);
+        this.totalDistanceX = (this.destinationX - sourceHex.center.x);
+        this.totalDistanceY = (this.destinationY - sourceHex.center.y);
         this.speedX = this.totalDistanceX / this.durationMillis;
         this.speedY = this.totalDistanceY / this.durationMillis;
     }

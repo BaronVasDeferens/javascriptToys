@@ -75,9 +75,7 @@ export class PathTracker {
     }
 
     getPath() {
-        let path = [...this.pathSet.values()];
-        path.shift();
-        return path;
+        return [...this.pathSet.values()];
     }
 
     computePips() {

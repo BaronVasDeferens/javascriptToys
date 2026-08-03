@@ -74,6 +74,12 @@ export class PathTracker {
         this.computePips();
     }
 
+    getPath() {
+        let path = [...this.pathSet.values()];
+        path.shift();
+        return path;
+    }
+
     computePips() {
         this.pips = [];
         this.pathSet.values().forEach((hex, index) => {

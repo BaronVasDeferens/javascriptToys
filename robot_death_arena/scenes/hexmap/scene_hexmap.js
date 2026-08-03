@@ -5,10 +5,12 @@ import { Hex } from "./hex.js";
 import { ImageAsset, SoundAsset } from "../../resources/ResourceManager.js";
 import { EntityPositionManager } from "./entitypositionmanager.js";
 import { Entity } from "./entity.js";
+import { Driver, EntityMotionDriver, EntityMovementMultiDriver } from "../../drivers/drivers.js";
 
 const GameState = Object.freeze({
     IDLE: "IDLE",
-    UNIT_SELECT_MOVE: "UNIT_SELECT_MOVE"
+    UNIT_SELECT_MOVE: "UNIT_SELECT_MOVE",
+    ANIMATING: "ANIMATING"
 });
 
 export class HexMapScene extends Scene {
@@ -28,6 +30,8 @@ export class HexMapScene extends Scene {
 
     selectedEntity = null;
 
+    drivers = [];
+
     constructor(canvasPrimary, canvasSecondary, resourceManager, soundPlayer) {
         super(SceneType.HEX_MAP, canvasPrimary, canvasSecondary, resourceManager, soundPlayer);
     }
@@ -41,6 +45,10 @@ export class HexMapScene extends Scene {
     }
 
     initialize() {
+
+        this.updateGameState(GameState.IDLE);
+
+        this.drivers = [];
 
         this.entities = [];
 
@@ -112,6 +120,14 @@ export class HexMapScene extends Scene {
 
     update(delta) {
 
+        let driver = this.drivers[0];
+        if (driver != null) {
+            if (driver.isFinished == true) {
+                this.drivers.shift();
+            } else {
+                driver.update(delta);
+            }
+        }
     }
 
     render(context, contextSecondary) {
@@ -157,6 +173,10 @@ export class HexMapScene extends Scene {
 
         event.preventDefault();
 
+        if (this.gameState != GameState.IDLE) {
+            return
+        }
+
         if (event.button == 0) {
 
             let hex = this.hexMap.findHexAtClick(event);
@@ -171,18 +191,50 @@ export class HexMapScene extends Scene {
 
     onMouseUp(event) {
 
+        if (this.gameState != GameState.UNIT_SELECT_MOVE) {
+            return
+        }
+
         if (event.button == 0) {
             let destinationHex = this.hexMap.findHexAtClick(event);
             let residentEntity = this.entityPositionMgr.getEntityForHex(destinationHex);
             if (this.selectedEntity != null && destinationHex != null && residentEntity == null) {
                 // TODO: Trigger movement
-                this.entityPositionMgr.setEntityHex(this.selectedEntity, destinationHex);
+                //this.entityPositionMgr.setEntityHex(this.selectedEntity, destinationHex);
+
+                this.updateGameState(GameState.ANIMATING);
+                let entity = this.selectedEntity;
+                this.pathTracker.getPath().forEach(hex => {
+
+                    this.drivers.push(
+
+                        new EntityMotionDriver(
+                            this.selectedEntity,
+                            hex,
+                            500,
+                            () => { },
+                            () => {
+                                this.entityPositionMgr.setEntityHex(entity, hex);
+                            }
+                        )
+                    )
+                });
+
+                this.drivers.push(
+                    new Driver(
+                        0,
+                        () => { },
+                        () => {
+                            this.selectedEntity = null;
+                            this.updateGameState(GameState.IDLE);
+                        }
+                    )
+                )
             }
         }
 
-        this.selectedEntity = null;
-        this.updateGameState(GameState.IDLE);
         this.pathTracker.clear();
+
     }
 
     onMouseMove(event) {

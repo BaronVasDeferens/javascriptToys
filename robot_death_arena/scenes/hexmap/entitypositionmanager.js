@@ -50,8 +50,9 @@ export class EntityPositionManager {
             this.hexIdToEntityId.delete(oldHexId);
         }
 
-        entity.x = hex.center.x - (entity.image.width / 2);
-        entity.y = hex.center.y - (entity.image.height / 2);
+        // entity.x = hex.center.x - (entity.image.width / 2);
+        // entity.y = hex.center.y - (entity.image.height / 2);
+        entity.setHex(hex);
         this.entityIdToEntity.set(entity.id, entity);
         this.entityIdToHexId.set(entity.id, hex.id);
         this.hexIdToEntityId.set(hex.id, entity.id);

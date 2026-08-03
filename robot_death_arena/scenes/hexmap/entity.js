@@ -23,6 +23,11 @@ export class Entity {
         this.image = this.resourceManager.getImage(assetId);
     }
 
+    setHex(hex) {
+        this.x = hex.center.x - (this.image.width / 2);
+        this.y = hex.center.y - (this.image.height / 2);
+    }
+
     toggleDebug() {
         this.isDebug = !this.isDebug;
     }

@@ -45,6 +45,28 @@ export class HexMap {
             }
         }
         this.hexesFlat = this.hexes.flat();
+
+        // compute zones
+        let numZones = 5;
+        let zones = new Set();
+
+        for (let i = 0; i < numZones; i++) {
+
+            let startRow = Math.floor(Math.random() * this.rows);
+            let startCol = Math.floor(Math.random() * this.cols);
+            let startHex = this.getHex(startRow, startCol);
+
+            if (!zones.has(startHex)) {
+                startHex.zoneColor = "#FF0000";
+                zones.add(startHex);
+                this.getAdjacentHexes(startHex).forEach( hex => {
+                    hex.zoneColor = "#FF0000"
+                    zones.add(hex);
+                })
+            }
+
+        }
+
     }
 
     getHex(row, col) {
@@ -171,6 +193,13 @@ export class HexMap {
             Math.floor(Math.random() * this.rows),
             Math.floor(Math.random() * this.cols)
         )
+    }
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
     }
 
 }

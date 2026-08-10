@@ -15,7 +15,7 @@ export class Hex {
 
     id = crypto.randomUUID();
 
-    colorOutline =  "#000000"; // "#777777";
+    colorOutline = "#000000"; // "#777777";
     colorSelected = "#FF0000";
 
     image = null;
@@ -30,6 +30,8 @@ export class Hex {
     halfSize = 0;
     hexWidth = 0;
     hexHeight = 0;
+
+    zoneColor = null;
 
     constructor(row, col, hexSize, image) {
         this.row = row;
@@ -105,6 +107,13 @@ export class Hex {
         context.clip(this.path);
         context.drawImage(this.image, this.points[0].x - this.halfSize - this.xOffset, this.points[0].y - this.yOffset);
         context.restore();
+
+
+        if (this.zoneColor != null) {
+            context.fillStyle = this.zoneColor;
+            //context.globalAlpha = 0.25;
+            context.fill(this.path);
+        }
 
         if (this.isDebug) {
             // Draw center point

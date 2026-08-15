@@ -46,26 +46,42 @@ export class HexMap {
         }
         this.hexesFlat = this.hexes.flat();
 
-        // compute zones
-        let numZones = 5;
-        let zones = new Set();
+        let startRow = Math.floor(Math.random() * this.rows);
+        let startCol = Math.floor(Math.random() * this.cols);
+        let startHex = this.getHex(startRow, startCol);
+        this.computeContiguousZone(startHex, 7);
 
-        for (let i = 0; i < numZones; i++) {
 
-            let startRow = Math.floor(Math.random() * this.rows);
-            let startCol = Math.floor(Math.random() * this.cols);
-            let startHex = this.getHex(startRow, startCol);
+    }
 
-            if (!zones.has(startHex)) {
-                startHex.zoneColor = "#FF0000";
-                zones.add(startHex);
-                this.getAdjacentHexes(startHex).forEach( hex => {
-                    hex.zoneColor = "#FF0000"
-                    zones.add(hex);
-                })
+    computeContiguousZone(startHex, size) {
+        let selected = new Set();
+        let frontier = new Set();
+        let bailOut = false;
+
+        selected.add(startHex);
+        this.getAdjacentHexes(startHex).forEach(hex => frontier.add(hex));
+
+        while (selected.size != size && bailOut == false) {
+
+            let candidates = [...frontier.values()];
+            this.shuffleArray(candidates);
+            let candidate = candidates.pop();
+
+            if (candidate == null) {
+                bailOut = true;
+                console.error("no candidate")
+                break;
+            } else {
+                selected.add(candidate);
+                frontier.delete(candidate);
+                this.getAdjacentHexes(candidate).forEach( hex => frontier.add(hex));
             }
-
         }
+
+        Array.from(selected).forEach(hex => {
+            hex.zoneColor = "#FF0000"
+        })
 
     }
 

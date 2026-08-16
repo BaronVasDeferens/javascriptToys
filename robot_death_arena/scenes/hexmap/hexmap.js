@@ -16,6 +16,12 @@ export class HexMap {
     // hexesFlat: a flat list of hexes
     hexesFlat = [];
 
+    // Zones: groups of contiguous hexes
+    zones = new Set();
+    numZones = 2;
+    zoneMaxSize = 15;
+
+
     constructor(rows, cols, hexSize, resourceManager, canvas) {
         this.rows = rows;
         this.cols = cols;
@@ -46,23 +52,44 @@ export class HexMap {
         }
         this.hexesFlat = this.hexes.flat();
 
-        let startRow = Math.floor(Math.random() * this.rows);
-        let startCol = Math.floor(Math.random() * this.cols);
-        let startHex = this.getHex(startRow, startCol);
-        this.computeContiguousZone(startHex, 7);
+        // Compute zones
+        this.zones = new Set();
+        let startHexes = this.hexes.flat();
+        this.shuffleArray(startHexes);
 
+        for (let i = 0; i < this.numZones; i++) {
+            this.zones.add(
+                new Zone(
+                    `zone ${i}`,
+                    startHexes.pop(),
+                    this.zoneMaxSize,
+                    this.generateRandomColor()
+                )
+            )
+        }
 
+        this.zones.values().forEach(zone => { this.computeContiguousZone(zone) })
+        console.log("--------------------------------------------------------------------")
     }
 
-    computeContiguousZone(startHex, size) {
+    computeContiguousZone(zone) {
+
+        let otherZones = this.zones.values().filter(other => {
+            return other.name != zone.name
+        });
+
+        console.log(`currentZone: ${zone.name}: ${zone.size()}`)
+        otherZones.forEach(other => {
+            console.log(`other: ${other.name} : ${other.size()}`)
+        })
+
         let selected = new Set();
         let frontier = new Set();
         let bailOut = false;
 
-        selected.add(startHex);
-        this.getAdjacentHexes(startHex).forEach(hex => frontier.add(hex));
+        this.getAdjacentHexes(zone.startHex).forEach(hex => frontier.add(hex));
 
-        while (selected.size != size && bailOut == false) {
+        while ((selected.size != zone.maxSize) && (bailOut == false)) {
 
             let candidates = [...frontier.values()];
             this.shuffleArray(candidates);
@@ -72,15 +99,25 @@ export class HexMap {
                 bailOut = true;
                 console.error("no candidate")
                 break;
-            } else {
+            }
+
+            let presentInOtherZone = otherZones.some(otherZone => {
+                return otherZone.hasHex(candidate) == true
+            });
+
+            if (!presentInOtherZone) {
                 selected.add(candidate);
                 frontier.delete(candidate);
-                this.getAdjacentHexes(candidate).forEach( hex => frontier.add(hex));
+                this.getAdjacentHexes(candidate).forEach(hex => frontier.add(hex));
+            } else {
+                console.log(`contested hex: ${candidate}`)
             }
+
         }
 
-        Array.from(selected).forEach(hex => {
-            hex.zoneColor = "#FF0000"
+        selected.values().forEach(hex => {
+            hex.zoneColor = zone.color;
+            zone.addHex(hex)
         })
 
     }
@@ -211,6 +248,15 @@ export class HexMap {
         )
     }
 
+    generateRandomColor() {
+        let hexDigits = "0123456789ABCDEF";
+        let colorCode = "#"
+        for (let j = 0; j < 6; j++) {
+            colorCode += hexDigits.charAt(Math.floor(Math.random() * hexDigits.length));
+        }
+        return colorCode;
+    }
+
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -218,4 +264,32 @@ export class HexMap {
         }
     }
 
+}
+
+export class Zone {
+
+    name = "unnamed zone";
+    startHex = null;
+    maxSize = 99;
+    color = "#FF0000";
+    hexes = new Set();
+
+    constructor(name, startHex, maxSize, color) {
+        this.name = name;
+        this.startHex = startHex;
+        this.maxSize = maxSize;
+        this.color = color;
+    }
+
+    addHex(hex) {
+        this.hexes.add(hex);
+    }
+
+    hasHex(hex) {
+        return this.hexes.has(hex)
+    }
+
+    size() {
+        return this.hexes.size
+    }
 }

@@ -32,6 +32,8 @@ export class HexMapScene extends Scene {
 
     drivers = [];
 
+    isDebug = false;
+
     constructor(canvasPrimary, canvasSecondary, resourceManager, soundPlayer) {
         super(SceneType.HEX_MAP, canvasPrimary, canvasSecondary, resourceManager, soundPlayer);
     }
@@ -56,13 +58,13 @@ export class HexMapScene extends Scene {
         this.overlayImage = new Image();
 
         this.hexMap = new HexMap(11, 15, this.hexSizeDefault, this.resourceManager, this.canvasPrimary);
+        this.hexMap.setDebug(this.isDebug);
         this.printBackground();
 
         this.pathTracker.clear();
 
         this.entityPositionMgr.clear();
         this.entityPositionMgr.setHexes(this.hexMap.hexes);
-
 
         for (let n = 0; n < 5; n++) {
             let testEntity = new Entity(ImageAsset.FROG, this.resourceManager);
@@ -71,8 +73,6 @@ export class HexMapScene extends Scene {
             let testHex = this.hexMap.getRandomHex();
             this.entityPositionMgr.setEntityHex(testEntity, testHex);
         }
-
-
     }
 
     updateGameState(newState) {
@@ -153,7 +153,9 @@ export class HexMapScene extends Scene {
         switch (event.code) {
 
             case "KeyD":
-                this.hexMap.toggleDebug();
+                this.isDebug = !this.isDebug;
+                this.hexMap.setDebug(this.isDebug);
+                console.log(`debug: ${this.isDebug}`)
                 this.printBackground();
                 break;
 

@@ -18,8 +18,8 @@ export class HexMap {
 
     // Zones: groups of contiguous hexes
     zones = new Set();
-    numZones = 2;
-    zoneMaxSize = 15;
+    numZones = 5;
+    zoneMaxSize = 18;
 
 
     constructor(rows, cols, hexSize, resourceManager, canvas) {
@@ -68,28 +68,38 @@ export class HexMap {
             )
         }
 
-        this.zones.values().forEach(zone => { this.computeContiguousZone(zone) })
+        this.zones.values().forEach(zone => {
+            this.computeContiguousZone(zone)
+        })
+
         console.log("--------------------------------------------------------------------")
     }
 
     computeContiguousZone(zone) {
 
-        let otherZones = this.zones.values().filter(other => {
-            return other.name != zone.name
-        });
+        let contestedTotal = 0;
+        let contestedMax = 20;
 
-        console.log(`currentZone: ${zone.name}: ${zone.size()}`)
+        let otherZones = [];
+        this.zones.values().forEach(zn => {
+            if (zn.name != zone.name) {
+                otherZones.push(zn)
+            }
+        })
+
+        console.log(`currentZone: ${zone.name}: size ${zone.size()} : ${zone.color}`)
         otherZones.forEach(other => {
-            console.log(`other: ${other.name} : ${other.size()}`)
+            console.log(`       other: ${other.name} : size ${other.size()}`)
         })
 
         let selected = new Set();
         let frontier = new Set();
         let bailOut = false;
 
+        selected.add(zone.startHex);
         this.getAdjacentHexes(zone.startHex).forEach(hex => frontier.add(hex));
 
-        while ((selected.size != zone.maxSize) && (bailOut == false)) {
+        while ((selected.size < zone.maxSize) && (bailOut == false)) {
 
             let candidates = [...frontier.values()];
             this.shuffleArray(candidates);
@@ -102,24 +112,34 @@ export class HexMap {
             }
 
             let presentInOtherZone = otherZones.some(otherZone => {
-                return otherZone.hasHex(candidate) == true
+                return otherZone.hasHex(candidate)
             });
 
-            if (!presentInOtherZone) {
+            if (presentInOtherZone == true) {
+                contestedTotal++;
+                if (contestedTotal >= contestedMax) {
+                    bailOut = true;
+                    console.log(`bailing out!`)
+                }
+                continue;
+            }
+
+            if (selected.has(candidate) == false) {
                 selected.add(candidate);
                 frontier.delete(candidate);
                 this.getAdjacentHexes(candidate).forEach(hex => frontier.add(hex));
-            } else {
-                console.log(`contested hex: ${candidate}`)
-            }
 
+                if (this.isDebug) {
+                    console.log(`added: ${candidate.row} ${candidate.col}`)
+                }
+
+            }
         }
 
         selected.values().forEach(hex => {
             hex.zoneColor = zone.color;
-            zone.addHex(hex)
-        })
-
+            zone.addHex(hex);
+        });
     }
 
     getHex(row, col) {
@@ -142,10 +162,10 @@ export class HexMap {
         });
     }
 
-    toggleDebug() {
-        this.isDebug = !this.isDebug;
+    setDebug(isDebug) {
+        this.isDebug = isDebug;
         this.hexesFlat.forEach(hex => {
-            hex.toggleDebug();
+            hex.isDebug = isDebug
         })
     }
 
@@ -272,24 +292,39 @@ export class Zone {
     startHex = null;
     maxSize = 99;
     color = "#FF0000";
-    hexes = new Set();
+    hexes = [];
 
     constructor(name, startHex, maxSize, color) {
         this.name = name;
         this.startHex = startHex;
         this.maxSize = maxSize;
         this.color = color;
+
+        this.hexes.push(startHex)
     }
 
     addHex(hex) {
-        this.hexes.add(hex);
+        if (this.hexes.every(other => {
+            return other.id != hex.id
+        })) {
+            this.hexes.push(hex)
+        }
     }
 
     hasHex(hex) {
-        return this.hexes.has(hex)
+
+        // console.log(`checking ${hex.id}`)
+        // this.hexes.forEach(hx => {
+        //     console.log(`       ${hx.id}`)
+        // })
+
+
+        return this.hexes.some(other => {
+            return other.id == hex.id
+        })
     }
 
     size() {
-        return this.hexes.size
+        return this.hexes.length
     }
 }

@@ -87,11 +87,6 @@ export class HexMap {
             }
         })
 
-        console.log(`currentZone: ${zone.name}: size ${zone.size()} : ${zone.color}`)
-        otherZones.forEach(other => {
-            console.log(`       other: ${other.name} : size ${other.size()}`)
-        })
-
         let selected = new Set();
         let frontier = new Set();
         let bailOut = false;

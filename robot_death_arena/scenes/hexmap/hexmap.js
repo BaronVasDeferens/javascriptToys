@@ -18,8 +18,8 @@ export class HexMap {
 
     // Zones: groups of contiguous hexes
     zones = new Set();
-    numZones = 5;
-    zoneMaxSize = 18;
+    numZones = 3;
+    zoneMaxSize = 12;
 
 
     constructor(rows, cols, hexSize, resourceManager, canvas) {
@@ -29,7 +29,6 @@ export class HexMap {
         this.resourceManager = resourceManager;
         this.canvas = canvas;
         this.boundingRectangle = canvas.getBoundingClientRect();
-        this.initialize();
     }
 
     initialize() {
@@ -72,6 +71,12 @@ export class HexMap {
             this.computeContiguousZone(zone)
         })
 
+        if (this.isDebug) {
+            this.hexesFlat.forEach(hex => {
+                hex.isDebug = this.isDebug;
+            })
+        }
+
         console.log("--------------------------------------------------------------------")
     }
 
@@ -90,6 +95,10 @@ export class HexMap {
         let selected = new Set();
         let frontier = new Set();
         let bailOut = false;
+
+        if (this.isDebug) {
+            console.log(`zone start: ${zone.startHex.row} ${zone.startHex.col}`)
+        }
 
         selected.add(zone.startHex);
         this.getAdjacentHexes(zone.startHex).forEach(hex => frontier.add(hex));
@@ -124,7 +133,7 @@ export class HexMap {
                 frontier.delete(candidate);
                 this.getAdjacentHexes(candidate).forEach(hex => frontier.add(hex));
 
-                if (this.isDebug) {
+                if (this.isDebug == true) {
                     console.log(`added: ${candidate.row} ${candidate.col}`)
                 }
 
@@ -132,7 +141,6 @@ export class HexMap {
         }
 
         selected.values().forEach(hex => {
-            hex.zoneColor = zone.color;
             zone.addHex(hex);
         });
     }
@@ -160,8 +168,9 @@ export class HexMap {
     setDebug(isDebug) {
         this.isDebug = isDebug;
         this.hexesFlat.forEach(hex => {
-            hex.isDebug = isDebug
+            hex.isDebug = isDebug;
         })
+        console.log(`hexmap debug: ${this.isDebug}`);
     }
 
     increaseSize() {
@@ -227,32 +236,28 @@ export class HexMap {
 
     getAdjacentHexes(hex) {
 
-        switch (hex.col % 2) {
-
-            case 0:
-                return [
-                    this.getHex(hex.row - 1, hex.col),
-                    this.getHex(hex.row + 1, hex.col),
-                    this.getHex(hex.row - 1, hex.col - 1),
-                    this.getHex(hex.row, hex.col - 1),
-                    this.getHex(hex.row - 1, hex.col + 1),
-                    this.getHex(hex.row, hex.col + 1),
-                ].filter(hx => {
-                    return hx != null
-                });
-
-            default:
-                return [
-                    this.getHex(hex.row - 1, hex.col),
-                    this.getHex(hex.row + 1, hex.col),
-                    this.getHex(hex.row, hex.col - 1),
-                    this.getHex(hex.row, hex.col + 1),
-                    this.getHex(hex.row + 1, hex.col + 1),
-                    this.getHex(hex.row + 1, hex.col - 1),
-                ].filter(hx => {
-                    return hx != null
-                });
-                break;
+        if (hex.col % 2 == 0) {
+            return [
+                this.getHex(hex.row - 1, hex.col),
+                this.getHex(hex.row + 1, hex.col),
+                this.getHex(hex.row - 1, hex.col - 1),
+                this.getHex(hex.row, hex.col - 1),
+                this.getHex(hex.row - 1, hex.col + 1),
+                this.getHex(hex.row, hex.col + 1),
+            ].filter(hx => {
+                return hx != null
+            });
+        } else {
+            return [
+                this.getHex(hex.row - 1, hex.col),
+                this.getHex(hex.row + 1, hex.col),
+                this.getHex(hex.row, hex.col - 1),
+                this.getHex(hex.row, hex.col + 1),
+                this.getHex(hex.row + 1, hex.col + 1),
+                this.getHex(hex.row + 1, hex.col - 1),
+            ].filter(hx => {
+                return hx != null
+            });
         }
     }
 
@@ -284,6 +289,7 @@ export class HexMap {
 export class Zone {
 
     name = "unnamed zone";
+    id = crypto.randomUUID();
     startHex = null;
     maxSize = 99;
     color = "#FF0000";
@@ -295,14 +301,15 @@ export class Zone {
         this.maxSize = maxSize;
         this.color = color;
 
-        this.hexes.push(startHex)
+        this.addHex(startHex);
     }
 
     addHex(hex) {
         if (this.hexes.every(other => {
             return other.id != hex.id
         })) {
-            this.hexes.push(hex)
+            hex.setZone(this);
+            this.hexes.push(hex);
         }
     }
 

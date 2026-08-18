@@ -59,6 +59,8 @@ export class HexMapScene extends Scene {
 
         this.hexMap = new HexMap(11, 15, this.hexSizeDefault, this.resourceManager, this.canvasPrimary);
         this.hexMap.setDebug(this.isDebug);
+        this.hexMap.initialize();
+
         this.printBackground();
 
         this.pathTracker.clear();
@@ -155,7 +157,6 @@ export class HexMapScene extends Scene {
             case "KeyD":
                 this.isDebug = !this.isDebug;
                 this.hexMap.setDebug(this.isDebug);
-                console.log(`debug: ${this.isDebug}`)
                 this.printBackground();
                 break;
 

@@ -14,6 +14,7 @@ export const HexFace = Object.freeze({
 export class Hex {
 
     id = crypto.randomUUID();
+    zoneId = null;
 
     colorOutline = "#000000"; // "#777777";
     colorSelected = "#FF0000";
@@ -91,6 +92,11 @@ export class Hex {
 
     toggleDebug() {
         this.isDebug = !this.isDebug;
+    }
+
+    setZone(zone) {
+        this.zoneId = zone.id;
+        this.zoneColor = zone.color;
     }
 
     setColor(newColor) {

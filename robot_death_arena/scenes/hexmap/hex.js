@@ -122,12 +122,8 @@ export class Hex {
         }
 
         if (this.isDebug) {
-            // Draw center point
-            context.fillStyle = "#0000FF"
-            context.fillRect(this.center.x, this.center.y, 2, 2);
-
-            context.strokeStyle = "#FFFF00"
-            context.lineWidth = 0.5;
+            context.strokeStyle = "#FFFFFF"
+            context.lineWidth = 1.25;
             context.strokeText(`${this.row}, ${this.col}`, this.points[0].x, this.center.y - this.hexSize / 2);
         }
 

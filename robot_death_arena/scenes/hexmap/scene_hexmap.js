@@ -69,7 +69,7 @@ export class HexMapScene extends Scene {
         this.entityPositionMgr.setHexes(this.hexMap.hexes);
 
         for (let n = 0; n < 5; n++) {
-            let testEntity = new Entity(ImageAsset.FROG, this.resourceManager);
+            let testEntity = new Entity(ImageAsset.SOLDIER_2, this.resourceManager);
             this.entities.push(testEntity);
             this.entityPositionMgr.addEntity(testEntity);
             let testHex = this.hexMap.getRandomHex();

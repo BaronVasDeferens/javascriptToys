@@ -68,12 +68,13 @@ export class HexMapScene extends Scene {
         this.entityPositionMgr.clear();
         this.entityPositionMgr.setHexes(this.hexMap.hexes);
 
-        for (let n = 0; n < 5; n++) {
+        let numEntities = 5;
+        let startHexes = this.hexMap.getRandomHexes(numEntities);
+        for (let n = 0; n < numEntities; n++) {
             let testEntity = new Entity(ImageAsset.SOLDIER_2, this.resourceManager);
             this.entities.push(testEntity);
             this.entityPositionMgr.addEntity(testEntity);
-            let testHex = this.hexMap.getRandomHex();
-            this.entityPositionMgr.setEntityHex(testEntity, testHex);
+            this.entityPositionMgr.setEntityHex(testEntity, startHexes.pop());
         }
     }
 

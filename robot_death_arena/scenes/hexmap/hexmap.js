@@ -268,6 +268,12 @@ export class HexMap {
         )
     }
 
+    getRandomHexes(numHexes) {
+        let flatHexes = this.hexes.flat();
+        this.shuffleArray(flatHexes);
+        return flatHexes.slice(0, numHexes);
+    }
+
     generateRandomColor() {
         let hexDigits = "0123456789ABCDEF";
         let colorCode = "#"
@@ -314,12 +320,6 @@ export class Zone {
     }
 
     hasHex(hex) {
-
-        // console.log(`checking ${hex.id}`)
-        // this.hexes.forEach(hx => {
-        //     console.log(`       ${hx.id}`)
-        // })
-
 
         return this.hexes.some(other => {
             return other.id == hex.id

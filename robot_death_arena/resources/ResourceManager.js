@@ -6,6 +6,8 @@ const relativePath = "resources/";
 
 export class ResourceManager {
 
+    currentId = 0;
+
     constructor(audioContext) {
         this.audioContext = audioContext;
         this.imageLoader = new ImageLoader();
@@ -37,6 +39,11 @@ export class ResourceManager {
 
     getFont(fontAsset) {
         return this.fontLoader.getFont(fontAsset);
+    }
+
+    createId() {
+        this.currentId++;
+        return this.currentId;
     }
 }
 

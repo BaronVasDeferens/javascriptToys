@@ -46,7 +46,13 @@ export class HexMap {
         for (let i = 0; i < this.rows; i++) {
             this.hexes[i] = new Array(this.rows);
             for (let j = 0; j < this.cols; j++) {
-                this.hexes[i][j] = new Hex(i, j, this.hexSize, this.resourceManager.getImage(imageIds[Math.floor(imageIds.length * Math.random())]));
+                this.hexes[i][j] = new Hex(
+                    i,
+                    j,
+                    this.hexSize,
+                    this.resourceManager,
+                    this.resourceManager.getImage(imageIds[Math.floor(imageIds.length * Math.random())])
+                );
             }
         }
         this.hexesFlat = this.hexes.flat();
@@ -62,7 +68,8 @@ export class HexMap {
                     `zone ${i}`,
                     startHexes.pop(),
                     this.zoneMaxSize,
-                    this.generateRandomColor()
+                    this.generateRandomColor(),
+                    this.resourceManager
                 )
             )
         }
@@ -295,18 +302,19 @@ export class HexMap {
 export class Zone {
 
     name = "unnamed zone";
-    id = crypto.randomUUID();
+    id = null;
     startHex = null;
     maxSize = 99;
     color = "#FF0000";
     hexes = [];
 
-    constructor(name, startHex, maxSize, color) {
+    constructor(name, startHex, maxSize, color, resourceManager) {
         this.name = name;
         this.startHex = startHex;
         this.maxSize = maxSize;
         this.color = color;
 
+        this.id = resourceManager.createId();
         this.addHex(startHex);
     }
 

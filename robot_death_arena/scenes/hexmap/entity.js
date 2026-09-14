@@ -2,7 +2,7 @@ import { ImageAsset } from "../../resources/ResourceManager.js";
 
 export class Entity {
 
-    id = crypto.randomUUID();
+    id = null;
 
     x = 0;
     y = 0;
@@ -15,6 +15,7 @@ export class Entity {
 
     constructor(imageAssetId, resourceManager) {
         this.resourceManager = resourceManager;
+        this.id = resourceManager.createId();
         this.imageAssetId = imageAssetId;
         this.setImage(this.imageAssetId);
     }

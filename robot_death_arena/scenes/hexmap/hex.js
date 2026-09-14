@@ -13,7 +13,7 @@ export const HexFace = Object.freeze({
 
 export class Hex {
 
-    id = crypto.randomUUID();
+    id = null;
     zoneId = null;
 
     colorOutline = "#000000"; // "#777777";
@@ -34,10 +34,11 @@ export class Hex {
 
     zoneColor = null;
 
-    constructor(row, col, hexSize, image) {
+    constructor(row, col, hexSize, resourceManager, image) {
         this.row = row;
         this.col = col;
         this.image = image;
+        this.id = resourceManager.createId();
         this.setSize(hexSize);
         this.computePoints;
     }

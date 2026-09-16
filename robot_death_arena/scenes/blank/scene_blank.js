@@ -1,4 +1,4 @@
-import { Scene, SceneType } from "../Scene.js";
+import { Scene, SceneType } from "../scene.js";
 
 export class BlankScene extends Scene {
 

@@ -53,6 +53,7 @@ const soundPlayer = new SoundPlayer(assetManager, audioContext);
 const canvas = document.getElementById('playArea');
 const context = canvas.getContext('2d');
 
+var gamepad = null;
 
 // ------------------------------ GAME DETAILS -------------------------------------
 
@@ -245,6 +246,12 @@ function initialize() {
     levelManager.init(speedDefault);
 
     updateStage(Stage.INSERT_COIN);
+
+
+    navigator.getGamepads().forEach(gp => {
+        console.log(gp)
+        gamepad = gp;
+    })
 }
 
 function beginGame() {
@@ -368,7 +375,7 @@ function updateStage(newStage) {
 
             case Stage.INSERT_COIN:
 
-                soundPlayer.playBackgroundMusic(SoundAsset.THEME_1);
+                //soundPlayer.playBackgroundMusic(SoundAsset.THEME_1);
 
                 speedCurrent = speedDefault;
                 levelManager.init(speedDefault);
@@ -452,9 +459,59 @@ function update() {
                     }
                 }
             });
+
+            if (gamepad.buttons[0].pressed == true) {
+                updateStage(Stage.GAME_ACTIVE);
+            }
+
+
             break;
 
         case Stage.GAME_ACTIVE:
+
+            let firing = gamepad.buttons[0].pressed == true;
+            if (firing) {
+                updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
+            } else {
+                updateWeaponStatus({ weaponStatus: WeaponStatus.IDLE })
+            }
+
+            // d-pad: up /down
+            if (gamepad.buttons[12].pressed == true) {
+                updatePlayerPosition(
+                    {
+                        deltaX: 0,
+                        deltaY: 1
+                    }
+                )
+            } else if (gamepad.buttons[13].pressed == true) {
+                updatePlayerPosition(
+                    {
+                        deltaX: 0,
+                        deltaY: -1
+                    }
+                )
+            }
+
+            // d-pad: left / right
+            if (gamepad.buttons[14].pressed == true) {
+                updatePlayerPosition(
+                    {
+                        deltaX: 1,
+                        deltaY: 0
+                    }
+                )
+            } else if (gamepad.buttons[15].pressed == true) {
+                updatePlayerPosition(
+                    {
+                        deltaX: -1,
+                        deltaY: 0
+                    }
+                )
+            }
+
+
+
             roadManager.update(levelManager);
             projectilesPlayer.forEach(projectile => {
                 projectile.update();
@@ -958,6 +1015,10 @@ document.addEventListener('mousedown', (click) => {
 
 });
 
+window.addEventListener('gamepadconnected', (event) => {
+    console.log(`gamepad!!! ${event}`);
+});
+
 document.addEventListener('keydown', (event) => {
 
     if (audioContext.state === 'suspended') {
@@ -1025,11 +1086,24 @@ document.addEventListener('keydown', (event) => {
                     toggleDebug();
                     break;
 
+                case "NumpadAdd":
+                    speedCurrent += speedIncrement;
+                    roadManager.updateDebugSpeedDelta(speedCurrent);
+                    console.log(`speed up: ${speedCurrent}`);
+                    break;
+
+                case "NumpadSubtract":
+                    speedCurrent -= speedIncrement;
+                    roadManager.updateDebugSpeedDelta(speedCurrent);
+                    console.log(`speed down: ${speedCurrent}`);
+                    break;
+
                 case "Escape":
                     initialize();
                     break;
 
                 default:
+                    console.log(event.code)
                     break;
             }
     }

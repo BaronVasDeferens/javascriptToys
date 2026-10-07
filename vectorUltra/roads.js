@@ -249,6 +249,8 @@ export class RoadManager {
     shoulderWidthTiles = 1;
 
     speedInPixels = 0;
+    debugSpeedDelta = 0;
+
     retiredSections = 0;
 
     constructor(widthInTiles, heightInTiles, tileSize, assetLoader) {
@@ -333,7 +335,11 @@ export class RoadManager {
     }
 
     updateSpeed(speedInPixels) {
-        this.speedInPixels = speedInPixels;
+        this.speedInPixels = speedInPixels + this.debugSpeedDelta;
+    }
+
+    updateDebugSpeedDelta(delta) {
+        this.debugSpeedDelta = delta;
     }
 
     update(levelManager) {

@@ -392,6 +392,17 @@ export class VectorUltraScene extends Scene {
         }
     }
 
+    dualSenseButtonMap = Object.freeze({
+        "buttonX": 0,
+        "buttonCircle": 1,
+        "buttonSquare": 2,
+        "buttonTriangle": 3,
+        "bumperLeft": 4,
+        "bumperRight": 5,
+        "triggerLeft": 6,
+        "triggerRight": 7
+    })
+
     update(deltaMillis) {
 
         let frameScale = deltaMillis / FRAME_MS;
@@ -430,7 +441,7 @@ export class VectorUltraScene extends Scene {
 
                 if (this.gamepad != null) {
 
-                    let firing = this.gamepad.buttons[7].pressed == true;
+                    let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
                     if (firing) {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
                     } else {

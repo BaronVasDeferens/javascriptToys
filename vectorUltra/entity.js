@@ -90,7 +90,7 @@ export class EntityRoadFollower extends EntityEnemy {
         super.update(deltaMillis);
 
         // try and follow the road
-        // for the next section that the car is about to occpy,
+        // for the next section that the car is about to occupy,
         // find the center of the road
 
         let nextRoadSection = roadManager.findRoadSectionsForEntityPosition(this);

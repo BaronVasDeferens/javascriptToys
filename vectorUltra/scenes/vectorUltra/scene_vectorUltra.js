@@ -769,7 +769,7 @@ export class VectorUltraScene extends Scene {
     }
 
     randomInRange(min, max) {
-        let range = Math.abs(max - min);
+        let range = Math.abs(max - min) + 1;
         return Math.floor(Math.random() * range) + min
     }
 

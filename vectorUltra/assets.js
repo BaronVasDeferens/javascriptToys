@@ -183,7 +183,12 @@ export class SoundLoader {
 
         for (const key in SoundAsset) {
             let asset = "resources/" + SoundAsset[key];
-            let response = await fetch(asset);
+            // cache: "no-store" -- a plain conditional GET that gets back a 304
+            // can hand fetch() a bodyless Response (empty arrayBuffer()), which
+            // then makes decodeAudioData() fail/produce nothing. These are tiny
+            // files loaded once at startup, so always pulling a fresh copy costs
+            // nothing and sidesteps 304 revalidation entirely.
+            let response = await fetch(asset, { cache: "no-store" });
             let buffer = await response.arrayBuffer();
             let decodedBuffer = await this.audioContext.decodeAudioData(buffer);
             this.decodedBufferMap.set(SoundAsset[key], decodedBuffer);
@@ -229,7 +234,8 @@ export class FontLoader {
 
         for (const key in FontAsset) {
             let asset = FontAsset[key];
-            let response = await fetch("resources/" + asset);
+            // Same 304-with-empty-body hazard as SoundLoader above.
+            let response = await fetch("resources/" + asset, { cache: "no-store" });
             let arrayBuffer = await response.arrayBuffer();
             let buffer = arrayBuffer.transfer();
             this.fontMap.set(key, buffer); 

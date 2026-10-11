@@ -1,4 +1,5 @@
 import { ImageAsset } from "./assets.js";
+import { FRAME_MS } from "./entity.js";
 
 
 export var RoadTileType = Object.freeze({
@@ -342,10 +343,14 @@ export class RoadManager {
         this.debugSpeedDelta = delta;
     }
 
-    update(levelManager) {
+    update(deltaMillis, levelManager) {
+
+        // this.speedInPixels is tuned in "pixels per 60fps frame"; scale it by
+        // actual elapsed time so scroll speed stays constant across frame rates.
+        let distancePixels = this.speedInPixels * (deltaMillis / FRAME_MS);
 
         this.roadSections.forEach(section => {
-            section.updatePosition(this.speedInPixels);
+            section.updatePosition(distancePixels);
         });
 
         // Examine the last section in the array and determine if it is no longer visible

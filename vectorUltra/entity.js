@@ -1,5 +1,14 @@
 import { ImageAsset, SoundAsset } from "./assets.js";
 
+// All of the per-frame pixel constants in this file (dX/dY, steering nudges, etc.)
+// were originally tuned assuming a steady 60fps requestAnimationFrame tick, with
+// movement applied once per update() call regardless of how much real time had
+// passed. FRAME_MS is that assumed reference frame duration: multiplying a
+// per-frame constant by (deltaMillis / FRAME_MS) reproduces the original motion
+// at 60fps while staying correct (platform/framerate independent) at any other
+// frame rate.
+export const FRAME_MS = 1000 / 60;
+
 
 
 export class Entity {
@@ -44,9 +53,10 @@ export class EntityEnemy extends Entity {
         this.canvasHeight = canvasHeight;
     }
 
-    update() {
-        this.x += this.dX;
-        this.y += this.dY;
+    update(deltaMillis) {
+        let frameScale = deltaMillis / FRAME_MS;
+        this.x += this.dX * frameScale;
+        this.y += this.dY * frameScale;
 
         if (this.x < (0 - this.imageWidth) || this.x > this.canvasWidth || this.y < (0 - this.imageHeight) || this.y > this.canvasHeight) {
             this.isOffScreen = true;
@@ -75,9 +85,9 @@ export class EntityRoadFollower extends EntityEnemy {
         super(x, y, image);
     }
 
-    update(nowMillis, roadManager) {
+    update(deltaMillis, roadManager) {
 
-        super.update();
+        super.update(deltaMillis);
 
         // try and follow the road
         // for the next section that the car is about to occpy,
@@ -90,10 +100,12 @@ export class EntityRoadFollower extends EntityEnemy {
             targetX = roadManager.getCenterOfRoadForSection(nextRoadSection[0]);
         }
 
+        let frameScale = deltaMillis / FRAME_MS;
+
         if (targetX > this.x) {
-            this.x += 2
+            this.x += 2 * frameScale
         } else if (targetX < this.x) {
-            this.x -= 2;
+            this.x -= 2 * frameScale;
         }
 
     }
@@ -143,6 +155,12 @@ export class EntityExplosion {
 
     isAlive = true;
 
+    // Accumulates real elapsed time between animation-frame advances, so the
+    // explosion plays back at a constant real-world speed (~FRAME_MS per sprite
+    // frame, matching its original "one sprite frame per 60fps tick" pacing)
+    // regardless of how often update() is actually called.
+    elapsedMillis = 0;
+
     constructor(entity, dX, dY, imageLoader) {
 
         this.x = entity.x;
@@ -170,13 +188,19 @@ export class EntityExplosion {
         ];
     }
 
-    update(nowMillis) {
+    update(deltaMillis) {
 
-        this.x += this.dX;
-        this.y += this.dY;
-        this.index++;
-        if (this.index >= this.imageArray.length) {
-            this.isAlive = false;
+        let frameScale = deltaMillis / FRAME_MS;
+        this.x += this.dX * frameScale;
+        this.y += this.dY * frameScale;
+
+        this.elapsedMillis += deltaMillis;
+        while (this.elapsedMillis >= FRAME_MS && this.isAlive == true) {
+            this.elapsedMillis -= FRAME_MS;
+            this.index++;
+            if (this.index >= this.imageArray.length) {
+                this.isAlive = false;
+            }
         }
     }
 
@@ -198,10 +222,11 @@ export class Projectile extends Entity {
         this.dY = dY;
     }
 
-    update() {
+    update(deltaMillis) {
 
-        this.x += this.dX;
-        this.y += this.dY;
+        let frameScale = deltaMillis / FRAME_MS;
+        this.x += this.dX * frameScale;
+        this.y += this.dY * frameScale;
 
         if (this.y <= 0) {
             this.isAlive = false;

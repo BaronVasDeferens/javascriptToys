@@ -163,14 +163,6 @@ export class VectorUltraScene extends Scene {
         this.pollGamepad();
     }
 
-    // Gamepad objects returned by navigator.getGamepads() are frozen snapshots --
-    // they do NOT update in place, so this must be called every frame (from
-    // update()) rather than once at startup, or button/stick state will never
-    // change after the first read. Also picks the first CONNECTED pad rather
-    // than just taking whichever slot came last: getGamepads() returns a
-    // fixed-size slot array (commonly 4) padded with nulls for empty slots, so
-    // blindly overwriting on every slot can stomp a real gamepad in slot 0
-    // with null from an empty slot 1-3.
     pollGamepad() {
         if (this.gamepad != null) {
             return;

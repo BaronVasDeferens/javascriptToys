@@ -82,6 +82,8 @@ export class VectorUltraScene extends Scene {
     // -------------------- PLAYER STUFF ------------------------------
     healthMax = 10;
 
+    maneuverFactor = 1.75;
+
     // ----------------------------- WEBSOCKET ---------------------------------
     ip = "127.0.0.1";
     port = 8080;
@@ -275,10 +277,8 @@ export class VectorUltraScene extends Scene {
 
     updatePlayerPosition(playerPos) {
 
-        let movementAdjust = 4;
-
-        this.playerEntity.x -= (movementAdjust * playerPos.deltaX);
-        this.playerEntity.y -= (movementAdjust * playerPos.deltaY);
+        this.playerEntity.x -= (this.maneuverFactor * playerPos.deltaX);
+        this.playerEntity.y -= (this.maneuverFactor * playerPos.deltaY);
 
         // Bounds checking -- keep the player on screen
 
@@ -438,11 +438,10 @@ export class VectorUltraScene extends Scene {
 
             case GameState.GAME_ACTIVE:
 
+                // --- GAMEPAD POLLING ---
                 if (this.gamepad != null) {
 
-                    // --- GAMEPAD POLLING ---
-
-                    // PLAYER FIRING?
+                    // Firing: machine guns
                     let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
                     if (firing) {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
@@ -450,37 +449,24 @@ export class VectorUltraScene extends Scene {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.IDLE })
                     }
 
-                    // PLAYER MOVING?
-                    // d-pad: up / down
-                    if (this.gamepad.buttons[12].pressed == true) {
+                    // Moving: left and right
+                    let leftRight = this.gamepad.axes[0];
+                    if (Math.abs(leftRight) > 0.15) {
                         this.updatePlayerPosition(
                             {
-                                deltaX: 0,
-                                deltaY: 1 * frameScale
-                            }
-                        )
-                    } else if (this.gamepad.buttons[13].pressed == true) {
-                        this.updatePlayerPosition(
-                            {
-                                deltaX: 0,
-                                deltaY: -1 * frameScale
+                                deltaX: -1 * leftRight,
+                                deltaY: 0
                             }
                         )
                     }
 
-                    // d-pad: left / right
-                    if (this.gamepad.buttons[14].pressed == true) {
+                    // Moving: up and down
+                    let upDown = this.gamepad.axes[1];
+                    if (Math.abs(upDown) > 0.15) {
                         this.updatePlayerPosition(
                             {
-                                deltaX: 1 * frameScale,
-                                deltaY: 0
-                            }
-                        )
-                    } else if (this.gamepad.buttons[15].pressed == true) {
-                        this.updatePlayerPosition(
-                            {
-                                deltaX: -1 * frameScale,
-                                deltaY: 0
+                                deltaX: 0,
+                                deltaY: -1 * upDown
                             }
                         )
                     }

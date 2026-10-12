@@ -273,19 +273,22 @@ export class VectorUltraScene extends Scene {
     */
 
     updatePlayerPosition(playerPos) {
-        this.playerEntity.x -= (4 * playerPos.deltaX);
-        this.playerEntity.y -= (4 * playerPos.deltaY);
+
+        let movementAdjust = 4;
+
+        this.playerEntity.x -= (movementAdjust * playerPos.deltaX);
+        this.playerEntity.y -= (movementAdjust * playerPos.deltaY);
 
         // Bounds checking -- keep the player on screen
 
-        // Top & bottom
+        // Check bounds: top & bottom
         if (this.playerEntity.y + this.playerEntity.image.height > this.canvasPrimary.height) {
             this.playerEntity.y = this.canvasPrimary.height - this.playerEntity.image.height;
         } else if (this.playerEntity.y < 0) {
             this.playerEntity.y = 0;
         }
 
-        // Left & right
+        // Check bounds: left & right
         if (this.playerEntity.x < 0) {
             this.playerEntity.x = 0;
         } else if (this.playerEntity.x > this.canvasPrimary.width - this.playerEntity.image.width) {

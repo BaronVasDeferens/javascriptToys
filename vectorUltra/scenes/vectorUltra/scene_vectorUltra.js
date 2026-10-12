@@ -164,6 +164,7 @@ export class VectorUltraScene extends Scene {
     }
 
     pollGamepad() {
+
         if (this.gamepad != null) {
             return;
         }
@@ -172,7 +173,7 @@ export class VectorUltraScene extends Scene {
         for (let i = 0; i < gamepads.length; i++) {
             if (gamepads[i] != null) {
                 this.gamepad = gamepads[i];
-                console.log(this.gamepad);
+                console.log(`acquired gamepad: ${this.gamepad}`);
                 return;
             }
         }
@@ -515,15 +516,22 @@ export class VectorUltraScene extends Scene {
                 });
 
                 if (this.weaponStatus == WeaponStatus.FIRING) {
-                    this.projectilesPlayer.push(
-                        new Projectile(
-                            this.playerEntity.x + this.randomInRange(-2,2),     // add some "jitter"
-                            this.playerEntity.y,                                // start at player's y coordinate
-                            0,                                                  // delta x
-                            (20 + this.randomInRange(0, 20) + this.speedCurrent) * -1,                      // delta y
-                            this.assetManager
+
+                    // Check: no more than 1 projectile / 100ms (the length of the machine gun sample)
+                    let now = Date.now();
+                    let lastProjectile = this.projectilesPlayer[this.projectilesPlayer.length - 1];
+                    if (lastProjectile == null || (lastProjectile != null && now - lastProjectile.timestamp > 100)) {
+                        this.projectilesPlayer.push(
+                            new Projectile(
+                                this.playerEntity.x + this.randomInRange(-1, 1),             // add some "jitter"
+                                this.playerEntity.y,                                         // start at player's y coordinate
+                                0,                                                           // delta x
+                                (20 + this.speedCurrent) * -1,                               // delta y
+                                now,
+                                this.assetManager
+                            )
                         )
-                    )
+                    }
                 }
 
                 this.entitiesEnemies.forEach(enemy => {

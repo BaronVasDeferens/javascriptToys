@@ -216,10 +216,11 @@ export class EntityExplosion {
 
 export class Projectile extends Entity {
 
-    constructor(x, y, dX, dY, imageLoader) {
+    constructor(x, y, dX, dY, timestamp, imageLoader) {
         super(x, y, imageLoader.getImage(ImageAsset.PLAYER_PROJECTILE_1));
         this.dX = dX;
         this.dY = dY;
+        this.timestamp = timestamp;
     }
 
     update(deltaMillis) {

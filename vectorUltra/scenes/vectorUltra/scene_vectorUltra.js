@@ -436,6 +436,8 @@ export class VectorUltraScene extends Scene {
 
                 if (this.gamepad != null) {
 
+                    // --- GAMEPAD POLLING ---
+
                     // PLAYER FIRING?
                     let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
                     if (firing) {
@@ -515,7 +517,7 @@ export class VectorUltraScene extends Scene {
                             this.playerEntity.x + this.randomInRange(-2,2),     // add some "jitter"
                             this.playerEntity.y,                                // start at player's y coordinate
                             0,                                                  // delta x
-                            (50 + this.speedCurrent) * -1,                      // delta y
+                            (20 + this.randomInRange(0, 20) + this.speedCurrent) * -1,                      // delta y
                             this.assetManager
                         )
                     )

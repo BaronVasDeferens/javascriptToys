@@ -6,7 +6,7 @@ export class MachineGunSoundHelper {
 
     constructor(soundLoader) {
 
-        this.machineGunPrimary = soundLoader.getSound(SoundAsset.MACHINEGUN_1);
+        this.machineGunPrimary = soundLoader.getSound(SoundAsset.MACHINEGUN_3);
         this.machineGunSecondary = soundLoader.getSound(SoundAsset.MACHINEGUN_2);
         this.machineGunTrail = soundLoader.getSound(SoundAsset.MACHINEGUN_TRAIL);
 

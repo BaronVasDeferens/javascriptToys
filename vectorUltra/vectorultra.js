@@ -216,7 +216,7 @@ document.addEventListener('mousedown', (click) => {
 });
 
 window.addEventListener('gamepadconnected', (event) => {
-    console.log(`gamepad!!! ${event}`);
+    console.log(`gamepad!!! ${JSON.stringify(event)}`);
 });
 
 document.addEventListener('keydown', (event) => {

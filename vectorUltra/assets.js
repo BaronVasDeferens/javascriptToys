@@ -160,6 +160,7 @@ export var SoundAsset = Object.freeze({
     THEME_1: "theme_1.wav",
     MACHINEGUN_1: "machinegun_1.wav",
     MACHINEGUN_2: "machinegun_2.wav",
+    MACHINEGUN_3: "machinegun_3.wav",
     MACHINEGUN_TRAIL: "machinegun_trail.wav",
     EXPLOSION_1: "explosion_1.wav",
     CRASH_1: "crash_1.wav",

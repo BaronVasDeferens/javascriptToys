@@ -151,7 +151,7 @@ export class VectorUltraScene extends Scene {
         this.projectilesPlayer = [];
         this.timers = [];
 
-        this.soundLooper = new SoundLooper(SoundAsset.MACHINEGUN_2, this.assetManager, this.assetManager.audioContext);
+        this.soundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
 
         //this.beginWebSocket();
 
@@ -172,14 +172,19 @@ export class VectorUltraScene extends Scene {
     // blindly overwriting on every slot can stomp a real gamepad in slot 0
     // with null from an empty slot 1-3.
     pollGamepad() {
+        if (this.gamepad != null) {
+            return;
+        }
+
         let gamepads = navigator.getGamepads();
         for (let i = 0; i < gamepads.length; i++) {
             if (gamepads[i] != null) {
                 this.gamepad = gamepads[i];
+                console.log(this.gamepad);
                 return;
             }
         }
-        this.gamepad = null;
+
     }
 
     // --- BACK-END I/O (preserved, currently unused) ---
@@ -407,8 +412,6 @@ export class VectorUltraScene extends Scene {
 
         let frameScale = deltaMillis / FRAME_MS;
 
-        this.pollGamepad();
-
         switch (this.state) {
 
             case GameState.INSERT_COIN:
@@ -441,6 +444,7 @@ export class VectorUltraScene extends Scene {
 
                 if (this.gamepad != null) {
 
+                    // PLAYER FIRING?
                     let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
                     if (firing) {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
@@ -448,6 +452,7 @@ export class VectorUltraScene extends Scene {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.IDLE })
                     }
 
+                    // PLAYER MOVING?
                     // d-pad: up / down
                     if (this.gamepad.buttons[12].pressed == true) {
                         this.updatePlayerPosition(
@@ -515,10 +520,10 @@ export class VectorUltraScene extends Scene {
                 if (this.weaponStatus == WeaponStatus.FIRING) {
                     this.projectilesPlayer.push(
                         new Projectile(
-                            this.playerEntity.x,
-                            this.playerEntity.y,
-                            0,
-                            (20 + this.speedCurrent) * -1,
+                            this.playerEntity.x + this.randomInRange(-2,2),     // add some "jitter"
+                            this.playerEntity.y,                                // start at player's y coordinate
+                            0,                                                  // delta x
+                            (50 + this.speedCurrent) * -1,                      // delta y
                             this.assetManager
                         )
                     )
@@ -615,6 +620,8 @@ export class VectorUltraScene extends Scene {
             // Punt the player in a random direction...
             this.playerEntity.x += this.randomInRange(-jitter, jitter);
             this.playerEntity.y += this.randomInRange(-jitter, jitter);
+
+            //this.gamepad.hapticActuators[0].pulse(1.0, 200);
 
             // ...penalize health...
             this.healthCurrent--;

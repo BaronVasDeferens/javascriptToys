@@ -85,6 +85,9 @@ export class VectorUltraScene extends Scene {
 
     maneuverFactor = 1.75;
 
+    ammunitionMax = 1000;
+    ammunitionCurrent = this.ammunitionMax;
+
     // ----------------------------- WEBSOCKET ---------------------------------
     ip = "127.0.0.1";
     port = 8080;
@@ -114,7 +117,6 @@ export class VectorUltraScene extends Scene {
         this.tileCols = this.canvasPrimary.width / this.tileSize;
 
         this.roadManager = new RoadManager(this.tileCols, this.tileRows, this.tileSize, this.assetManager);
-
 
         this.speedCurrent = this.speedDefault;
 
@@ -155,6 +157,8 @@ export class VectorUltraScene extends Scene {
         this.timers = [];
 
         this.soundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
+
+        this.ammunitionCurrent = this.ammunitionMax;
 
         //this.beginWebSocket();
 
@@ -444,7 +448,7 @@ export class VectorUltraScene extends Scene {
 
                     // Firing: machine guns
                     let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
-                    if (firing) {
+                    if (firing && this.ammunitionCurrent > 0) {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
                     } else {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.IDLE })
@@ -502,6 +506,7 @@ export class VectorUltraScene extends Scene {
                     return projectile.isAlive == true
                 });
 
+
                 if (this.weaponStatus == WeaponStatus.FIRING) {
 
                     // Check: no more than 1 projectile / 100ms (the length of the machine gun sample)
@@ -518,6 +523,11 @@ export class VectorUltraScene extends Scene {
                                 this.assetManager
                             )
                         )
+
+                        this.ammunitionCurrent -= 2;
+                        if (this.ammunitionCurrent < 0) {
+                            this.ammunitionCurrent = 0;
+                        }
                     }
                 }
 
@@ -710,6 +720,7 @@ export class VectorUltraScene extends Scene {
     }
 
     renderHUD(context) {
+        // Draw filled/hollow boxes to represent HEALTH
         context.strokeStyle = "#FFFFFF";
         context.fillStyle = "#FFFFFF";
 
@@ -720,6 +731,9 @@ export class VectorUltraScene extends Scene {
                 context.strokeRect(n * 40, 20, 20, 20);
             }
         }
+
+        context.font = "20px micronian";
+        context.fillText(`M/G AMMO: ${this.ammunitionCurrent}`, 40, 60);
 
         // let visionReadout;
         // if (this.visionMode == VisionMode.NORMAL) {

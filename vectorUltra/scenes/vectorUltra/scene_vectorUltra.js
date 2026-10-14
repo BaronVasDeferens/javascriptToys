@@ -68,7 +68,7 @@ export class VectorUltraScene extends Scene {
     // ------------------------- MAP & BACKGROUND ------------------------------------
     tileSize = 64;                            // in pixels
 
-    speedDefault = 8;
+    speedDefault = 7;
     speedIncrement = 1;
     speedMax = 32;
     speedMin = 0;
@@ -119,6 +119,8 @@ export class VectorUltraScene extends Scene {
         this.roadManager = new RoadManager(this.tileCols, this.tileRows, this.tileSize, this.assetManager);
 
         this.speedCurrent = this.speedDefault;
+        this.speedLastUpdated = Date.now();
+        this.updateSpeed(0);
 
         this.levelManager = new LevelManager();
 
@@ -164,6 +166,10 @@ export class VectorUltraScene extends Scene {
 
         this.roadManager.init();
         this.levelManager.init(this.speedDefault);
+
+        this.speedCurrent = this.speedDefault;
+        this.speedLastUpdated = 0;
+        this.updateSpeed(0);
 
         this.updateState(GameState.INSERT_COIN);
 
@@ -446,6 +452,14 @@ export class VectorUltraScene extends Scene {
                 // --- GAMEPAD POLLING ---
                 if (this.gamepad != null) {
 
+                    // Speed: up or down
+                    if (this.gamepad.buttons[this.dualSenseButtonMap.bumperRight].pressed == true) {
+                        this.updateSpeed(this.speedIncrement);
+                    } else if (this.gamepad.buttons[this.dualSenseButtonMap.bumperLeft].pressed == true) {
+                        this.updateSpeed(-this.speedIncrement);
+
+                    }
+
                     // Firing: machine guns
                     let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
                     if (firing && this.ammunitionCurrent > 0) {
@@ -650,6 +664,28 @@ export class VectorUltraScene extends Scene {
             // ... and give them a moment's grace
             this.setPlayerInvulnerable(1)
         }
+    }
+
+    updateSpeed(increment) {
+
+        let now = Date.now();
+
+        // Rate limit the number of times per second the speed can be changed
+        if ((now - this.speedLastUpdated) < 250) {
+            return;
+        }
+
+        this.speedCurrent += increment;
+
+        if (this.speedCurrent < this.speedMin) {
+            this.speedCurrent = this.speedMin;
+        } else if (this.speedCurrent > this.speedMax) {
+            this.speedCurrent = this.speedMax;
+        }
+
+        this.roadManager.updateDebugSpeedDelta(this.speedCurrent);
+        this.speedLastUpdated = now;
+        console.log(`speed: ${this.speedCurrent}`);
     }
 
     // Returns TRUE if the game is over

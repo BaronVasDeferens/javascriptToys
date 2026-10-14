@@ -171,6 +171,7 @@ export var SoundAsset = Object.freeze({
     MACHINEGUN_3: "machinegun_3.wav",
     MACHINEGUN_TRAIL: "machinegun_trail.wav",
     EXPLOSION_1: "explosion_1.wav",
+    ENGINE_1: "engine_1.wav",
     CRASH_1: "crash_1.wav",
     CRASH_2: "crash_2.wav"
 });

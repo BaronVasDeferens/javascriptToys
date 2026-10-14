@@ -2,7 +2,7 @@ import { ImageAsset, SoundAsset } from "../../assets.js";
 import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, FRAME_MS } from "../../entity.js";
 import { RoadManager } from "../../roads.js";
 import { Level, LevelManager } from "../../levels.js"
-import { SoundLooper } from "../../soundHelper.js";
+import { SoundGenerator, SoundLooper } from "../../soundHelper.js";
 import { Scene, SceneType } from "../Scene.js";
 
 /**
@@ -66,22 +66,25 @@ class BackEndUpdateData {
 export class VectorUltraScene extends Scene {
 
     // ------------------------- MAP & BACKGROUND ------------------------------------
+
     tileSize = 64;                            // in pixels
 
-    speedDefault = 7;
-    speedIncrement = 1;
-    speedMax = 32;
-    speedMin = 0;
-
     // ------------------------ FPS MANAGEMENT (debug HUD only) -----------------
+
     frames = 0;
     milliseconds = Date.now();
 
     targetFps = 60;
-    targetPausedmsBetweenFrames = 1000 / this.targetFps;
+    targetPausedMsBetweenFrames = 1000 / this.targetFps;
 
     // -------------------- PLAYER STUFF ------------------------------
+
     healthMax = 10;
+
+    speedMax = 32;
+    speedMin = 5;
+    speedDefault = 5;
+    speedIncrement = 1;
 
     maneuverFactor = 1.75;
 
@@ -134,7 +137,8 @@ export class VectorUltraScene extends Scene {
         this.visionMode = VisionMode.NORMAL;
         this.weaponStatus = WeaponStatus.IDLE;
 
-        this.soundLooper = null;
+        this.machineGunSoundLooper = null;
+        this.engineSoundLooper = null;
 
         this.debugMode = false;
     }
@@ -158,7 +162,8 @@ export class VectorUltraScene extends Scene {
         this.projectilesPlayer = [];
         this.timers = [];
 
-        this.soundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
+        this.machineGunSoundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
+        this.engineSoundLooper = new SoundGenerator(this.assetManager.audioContext); //new SoundLooper(SoundAsset.ENGINE_1, this.assetManager, this.assetManager.audioContext);
 
         this.ammunitionCurrent = this.ammunitionMax;
 
@@ -176,166 +181,17 @@ export class VectorUltraScene extends Scene {
         this.pollGamepad();
     }
 
-    pollGamepad() {
+    dualSenseButtonMap = Object.freeze({
+        "buttonX": 0,
+        "buttonCircle": 1,
+        "buttonSquare": 2,
+        "buttonTriangle": 3,
+        "bumperLeft": 4,
+        "bumperRight": 5,
+        "triggerLeft": 6,
+        "triggerRight": 7
+    })
 
-        if (this.gamepad != null) {
-            return;
-        }
-
-        let gamepads = navigator.getGamepads();
-        for (let i = 0; i < gamepads.length; i++) {
-            if (gamepads[i] != null) {
-                this.gamepad = gamepads[i];
-                console.log(`acquired gamepad: ${this.gamepad}`);
-                return;
-            }
-        }
-
-    }
-
-    // --- BACK-END I/O (preserved, currently unused) ---
-
-    beginWebSocket() {
-
-        this.socket = new WebSocket(this.serverAddress);
-
-        this.socket.onopen = () => {
-            console.log(`>>> Connected to ${this.serverAddress}`);
-
-            let update = new BackEndUpdateData(
-                this.canvasPrimary.width,
-                this.canvasPrimary.height,
-                false,
-                this.state);
-
-            this.sendUpdateToBackEnd(update);
-        };
-
-        this.socket.onmessage = (event) => {
-            this.processIncomingGameStateData(event.data);
-        };
-
-        this.socket.onclose = (event) => {
-            console.log(">>> WebSocket connection CLOSED!");
-            console.log(event);
-            this.updateState(GameState.INSERT_COIN);
-        };
-
-        this.socket.onerror = (event) => {
-            console.log(event);
-        };
-
-    }
-
-    sendUpdateToBackEnd(update) {
-        let payload = JSON.stringify(update);
-        this.socket.send(payload);
-    }
-
-    sendVibration(vibeOn) {
-        this.sendUpdateToBackEnd(
-            new BackEndUpdateData(
-                this.canvasPrimary.width,
-                this.canvasPrimary.height,
-                vibeOn,
-                this.state
-            )
-        )
-    }
-
-    processIncomingGameStateData(update) {
-
-        let data = JSON.parse(update);
-
-        // If no controllers are present, the game cannot begin
-        let controllerIds = data.controllerIds;
-        if (controllerIds == null || controllerIds.length <= 0) {
-            this.updateState(GameState.INSERT_COIN);
-        } else {
-            switch (this.state) {
-
-                case GameState.INSERT_COIN:
-                case GameState.AWAITING_PLAYER_START:
-
-                    this.updateState(GameState.GAME_ACTIVE);
-                    break;
-
-                case GameState.GAME_ACTIVE:
-                    if (data.playerPositions != null) {
-                        data.playerPositions.forEach(update => {
-                            this.updatePlayerPosition(update);
-                            this.updateVisionStatus(update);
-                            this.updateWeaponStatus(update);
-                        });
-                    }
-                    break;
-            }
-        }
-    }
-
-    /*
-
-    data class PlayerControllerInput(
-        val playerId: String,
-        val millis: Long,
-        val deltaX: Float,
-        val deltaY: Float,
-        val visionMode: VisionModeStatus,
-        val weaponStatus: WeaponStatus
-    )
-
-    */
-
-    updatePlayerPosition(playerPos) {
-
-        this.playerEntity.x -= (this.maneuverFactor * playerPos.deltaX);
-        this.playerEntity.y -= (this.maneuverFactor * playerPos.deltaY);
-
-        // Bounds checking -- keep the player on screen
-
-        // Check bounds: top & bottom
-        if (this.playerEntity.y + this.playerEntity.image.height > this.canvasPrimary.height) {
-            this.playerEntity.y = this.canvasPrimary.height - this.playerEntity.image.height;
-        } else if (this.playerEntity.y < 0) {
-            this.playerEntity.y = 0;
-        }
-
-        // Check bounds: left & right
-        if (this.playerEntity.x < 0) {
-            this.playerEntity.x = 0;
-        } else if (this.playerEntity.x > this.canvasPrimary.width - this.playerEntity.image.width) {
-            this.playerEntity.x = this.canvasPrimary.width - this.playerEntity.image.width;
-        }
-    }
-
-    toggleVisionMode() {
-        if (this.visionMode == VisionMode.NORMAL) {
-            this.updateVisionStatus(VisionMode.INFRARED);
-        } else {
-            this.updateVisionStatus(VisionMode.NORMAL);
-        }
-    }
-
-    updateWeaponStatus(update) {
-        if (update.weaponStatus != this.weaponStatus) {
-            this.weaponStatus = update.weaponStatus;
-
-            if (this.weaponStatus == WeaponStatus.FIRING) {
-                this.soundLooper.play();
-            } else {
-                this.soundLooper.stop();
-                this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_TRAIL);
-            }
-        }
-    }
-
-    updateVisionStatus(mode) {
-
-        if (mode != null && mode != this.visionMode) {
-            this.visionMode = mode;
-            console.log(this.visionMode)
-        }
-    }
 
     updateState(newState) {
 
@@ -397,23 +253,14 @@ export class VectorUltraScene extends Scene {
                         )
                     )
 
+                    this.engineSoundLooper.play();
+
                     break;
                 default:
                     break;
             }
         }
     }
-
-    dualSenseButtonMap = Object.freeze({
-        "buttonX": 0,
-        "buttonCircle": 1,
-        "buttonSquare": 2,
-        "buttonTriangle": 3,
-        "bumperLeft": 4,
-        "bumperRight": 5,
-        "triggerLeft": 6,
-        "triggerRight": 7
-    })
 
     update(deltaMillis) {
 
@@ -622,47 +469,25 @@ export class VectorUltraScene extends Scene {
 
     }
 
-    handleObstacleCollision() {
+    updatePlayerPosition(playerPos) {
 
-        let jitter = 3
+        this.playerEntity.x -= (this.maneuverFactor * playerPos.deltaX);
+        this.playerEntity.y -= (this.maneuverFactor * playerPos.deltaY);
 
-        //this.sendVibration(true);
+        // Bounds checking -- keep the player on screen
 
-        if (this.isPlayerInvulnerable == true) {
-            // Ignore damage while invulnerable
-        } else {
-
-            // !!! Collision!!!
-            // Punt the player in a random direction...
-            this.playerEntity.x += this.randomInRange(-jitter, jitter);
-            this.playerEntity.y += this.randomInRange(-jitter, jitter);
-
-            //this.gamepad.hapticActuators[0].pulse(1.0, 200);
-
-            // ...penalize health...
-            this.healthCurrent--;
-
-            // ... and give them a moment's grace
-            this.setPlayerInvulnerable(1)
+        // Check bounds: top & bottom
+        if (this.playerEntity.y + this.playerEntity.image.height > this.canvasPrimary.height) {
+            this.playerEntity.y = this.canvasPrimary.height - this.playerEntity.image.height;
+        } else if (this.playerEntity.y < 0) {
+            this.playerEntity.y = 0;
         }
-    }
 
-    handleEntityCollision(entity) {
-        //this.sendVibration(true);
-
-        if (this.isPlayerInvulnerable == true) {
-            // Ignore damage while invulnerable
-        } else {
-            // !!! Collision!!!
-            // Punt the player in a random direction...
-            this.playerEntity.x += this.randomInRange(-5, 5);
-            this.playerEntity.y += this.randomInRange(-5, 5);
-
-            // ...penalize health...
-            this.healthCurrent--;
-
-            // ... and give them a moment's grace
-            this.setPlayerInvulnerable(1)
+        // Check bounds: left & right
+        if (this.playerEntity.x < 0) {
+            this.playerEntity.x = 0;
+        } else if (this.playerEntity.x > this.canvasPrimary.width - this.playerEntity.image.width) {
+            this.playerEntity.x = this.canvasPrimary.width - this.playerEntity.image.width;
         }
     }
 
@@ -679,18 +504,42 @@ export class VectorUltraScene extends Scene {
 
         if (this.speedCurrent < this.speedMin) {
             this.speedCurrent = this.speedMin;
+            return;
         } else if (this.speedCurrent > this.speedMax) {
             this.speedCurrent = this.speedMax;
+            return;
         }
 
         this.roadManager.updateDebugSpeedDelta(this.speedCurrent);
+        if (increment != 0) {
+            this.engineSoundLooper.changePitchBy(increment * 100);
+        } else {
+            this.engineSoundLooper.stop();
+        }
+
         this.speedLastUpdated = now;
         console.log(`speed: ${this.speedCurrent}`);
     }
 
-    // Returns TRUE if the game is over
-    checkForGameOver() {
-        return false
+    updateWeaponStatus(update) {
+        if (update.weaponStatus != this.weaponStatus) {
+            this.weaponStatus = update.weaponStatus;
+
+            if (this.weaponStatus == WeaponStatus.FIRING) {
+                this.machineGunSoundLooper.play();
+            } else {
+                this.machineGunSoundLooper.stop();
+                this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_TRAIL);
+            }
+        }
+    }
+
+    updateVisionStatus(mode) {
+
+        if (mode != null && mode != this.visionMode) {
+            this.visionMode = mode;
+            console.log(this.visionMode)
+        }
     }
 
     render(context) {
@@ -780,15 +629,6 @@ export class VectorUltraScene extends Scene {
         // context.drawImage(visionReadout, 20, 60);
     }
 
-    toggleDebug() {
-        this.debugMode = !this.debugMode;
-        if (this.debugMode == true) {
-            console.log(`debug: ON`);
-        } else {
-            console.log(`debug: OFF`);
-        }
-    }
-
     renderDebug(context) {
 
         this.frames++;
@@ -817,9 +657,65 @@ export class VectorUltraScene extends Scene {
 
     }
 
-    randomInRange(min, max) {
-        let range = Math.abs(max - min) + 1;
-        return Math.floor(Math.random() * range) + min
+    pollGamepad() {
+
+        if (this.gamepad != null) {
+            return;
+        }
+
+        let gamepads = navigator.getGamepads();
+        for (let i = 0; i < gamepads.length; i++) {
+            if (gamepads[i] != null) {
+                this.gamepad = gamepads[i];
+                console.log(`acquired gamepad: ${this.gamepad}`);
+                return;
+            }
+        }
+
+    }
+
+    handleObstacleCollision() {
+
+        let jitter = 3
+
+        //this.sendVibration(true);
+
+        if (this.isPlayerInvulnerable == true) {
+            // Ignore damage while invulnerable
+        } else {
+
+            // !!! Collision!!!
+            // Punt the player in a random direction...
+            this.playerEntity.x += this.randomInRange(-jitter, jitter);
+            this.playerEntity.y += this.randomInRange(-jitter, jitter);
+
+            //this.gamepad.hapticActuators[0].pulse(1.0, 200);
+
+            // ...penalize health...
+            this.healthCurrent--;
+
+            // ... and give them a moment's grace
+            this.setPlayerInvulnerable(1)
+        }
+    }
+
+    handleEntityCollision(entity) {
+        //this.sendVibration(true);
+
+        if (this.isPlayerInvulnerable == true) {
+            // Ignore damage while invulnerable
+        } else {
+            // !!! Collision!!!
+            // Punt the player in a random direction...
+            this.playerEntity.x += this.randomInRange(-5, 5);
+            this.playerEntity.y += this.randomInRange(-5, 5);
+
+            // ...penalize health...
+            this.healthCurrent--;
+
+            // ... and give them a moment's grace
+            this.setPlayerInvulnerable(1)
+        }
     }
 
     setPlayerInvulnerable(seconds) {
@@ -877,6 +773,33 @@ export class VectorUltraScene extends Scene {
                 }
             )
         )
+    }
+
+    // Returns TRUE if the game is over
+    checkForGameOver() {
+        return false
+    }
+
+    toggleVisionMode() {
+        if (this.visionMode == VisionMode.NORMAL) {
+            this.updateVisionStatus(VisionMode.INFRARED);
+        } else {
+            this.updateVisionStatus(VisionMode.NORMAL);
+        }
+    }
+
+    toggleDebug() {
+        this.debugMode = !this.debugMode;
+        if (this.debugMode == true) {
+            console.log(`debug: ON`);
+        } else {
+            console.log(`debug: OFF`);
+        }
+    }
+
+    randomInRange(min, max) {
+        let range = Math.abs(max - min) + 1;
+        return Math.floor(Math.random() * range) + min
     }
 
     addEnemy() {
@@ -971,7 +894,7 @@ export class VectorUltraScene extends Scene {
         }
     }
 
-    // ------------------------ PLAYER INPUT -----------------------
+    // ------------------------ KEYBOARD INPUT -----------------------
     // Routed here from vectorultra.js via SceneManager.onKeyPressed()/onKeyUp(),
     // the same way jsGame routes input to whichever scene is active.
 
@@ -1050,6 +973,7 @@ export class VectorUltraScene extends Scene {
                         break;
 
                     case "Escape":
+                        this.engineSoundLooper.stop();
                         this.initialize();
                         break;
 

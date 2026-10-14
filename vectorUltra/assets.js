@@ -11,14 +11,15 @@ export class AssetManager {
         this.fontLoader = new FontLoader();
     }
 
-    loadAssets(callback) {
+    async loadAssets(callback) {
 
-        this.imageLoader.loadImages(() => {
-            this.fontLoader.loadFonts();
-            this.soundLoader.loadSounds(() => {
-                callback();
-            });
-        });
+        await this.fontLoader.loadFonts();
+        await this.imageLoader.loadImages();
+        await this.soundLoader.loadSounds();
+
+        callback()
+
+
     }
 
     getImage(imageAsset) {
@@ -119,31 +120,38 @@ export class ImageLoader {
 
     imageMap = new Map();
 
-    loadImages(callback) {
+    loadImages() {
 
-		let assetFolder = "resources/";
+        let assetFolder = "resources/";
 
         let loadedImages = 0;
         let totalImages = Object.keys(ImageAsset).length;
 
         console.log(`Loading ${totalImages} images...`);
 
-        for (const key in ImageAsset) {
+        return new Promise((resolve, reject) => {
 
-            let assetLocation = ImageAsset[key];
-            let img = new Image();
-            this.imageMap.set(ImageAsset[key], img);
+            for (const key in ImageAsset) {
 
-            img.onload = function () {
-                loadedImages++;
-                if (loadedImages == totalImages) {
-                    console.log(`...images loaded!`);
-                    callback();
+                let assetLocation = ImageAsset[key];
+                let img = new Image();
+                this.imageMap.set(ImageAsset[key], img);
+
+                img.onload = function () {
+                    loadedImages++;
+                    if (loadedImages == totalImages) {
+                        console.log(`...images loaded!`);
+                        resolve();
+                    }
                 }
-            }
 
-            img.src = assetFolder + assetLocation;        // <-- this triggers the load
-        };
+                img.onerror = function () {
+                    reject(new Error(`Failed to load image: ${assetLocation}`));
+                }
+
+                img.src = assetFolder + assetLocation;        // <-- this triggers the load
+            };
+        });
     }
 
     getImage(imgAsset) {
@@ -176,7 +184,7 @@ export class SoundLoader {
         this.audioContext = audioContext;
     }
 
-    async loadSounds(callback) {
+    async loadSounds() {
 
         let soundsTotal = Object.keys(SoundAsset).length;
 
@@ -194,8 +202,6 @@ export class SoundLoader {
             let decodedBuffer = await this.audioContext.decodeAudioData(buffer);
             this.decodedBufferMap.set(SoundAsset[key], decodedBuffer);
         };
-
-        callback();
     }
 
     getBuffer(soundAsset) {
@@ -220,9 +226,9 @@ export class SoundLoader {
 
 // ------------------------------ FONTZ -----------------------------------
 
-export var FontAsset = Object.freeze({
-    PRIMARY: "micronian.ttf"
-});
+export const fontNames = [
+    "micronian.ttf",
+];
 
 export class FontLoader {
 
@@ -230,16 +236,15 @@ export class FontLoader {
 
     async loadFonts() {
 
-        let fontsTotal = Object.keys(FontAsset).length;
+        let fontsTotal = fontNames.length;
         console.log(`Loading ${fontsTotal} fonts...`);
 
-        for (const key in FontAsset) {
-            let asset = FontAsset[key];
+        for (const key in fontNames) {
+            let asset = fontNames[key];
             // Same 304-with-empty-body hazard as SoundLoader above.
             let response = await fetch("resources/" + asset, { cache: "no-store" });
-            let arrayBuffer = await response.arrayBuffer();
-            let buffer = arrayBuffer.transfer();
-            this.fontMap.set(key, buffer); 
+            let buffer = await response.arrayBuffer();
+            this.fontMap.set(asset, buffer);
         };
     }
 

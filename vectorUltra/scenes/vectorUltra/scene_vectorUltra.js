@@ -68,7 +68,8 @@ export class VectorUltraScene extends Scene {
     // ------------------------- MAP & BACKGROUND ------------------------------------
     tileSize = 64;                            // in pixels
 
-    speedIncrement = .5;
+    speedDefault = 8;
+    speedIncrement = 1;
     speedMax = 32;
     speedMin = 0;
 
@@ -114,7 +115,7 @@ export class VectorUltraScene extends Scene {
 
         this.roadManager = new RoadManager(this.tileCols, this.tileRows, this.tileSize, this.assetManager);
 
-        this.speedDefault = 2;
+
         this.speedCurrent = this.speedDefault;
 
         this.levelManager = new LevelManager();
@@ -367,7 +368,7 @@ export class VectorUltraScene extends Scene {
                         timer.isActive = false;
                     });
                     this.timers = [];
-                    this.roadManager.setRoadProperties(this.tileCols, this.tileRows, 5, 3);
+                    this.roadManager.setRoadProperties(this.tileCols, this.tileRows, 7, 3);
                     this.playerEntity = new Entity(
                         this.canvasPrimary.width / 2,
                         this.canvasPrimary.height / 2,
@@ -749,7 +750,7 @@ export class VectorUltraScene extends Scene {
         } else {
             let framesPerSecond = Math.floor(this.frames / (delta / 1000));
             context.fillStyle = "#FFFFFF";
-            context.font = "16px arial";
+            context.font = "16px micronian";
             context.fillText(`fps: ${framesPerSecond}`, 50, 100);
         }
 
@@ -774,7 +775,10 @@ export class VectorUltraScene extends Scene {
     setPlayerInvulnerable(seconds) {
 
         // ...play a sound...
-        this.soundPlayer.playOneShot(SoundAsset.CRASH_2);
+
+        if (seconds != 3) {
+            this.soundPlayer.playOneShot(SoundAsset.CRASH_2);
+        }
 
         // Give the player a few seconds of invulnerability
         this.isPlayerInvulnerable = true;

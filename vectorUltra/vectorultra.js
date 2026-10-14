@@ -1,4 +1,4 @@
-import { AssetManager, FontAsset } from "./assets.js";
+import { AssetManager } from "./assets.js";
 import { SoundPlayer } from "./soundHelper.js";
 import { SceneType } from "./scenes/Scene.js";
 import { SceneManager } from "./scenes/SceneManager.js";
@@ -94,8 +94,9 @@ var setup = function () {
 function onInitialUserInteraction() {
     updateStage(Stage.LOAD_START);
     render(context);
-    assetManager.loadAssets(() => {
-        let gameFont = new FontFace("micronian", assetManager.getFont(FontAsset.PRIMARY));
+    assetManager.loadAssets(async () => {
+        let gameFont = new FontFace("micronian", assetManager.getFont("micronian.ttf"));
+        await gameFont.load();
         document.fonts.add(gameFont);
         updateStage(Stage.LOAD_COMPLETE);
     });

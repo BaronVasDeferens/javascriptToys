@@ -251,6 +251,7 @@ export class VectorUltraScene extends Scene {
 
                 case GameState.GAME_OVER:
                     this.engineSoundLooper.stop();
+                    this.machineGunSoundLooper.stop();
                     this.roadManager.updateSpeed(0);
                     break;
 
@@ -428,7 +429,7 @@ export class VectorUltraScene extends Scene {
                         if (section.isCollideWithObstacle(this.playerEntity)) {
                             this.handleObstacleCollision();
                         } else if (section.isOffRoad(this.playerEntity)) {
-                            // Going off-road makes the vehicle squirrely
+                            // SHOULDER JITTER: going off-road makes the vehicle jitter
                             this.playerEntity.x += this.randomInRange(-1, 1);
                             this.playerEntity.y += this.randomInRange(-1, 1);
                         }
@@ -638,6 +639,7 @@ export class VectorUltraScene extends Scene {
             return;
         }
 
+        // Calculate and display FPS
         this.frames++;
         let now = Date.now();
         let delta = now - this.milliseconds;
@@ -650,6 +652,13 @@ export class VectorUltraScene extends Scene {
             context.font = "16px micronian";
             context.fillText(`fps: ${framesPerSecond}`, 50, 100);
         }
+
+        // Highlight entities
+        context.strokeStyle = "#FF0000";
+        context.strokeRect(this.playerEntity.x, this.playerEntity.y, this.playerEntity.image.width, this.playerEntity.image.height);
+        this.entitiesEnemies.forEach(entity => {
+            context.strokeRect(entity.x, entity.y, entity.image.width, entity.image.height);
+        })
 
         // let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(this.playerEntity);
         // if (highlightedSections.length > 0) {
@@ -682,8 +691,6 @@ export class VectorUltraScene extends Scene {
     }
 
     handleObstacleCollision() {
-
-
 
         //this.sendVibration(true);
 
@@ -729,8 +736,6 @@ export class VectorUltraScene extends Scene {
 
     setPlayerInvulnerable(seconds) {
 
-        // ...play a sound...
-
         if (seconds != 3) {
             this.soundPlayer.playOneShot(SoundAsset.CRASH_2);
         }
@@ -742,7 +747,7 @@ export class VectorUltraScene extends Scene {
         let divisions = 100;
         let now = Date.now();
 
-        // Push pairs of timers (one of on, one for off) into the timer queue
+        // Push PAIRS of timers (one to show, wait, then another to hide and wait) into the timer queue
         // which cause the player's car to blink for a few moments
         for (let i = 1; i < (invulnerableMillis / divisions) / 2; i++) {
 

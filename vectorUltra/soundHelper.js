@@ -288,7 +288,7 @@ export class SoundGenerator {
      * @returns {void}
      */
     changePitchBy(increment) {
-        console.log(`${this.oscillatorPrimary.frequency.value} + ${increment}`)
+        // console.log(`${this.oscillatorPrimary.frequency.value} + ${increment}`)
         this.oscillatorPrimary.frequency.setValueAtTime(this.oscillatorPrimary.frequency.value + increment / 10, this.audioContext.currentTime);
         this.oscillatorSecondary.frequency.setValueAtTime(this.oscillatorSecondary.frequency.value + increment / 10, this.audioContext.currentTime);
 

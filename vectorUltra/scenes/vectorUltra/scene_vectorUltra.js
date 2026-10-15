@@ -79,7 +79,7 @@ export class VectorUltraScene extends Scene {
 
     // -------------------- PLAYER STUFF ------------------------------
 
-    healthMax = 10;
+    healthMax = 5;
 
     speedMax = 32;
     speedMin = 5;
@@ -91,15 +91,9 @@ export class VectorUltraScene extends Scene {
     ammunitionMax = 1000;
     ammunitionCurrent = this.ammunitionMax;
 
-    // ----------------------------- WEBSOCKET ---------------------------------
-    ip = "127.0.0.1";
-    port = 8080;
-
     constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
-        super(SceneType.VECTOR_ULTRA, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
 
-        this.serverAddress = `ws://${this.ip}:${this.port}/registerMonitor`;
-        this.socket = null;
+        super(SceneType.VECTOR_ULTRA, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
 
         this.gamepad = null;
 
@@ -167,8 +161,6 @@ export class VectorUltraScene extends Scene {
 
         this.ammunitionCurrent = this.ammunitionMax;
 
-        //this.beginWebSocket();
-
         this.roadManager.init();
         this.levelManager.init(this.speedDefault);
 
@@ -191,7 +183,6 @@ export class VectorUltraScene extends Scene {
         "triggerLeft": 6,
         "triggerRight": 7
     })
-
 
     updateState(newState) {
 
@@ -228,6 +219,7 @@ export class VectorUltraScene extends Scene {
                     break;
 
                 case GameState.GAME_ACTIVE:
+
                     this.entitiesEnemies = [];
                     this.entitiesTemporary = [];
                     this.timers.forEach(timer => {
@@ -256,6 +248,12 @@ export class VectorUltraScene extends Scene {
                     this.engineSoundLooper.play();
 
                     break;
+
+                case GameState.GAME_OVER:
+                    this.engineSoundLooper.stop();
+                    this.roadManager.updateSpeed(0);
+                    break;
+
                 default:
                     break;
             }
@@ -269,6 +267,7 @@ export class VectorUltraScene extends Scene {
         switch (this.state) {
 
             case GameState.INSERT_COIN:
+
                 this.roadManager.update(deltaMillis, null);
                 this.entitiesEnemies.forEach(enemy => {
                     if (enemy instanceof EntityRoadFollower) {
@@ -466,7 +465,6 @@ export class VectorUltraScene extends Scene {
         this.entitiesEnemies = this.entitiesEnemies.filter(enemy => {
             return enemy.isOffScreen == false
         })
-
     }
 
     updatePlayerPosition(playerPos) {
@@ -552,6 +550,7 @@ export class VectorUltraScene extends Scene {
 
             case GameState.INITIALIZING:
             case GameState.INSERT_COIN:
+
                 this.roadManager.render(context);
                 context.drawImage(this.assetManager.getImage(ImageAsset.TITLE), 0, this.canvasPrimary.height / 6);
 
@@ -596,10 +595,14 @@ export class VectorUltraScene extends Scene {
 
                 this.entitiesTransient = [];
                 this.renderHUD(context);
-                if (this.debugMode == true) {
-                    this.renderDebug(context);
-                }
+                this.renderDebug(context);
+
                 break;
+
+            case GameState.GAME_OVER:
+                this.playerEntity.render(context);
+                break;
+
         }
 
     }
@@ -630,6 +633,10 @@ export class VectorUltraScene extends Scene {
     }
 
     renderDebug(context) {
+
+        if (this.debugMode == false) {
+            return;
+        }
 
         this.frames++;
         let now = Date.now();
@@ -676,45 +683,47 @@ export class VectorUltraScene extends Scene {
 
     handleObstacleCollision() {
 
-        let jitter = 3
+
 
         //this.sendVibration(true);
 
         if (this.isPlayerInvulnerable == true) {
             // Ignore damage while invulnerable
         } else {
-
-            // !!! Collision!!!
-            // Punt the player in a random direction...
-            this.playerEntity.x += this.randomInRange(-jitter, jitter);
-            this.playerEntity.y += this.randomInRange(-jitter, jitter);
 
             //this.gamepad.hapticActuators[0].pulse(1.0, 200);
 
             // ...penalize health...
             this.healthCurrent--;
 
-            // ... and give them a moment's grace
-            this.setPlayerInvulnerable(1)
+            if (this.checkForGameOver() == true) {
+                this.updateState(GameState.GAME_OVER);
+            } else {
+                // Punt the player in a random direction
+                let jitterSize = this.tileSize
+                this.playerEntity.x += this.randomInRange(-jitterSize, jitterSize);
+                this.setPlayerInvulnerable(1);
+            }
         }
     }
 
     handleEntityCollision(entity) {
-        //this.sendVibration(true);
 
         if (this.isPlayerInvulnerable == true) {
             // Ignore damage while invulnerable
         } else {
-            // !!! Collision!!!
-            // Punt the player in a random direction...
-            this.playerEntity.x += this.randomInRange(-5, 5);
-            this.playerEntity.y += this.randomInRange(-5, 5);
 
-            // ...penalize health...
             this.healthCurrent--;
 
-            // ... and give them a moment's grace
-            this.setPlayerInvulnerable(1)
+            if (this.checkForGameOver() == true) {
+                this.updateState(GameState.GAME_OVER);
+            } else {
+                // Punt the player in a random direction
+                let jitterSize = this.tileSize
+                this.playerEntity.x += this.randomInRange(-jitterSize, jitterSize);
+                this.playerEntity.y += this.randomInRange(-jitterSize, jitterSize);
+                this.setPlayerInvulnerable(1);
+            }
         }
     }
 
@@ -777,7 +786,11 @@ export class VectorUltraScene extends Scene {
 
     // Returns TRUE if the game is over
     checkForGameOver() {
-        return false
+        if (this.healthCurrent <= 0) {
+            return true
+        } else {
+            return false
+        }
     }
 
     toggleVisionMode() {
@@ -982,6 +995,17 @@ export class VectorUltraScene extends Scene {
                         break;
                 }
                 break;
+
+            case GameState.GAME_OVER:
+
+                switch (event.code) {
+                    case "Escape":
+                        this.engineSoundLooper.stop();
+                        this.initialize();
+                        break;
+                    default:
+                        break;
+                }
 
             default:
                 break;

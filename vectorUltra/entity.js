@@ -20,19 +20,66 @@ export class Entity {
     isOffScreen = false;
     isAlive = true;
 
+    hitBoxPercent = 0.80;
+
+    hitBoxOffsetX = 0;
+    hitBoxOffsetY = 0;
+    hitBoxWidth = 0;
+    hitBoxHeight = 0;
+
+    hitBox = null;
+
     constructor(x, y, image) {
         this.x = x;
         this.y = y;
         this.image = image;
         this.imageHeight = image.height;
         this.imageWidth = image.width;
+
+        this.hitBoxOffsetX = Math.floor(this.imageWidth * (1 - this.hitBoxPercent) / 2);
+        this.hitBoxOffsetY = Math.floor(this.imageHeight * (1 - this.hitBoxPercent) / 2);
+        this.hitBoxWidth = Math.floor(this.imageWidth * this.hitBoxPercent);
+        this.hitBoxHeight = Math.floor(this.imageHeight * this.hitBoxPercent);
+
+        this.hitBox = this.computeHitBox();
+    }
+
+    updatePositionByDelta(deltaX, deltaY) {
+        this.x += deltaX;
+        this.y += deltaY;
+        this.hitBox = this.computeHitBox();
     }
 
     isCollideWithEntity(otherEntity) {
-        return (otherEntity.x + otherEntity.imageWidth >= this.x)
+
+        let myHitBox = this.hitBox;
+        let theirHitBox = otherEntity.computeHitBox();
+
+        /*
+                return (otherEntity.x + otherEntity.imageWidth >= this.x)
             && (otherEntity.x <= this.x + this.imageWidth)
             && (otherEntity.y + otherEntity.imageHeight >= this.y)
             && (otherEntity.y <= this.y + this.imageHeight)
+        
+        */
+
+        return (theirHitBox.x + theirHitBox.width >= myHitBox.x)
+            && (theirHitBox.x <= myHitBox.x + myHitBox.width)
+            && (theirHitBox.y + theirHitBox.height >= myHitBox.y)
+            && (theirHitBox.y <= myHitBox.y + myHitBox.height)
+    }
+
+    computeHitBox() {
+
+        let startX = this.x + this.hitBoxOffsetX;
+        let startY = this.y + this.hitBoxOffsetY;
+
+        return {
+            x: startX,
+            y: startY,
+            width: this.hitBoxWidth,
+            height: this.hitBoxHeight,
+        }
     }
 
     render(context) {
@@ -55,8 +102,7 @@ export class EntityEnemy extends Entity {
 
     update(deltaMillis) {
         let frameScale = deltaMillis / FRAME_MS;
-        this.x += this.dX * frameScale;
-        this.y += this.dY * frameScale;
+        this.updatePositionByDelta(this.dX * frameScale, this.dY * frameScale);
 
         if (this.x < (0 - this.imageWidth) || this.x > this.canvasWidth || this.y < (0 - this.imageHeight) || this.y > this.canvasHeight) {
             this.isOffScreen = true;
@@ -103,9 +149,11 @@ export class EntityRoadFollower extends EntityEnemy {
         let frameScale = deltaMillis / FRAME_MS;
 
         if (targetX > this.x) {
-            this.x += 2 * frameScale
+            this.updatePositionByDelta(2 * frameScale, 0);
+            // this.x += 2 * frameScale
         } else if (targetX < this.x) {
-            this.x -= 2 * frameScale;
+            this.updatePositionByDelta(-2 * frameScale, 0);
+            // this.x -= 2 * frameScale;
         }
 
     }
@@ -188,11 +236,15 @@ export class EntityExplosion {
         ];
     }
 
+    updatePositionByDelta(deltaX, deltaY) {
+        this.x += deltaX;
+        this.y += deltaY;
+    }
+
     update(deltaMillis) {
 
         let frameScale = deltaMillis / FRAME_MS;
-        this.x += this.dX * frameScale;
-        this.y += this.dY * frameScale;
+        this.updatePositionByDelta(this.dX * frameScale, this.dY * frameScale);
 
         this.elapsedMillis += deltaMillis;
         while (this.elapsedMillis >= FRAME_MS && this.isAlive == true) {
@@ -216,6 +268,8 @@ export class EntityExplosion {
 
 export class Projectile extends Entity {
 
+    hitBoxPercent = 1.0;
+
     constructor(x, y, dX, dY, timestamp, imageLoader) {
         super(x, y, imageLoader.getImage(ImageAsset.PLAYER_PROJECTILE_1));
         this.dX = dX;
@@ -226,8 +280,7 @@ export class Projectile extends Entity {
     update(deltaMillis) {
 
         let frameScale = deltaMillis / FRAME_MS;
-        this.x += this.dX * frameScale;
-        this.y += this.dY * frameScale;
+        this.updatePositionByDelta(this.dX * frameScale, this.dY * frameScale);
 
         if (this.y <= 0) {
             this.isAlive = false;

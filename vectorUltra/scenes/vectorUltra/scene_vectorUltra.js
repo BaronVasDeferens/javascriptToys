@@ -49,19 +49,9 @@ export const WeaponStatus = Object.freeze({
     FIRING: "FIRING",
 });
 
-// ------------------------- BACK-END I/O ----------------------------
-// Preserved from the original file. Currently unused (beginWebSocket() is
-// never called -- it wasn't in the original either), kept for parity.
 
-class BackEndUpdateData {
-    constructor(width, height, vibrations, state) {
-        this.millis = Date.now(),
-            this.width = width;
-        this.height = height;
-        this.vibrations = vibrations;
-        this.stage = state;
-    }
-}
+
+
 
 export class VectorUltraScene extends Scene {
 
@@ -159,6 +149,7 @@ export class VectorUltraScene extends Scene {
         this.machineGunSoundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
         this.engineSoundLooper = new SoundGenerator(this.assetManager.audioContext); //new SoundLooper(SoundAsset.ENGINE_1, this.assetManager, this.assetManager.audioContext);
 
+        this.lethalEntity = null;
         this.ammunitionCurrent = this.ammunitionMax;
 
         this.roadManager.init();
@@ -400,8 +391,11 @@ export class VectorUltraScene extends Scene {
                         if (highlightedSections.length > 0) {
                             highlightedSections.forEach(section => {
                                 if (section.isCollideWithObstacle(enemy)) {
-                                    enemy.x += this.randomInRange(-10, 10);
-                                    enemy.y += this.randomInRange(-10, 10);
+
+                                    enemy.updatePositionByDelta(this.randomInRange(-10, 10), this.randomInRange(-10, 10))
+
+                                    // enemy.x += this.randomInRange(-10, 10);
+                                    // enemy.y += this.randomInRange(-10, 10);
                                 }
                             })
                         }
@@ -602,6 +596,9 @@ export class VectorUltraScene extends Scene {
 
             case GameState.GAME_OVER:
                 this.playerEntity.render(context);
+                if (this.lethalEntity != null) {
+                    this.lethalEntity.render(context);
+                }
                 break;
 
         }
@@ -657,7 +654,14 @@ export class VectorUltraScene extends Scene {
         context.strokeStyle = "#FF0000";
         context.strokeRect(this.playerEntity.x, this.playerEntity.y, this.playerEntity.image.width, this.playerEntity.image.height);
         this.entitiesEnemies.forEach(entity => {
-            context.strokeRect(entity.x, entity.y, entity.image.width, entity.image.height);
+            let hitBox = entity.hitBox;
+            context.strokeRect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
+        });
+
+        this.projectilesPlayer.forEach(bullet => {
+            let hitBox = bullet.hitBox;
+            context.strokeRect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
+
         })
 
         // let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(this.playerEntity);
@@ -723,6 +727,7 @@ export class VectorUltraScene extends Scene {
             this.healthCurrent--;
 
             if (this.checkForGameOver() == true) {
+                this.lethalEntity = entity;
                 this.updateState(GameState.GAME_OVER);
             } else {
                 // Punt the player in a random direction

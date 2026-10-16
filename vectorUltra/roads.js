@@ -183,9 +183,10 @@ export class RoadSection {
     }
 
     isCollideWithObstacle(entity) {
-        // For any given section, an entity can be in up to two tiles simulataneously; check both possibilities
+        // For any given section, an entity can be in up to two tiles simultaneously; check both possibilities
         let indexA = Math.floor(entity.x / this.tileSize);
         let indexB = Math.floor((entity.x + entity.imageWidth) / this.tileSize);
+
         return this.obstacleIndexes[indexA] != 0 || this.obstacleIndexes[indexB] != 0;
     }
 
@@ -226,7 +227,7 @@ export class RoadManager {
 
     /**
      * Road Sections:
-     * The road is comproised of a set of n RoadSections, where n = heightInTiles + 1
+     * The road is comprised of a set of n RoadSections, where n = heightInTiles + 1
      * The uppermost visible section is at index 0.
      * As sections are updated, they move downward and are checked to see if they are "off screen."
      * Off screen sections are removed and a new section is pushed onto the top of the section array
@@ -364,7 +365,7 @@ export class RoadManager {
             }
 
             let newSection = new RoadSection(
-                this.roadSections[0].yOffset - this.tileSize,                 
+                this.roadSections[0].yOffset - this.tileSize,
                 this.heightInTiles,
                 this.widthInTiles,
                 this.pavedWidthTiles,
@@ -399,9 +400,9 @@ export class RoadManager {
                         break;
                     case 6:
                     case 7:
+                    case 8:
                         this.modifyWidth(1);
                         break;
-                    case 8:
                     case 9:
                         this.modifyWidth(-1);
                         break;

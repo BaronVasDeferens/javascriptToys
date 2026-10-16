@@ -384,18 +384,18 @@ export class VectorUltraScene extends Scene {
                 }
 
                 this.entitiesEnemies.forEach(enemy => {
+
+                    // Only some kinds of monsters interact with obstacles
                     if (enemy instanceof EntityRoadFollower) {
+
                         enemy.update(deltaMillis, this.roadManager);
-                        // OBSTACLE COLLISION DETECTION
+
+                        // ENEMY vs OBSTACLE 
                         let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(enemy);
                         if (highlightedSections.length > 0) {
                             highlightedSections.forEach(section => {
                                 if (section.isCollideWithObstacle(enemy)) {
-
-                                    enemy.updatePositionByDelta(this.randomInRange(-10, 10), this.randomInRange(-10, 10))
-
-                                    // enemy.x += this.randomInRange(-10, 10);
-                                    // enemy.y += this.randomInRange(-10, 10);
+                                    enemy.updatePositionByDelta(this.randomInRange(-5, 5), this.randomInRange(-5, 5));
                                 }
                             })
                         }
@@ -404,7 +404,7 @@ export class VectorUltraScene extends Scene {
                         enemy.update(deltaMillis);
                     }
 
-                    // --- MONSTER COLLISIONS
+                    // --- ENEMY vs PLAYER
                     if (enemy.isAlive == true && enemy.isCollideWithEntity(this.playerEntity)) {
                         //this.sendVibration(true);
                         this.handleEntityCollision(enemy);
@@ -424,8 +424,7 @@ export class VectorUltraScene extends Scene {
                             this.handleObstacleCollision();
                         } else if (section.isOffRoad(this.playerEntity)) {
                             // SHOULDER JITTER: going off-road makes the vehicle jitter
-                            this.playerEntity.x += this.randomInRange(-1, 1);
-                            this.playerEntity.y += this.randomInRange(-1, 1);
+                            this.playerEntity.updatePositionByDelta(this.randomInRange(-1, 1), this.randomInRange(-1, 1));
                         }
 
                     })
@@ -595,6 +594,7 @@ export class VectorUltraScene extends Scene {
                 break;
 
             case GameState.GAME_OVER:
+                this.roadManager.render(context);
                 this.playerEntity.render(context);
                 if (this.lethalEntity != null) {
                     this.lethalEntity.render(context);

@@ -204,6 +204,9 @@ export class RoadSection {
                     index * this.tileSize,
                     this.yOffset
                 )
+
+                context.strokeStyle = "#FF0000";
+                context.strokeRect(index * this.tileSize, this.yOffset, this.tileSize, this.tileSize);
             }
         });
 

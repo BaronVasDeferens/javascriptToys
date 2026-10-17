@@ -69,7 +69,7 @@ export class VectorUltraScene extends Scene {
 
     // -------------------- PLAYER STUFF ------------------------------
 
-    healthMax = 5;
+    healthMax = 1;
 
     speedMax = 32;
     speedMin = 5;
@@ -80,6 +80,16 @@ export class VectorUltraScene extends Scene {
 
     ammunitionMax = 1000;
     ammunitionCurrent = this.ammunitionMax;
+
+    // ------------------- OBJECTIVE STUFF ------------------------------
+
+    // Remaining time
+    timeAtLevelStartMilliseconds = Date.now();
+    timeMaxMilliseconds = 60 * 1000;
+    timeRemainingMilliseconds = 0;
+
+    // Remaining distance
+    distanceRequired = 2000;
 
     constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
 
@@ -138,6 +148,7 @@ export class VectorUltraScene extends Scene {
     }
 
     initialize() {
+
         console.log("Initializing...");
         this.state = GameState.INITIALIZING;
         this.entitiesEnemies = [];
@@ -158,6 +169,8 @@ export class VectorUltraScene extends Scene {
         this.speedCurrent = this.speedDefault;
         this.speedLastUpdated = 0;
         this.updateSpeed(0);
+
+        this.distancePercent = 1;
 
         this.updateState(GameState.INSERT_COIN);
 
@@ -211,6 +224,10 @@ export class VectorUltraScene extends Scene {
 
                 case GameState.GAME_ACTIVE:
 
+                    this.timeAtLevelStartMilliseconds = Date.now();
+                    this.timeDeadlineMilliseconds = this.timeAtLevelStartMilliseconds + this.timeMaxMilliseconds;
+                    this.timeRemainingMilliseconds = this.timeAtLevelStartMilliseconds - this.timeDeadlineMilliseconds;
+
                     this.entitiesEnemies = [];
                     this.entitiesTemporary = [];
                     this.timers.forEach(timer => {
@@ -241,9 +258,37 @@ export class VectorUltraScene extends Scene {
                     break;
 
                 case GameState.GAME_OVER:
+
                     this.engineSoundLooper.stop();
                     this.machineGunSoundLooper.stop();
-                    this.roadManager.updateSpeed(0);
+                    this.roadManager.setSpeed(1);
+
+                    // Place some explosions
+                    for (let i = 0; i < 3; i++) {
+                        
+                        let positionEntity = {
+                            x: this.playerEntity.x + this.randomInRange(-15, 15),
+                            y: this.playerEntity.y + this.randomInRange(-10, 10)
+                        }
+
+                        let explosion = new EntityExplosion(positionEntity, 0, 1, this.assetManager)
+                        explosion.randomizeFrameIndex();
+
+                        this.entitiesTemporary.push(explosion);
+                    }
+
+                    this.soundPlayer.playOneShot(SoundAsset.GAME_OVER_EXPLOSION);
+
+
+                    this.timers.push(
+                        new Timer(
+                            Date.now(),
+                            Date.now() + 7000,
+                            () => { },
+                            () => { this.initialize() }
+                        )
+                    )
+
                     break;
 
                 default:
@@ -358,7 +403,6 @@ export class VectorUltraScene extends Scene {
                     return projectile.isAlive == true
                 });
 
-
                 if (this.weaponStatus == WeaponStatus.FIRING) {
 
                     // Check: no more than 1 projectile / 100ms (the length of the machine gun sample)
@@ -411,7 +455,6 @@ export class VectorUltraScene extends Scene {
                     }
                 });
 
-
                 this.entitiesEnemies = this.entitiesEnemies.filter(enemy => {
                     return enemy.isAlive == true && enemy.isOffScreen == false
                 });
@@ -437,6 +480,27 @@ export class VectorUltraScene extends Scene {
                 this.entitiesTemporary = this.entitiesTemporary.filter(entity => {
                     return entity.isAlive == true
                 });
+
+                // Deduct TIME
+                let now = Date.now();
+                this.timeRemainingMilliseconds = this.timeDeadlineMilliseconds - now
+                if (this.timeRemainingMilliseconds < 0) {
+                    console.log("times up");
+                    this.updateState(GameState.GAME_OVER);
+                }
+
+                // Deduct DISTANCE
+                if (this.roadManager.retiredSections >= this.distanceRequired) {
+                    console.log("you win")
+                    this.updateState(GameState.GAME_OVER);
+                } else {
+                    this.distancePercent = (this.distanceRequired - this.roadManager.retiredSections) / this.distanceRequired;
+                }
+
+                break;
+
+            case GameState.GAME_OVER:
+                this.roadManager.update(deltaMillis, this.levelManager);
                 break;
 
             default:
@@ -594,8 +658,13 @@ export class VectorUltraScene extends Scene {
                 break;
 
             case GameState.GAME_OVER:
+
                 this.roadManager.render(context);
                 this.playerEntity.render(context);
+                this.entitiesTemporary.forEach(entity => {
+                    entity.render(context);
+                })
+
                 if (this.lethalEntity != null) {
                     this.lethalEntity.render(context);
                 }
@@ -606,6 +675,8 @@ export class VectorUltraScene extends Scene {
     }
 
     renderHUD(context) {
+
+        // --- HEALTH
         // Draw filled/hollow boxes to represent HEALTH
         context.strokeStyle = "#FFFFFF";
         context.fillStyle = "#FFFFFF";
@@ -618,8 +689,20 @@ export class VectorUltraScene extends Scene {
             }
         }
 
+        // --- AMMUNITION
         context.font = "20px micronian";
         context.fillText(`M/G AMMO: ${this.ammunitionCurrent}`, 40, 60);
+
+        // --- SPEED
+        context.font = "60px micronian";
+        context.fillText(`${this.speedCurrent * 8}`, 700, 60);
+        context.font = "20px micronian";
+        context.fillText(`SPEED MPH`, 700, 80);
+
+        // --- REMAINING DISTANCE
+        let width = this.canvasPrimary.width * this.distancePercent
+        context.fillRect(0, 0, width, 10);
+
 
         // let visionReadout;
         // if (this.visionMode == VisionMode.NORMAL) {

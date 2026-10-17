@@ -173,7 +173,8 @@ export var SoundAsset = Object.freeze({
     EXPLOSION_1: "explosion_1.wav",
     ENGINE_1: "engine_1.wav",
     CRASH_1: "crash_1.wav",
-    CRASH_2: "crash_2.wav"
+    CRASH_2: "crash_2.wav", 
+    GAME_OVER_EXPLOSION: "game_over_explosion_1.wav"
 });
 
 
@@ -192,7 +193,7 @@ export class SoundLoader {
         console.log(`Loading ${soundsTotal} sounds...`);
 
         for (const key in SoundAsset) {
-            let asset = "resources/" + SoundAsset[key];
+            let asset = "resources/sounds/" + SoundAsset[key];
             // cache: "no-store" -- a plain conditional GET that gets back a 304
             // can hand fetch() a bodyless Response (empty arrayBuffer()), which
             // then makes decodeAudioData() fail/produce nothing. These are tiny

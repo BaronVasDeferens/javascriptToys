@@ -205,6 +205,7 @@ export class RoadSection {
                     this.yOffset
                 )
 
+                // DEBUG: outline all obstacles with red border
                 context.strokeStyle = "#FF0000";
                 context.strokeRect(index * this.tileSize, this.yOffset, this.tileSize, this.tileSize);
             }
@@ -309,6 +310,7 @@ export class RoadManager {
 
         this.setRoadProperties(this.widthInTiles, this.heightInTiles, this.pavedWidthTiles, this.pavedIndexBegin)
 
+        this.retiredSections = 0;
     }
 
     setRoadProperties(widthInTiles, heightInTiles, pavedWidthTiles, pavedIndexBegin) {
@@ -337,6 +339,10 @@ export class RoadManager {
                 )
             )
         }
+    }
+
+    setSpeed(newSpeed) {
+        this.speedInPixels = newSpeed;
     }
 
     updateSpeed(speedInPixels) {
@@ -415,7 +421,7 @@ export class RoadManager {
             }
         }
 
-        if (levelManager != null) {
+        if (levelManager != null && this.speedInPixels != 1) {
             this.updateSpeed(levelManager.getCurrentLevel().speed);
         }
 

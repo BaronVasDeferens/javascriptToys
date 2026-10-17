@@ -236,6 +236,10 @@ export class EntityExplosion {
         ];
     }
 
+    randomizeFrameIndex() {
+        this.index = Math.floor(this.imageArray.length * Math.random());
+    }
+
     updatePositionByDelta(deltaX, deltaY) {
         this.x += deltaX;
         this.y += deltaY;

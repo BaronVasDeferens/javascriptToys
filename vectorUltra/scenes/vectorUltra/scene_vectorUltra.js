@@ -269,7 +269,7 @@ export class VectorUltraScene extends Scene {
                             () => { },
                             () => {
                                 // Place some explosion decals
-                                for (let i = 0; i < 5; i++) {
+                                for (let i = 0; i < 10; i++) {
 
                                     let positionEntity = {
                                         x: this.playerEntity.x + this.randomInRange(-15, 15),
@@ -277,8 +277,7 @@ export class VectorUltraScene extends Scene {
                                     }
 
                                     let explosion = new EntityExplosion(positionEntity, 0, 1, this.assetManager);
-                                    explosion.randomizeFrameIndex();
-
+                                    explosion.randomizeFrameIndex()
                                     this.entitiesTemporary.push(explosion);
                                 }
                             }
@@ -507,6 +506,10 @@ export class VectorUltraScene extends Scene {
 
             case GameState.GAME_OVER:
                 this.roadManager.update(deltaMillis, this.levelManager);
+                let slowDelta = deltaMillis * 0.01;
+                this.entitiesTemporary.forEach( entity => {
+                    entity.update(slowDelta)
+                });
                 break;
 
             default:

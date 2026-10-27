@@ -1078,18 +1078,6 @@ export class VectorUltraScene extends Scene {
                         this.toggleDebug();
                         break;
 
-                    case "NumpadAdd":
-                        this.speedCurrent += this.speedIncrement;
-                        this.roadManager.updateDebugSpeedDelta(this.speedCurrent);
-                        console.log(`speed up: ${this.speedCurrent}`);
-                        break;
-
-                    case "NumpadSubtract":
-                        this.speedCurrent -= this.speedIncrement;
-                        this.roadManager.updateDebugSpeedDelta(this.speedCurrent);
-                        console.log(`speed down: ${this.speedCurrent}`);
-                        break;
-
                     case "Escape":
                         this.engineSoundLooper.stop();
                         this.initialize();

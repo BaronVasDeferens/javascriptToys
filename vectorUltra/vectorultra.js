@@ -149,8 +149,8 @@ function render(contextPrimary) {
             contextPrimary.fillRect(0, 0, canvas.width, canvas.height);
             contextPrimary.fillStyle = "#FFFFFF";
             contextPrimary.font = "35px micronian";
-            contextPrimary.fillText("ESRB WARNING", 50, 50);
-            contextPrimary.fillText("This game may be too rad. Click to continue...", 50, 100);
+            contextPrimary.fillText("WELCOME", 50, 50);
+            contextPrimary.fillText("Click to continue...", 50, 100);
             break;
 
         case Stage.LOAD_START:

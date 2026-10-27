@@ -206,8 +206,8 @@ export class RoadSection {
                 )
 
                 // DEBUG: outline all obstacles with red border
-                context.strokeStyle = "#FF0000";
-                context.strokeRect(index * this.tileSize, this.yOffset, this.tileSize, this.tileSize);
+                // context.strokeStyle = "#FF0000";
+                // context.strokeRect(index * this.tileSize, this.yOffset, this.tileSize, this.tileSize);
             }
         });
 

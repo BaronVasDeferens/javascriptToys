@@ -174,7 +174,7 @@ export var SoundAsset = Object.freeze({
     ENGINE_1: "engine_1.wav",
     CRASH_1: "crash_1.wav",
     CRASH_2: "crash_2.wav", 
-    GAME_OVER_EXPLOSION: "game_over_explosion_1.wav"
+    GAME_OVER_EXPLOSION: "game_over_crash_explode.wav"
 });
 
 

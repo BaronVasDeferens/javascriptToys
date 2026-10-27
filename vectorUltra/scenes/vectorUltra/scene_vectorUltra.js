@@ -69,7 +69,7 @@ export class VectorUltraScene extends Scene {
 
     // -------------------- PLAYER STUFF ------------------------------
 
-    healthMax = 1;
+    healthMax = 3;
 
     speedMax = 32;
     speedMin = 5;
@@ -263,21 +263,30 @@ export class VectorUltraScene extends Scene {
                     this.machineGunSoundLooper.stop();
                     this.roadManager.setSpeed(1);
 
-                    // Place some explosions
-                    for (let i = 0; i < 3; i++) {
-                        
-                        let positionEntity = {
-                            x: this.playerEntity.x + this.randomInRange(-15, 15),
-                            y: this.playerEntity.y + this.randomInRange(-10, 10)
-                        }
-
-                        let explosion = new EntityExplosion(positionEntity, 0, 1, this.assetManager)
-                        explosion.randomizeFrameIndex();
-
-                        this.entitiesTemporary.push(explosion);
-                    }
-
                     this.soundPlayer.playOneShot(SoundAsset.GAME_OVER_EXPLOSION);
+
+                    this.timers.push(
+                        new Timer(
+                            Date.now(),
+                            Date.now() + 1200,          // the crash precedes the explosion (around 1.2 seconds in)
+                            () => { },
+                            () => {
+                                // Place some explosion decals
+                                for (let i = 0; i < 5; i++) {
+
+                                    let positionEntity = {
+                                        x: this.playerEntity.x + this.randomInRange(-15, 15),
+                                        y: this.playerEntity.y + this.randomInRange(-10, 30)
+                                    }
+
+                                    let explosion = new EntityExplosion(positionEntity, 0, 1, this.assetManager);
+                                    explosion.randomizeFrameIndex();
+
+                                    this.entitiesTemporary.push(explosion);
+                                }
+                            }
+                        )
+                    )
 
 
                     this.timers.push(

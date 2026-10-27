@@ -170,7 +170,7 @@ export class VectorUltraScene extends Scene {
         this.speedLastUpdated = 0;
         this.updateSpeed(0);
 
-        this.distancePercent = 1;
+        this.distancePercent = 1.0;
 
         this.updateState(GameState.INSERT_COIN);
 
@@ -224,15 +224,8 @@ export class VectorUltraScene extends Scene {
 
                 case GameState.GAME_ACTIVE:
 
-                    this.timeAtLevelStartMilliseconds = Date.now();
-                    this.timeDeadlineMilliseconds = this.timeAtLevelStartMilliseconds + this.timeMaxMilliseconds;
-                    this.timeRemainingMilliseconds = this.timeAtLevelStartMilliseconds - this.timeDeadlineMilliseconds;
-
                     this.entitiesEnemies = [];
                     this.entitiesTemporary = [];
-                    this.timers.forEach(timer => {
-                        timer.isActive = false;
-                    });
                     this.timers = [];
                     this.roadManager.setRoadProperties(this.tileCols, this.tileRows, 7, 3);
                     this.playerEntity = new Entity(
@@ -242,6 +235,10 @@ export class VectorUltraScene extends Scene {
                     this.setPlayerInvulnerable(3);
 
                     let levelZero = this.levelManager.getCurrentLevel();
+
+                    this.timeAtLevelStartMilliseconds = Date.now();
+                    this.timeDeadlineMilliseconds = this.timeAtLevelStartMilliseconds + this.timeMaxMilliseconds;
+                    this.timeRemainingMilliseconds = this.timeAtLevelStartMilliseconds - this.timeDeadlineMilliseconds;
 
                     this.roadManager.updateSpeed(levelZero.speed);
 
@@ -706,7 +703,7 @@ export class VectorUltraScene extends Scene {
         context.font = "60px micronian";
         context.fillText(`${this.speedCurrent * 8}`, 700, 60);
         context.font = "20px micronian";
-        context.fillText(`SPEED MPH`, 700, 80);
+        context.fillText(`MPH`, 700, 80);
 
         // --- REMAINING DISTANCE
         let width = this.canvasPrimary.width * this.distancePercent
@@ -799,6 +796,9 @@ export class VectorUltraScene extends Scene {
             // ...penalize health...
             this.healthCurrent--;
 
+            // ...penalize speed...
+            this.updateSpeed(-this.speedIncrement);
+
             if (this.checkForGameOver() == true) {
                 this.updateState(GameState.GAME_OVER);
             } else {
@@ -817,6 +817,9 @@ export class VectorUltraScene extends Scene {
         } else {
 
             this.healthCurrent--;
+
+            // ...penalize speed...
+            this.updateSpeed(-this.speedIncrement);
 
             if (this.checkForGameOver() == true) {
                 this.lethalEntity = entity;

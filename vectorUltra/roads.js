@@ -190,7 +190,7 @@ export class RoadSection {
         return this.obstacleIndexes[indexA] != 0 || this.obstacleIndexes[indexB] != 0;
     }
 
-    render(context, tilesIndexByType, decalsIndexedByType) {
+    render(context, tilesIndexByType, decalsIndexedByType, isDebug) {
 
         this.roadTileTypeArray.forEach((tileType, index) => {
             context.drawImage(
@@ -206,8 +206,11 @@ export class RoadSection {
                 )
 
                 // DEBUG: outline all obstacles with red border
-                // context.strokeStyle = "#FF0000";
-                // context.strokeRect(index * this.tileSize, this.yOffset, this.tileSize, this.tileSize);
+                if (isDebug) {
+                    context.strokeStyle = "#FF0000";
+                    context.strokeRect(index * this.tileSize, this.yOffset, this.tileSize, this.tileSize);
+                }
+
             }
         });
 
@@ -259,6 +262,8 @@ export class RoadManager {
 
     retiredSections = 0;
 
+    isDebug = false;
+
     constructor(widthInTiles, heightInTiles, tileSize, assetLoader) {
 
         console.log(`creating road: ${widthInTiles} x ${heightInTiles} tileSize:${tileSize}`);
@@ -267,6 +272,8 @@ export class RoadManager {
         this.heightInTiles = heightInTiles;
         this.tileSize = tileSize;
         this.assetLoader = assetLoader;
+
+        this.isDebug = false;
     }
 
     init() {
@@ -346,6 +353,9 @@ export class RoadManager {
         this.retiredSections = 0;
     }
 
+    setDebug(isDebug) {
+        this.isDebug = isDebug;
+    }
 
     setSpeed(newSpeed) {
         this.speedInPixels = newSpeed;
@@ -479,7 +489,7 @@ export class RoadManager {
 
     render(context) {
         this.roadSections.forEach(section => {
-            section.render(context, this.tilesIndexedByType, this.decalsIndexedByType);
+            section.render(context, this.tilesIndexedByType, this.decalsIndexedByType, this.isDebug);
         });
     }
 

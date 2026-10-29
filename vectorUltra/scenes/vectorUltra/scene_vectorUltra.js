@@ -89,7 +89,7 @@ export class VectorUltraScene extends Scene {
 
     // -------------------- PLAYER STUFF ------------------------------
 
-    healthMax = 3;
+    healthMax = 5;
 
     speedMax = 32;
     speedMin = 5;
@@ -154,7 +154,7 @@ export class VectorUltraScene extends Scene {
         this.machineGunSoundLooper = null;
         this.engineSoundLooper = null;
 
-        this.debugMode = false;
+        this.isDebug = false;
     }
 
     // ---------------------------- CORE LOGIC -----------------------
@@ -755,7 +755,7 @@ export class VectorUltraScene extends Scene {
 
     renderDebug(context) {
 
-        if (this.debugMode == false) {
+        if (this.isDebug == false) {
             return;
         }
 
@@ -941,8 +941,9 @@ export class VectorUltraScene extends Scene {
     }
 
     toggleDebug() {
-        this.debugMode = !this.debugMode;
-        if (this.debugMode == true) {
+        this.isDebug = !this.isDebug;
+        this.roadManager.setDebug(this.isDebug);
+        if (this.isDebug == true) {
             console.log(`debug: ON`);
         } else {
             console.log(`debug: OFF`);

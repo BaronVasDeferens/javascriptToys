@@ -599,7 +599,7 @@ export class VectorUltraScene extends Scene {
 
         this.roadManager.updateDebugSpeedDelta(this.speedCurrent);
         if (increment != 0) {
-            this.engineSoundLooper.changePitchBy(increment * 100);
+            this.engineSoundLooper.changePitchBy(increment * 75);
         } else {
             this.engineSoundLooper.stop();
         }

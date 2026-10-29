@@ -341,6 +341,12 @@ export class RoadManager {
         }
     }
 
+
+    reset() {
+        this.retiredSections = 0;
+    }
+
+
     setSpeed(newSpeed) {
         this.speedInPixels = newSpeed;
     }

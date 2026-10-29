@@ -49,7 +49,27 @@ export const WeaponStatus = Object.freeze({
     FIRING: "FIRING",
 });
 
-
+/**
+ * 
+ * ------------------------------- IDEAS --------------------------------
+ * 
+ *      infiltrator smokes when damaged
+ *      infiltrator emits warning tone on low health
+ *      infiltrator has swivelling cannon on roof, controlled with right stick
+ * 
+ *      vehicle inertia
+ *      muzzle flashes
+ * 
+ *      an enemy type that seeks the player
+ * 
+ *      enemies move SLOWER as the player goes FASTER
+ * 
+ *      one of the engine tone generators oscillates the faster with vehicle speed
+ * 
+ *      refresh-independent infiltrator motion deltas (can we combine this with vehicle inertia?)
+ * 
+ * 
+ */
 
 
 
@@ -227,7 +247,8 @@ export class VectorUltraScene extends Scene {
                     this.entitiesEnemies = [];
                     this.entitiesTemporary = [];
                     this.timers = [];
-                    this.roadManager.setRoadProperties(this.tileCols, this.tileRows, 7, 3);
+
+
                     this.playerEntity = new Entity(
                         this.canvasPrimary.width / 2,
                         this.canvasPrimary.height / 2,
@@ -240,6 +261,8 @@ export class VectorUltraScene extends Scene {
                     this.timeDeadlineMilliseconds = this.timeAtLevelStartMilliseconds + this.timeMaxMilliseconds;
                     this.timeRemainingMilliseconds = this.timeAtLevelStartMilliseconds - this.timeDeadlineMilliseconds;
 
+                    this.roadManager.setRoadProperties(this.tileCols, this.tileRows, 7, 3);
+                    this.roadManager.reset();
                     this.roadManager.updateSpeed(levelZero.speed);
 
                     // -------------- ADD BADDIES AT A FIXED RATE ---------------------
@@ -283,7 +306,6 @@ export class VectorUltraScene extends Scene {
                             }
                         )
                     )
-
 
                     this.timers.push(
                         new Timer(
@@ -488,8 +510,8 @@ export class VectorUltraScene extends Scene {
 
                 // Deduct TIME
                 let now = Date.now();
-                this.timeRemainingMilliseconds = this.timeDeadlineMilliseconds - now
-                if (this.timeRemainingMilliseconds < 0) {
+                this.timeRemainingMilliseconds = this.timeDeadlineMilliseconds - now;
+                if (this.timeRemainingMilliseconds <= 0.00) {
                     console.log("times up");
                     this.updateState(GameState.GAME_OVER);
                 }
@@ -507,7 +529,7 @@ export class VectorUltraScene extends Scene {
             case GameState.GAME_OVER:
                 this.roadManager.update(deltaMillis, this.levelManager);
                 let slowDelta = deltaMillis * 0.01;
-                this.entitiesTemporary.forEach( entity => {
+                this.entitiesTemporary.forEach(entity => {
                     entity.update(slowDelta)
                 });
                 break;
@@ -531,7 +553,7 @@ export class VectorUltraScene extends Scene {
         // Cull dead enemies
         this.entitiesEnemies = this.entitiesEnemies.filter(enemy => {
             return enemy.isOffScreen == false
-        })
+        });
     }
 
     updatePlayerPosition(playerPos) {
@@ -702,15 +724,24 @@ export class VectorUltraScene extends Scene {
         context.font = "20px micronian";
         context.fillText(`M/G AMMO: ${this.ammunitionCurrent}`, 40, 60);
 
-        // --- SPEED
-        context.font = "60px micronian";
-        context.fillText(`${this.speedCurrent * 8}`, 700, 60);
+        // SPEED: LABEL
         context.font = "20px micronian";
         context.fillText(`MPH`, 700, 80);
+
+        // --- SPEED: VELOCITY
+        context.font = "60px micronian";
+        context.fillText(`${this.speedCurrent * 8}`, 700, 60);
+
+        // --- TIME: REMAINING
+        context.font = "60px micronian";
+        context.fillText(`${this.timeRemainingMilliseconds / 1000}`, 300, 60);
 
         // --- REMAINING DISTANCE
         let width = this.canvasPrimary.width * this.distancePercent
         context.fillRect(0, 0, width, 10);
+
+
+
 
 
         // let visionReadout;

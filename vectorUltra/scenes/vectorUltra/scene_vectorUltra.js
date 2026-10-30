@@ -96,7 +96,8 @@ export class VectorUltraScene extends Scene {
     speedDefault = 5;
     speedIncrement = 1;
 
-    maneuverFactor = 1.75;
+    maneuverPixelsPerSecond = 375;
+    maneuverFactor = 3.5;
 
     ammunitionMax = 1000;
     ammunitionCurrent = this.ammunitionMax;
@@ -359,10 +360,10 @@ export class VectorUltraScene extends Scene {
 
             case GameState.GAME_ACTIVE:
 
-                // --- GAMEPAD POLLING ---
+                // --- GAMEPAD: Read ---
                 if (this.gamepad != null) {
 
-                    // Speed: up or down
+                    // SPEED: up or down
                     if (this.gamepad.buttons[this.dualSenseButtonMap.bumperRight].pressed == true) {
                         this.updateSpeed(this.speedIncrement);
                     } else if (this.gamepad.buttons[this.dualSenseButtonMap.bumperLeft].pressed == true) {
@@ -370,7 +371,7 @@ export class VectorUltraScene extends Scene {
 
                     }
 
-                    // Firing: machine guns
+                    // WEAPONS: machine guns
                     let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
                     if (firing && this.ammunitionCurrent > 0) {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
@@ -378,24 +379,25 @@ export class VectorUltraScene extends Scene {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.IDLE })
                     }
 
-                    // Moving: left and right
+                    // STEERING: left and right
+                    let pixelDistanceForInterval = ((this.maneuverPixelsPerSecond) + (this.maneuverFactor * this.speedCurrent)) * (deltaMillis / 1000)
                     let leftRight = this.gamepad.axes[0];
                     if (Math.abs(leftRight) > 0.15) {
                         this.updatePlayerPosition(
                             {
-                                deltaX: -1 * leftRight,
+                                deltaX: -1 * leftRight * pixelDistanceForInterval,
                                 deltaY: 0
                             }
                         )
                     }
 
-                    // Moving: up and down
+                    // STEERING: up and down
                     let upDown = this.gamepad.axes[1];
                     if (Math.abs(upDown) > 0.15) {
                         this.updatePlayerPosition(
                             {
                                 deltaX: 0,
-                                deltaY: -1 * upDown
+                                deltaY: -1 * upDown * pixelDistanceForInterval
                             }
                         )
                     }
@@ -558,8 +560,8 @@ export class VectorUltraScene extends Scene {
 
     updatePlayerPosition(playerPos) {
 
-        this.playerEntity.x -= (this.maneuverFactor * playerPos.deltaX);
-        this.playerEntity.y -= (this.maneuverFactor * playerPos.deltaY);
+        this.playerEntity.x -= playerPos.deltaX;
+        this.playerEntity.y -= playerPos.deltaY;
 
         // Bounds checking -- keep the player on screen
 
@@ -736,7 +738,6 @@ export class VectorUltraScene extends Scene {
         context.font = "60px micronian";
         context.fillText(`${this.speedCurrent * 8}`, 700, 60);
 
-
         // --- TIME: REMAINING
         context.font = "60px micronian";
         let secondsRemaining = this.timeRemainingMilliseconds / 1000;
@@ -744,12 +745,6 @@ export class VectorUltraScene extends Scene {
             context.fillStyle = "#FF0000"
         }
         context.fillText(`${secondsRemaining}`, 300, 60);
-
-
-
-
-
-
 
         // let visionReadout;
         // if (this.visionMode == VisionMode.NORMAL) {

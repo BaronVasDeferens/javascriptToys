@@ -53,7 +53,7 @@ export var ImageAsset = Object.freeze({
     PLAYER_PROJECTILE_1: "player_projectile_1.png",
 
     ENEMY_SPIDER_1: "enemy_1.png",
-    ENEMY_MUTANT_1: "enemy_2.png",
+    ENEMY_MUTANT_1: "enemy_4.png",
     ENEMY_TRUCK: "enemy_truck.png",
 
     BLACK: "black.png",

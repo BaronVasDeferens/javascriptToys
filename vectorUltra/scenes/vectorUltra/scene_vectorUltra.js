@@ -404,8 +404,11 @@ export class VectorUltraScene extends Scene {
                 }
 
                 this.roadManager.update(deltaMillis, this.levelManager);
+
                 this.projectilesPlayer.forEach(projectile => {
+
                     projectile.update(deltaMillis);
+
                     let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(projectile);
                     if (highlightedSections.length > 0) {
                         highlightedSections.forEach(section => {
@@ -418,7 +421,7 @@ export class VectorUltraScene extends Scene {
                     // BULLETS vs MONSTERS
                     this.entitiesEnemies.forEach(enemy => {
                         if (enemy.isCollideWithEntity(projectile)) {
-                            this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.EXPLOSION_1, -500, 500);
+                            this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.EXPLOSION_1, -500, 0);
                             enemy.isAlive = false;
                             projectile.isAlive = false;
                             this.entitiesTemporary.push(

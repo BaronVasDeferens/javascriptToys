@@ -105,11 +105,11 @@ export class VectorUltraScene extends Scene {
 
     // Remaining time
     timeAtLevelStartMilliseconds = Date.now();
-    timeMaxMilliseconds = 60 * 1000;
+    timeMaxMilliseconds = 70 * 1000;
     timeRemainingMilliseconds = 0;
 
     // Remaining distance
-    distanceRequired = 2000;
+    distanceRequired = 1600;
 
     constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
 
@@ -720,11 +720,15 @@ export class VectorUltraScene extends Scene {
             }
         }
 
+        // --- REMAINING DISTANCE
+        let width = this.canvasPrimary.width * this.distancePercent
+        context.fillRect(0, 0, width, 10);
+
         // --- AMMUNITION
         context.font = "20px micronian";
         context.fillText(`M/G AMMO: ${this.ammunitionCurrent}`, 40, 60);
 
-        // SPEED: LABEL
+        // --- SPEED: LABEL
         context.font = "20px micronian";
         context.fillText(`MPH`, 700, 80);
 
@@ -732,13 +736,16 @@ export class VectorUltraScene extends Scene {
         context.font = "60px micronian";
         context.fillText(`${this.speedCurrent * 8}`, 700, 60);
 
+
         // --- TIME: REMAINING
         context.font = "60px micronian";
-        context.fillText(`${this.timeRemainingMilliseconds / 1000}`, 300, 60);
+        let secondsRemaining = this.timeRemainingMilliseconds / 1000;
+        if (secondsRemaining < 10.00) {
+            context.fillStyle = "#FF0000"
+        }
+        context.fillText(`${secondsRemaining}`, 300, 60);
 
-        // --- REMAINING DISTANCE
-        let width = this.canvasPrimary.width * this.distancePercent
-        context.fillRect(0, 0, width, 10);
+
 
 
 

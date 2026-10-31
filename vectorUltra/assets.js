@@ -112,7 +112,10 @@ export var ImageAsset = Object.freeze({
     EXPLOSION_12: "explosion_12.png",
     EXPLOSION_13: "explosion_13.png",
     EXPLOSION_14: "explosion_14.png",
-    EXPLOSION_15: "explosion_15.png"
+    EXPLOSION_15: "explosion_15.png",
+
+    DEBRIS_1: "debris_1.png",
+    DEBRIS_2: "debris_2.png"
 });
 
 export class ImageLoader {

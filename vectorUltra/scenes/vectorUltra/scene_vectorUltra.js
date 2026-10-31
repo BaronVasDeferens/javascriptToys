@@ -1,5 +1,5 @@
 import { ImageAsset, SoundAsset } from "../../assets.js";
-import { Entity, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, FRAME_MS } from "../../entity.js";
+import { Entity, EntityBlinker, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, FRAME_MS } from "../../entity.js";
 import { RoadManager } from "../../roads.js";
 import { Level, LevelManager } from "../../levels.js"
 import { SoundGenerator, SoundLooper } from "../../soundHelper.js";
@@ -284,6 +284,26 @@ export class VectorUltraScene extends Scene {
                     this.machineGunSoundLooper.stop();
                     this.roadManager.setSpeed(1);
 
+                    // DEBRIS
+                    let decalId = ImageAsset.DEBRIS_1;
+                    if (this.randomInRange(0, 10) % 2 == 0) {
+                        decalId = ImageAsset.DEBRIS_2;
+                    }
+                    let debris = new EntityBlinker(
+                        this.playerEntity.x - this.randomInRange(0, 25),
+                        this.playerEntity.y - this.randomInRange(25, 45),
+                        this.assetManager.getImage(decalId),
+                        35
+                    )
+
+                    debris.update = (deltaMillis) => {
+                        debris.y += -1 * deltaMillis / 100;
+                    };
+
+                    this.entitiesTemporary.push(debris);
+
+
+                    // play the CRASH & EXPLOSION sfx
                     this.soundPlayer.playOneShot(SoundAsset.GAME_OVER_EXPLOSION);
 
                     this.timers.push(
@@ -292,7 +312,7 @@ export class VectorUltraScene extends Scene {
                             Date.now() + 1200,          // the crash precedes the explosion (around 1.2 seconds in)
                             () => { },
                             () => {
-                                // Place some explosion decals
+                                // Once the explosion begins, place some explosion decals
                                 for (let i = 0; i < 10; i++) {
 
                                     let positionEntity = {

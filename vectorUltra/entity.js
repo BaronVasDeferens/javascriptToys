@@ -17,6 +17,9 @@ export class Entity {
     image = null;
     alpha = 1.0;
 
+    dX = 0;
+    dY = 0;
+
     isOffScreen = false;
     isAlive = true;
 
@@ -80,6 +83,11 @@ export class Entity {
             width: this.hitBoxWidth,
             height: this.hitBoxHeight,
         }
+    }
+
+    update(deltaMillis) {
+        this.x += this.dX;
+        this.y += this.dY;
     }
 
     render(context) {
@@ -159,14 +167,10 @@ export class EntityRoadFollower extends EntityEnemy {
     }
 }
 
-
-
 export class EntityBlinker extends Entity {
 
-    constructor(x, y, imageLoader, periodMillis) {
-        this.x = x;
-        this.y = y;
-        this.image = imageLoader.getImage(ImageAsset.DECAL_CAR_1);
+    constructor(x, y, image, periodMillis) {
+        super(x, y, image);
         this.periodMillis = periodMillis;
         this.onMillis = Date.now() + periodMillis;
         this.offMillis = this.onMillis + periodMillis;
@@ -195,7 +199,6 @@ export class EntityBlinker extends Entity {
     }
 
 }
-
 
 export class EntityExplosion {
 
@@ -268,7 +271,6 @@ export class EntityExplosion {
 
 
 }
-
 
 export class Projectile extends Entity {
 

@@ -39,6 +39,12 @@ export const GameState = Object.freeze({
     GAME_OVER: "GAME_OVER"
 });
 
+export const SubScene = Object.freeze({
+   ATTRACT: 0,
+   EQUIPMENT_SELECT: 1,
+   MAIN: 2 
+});
+
 export const VisionMode = Object.freeze({
     NORMAL: 0,
     INFRARED: 1
@@ -74,6 +80,8 @@ export const WeaponStatus = Object.freeze({
 
 
 export class VectorUltraScene extends Scene {
+
+    subScene = SubScene.ATTRACT;
 
     // ------------------------- MAP & BACKGROUND ------------------------------------
 

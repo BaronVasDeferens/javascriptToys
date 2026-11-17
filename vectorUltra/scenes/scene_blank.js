@@ -4,8 +4,8 @@ import { Scene, SceneType } from "./Scene.js";
 
 export class BlankScene extends Scene {
 
-    constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
-        super(SceneType.NO_SCENE, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
+    constructor(sceneManager, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+        super(sceneManager, SceneType.NO_SCENE, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
     }
 
     onStart() {

@@ -24,8 +24,8 @@ export class SceneManager {
     initialize() {
         // !!! IMPORTANT !!!
         // This method should only be called after the assetManager has been initialized!
-        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.canvasPrimary, null, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.VECTOR_ULTRA, new VectorUltraScene(this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.VECTOR_ULTRA, new VectorUltraScene(this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
     }
 
     setCurrentSceneType(newSceneType) {

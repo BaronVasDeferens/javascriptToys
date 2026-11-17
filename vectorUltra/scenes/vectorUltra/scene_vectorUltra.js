@@ -112,9 +112,9 @@ export class VectorUltraScene extends Scene {
     // Remaining distance
     distanceRequired = 1600;
 
-    constructor(canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+    constructor(sceneManager, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
 
-        super(SceneType.VECTOR_ULTRA, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
+        super(sceneManager, SceneType.VECTOR_ULTRA, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
 
         this.gamepad = null;
 

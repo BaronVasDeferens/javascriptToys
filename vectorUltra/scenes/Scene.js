@@ -14,7 +14,8 @@ export class Scene {
 
     backgroundImage = new Image();
 
-    constructor(sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+    constructor(sceneManager, sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+        this.sceneManager = sceneManager;
         this.sceneType = sceneType;
         this.canvasPrimary = canvasPrimary;
         this.canvasSecondary = canvasSecondary;

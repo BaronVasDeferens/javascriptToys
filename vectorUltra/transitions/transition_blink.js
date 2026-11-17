@@ -1,8 +1,8 @@
 // Ported from jsGame/transitions/transition_blink.js
 // NOTE: the jsGame original imports "../transition.js", which is wrong (that file
-// escapes the transitions/ folder entirely) -- fixed to "./transition.js" here.
+// escapes the transitions/ folder entirely) -- fixed to "./Transition.js" here.
 
-import { Transition } from "./transition.js";
+import { Transition } from "./Transition.js";
 
 /**
  * BLINK EFFECT TRANSITION

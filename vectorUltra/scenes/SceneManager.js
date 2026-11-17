@@ -3,7 +3,7 @@
 import { FadeTransition } from "../transitions/transition_fade.js";
 import { SceneType } from "./Scene.js"
 import { BlankScene } from "./scene_blank.js";
-import { VectorUltraScene } from "./vectorUltra/scene_vectorUltra.js"
+import { VectorUltraScene } from "./vectorUltra/vectorUltra_main.js"
 
 
 

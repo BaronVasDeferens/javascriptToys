@@ -1,8 +1,8 @@
-import { ImageAsset, SoundAsset } from "../../assets.js";
-import { Entity, EntityBlinker, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, FRAME_MS } from "../../entity.js";
-import { RoadManager } from "../../roads.js";
-import { Level, LevelManager } from "../../levels.js"
-import { SoundGenerator, SoundLooper } from "../../soundHelper.js";
+import { ImageAsset, SoundAsset } from "../../Assets.js";
+import { Entity, EntityBlinker, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, FRAME_MS } from "./Entity.js";
+import { RoadManager } from "./Roads.js";
+import { Level, LevelManager } from "./Levels.js"
+import { SoundGenerator, SoundLooper } from "../../SoundHelper.js";
 import { Scene, SceneType } from "../Scene.js";
 
 /**

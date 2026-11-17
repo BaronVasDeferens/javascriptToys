@@ -1,6 +1,6 @@
 // Ported from jsGame/transitions/transition_fade.js
 
-import { Transition } from "./transition.js";
+import { Transition } from "./Transition.js";
 
 export class FadeTransition extends Transition {
 

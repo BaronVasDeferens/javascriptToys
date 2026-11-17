@@ -1,5 +1,5 @@
-import { AssetManager } from "./assets.js";
-import { SoundPlayer } from "./soundHelper.js";
+import { AssetManager } from "./Assets.js";
+import { SoundPlayer } from "./SoundHelper.js";
 import { SceneType } from "./scenes/Scene.js";
 import { SceneManager } from "./scenes/SceneManager.js";
 
@@ -12,7 +12,7 @@ import { SceneManager } from "./scenes/SceneManager.js";
  *  requestAnimationFrame loop, and global DOM input listeners -- then hands
  *  everything else off to the SceneManager. All of the actual game logic
  *  (entities, road, level progression, HUD, gameplay input) now lives in
- *  scenes/vectorUltra/scene_vectorUltra.js as VectorUltraScene.
+ *  scenes/vectorUltra/vectorUltra_main.js as VectorUltraScene.
  *
  *  IDEAS
  *
@@ -91,6 +91,10 @@ var setup = function () {
     render(context);
 }();
 
+
+/**
+ * Triggers the Asset Manager to begin loading resources
+ */
 function onInitialUserInteraction() {
     updateStage(Stage.LOAD_START);
     render(context);

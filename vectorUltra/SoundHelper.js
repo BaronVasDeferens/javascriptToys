@@ -1,4 +1,4 @@
-import { AssetManager, ImageAsset, ImageLoader, SoundAsset, SoundLoader } from "./assets.js";
+import { AssetManager, ImageAsset, ImageLoader, SoundAsset, SoundLoader } from "./Assets.js";
 
 export class MachineGunSoundHelper {
 

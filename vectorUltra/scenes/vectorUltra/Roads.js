@@ -1,5 +1,5 @@
-import { ImageAsset } from "./assets.js";
-import { FRAME_MS } from "./entity.js";
+import { ImageAsset } from "../../Assets.js";
+import { FRAME_MS } from "./Entity.js";
 
 
 export var RoadTileType = Object.freeze({

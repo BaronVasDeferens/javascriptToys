@@ -1,4 +1,4 @@
-import { ImageAsset, SoundAsset } from "./assets.js";
+import { ImageAsset, SoundAsset } from "../../Assets.js";
 
 // All of the per-frame pixel constants in this file (dX/dY, steering nudges, etc.)
 // were originally tuned assuming a steady 60fps requestAnimationFrame tick, with

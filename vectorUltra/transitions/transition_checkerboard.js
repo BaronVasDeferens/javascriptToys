@@ -1,6 +1,6 @@
 // Ported from jsGame/transitions/transition_checkerboard.js
 
-import { Transition } from "./transition.js";
+import { Transition } from "./Transition.js";
 
 /**
  * CHECKERBOARD TRANSITION

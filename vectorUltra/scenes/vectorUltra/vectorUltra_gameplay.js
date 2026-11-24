@@ -1,0 +1,1195 @@
+import { ImageAsset, SoundAsset } from "../../Assets.js";
+import { Entity, EntityBlinker, EntityEnemy, Timer, TimedLooper, EntityRoadFollower, Projectile, EntityExplosion, FRAME_MS } from "./Entity.js";
+import { RoadManager } from "./Roads.js";
+import { LevelManager } from "./Levels.js"
+import { SoundGenerator, SoundLooper } from "../../SoundHelper.js";
+import { Scene, SceneType } from "../Scene.js";
+
+/**
+ *
+ *  VECTOR ULTRA
+ *  Ported to the jsGame Scene/SceneManager framework.
+ *
+ *  The old vectorultra.js owned its own requestAnimationFrame loop, its own
+ *  AssetManager/SoundPlayer, and a flat Stage enum that mixed app-bootstrap
+ *  states (AWAITING_INTERACTION, LOAD_START, LOAD_COMPLETE) together with
+ *  actual gameplay states (INSERT_COIN, GAME_ACTIVE, GAME_OVER).
+ *
+ *  Now: the bootstrap-only stages live in vectorultra.js (the thin app host,
+ *  modeled on jsGame/index.js) and this file owns only the gameplay states,
+ *  via GameState below. All the module-level `var`s from the original file
+ *  became instance fields; all free functions became methods.
+ *
+ *  All entity/road movement now flows through update(deltaMillis) -- see
+ *  FRAME_MS in entity.js for how the old per-frame pixel constants are kept
+ *  meaningful under a real elapsed-time clock.
+ * 
+ * 
+ * 
+ * Gamepad test: https://luser.github.io/gamepadtest/
+ * 
+ * 
+ */
+
+const GameState = Object.freeze({
+    INITIALIZING: "INITIALIZING",
+    READY: "READY",
+    GAME_OVER: "GAME_OVER"
+});
+
+export const VisionMode = Object.freeze({
+    NORMAL: 0,
+    INFRARED: 1
+});
+
+export const WeaponStatus = Object.freeze({
+    IDLE: "IDLE",
+    FIRING: "FIRING",
+});
+
+/**
+ * 
+ * ------------------------------- IDEAS --------------------------------
+ * 
+ *      infiltrator smokes when damaged
+ *      infiltrator emits warning tone on low health
+ *      infiltrator has swivelling cannon on roof, controlled with right stick
+ * 
+ *      vehicle inertia
+ *      muzzle flashes
+ * 
+ *      an enemy type that seeks the player
+ * 
+ *      enemies move SLOWER as the player goes FASTER
+ * 
+ *      one of the engine tone generators oscillates the faster with vehicle speed
+ * 
+ *      refresh-independent infiltrator motion deltas (can we combine this with vehicle inertia?)
+ * 
+ * 
+ */
+
+
+
+export class VectorUltraSceneGameplay extends Scene {
+
+    // ------------------------- MAP & BACKGROUND ------------------------------------
+
+    tileSize = 64;                            // in pixels
+
+    // ------------------------ FPS MANAGEMENT (debug HUD only) -----------------
+
+    frames = 0;
+    milliseconds = Date.now();
+
+    targetFps = 60;
+    targetPausedMsBetweenFrames = 1000 / this.targetFps;
+
+    // -------------------- PLAYER STUFF ------------------------------
+
+    healthMax = 5;
+
+    speedMax = 32;
+    speedMin = 5;
+    speedDefault = 5;
+    speedIncrement = 1;
+
+    maneuverPixelsPerSecond = 375;
+    maneuverFactor = 3.5;
+
+    ammunitionMax = 1000;
+    ammunitionCurrent = this.ammunitionMax;
+
+    // ------------------- OBJECTIVE STUFF ------------------------------
+
+    // Remaining time
+    timeAtLevelStartMilliseconds = Date.now();
+    timeMaxMilliseconds = 70 * 1000;
+    timeRemainingMilliseconds = 0;
+
+    // Remaining distance
+    distanceRequired = 1600;
+
+    constructor(gameCore, sceneManager, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+
+        super(gameCore, sceneManager, SceneType.VECTOR_ULTRA_GAME, canvasPrimary, canvasSecondary, assetManager, soundPlayer);
+
+        this.gamepad = null;
+
+        this.state = GameState.INITIALIZING;
+
+        this.timers = [];
+
+        // TEMPORARY: entities that are not permanent but will persist for longer than a single update/rendering cycle
+        this.entitiesTemporary = [];
+
+        // TRANSIENT: entities that will be cleared after a single update/rendering cycle.
+        this.entitiesTransient = [];
+
+        this.entitiesEnemies = [];
+        this.projectilesPlayer = [];
+
+        this.tileRows = this.canvasPrimary.height / this.tileSize;
+        this.tileCols = this.canvasPrimary.width / this.tileSize;
+
+        this.roadManager = new RoadManager(this.tileCols, this.tileRows, this.tileSize, this.assetManager);
+
+        this.speedCurrent = this.speedDefault;
+        this.speedLastUpdated = Date.now();
+        this.updateSpeed(0);
+
+        this.levelManager = new LevelManager();
+
+        this.backgroundImage = new Image();
+
+        this.playerEntity = new Entity(0, 0, this.backgroundImage);
+
+        this.healthCurrent = this.healthMax;
+        this.isPlayerInvulnerable = false;
+
+        this.visionMode = VisionMode.NORMAL;
+        this.weaponStatus = WeaponStatus.IDLE;
+
+        this.machineGunSoundLooper = null;
+        this.engineSoundLooper = null;
+
+        this.isDebug = false;
+    }
+
+    // ---------------------------- CORE LOGIC -----------------------
+
+    onStart() {
+        this.initialize();
+    }
+
+    onStop() {
+
+    }
+
+    initialize() {
+
+        console.log("Initializing...");
+        this.state = GameState.INITIALIZING;
+        this.entitiesEnemies = [];
+        this.entitiesTemporary = [];
+        this.entitiesTransient = [];
+        this.projectilesPlayer = [];
+        this.timers = [];
+
+        this.machineGunSoundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
+        this.engineSoundLooper = new SoundGenerator(this.assetManager.audioContext); //new SoundLooper(SoundAsset.ENGINE_1, this.assetManager, this.assetManager.audioContext);
+
+        this.lethalEntity = null;
+        this.ammunitionCurrent = this.ammunitionMax;
+
+        this.roadManager.init();
+        this.levelManager.init(this.speedDefault);
+
+        this.speedCurrent = this.speedDefault;
+        this.speedLastUpdated = 0;
+        this.updateSpeed(0);
+
+        this.distancePercent = 1.0;
+
+        this.healthCurrent = this.healthMax;
+        this.isPlayerInvulnerable = false;
+
+        this.visionMode = VisionMode.NORMAL;
+        this.weaponStatus = WeaponStatus.IDLE;
+
+        this.updateState(GameState.READY);
+
+        this.gamepad = this.gameCore.gamePad;
+    }
+
+    dualSenseButtonMap = Object.freeze({
+        "buttonX": 0,
+        "buttonCircle": 1,
+        "buttonSquare": 2,
+        "buttonTriangle": 3,
+        "bumperLeft": 4,
+        "bumperRight": 5,
+        "triggerLeft": 6,
+        "triggerRight": 7
+    })
+
+    updateState(newState) {
+
+        if (newState != this.state) {
+            this.state = newState;
+            console.log(`vectorUltra state: ${this.state}`);
+
+            switch (this.state) {
+
+                case GameState.INITIALIZING:
+                    break;
+
+
+                    //this.soundPlayer.playBackgroundMusic(SoundAsset.THEME_1);
+
+                    this.speedCurrent = this.speedDefault;
+                    this.levelManager.init(this.speedDefault);
+                    this.roadManager.updateSpeed(this.speedDefault);
+
+                    this.healthCurrent = this.healthMax;
+
+                    this.projectilesPlayer = [];
+
+                    this.timers.forEach(timer => {
+                        timer.isActive = false;
+                    });
+                    this.timers = [];
+
+                    this.entitiesEnemies.forEach(enemy => {
+                        enemy.isOffScreen = true;
+                    });
+                    this.entitiesEnemies = [];
+                    break;
+
+                case GameState.READY:
+
+                    this.entitiesEnemies = [];
+                    this.entitiesTemporary = [];
+                    this.timers = [];
+
+                    this.playerEntity = new Entity(
+                        this.canvasPrimary.width / 2,
+                        this.canvasPrimary.height / 2,
+                        this.assetManager.getImage(ImageAsset.INFILTRATOR));
+                    this.setPlayerInvulnerable(3);
+
+                    let levelZero = this.levelManager.getCurrentLevel();
+
+                    this.timeAtLevelStartMilliseconds = Date.now();
+                    this.timeDeadlineMilliseconds = this.timeAtLevelStartMilliseconds + this.timeMaxMilliseconds;
+                    this.timeRemainingMilliseconds = this.timeAtLevelStartMilliseconds - this.timeDeadlineMilliseconds;
+
+                    this.roadManager.setRoadProperties(this.tileCols, this.tileRows, 7, 3);
+                    this.roadManager.reset();
+                    this.roadManager.updateSpeed(levelZero.speed);
+
+                    // -------------- ADD BADDIES AT A FIXED RATE ---------------------
+                    this.timers.push(
+                        new TimedLooper(
+                            1000,
+                            () => { this.addEnemy() }
+                        )
+                    )
+
+                    this.engineSoundLooper.play();
+
+                    break;
+
+                case GameState.GAME_OVER:
+
+                    this.engineSoundLooper.stop();
+                    this.machineGunSoundLooper.stop();
+                    this.roadManager.setSpeed(1);
+
+                    // DEBRIS
+                    let decalId = ImageAsset.DEBRIS_1;
+                    if (this.randomInRange(0, 10) % 2 == 0) {
+                        decalId = ImageAsset.DEBRIS_2;
+                    }
+                    let debris = new EntityBlinker(
+                        this.playerEntity.x - this.randomInRange(0, 25),
+                        this.playerEntity.y - this.randomInRange(25, 45),
+                        this.assetManager.getImage(decalId),
+                        35
+                    )
+
+                    debris.update = (deltaMillis) => {
+                        debris.y += -1 * deltaMillis / 100;
+                    };
+
+                    this.entitiesTemporary.push(debris);
+
+
+                    // play the CRASH & EXPLOSION sfx
+                    this.soundPlayer.playOneShot(SoundAsset.GAME_OVER_EXPLOSION);
+
+                    this.timers.push(
+                        new Timer(
+                            Date.now(),
+                            Date.now() + 1200,          // the crash precedes the explosion (around 1.2 seconds in)
+                            () => { },
+                            () => {
+                                // Once the explosion begins, place some explosion decals
+                                for (let i = 0; i < 10; i++) {
+
+                                    let positionEntity = {
+                                        x: this.playerEntity.x + this.randomInRange(-15, 15),
+                                        y: this.playerEntity.y + this.randomInRange(-10, 30)
+                                    }
+
+                                    let explosion = new EntityExplosion(positionEntity, 0, 1, this.assetManager);
+                                    explosion.randomizeFrameIndex()
+                                    this.entitiesTemporary.push(explosion);
+                                }
+                            }
+                        )
+                    )
+
+                    this.timers.push(
+                        new Timer(
+                            Date.now(),
+                            Date.now() + 7000,
+                            () => { },
+                            () => {
+                                this.sceneManager.setCurrentSceneType(SceneType.VECTOR_ULTRA_ATTRACT);
+                            }
+                        )
+                    )
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    update(deltaMillis) {
+
+        let frameScale = deltaMillis / FRAME_MS;
+
+        switch (this.state) {
+
+            // case GameState.INSERT_COIN:
+
+            //     this.roadManager.update(deltaMillis, null);
+            //     this.entitiesEnemies.forEach(enemy => {
+            //         if (enemy instanceof EntityRoadFollower) {
+
+            //             enemy.update(deltaMillis, this.roadManager);
+
+            //             // OBSTACLE COLLISION DETECTION
+            //             let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(enemy);
+            //             if (highlightedSections.length > 0) {
+            //                 highlightedSections.forEach(section => {
+            //                     if (section.isCollideWithObstacle(enemy)) {
+            //                         enemy.x += this.randomInRange(-10, 10);
+            //                         enemy.y += this.randomInRange(-10, 10);
+            //                     }
+            //                 })
+            //             }
+            //         }
+            //     });
+
+            //     if (this.gamepad != null && this.gamepad.buttons[0].pressed == true) {
+            //         this.updateState(GameState.GAME_ACTIVE);
+            //     }
+
+            //     break;
+
+            case GameState.READY:
+
+                // --- GAMEPAD: Read ---
+                if (this.gamepad != null) {
+
+                    // SPEED: up or down
+                    if (this.gamepad.buttons[this.dualSenseButtonMap.bumperRight].pressed == true) {
+                        this.updateSpeed(this.speedIncrement);
+                    } else if (this.gamepad.buttons[this.dualSenseButtonMap.bumperLeft].pressed == true) {
+                        this.updateSpeed(-this.speedIncrement);
+
+                    }
+
+                    // WEAPONS: machine guns
+                    let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
+                    if (firing && this.ammunitionCurrent > 0) {
+                        this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
+                    } else {
+                        this.updateWeaponStatus({ weaponStatus: WeaponStatus.IDLE })
+                    }
+
+                    // STEERING: left and right
+                    let pixelDistanceForInterval = ((this.maneuverPixelsPerSecond) + (this.maneuverFactor * this.speedCurrent)) * (deltaMillis / 1000)
+                    let leftRight = this.gamepad.axes[0];
+                    if (Math.abs(leftRight) > 0.15) {
+                        this.updatePlayerPosition(
+                            {
+                                deltaX: -1 * leftRight * pixelDistanceForInterval,
+                                deltaY: 0
+                            }
+                        )
+                    }
+
+                    // STEERING: up and down
+                    let upDown = this.gamepad.axes[1];
+                    if (Math.abs(upDown) > 0.15) {
+                        this.updatePlayerPosition(
+                            {
+                                deltaX: 0,
+                                deltaY: -1 * upDown * pixelDistanceForInterval
+                            }
+                        )
+                    }
+                }
+
+                this.roadManager.update(deltaMillis, this.levelManager);
+
+                this.projectilesPlayer.forEach(projectile => {
+
+                    projectile.update(deltaMillis);
+
+                    let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(projectile);
+                    if (highlightedSections.length > 0) {
+                        highlightedSections.forEach(section => {
+                            if (section.isCollideWithObstacle(projectile)) {
+                                projectile.isAlive = false;
+                            }
+                        })
+                    }
+
+                    // BULLETS vs MONSTERS
+                    this.entitiesEnemies.forEach(enemy => {
+                        if (enemy.isCollideWithEntity(projectile)) {
+                            this.soundPlayer.playOneShotWithDetuneRange(SoundAsset.EXPLOSION_1, -500, 0);
+                            enemy.isAlive = false;
+                            projectile.isAlive = false;
+                            this.entitiesTemporary.push(
+                                new EntityExplosion(enemy, 0, this.speedCurrent, this.assetManager)
+                            );
+                        }
+                    })
+                });
+
+                this.projectilesPlayer = this.projectilesPlayer.filter(projectile => {
+                    return projectile.isAlive == true
+                });
+
+                if (this.weaponStatus == WeaponStatus.FIRING) {
+
+                    // Check: no more than 1 projectile / 100ms (the length of the machine gun sample)
+                    let now = Date.now();
+                    let lastProjectile = this.projectilesPlayer[this.projectilesPlayer.length - 1];
+                    if (lastProjectile == null || (lastProjectile != null && now - lastProjectile.timestamp > 100)) {
+                        this.projectilesPlayer.push(
+                            new Projectile(
+                                this.playerEntity.x + this.randomInRange(-1, 1),             // add some "jitter"
+                                this.playerEntity.y,                                         // start at player's y coordinate
+                                0,                                                           // delta x
+                                (20 + this.speedCurrent) * -1,                               // delta y
+                                now,
+                                this.assetManager
+                            )
+                        )
+
+                        this.ammunitionCurrent -= 2;
+                        if (this.ammunitionCurrent < 0) {
+                            this.ammunitionCurrent = 0;
+                        }
+                    }
+                }
+
+                this.entitiesEnemies.forEach(enemy => {
+
+                    // Only some kinds of monsters interact with obstacles
+                    if (enemy instanceof EntityRoadFollower) {
+
+                        enemy.update(deltaMillis, this.roadManager);
+
+                        // ENEMY vs OBSTACLE 
+                        let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(enemy);
+                        if (highlightedSections.length > 0) {
+                            highlightedSections.forEach(section => {
+                                if (section.isCollideWithObstacle(enemy)) {
+                                    enemy.updatePositionByDelta(this.randomInRange(-5, 5), this.randomInRange(-5, 5));
+                                }
+                            })
+                        }
+
+                    } else {
+                        enemy.update(deltaMillis);
+                    }
+
+                    // --- ENEMY vs PLAYER
+                    if (enemy.isAlive == true && enemy.isCollideWithEntity(this.playerEntity)) {
+                        //this.sendVibration(true);
+                        this.handleEntityCollision(enemy);
+                    }
+                });
+
+                this.entitiesEnemies = this.entitiesEnemies.filter(enemy => {
+                    return enemy.isAlive == true && enemy.isOffScreen == false
+                });
+
+                // PLAYER: OBSTACLE COLLISION DETECTION / INVULNERABLE FRAMES
+                let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(this.playerEntity);
+                if (highlightedSections.length > 0) {
+                    highlightedSections.forEach(section => {
+                        if (section.isCollideWithObstacle(this.playerEntity)) {
+                            this.handleObstacleCollision();
+                        } else if (section.isOffRoad(this.playerEntity)) {
+                            // SHOULDER JITTER: going off-road makes the vehicle jitter
+                            this.playerEntity.updatePositionByDelta(this.randomInRange(-1, 1), this.randomInRange(-1, 1));
+                        }
+
+                    })
+                }
+
+                this.entitiesTemporary.forEach(entity => {
+                    entity.update(deltaMillis)
+                });
+
+                this.entitiesTemporary = this.entitiesTemporary.filter(entity => {
+                    return entity.isAlive == true
+                });
+
+                // Deduct TIME
+                let now = Date.now();
+                this.timeRemainingMilliseconds = this.timeDeadlineMilliseconds - now;
+                if (this.timeRemainingMilliseconds <= 0.00) {
+                    console.log("times up");
+                    this.updateState(GameState.GAME_OVER);
+                }
+
+                // Deduct DISTANCE
+                if (this.roadManager.retiredSections >= this.distanceRequired) {
+                    console.log("you win")
+                    this.updateState(GameState.GAME_OVER);
+                } else {
+                    this.distancePercent = (this.distanceRequired - this.roadManager.retiredSections) / this.distanceRequired;
+                }
+
+                break;
+
+            case GameState.GAME_OVER:
+                this.roadManager.update(deltaMillis, this.levelManager);
+                let slowDelta = deltaMillis * 0.01;
+                this.entitiesTemporary.forEach(entity => {
+                    entity.update(slowDelta)
+                });
+                break;
+
+            default:
+                break;
+        }
+
+        // Update timers...
+        // (Timer/TimedLooper are wall-clock based by design -- see entity.js --
+        // so they still take Date.now() rather than deltaMillis.)
+        this.timers.forEach(timer => {
+            timer.update(Date.now())
+        });
+
+        // Cull dead timers...
+        this.timers = this.timers.filter(timer => {
+            return timer.isActive == true
+        });
+
+        // Cull dead enemies
+        this.entitiesEnemies = this.entitiesEnemies.filter(enemy => {
+            return enemy.isOffScreen == false
+        });
+    }
+
+    updatePlayerPosition(playerPos) {
+
+        this.playerEntity.x -= playerPos.deltaX;
+        this.playerEntity.y -= playerPos.deltaY;
+
+        // Bounds checking -- keep the player on screen
+
+        // Check bounds: top & bottom
+        if (this.playerEntity.y + this.playerEntity.image.height > this.canvasPrimary.height) {
+            this.playerEntity.y = this.canvasPrimary.height - this.playerEntity.image.height;
+        } else if (this.playerEntity.y < 0) {
+            this.playerEntity.y = 0;
+        }
+
+        // Check bounds: left & right
+        if (this.playerEntity.x < 0) {
+            this.playerEntity.x = 0;
+        } else if (this.playerEntity.x > this.canvasPrimary.width - this.playerEntity.image.width) {
+            this.playerEntity.x = this.canvasPrimary.width - this.playerEntity.image.width;
+        }
+    }
+
+    updateSpeed(increment) {
+
+        let now = Date.now();
+
+        // Rate limit the number of times per second the speed can be changed
+        if ((now - this.speedLastUpdated) < 250) {
+            return;
+        }
+
+        this.speedCurrent += increment;
+
+        if (this.speedCurrent < this.speedMin) {
+            this.speedCurrent = this.speedMin;
+            return;
+        } else if (this.speedCurrent > this.speedMax) {
+            this.speedCurrent = this.speedMax;
+            return;
+        }
+
+        this.roadManager.updateDebugSpeedDelta(this.speedCurrent);
+        if (increment != 0) {
+            this.engineSoundLooper.changePitchBy(increment * 75);
+        } else {
+            this.engineSoundLooper.stop();
+        }
+
+        this.speedLastUpdated = now;
+        console.log(`speed: ${this.speedCurrent}`);
+    }
+
+    updateWeaponStatus(update) {
+        if (update.weaponStatus != this.weaponStatus) {
+            this.weaponStatus = update.weaponStatus;
+
+            if (this.weaponStatus == WeaponStatus.FIRING) {
+                this.machineGunSoundLooper.play();
+            } else {
+                this.machineGunSoundLooper.stop();
+                this.soundPlayer.playOneShot(SoundAsset.MACHINEGUN_TRAIL);
+            }
+        }
+    }
+
+    updateVisionStatus(mode) {
+
+        if (mode != null && mode != this.visionMode) {
+            this.visionMode = mode;
+            console.log(this.visionMode)
+        }
+    }
+
+    render(context) {
+
+        context.fillStyle = "#000000";
+        context.globalAlpha = 1.0;
+        context.fillRect(0, 0, this.canvasPrimary.width, this.canvasPrimary.height);
+
+        switch (this.state) {
+
+            case GameState.INITIALIZING:
+                // case GameState.INSERT_COIN:
+
+                //     this.roadManager.render(context);
+                //     context.drawImage(this.assetManager.getImage(ImageAsset.TITLE), 0, this.canvasPrimary.height / 6);
+
+                //     context.drawImage(
+                //         this.assetManager.getImage(ImageAsset.TITLE),
+                //         0 + this.randomInRange(-5, 5),
+                //         (this.canvasPrimary.height / 6) + this.randomInRange(-5, 5),
+                //     )
+
+                //     this.entitiesEnemies.filter(enemy => {
+                //         return enemy.isAlive == true
+                //     }).forEach(enemy => {
+                //         enemy.render(context);
+                //     });
+
+                //     this.entitiesTemporary.forEach(entity => {
+                //         entity.render(context);
+                //     })
+                break;
+
+            case GameState.READY:
+
+                this.roadManager.render(context);
+
+                this.projectilesPlayer.forEach(projectile => {
+                    projectile.render(context);
+                })
+
+                this.entitiesEnemies.forEach(enemy => {
+                    enemy.render(context);
+                });
+
+                this.entitiesTemporary.forEach(ent => {
+                    ent.render(context);
+                });
+
+                this.playerEntity.render(context);
+
+                this.entitiesTransient.forEach(transient => {
+                    transient.render(context)
+                });
+
+                this.entitiesTransient = [];
+                this.renderHUD(context);
+                this.renderDebug(context);
+
+                break;
+
+            case GameState.GAME_OVER:
+
+                this.roadManager.render(context);
+                this.playerEntity.render(context);
+                this.entitiesTemporary.forEach(entity => {
+                    entity.render(context);
+                })
+
+                if (this.lethalEntity != null) {
+                    this.lethalEntity.render(context);
+                }
+                break;
+
+        }
+
+    }
+
+    renderHUD(context) {
+
+        // --- HEALTH
+        // Draw filled/hollow boxes to represent HEALTH
+        context.strokeStyle = "#FFFFFF";
+        context.fillStyle = "#FFFFFF";
+
+        for (let n = 1; n <= this.healthMax; n++) {
+            if (n <= this.healthCurrent) {
+                context.fillRect(n * 40, 20, 20, 20);
+            } else {
+                context.strokeRect(n * 40, 20, 20, 20);
+            }
+        }
+
+        // --- REMAINING DISTANCE
+        let width = this.canvasPrimary.width * this.distancePercent
+        context.fillRect(0, 0, width, 10);
+
+        // --- AMMUNITION
+        context.font = "20px micronian";
+        context.fillText(`M/G AMMO: ${this.ammunitionCurrent}`, 40, 60);
+
+        // --- SPEED: LABEL
+        context.font = "20px micronian";
+        context.fillText(`MPH`, 700, 80);
+
+        // --- SPEED: VELOCITY
+        context.font = "60px micronian";
+        context.fillText(`${this.speedCurrent * 8}`, 700, 60);
+
+        // --- TIME: REMAINING
+        context.font = "60px micronian";
+        let secondsRemaining = this.timeRemainingMilliseconds / 1000;
+        if (secondsRemaining < 10.00) {
+            context.fillStyle = "#FF0000"
+        }
+        context.fillText(`${secondsRemaining}`, 300, 60);
+
+        // let visionReadout;
+        // if (this.visionMode == VisionMode.NORMAL) {
+        //     visionReadout = this.assetManager.getImage(ImageAsset.VISION_NIGHT_MODE);
+        // } else {
+        //     visionReadout = this.assetManager.getImage(ImageAsset.VISION_INFRARED_MODE);
+        // }
+        // context.drawImage(visionReadout, 20, 60);
+    }
+
+    renderDebug(context) {
+
+        if (this.isDebug == false) {
+            return;
+        }
+
+        // Calculate and display FPS
+        this.frames++;
+        let now = Date.now();
+        let delta = now - this.milliseconds;
+        if (delta >= 1000) {
+            this.frames = 0;
+            this.milliseconds = now;
+        } else {
+            let framesPerSecond = Math.floor(this.frames / (delta / 1000));
+            context.fillStyle = "#FFFFFF";
+            context.font = "16px micronian";
+            context.fillText(`fps: ${framesPerSecond}`, 50, 100);
+        }
+
+        // Highlight entities
+        context.strokeStyle = "#FF0000";
+        context.strokeRect(this.playerEntity.x, this.playerEntity.y, this.playerEntity.image.width, this.playerEntity.image.height);
+        this.entitiesEnemies.forEach(entity => {
+            let hitBox = entity.hitBox;
+            context.strokeRect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
+        });
+
+        this.projectilesPlayer.forEach(bullet => {
+            let hitBox = bullet.hitBox;
+            context.strokeRect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
+
+        })
+
+        // let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(this.playerEntity);
+        // if (highlightedSections.length > 0) {
+
+        //     highlightedSections.forEach(section => {
+        //         if (this.debugMode) {
+        //             context.strokeStyle = "#FF0000";
+        //             context.strokeRect(0, section.yOffset, 1024, 64);
+        //         }
+        //     })
+        // }
+
+    }
+
+    pollGamepad() {
+
+        if (this.gamepad != null) {
+            return;
+        }
+
+        let gamepads = navigator.getGamepads();
+        for (let i = 0; i < gamepads.length; i++) {
+            if (gamepads[i] != null) {
+                this.gamepad = gamepads[i];
+                console.log(`acquired gamepad: ${this.gamepad}`);
+                return;
+            }
+        }
+
+    }
+
+    handleObstacleCollision() {
+
+        //this.sendVibration(true);
+
+        if (this.isPlayerInvulnerable == true) {
+            // Ignore damage while invulnerable
+        } else {
+
+            //this.gamepad.hapticActuators[0].pulse(1.0, 200);
+
+            // ...penalize health...
+            this.healthCurrent--;
+
+            // ...penalize speed...
+            this.updateSpeed(-this.speedIncrement);
+
+            if (this.checkForGameOver() == true) {
+                this.updateState(GameState.GAME_OVER);
+            } else {
+                // Punt the player in a random direction
+                let jitterSize = this.tileSize
+                this.playerEntity.x += this.randomInRange(-jitterSize, jitterSize);
+                this.setPlayerInvulnerable(1);
+            }
+        }
+    }
+
+    handleEntityCollision(entity) {
+
+        if (this.isPlayerInvulnerable == true) {
+            // Ignore damage while invulnerable
+        } else {
+
+            this.healthCurrent--;
+
+            // ...penalize speed...
+            this.updateSpeed(-this.speedIncrement);
+
+            if (this.checkForGameOver() == true) {
+                this.lethalEntity = entity;
+                this.updateState(GameState.GAME_OVER);
+            } else {
+                // Punt the player in a random direction
+                let jitterSize = this.tileSize
+                this.playerEntity.x += this.randomInRange(-jitterSize, jitterSize);
+                this.playerEntity.y += this.randomInRange(-jitterSize, jitterSize);
+                this.setPlayerInvulnerable(1);
+            }
+        }
+    }
+
+    setPlayerInvulnerable(seconds) {
+
+        if (seconds != 3) {
+            this.soundPlayer.playOneShot(SoundAsset.CRASH_2);
+        }
+
+        // Give the player a few seconds of invulnerability
+        this.isPlayerInvulnerable = true;
+
+        let invulnerableMillis = seconds * 1000;
+        let divisions = 100;
+        let now = Date.now();
+
+        // Push PAIRS of timers (one to show, wait, then another to hide and wait) into the timer queue
+        // which cause the player's car to blink for a few moments
+        for (let i = 1; i < (invulnerableMillis / divisions) / 2; i++) {
+
+            this.timers.push(
+                new Timer(
+                    now,
+                    now + (((i * 2) - 1) * divisions),
+                    () => { },
+                    () => {
+                        this.playerEntity.alpha = 0.25;
+                    }
+                )
+            )
+
+            this.timers.push(
+                new Timer(
+                    now,
+                    now + (((i * 2)) * divisions),
+                    () => { },
+                    () => {
+                        this.playerEntity.alpha = 1.00;
+                    }
+                )
+            )
+        }
+
+        // Finally, add a timer to remove the invulnerable state
+        // and restore opacity / alpha
+        this.timers.push(
+            new Timer(
+                Date.now(),
+                Date.now() + invulnerableMillis + 100,
+                () => { }, // on every update
+                () => {   // on finish
+                    this.isPlayerInvulnerable = false;
+                    this.playerEntity.alpha = 1.0;
+                }
+            )
+        )
+    }
+
+    // Returns TRUE if the game is over
+    checkForGameOver() {
+        if (this.healthCurrent <= 0) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    toggleVisionMode() {
+        if (this.visionMode == VisionMode.NORMAL) {
+            this.updateVisionStatus(VisionMode.INFRARED);
+        } else {
+            this.updateVisionStatus(VisionMode.NORMAL);
+        }
+    }
+
+    toggleDebug() {
+        this.isDebug = !this.isDebug;
+        this.roadManager.setDebug(this.isDebug);
+        if (this.isDebug == true) {
+            console.log(`debug: ON`);
+        } else {
+            console.log(`debug: OFF`);
+        }
+    }
+
+    randomInRange(min, max) {
+        let range = Math.abs(max - min) + 1;
+        return Math.floor(Math.random() * range) + min
+    }
+
+    addEnemy() {
+
+        let startX = 0;
+        let startY = 0;
+        let dX = 0;
+        let dY = 0;
+
+        let chance = Math.floor(Math.random() * 2);
+        switch (chance) {
+            case 0:
+
+                switch (Math.floor(Math.random() * 4)) {
+                    case 0:
+                        // Top down (same as road)
+                        startX = this.randomInRange(10, this.canvasPrimary.width - 10);
+                        startY = -10;
+                        dX = 0;
+                        dY = this.randomInRange(2, 6);
+                        break;
+                    case 1:
+                        // bottom up
+                        startX = this.randomInRange(10, this.canvasPrimary.width - 10)
+                        startY = this.canvasPrimary.height - 10;
+                        dX = 0;
+                        dY = -2;
+                        break;
+                    case 2:
+                        // left to right
+                        startX = 1;
+                        startY = Math.floor(Math.random() * this.canvasPrimary.height);
+                        dX = 2;
+                        dY = 0;
+                        break;
+                    case 3:
+                        // right to left
+                        startX = this.canvasPrimary.width - 10;
+                        startY = Math.floor(Math.random() * this.canvasPrimary.height);
+                        dX = -1;
+                        dY = 0;
+                        break;
+                }
+
+                this.entitiesEnemies.push(new EntityEnemy(
+                    startX,
+                    startY,
+                    this.assetManager.getImage(ImageAsset.ENEMY_MUTANT_1),
+                    dX,
+                    dY,
+                    this.canvasPrimary.width,
+                    this.canvasPrimary.height
+                ));
+
+
+                break;
+            case 1:
+
+                /**
+                 * These enemies should come in from the sides and
+                 * begin to occupy the lower sections of the road, forcing
+                 * the player to either drive closer to the top or engage
+                 * the monsters.
+                 */
+
+
+                let lastFollower = this.entitiesEnemies.filter(enemy => {
+                    return enemy instanceof EntityRoadFollower
+                }).sort((a, b) => {
+                    if (a.y < b.y) {
+                        return -1
+                    } else if (a.y > b.y) {
+                        return 1
+                    } else {
+                        return 0
+                    }
+                })[0];
+
+                if (lastFollower != null) {
+                    startY = lastFollower.y - this.tileSize
+                } else {
+                    startY = (this.canvasPrimary.height) - (this.tileSize * 3)
+                }
+
+                this.entitiesEnemies.push(new EntityRoadFollower(
+                    Math.floor(Math.random() * 2) * this.canvasPrimary.width,
+                    startY,                                         // not TOO close to the bottom!
+                    this.assetManager.getImage(ImageAsset.ENEMY_SPIDER_1)
+                ));
+
+                break;
+        }
+    }
+
+    // ------------------------ KEYBOARD INPUT -----------------------
+    // Routed here from vectorultra.js via SceneManager.onKeyPressed()/onKeyUp(),
+    // the same way jsGame routes input to whichever scene is active.
+
+    onKeyPressed(event) {
+
+        switch (this.state) {
+
+            case GameState.INSERT_COIN:
+                this.updateState(GameState.GAME_ACTIVE);
+                break;
+
+            case GameState.GAME_ACTIVE:
+
+                switch (event.code) {
+
+                    case "KeyA":
+                        this.updatePlayerPosition(
+                            {
+                                deltaX: 5,
+                                deltaY: 0
+                            }
+                        )
+                        break;
+
+                    case "KeyD":
+                        this.updatePlayerPosition(
+                            {
+                                deltaX: -5,
+                                deltaY: 0
+                            }
+                        )
+                        break;
+
+                    case "KeyW":
+                        this.updatePlayerPosition(
+                            {
+                                deltaX: 0,
+                                deltaY: 5
+                            }
+                        )
+                        break;
+
+                    case "KeyS":
+                        this.updatePlayerPosition(
+                            {
+                                deltaX: 0,
+                                deltaY: -5
+                            }
+                        )
+                        break;
+
+                    case "Space":
+                        this.updateWeaponStatus(
+                            { weaponStatus: WeaponStatus.FIRING }
+                        );
+                        break;
+
+                    case "KeyV":
+                        this.toggleVisionMode();
+                        break;
+
+                    case "KeyP":
+                        this.toggleDebug();
+                        break;
+
+                    case "Escape":
+                        this.engineSoundLooper.stop();
+                        this.initialize();
+                        break;
+
+                    default:
+                        console.log(event.code)
+                        break;
+                }
+                break;
+
+            case GameState.GAME_OVER:
+
+                switch (event.code) {
+                    case "Escape":
+                        this.engineSoundLooper.stop();
+                        this.initialize();
+                        break;
+                    default:
+                        break;
+                }
+
+            default:
+                break;
+        }
+    }
+
+    onKeyUp(event) {
+
+        switch (this.state) {
+
+            case GameState.GAME_ACTIVE:
+
+                switch (event.code) {
+
+                    case "Space":
+                        this.updateWeaponStatus(
+                            { weaponStatus: WeaponStatus.IDLE }
+                        );
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+}

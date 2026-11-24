@@ -4,7 +4,8 @@
 
 export const SceneType = Object.freeze({
     NO_SCENE: "NO_SCENE",
-    VECTOR_ULTRA: "VECTOR_ULTRA"
+    VECTOR_ULTRA_ATTRACT: "VECTOR_ULTRA_ATTRACT",
+    VECTOR_ULTRA_GAME: "VECTOR_ULTRA_GAME"
 });
 
 //  ------------------------------------ SCENE DEFINITION ------------------------------------
@@ -14,7 +15,8 @@ export class Scene {
 
     backgroundImage = new Image();
 
-    constructor(sceneManager, sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+    constructor(gameCore, sceneManager, sceneType, canvasPrimary, canvasSecondary, assetManager, soundPlayer) {
+        this.gameCore = gameCore;
         this.sceneManager = sceneManager;
         this.sceneType = sceneType;
         this.canvasPrimary = canvasPrimary;

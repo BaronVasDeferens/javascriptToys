@@ -102,6 +102,7 @@ function onInitialUserInteraction() {
         let gameFont = new FontFace("micronian", assetManager.getFont("micronian.ttf"));
         await gameFont.load();
         document.fonts.add(gameFont);
+
         updateStage(Stage.LOAD_COMPLETE);
     });
 }
@@ -126,7 +127,7 @@ function updateStage(newStage) {
 
             case Stage.GAME_ACTIVE:
                 sceneManager.initialize();
-                sceneManager.setCurrentSceneType(SceneType.VECTOR_ULTRA);
+                sceneManager.setCurrentSceneType(SceneType.VECTOR_ULTRA_ATTRACT);
                 beginGame();
                 break;
 
@@ -153,7 +154,6 @@ function render(contextPrimary) {
             contextPrimary.fillRect(0, 0, canvas.width, canvas.height);
             contextPrimary.fillStyle = "#FFFFFF";
             contextPrimary.font = "35px micronian";
-            contextPrimary.fillText("WELCOME", 50, 50);
             contextPrimary.fillText("Click to continue...", 50, 100);
             break;
 
@@ -183,6 +183,8 @@ function render(contextPrimary) {
     }
 
 }
+
+
 
 // ------------------------ PLAYER INPUT -----------------------
 // Bootstrap-level stage transitions (click-to-start / loading) are handled

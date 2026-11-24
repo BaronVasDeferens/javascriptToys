@@ -3,11 +3,15 @@
 import { FadeTransition } from "../transitions/transition_fade.js";
 import { SceneType } from "./Scene.js"
 import { BlankScene } from "./scene_blank.js";
-import { VectorUltraScene } from "./vectorUltra/vectorUltra_main.js"
+import { GameCore } from "./vectorUltra/gameCore.js";
+import { VectorUltraSceneAttract } from "./vectorUltra/vectorUltra_attract.js"
+import { VectorUltraSceneGameplay } from "./vectorUltra/vectorUltra_gameplay.js"
 
 
 
 export class SceneManager {
+
+    gameCore = new GameCore();
 
     sceneMap = new Map();
     currentSceneType = SceneType.NO_SCENE;
@@ -24,8 +28,10 @@ export class SceneManager {
     initialize() {
         // !!! IMPORTANT !!!
         // This method should only be called after the assetManager has been initialized!
-        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
-        this.sceneMap.set(SceneType.VECTOR_ULTRA, new VectorUltraScene(this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.NO_SCENE, new BlankScene(this.gameCore, this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.VECTOR_ULTRA_ATTRACT, new VectorUltraSceneAttract(this.gameCore, this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+        this.sceneMap.set(SceneType.VECTOR_ULTRA_GAME, new VectorUltraSceneGameplay(this.gameCore, this, this.canvasPrimary, null, this.assetManager, this.soundPlayer));
+
     }
 
     setCurrentSceneType(newSceneType) {
@@ -144,7 +150,25 @@ export class SceneManager {
         this.getCurrentScene().onVisibilityStateChanged(state);
     }
 
+    pollGamepad() {
+
+        if (this.gameCore.gamePad != null) {
+            return;
+        }
+
+        let gamepads = navigator.getGamepads();
+        for (let i = 0; i < gamepads.length; i++) {
+            if (gamepads[i] != null) {
+                this.gameCore.setGamePad(gamepads[i]);
+                return;
+            }
+        }
+
+    }
+
     update(delta) {
+
+        this.pollGamepad();
 
         if (this.getCurrentScene() == null) {
             return;

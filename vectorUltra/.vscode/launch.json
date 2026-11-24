@@ -3,7 +3,7 @@
     "configurations": [
         {
             "type": "firefox",
-            "firefoxExecutable": "C:\\Users\\Skot\\AppData\\Local\\Mozilla Firefox\\firefox.exe",
+            "firefoxExecutable": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
             "request": "launch",
             "name": "Launch Firefox for game debug",
             "url": "http://localhost:3000/vectorultra.html",

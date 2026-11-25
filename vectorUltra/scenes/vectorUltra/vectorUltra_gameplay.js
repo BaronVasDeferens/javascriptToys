@@ -178,7 +178,7 @@ export class VectorUltraSceneGameplay extends Scene {
         this.timers = [];
 
         this.machineGunSoundLooper = new SoundLooper(SoundAsset.MACHINEGUN_3, this.assetManager, this.assetManager.audioContext);
-        this.engineSoundLooper = new SoundGenerator(this.assetManager.audioContext); //new SoundLooper(SoundAsset.ENGINE_1, this.assetManager, this.assetManager.audioContext);
+        this.engineSoundLooper = new SoundGenerator(this.assetManager.audioContext); 
 
         this.lethalEntity = null;
         this.ammunitionCurrent = this.ammunitionMax;
@@ -338,6 +338,9 @@ export class VectorUltraSceneGameplay extends Scene {
 
             case GameState.READY:
 
+                let cannonLeftRight = 0;
+                let cannonLeftRightAngle = 0;
+
                 // --- GAMEPAD: Read ---
                 if (this.gamepad != null) {
 
@@ -379,6 +382,12 @@ export class VectorUltraSceneGameplay extends Scene {
                             }
                         )
                     }
+
+                    // EXPERIMENTAL
+                    // CANNON
+                    cannonLeftRight = this.gamepad.axes[2];
+                    cannonLeftRightAngle = cannonLeftRight * 90;
+
                 }
 
                 this.roadManager.update(deltaMillis, this.levelManager);
@@ -423,7 +432,7 @@ export class VectorUltraSceneGameplay extends Scene {
                             new Projectile(
                                 this.playerEntity.x + this.randomInRange(-1, 1),             // add some "jitter"
                                 this.playerEntity.y,                                         // start at player's y coordinate
-                                0,                                                           // delta x
+                                cannonLeftRightAngle,                                        // delta x
                                 (20 + this.speedCurrent) * -1,                               // delta y
                                 now,
                                 this.assetManager

@@ -1,6 +1,7 @@
 // Ported from jsGame/scenes/SceneManager.js, trimmed to vectorUltra's own scene set.
 
-import { FadeTransition } from "../transitions/transition_fade.js";
+import { FadeTransition } from "../transitions/transition_fade.js"
+import { CheckerboardTransition } from "../transitions/transition_checkerboard.js"
 import { SceneType } from "./Scene.js"
 import { BlankScene } from "./scene_blank.js";
 import { GameCore } from "./vectorUltra/gameCore.js";
@@ -41,11 +42,22 @@ export class SceneManager {
             // Create a transition
             this.transitions.push(
 
+                // new CheckerboardTransition(
+                //     this.getCurrentScene(),
+                //     this.sceneMap.get(newSceneType),
+                //     this.canvasPrimary,
+                //     500,
+                //     this.tileSize / 4,
+                //     "#FF0000"
+                // )
+
                 new FadeTransition(
                     this.getCurrentScene(),
                     this.sceneMap.get(newSceneType),
                     this.canvasPrimary,
                     500,
+                    this.tileSize / 4,
+                    "#FF0000"
                 )
 
             );

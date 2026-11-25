@@ -170,6 +170,7 @@ export class VectorUltraSceneGameplay extends Scene {
 
         console.log("Initializing...");
         this.state = GameState.INITIALIZING;
+
         this.entitiesEnemies = [];
         this.entitiesTemporary = [];
         this.entitiesTransient = [];
@@ -197,9 +198,10 @@ export class VectorUltraSceneGameplay extends Scene {
         this.visionMode = VisionMode.NORMAL;
         this.weaponStatus = WeaponStatus.IDLE;
 
+        this.gamepad = this.gameCore.gamePad;
+
         this.updateState(GameState.READY);
 
-        this.gamepad = this.gameCore.gamePad;
     }
 
     dualSenseButtonMap = Object.freeze({
@@ -224,28 +226,6 @@ export class VectorUltraSceneGameplay extends Scene {
                 case GameState.INITIALIZING:
                     break;
 
-
-                    //this.soundPlayer.playBackgroundMusic(SoundAsset.THEME_1);
-
-                    this.speedCurrent = this.speedDefault;
-                    this.levelManager.init(this.speedDefault);
-                    this.roadManager.updateSpeed(this.speedDefault);
-
-                    this.healthCurrent = this.healthMax;
-
-                    this.projectilesPlayer = [];
-
-                    this.timers.forEach(timer => {
-                        timer.isActive = false;
-                    });
-                    this.timers = [];
-
-                    this.entitiesEnemies.forEach(enemy => {
-                        enemy.isOffScreen = true;
-                    });
-                    this.entitiesEnemies = [];
-                    break;
-
                 case GameState.READY:
 
                     this.entitiesEnemies = [];
@@ -256,6 +236,7 @@ export class VectorUltraSceneGameplay extends Scene {
                         this.canvasPrimary.width / 2,
                         this.canvasPrimary.height / 2,
                         this.assetManager.getImage(ImageAsset.INFILTRATOR));
+
                     this.setPlayerInvulnerable(3);
 
                     let levelZero = this.levelManager.getCurrentLevel();
@@ -268,7 +249,7 @@ export class VectorUltraSceneGameplay extends Scene {
                     this.roadManager.reset();
                     this.roadManager.updateSpeed(levelZero.speed);
 
-                    // -------------- ADD BADDIES AT A FIXED RATE ---------------------
+                    // -------------- ADD ENEMIES AT A FIXED RATE ---------------------
                     this.timers.push(
                         new TimedLooper(
                             1000,
@@ -355,33 +336,6 @@ export class VectorUltraSceneGameplay extends Scene {
 
         switch (this.state) {
 
-            // case GameState.INSERT_COIN:
-
-            //     this.roadManager.update(deltaMillis, null);
-            //     this.entitiesEnemies.forEach(enemy => {
-            //         if (enemy instanceof EntityRoadFollower) {
-
-            //             enemy.update(deltaMillis, this.roadManager);
-
-            //             // OBSTACLE COLLISION DETECTION
-            //             let highlightedSections = this.roadManager.findRoadSectionsForEntityPosition(enemy);
-            //             if (highlightedSections.length > 0) {
-            //                 highlightedSections.forEach(section => {
-            //                     if (section.isCollideWithObstacle(enemy)) {
-            //                         enemy.x += this.randomInRange(-10, 10);
-            //                         enemy.y += this.randomInRange(-10, 10);
-            //                     }
-            //                 })
-            //             }
-            //         }
-            //     });
-
-            //     if (this.gamepad != null && this.gamepad.buttons[0].pressed == true) {
-            //         this.updateState(GameState.GAME_ACTIVE);
-            //     }
-
-            //     break;
-
             case GameState.READY:
 
                 // --- GAMEPAD: Read ---
@@ -396,7 +350,7 @@ export class VectorUltraSceneGameplay extends Scene {
                     }
 
                     // WEAPONS: machine guns
-                    let firing = this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true;
+                    let firing = (this.gamepad.buttons[this.dualSenseButtonMap.buttonX].pressed == true) || (this.gamepad.buttons[this.dualSenseButtonMap.triggerRight].pressed == true);
                     if (firing && this.ammunitionCurrent > 0) {
                         this.updateWeaponStatus({ weaponStatus: WeaponStatus.FIRING })
                     } else {
@@ -574,7 +528,7 @@ export class VectorUltraSceneGameplay extends Scene {
             timer.update(Date.now())
         });
 
-        // Cull dead timers...
+        // Cull dead timers
         this.timers = this.timers.filter(timer => {
             return timer.isActive == true
         });
@@ -667,26 +621,6 @@ export class VectorUltraSceneGameplay extends Scene {
         switch (this.state) {
 
             case GameState.INITIALIZING:
-                // case GameState.INSERT_COIN:
-
-                //     this.roadManager.render(context);
-                //     context.drawImage(this.assetManager.getImage(ImageAsset.TITLE), 0, this.canvasPrimary.height / 6);
-
-                //     context.drawImage(
-                //         this.assetManager.getImage(ImageAsset.TITLE),
-                //         0 + this.randomInRange(-5, 5),
-                //         (this.canvasPrimary.height / 6) + this.randomInRange(-5, 5),
-                //     )
-
-                //     this.entitiesEnemies.filter(enemy => {
-                //         return enemy.isAlive == true
-                //     }).forEach(enemy => {
-                //         enemy.render(context);
-                //     });
-
-                //     this.entitiesTemporary.forEach(entity => {
-                //         entity.render(context);
-                //     })
                 break;
 
             case GameState.READY:
@@ -1084,55 +1018,10 @@ export class VectorUltraSceneGameplay extends Scene {
 
         switch (this.state) {
 
-            case GameState.INSERT_COIN:
-                this.updateState(GameState.GAME_ACTIVE);
-                break;
 
-            case GameState.GAME_ACTIVE:
+            case GameState.READY:
 
                 switch (event.code) {
-
-                    case "KeyA":
-                        this.updatePlayerPosition(
-                            {
-                                deltaX: 5,
-                                deltaY: 0
-                            }
-                        )
-                        break;
-
-                    case "KeyD":
-                        this.updatePlayerPosition(
-                            {
-                                deltaX: -5,
-                                deltaY: 0
-                            }
-                        )
-                        break;
-
-                    case "KeyW":
-                        this.updatePlayerPosition(
-                            {
-                                deltaX: 0,
-                                deltaY: 5
-                            }
-                        )
-                        break;
-
-                    case "KeyS":
-                        this.updatePlayerPosition(
-                            {
-                                deltaX: 0,
-                                deltaY: -5
-                            }
-                        )
-                        break;
-
-                    case "Space":
-                        this.updateWeaponStatus(
-                            { weaponStatus: WeaponStatus.FIRING }
-                        );
-                        break;
 
                     case "KeyV":
                         this.toggleVisionMode();
@@ -1146,23 +1035,13 @@ export class VectorUltraSceneGameplay extends Scene {
                         this.engineSoundLooper.stop();
                         this.initialize();
                         break;
-
+ 
                     default:
                         console.log(event.code)
                         break;
                 }
                 break;
 
-            case GameState.GAME_OVER:
-
-                switch (event.code) {
-                    case "Escape":
-                        this.engineSoundLooper.stop();
-                        this.initialize();
-                        break;
-                    default:
-                        break;
-                }
 
             default:
                 break;
@@ -1173,15 +1052,9 @@ export class VectorUltraSceneGameplay extends Scene {
 
         switch (this.state) {
 
-            case GameState.GAME_ACTIVE:
+            case GameState.READY:
 
                 switch (event.code) {
-
-                    case "Space":
-                        this.updateWeaponStatus(
-                            { weaponStatus: WeaponStatus.IDLE }
-                        );
-                        break;
 
                     default:
                         break;
